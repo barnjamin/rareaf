@@ -1,0 +1,6 @@
+Follow instructions here:
+
+https://github.com/ipfs/js-ipfs/tree/master/examples/browser-http-client-upload-file
+
+
+
