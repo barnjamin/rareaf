@@ -3,6 +3,7 @@
 
 const React = require('react')
 const ipfsClient = require('ipfs-http-client')
+import { Button,FileInput, FormGroup, InputGroup, TextArea } from "@blueprintjs/core"
 
 class Uploader extends React.Component {
   constructor(props) {
@@ -93,21 +94,19 @@ class Uploader extends React.Component {
     if (!this.state.file_hash) {
       return (
         <div>
-          <form id='capture-media' onSubmit={this.handleSubmit}>
-            <input type='file' name='input-file' id='input-file' onChange={this.captureFile} />
-          </form>
+          <FileInput large={true} disabled={false} text="Choose file..." onInputChange={this.captureFile} />
         </div>
       )
     }
     return (
       <div>
         <img height='300' width='200' id="gateway-link" target='_blank' src={'https://ipfs.io/ipfs/' + this.state.file_hash} alt={this.state.file_hash} />
-        <form onSubmit={this.captureMetadata}>
-          <input onChange={this.handleInputChange} type='text' name='title' id='title' value={this.state.title}></input>
-          <input onChange={this.handleInputChange} type='text' name='artist' id='artist' value={this.state.artist}></input>
-          <textarea onChange={this.handleInputChange} type='text' name='description' id='description' value={this.state.description}></textarea>
-          <input type='submit' value='Submit' />
-        </form>
+        <FormGroup  >
+          <InputGroup onChange={this.handleInputChange} type='text' name='title' id='title' value={this.state.title}></InputGroup>
+          <InputGroup onChange={this.handleInputChange} type='text' name='artist' id='artist' value={this.state.artist}></InputGroup>
+          <TextArea onChange={this.handleInputChange} type='text' name='description' id='description' value={this.state.description}></TextArea>
+          <Button onClick={this.captureMetadata} icon='floppy-disk'>Save</Button>
+        </FormGroup>
       </div>
     )
   }

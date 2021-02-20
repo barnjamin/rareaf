@@ -2,18 +2,8 @@
 'use strict'
 
 const React = require('react')
-const algosdk = require('algosdk')
+import { Button,FileInput, FormGroup, InputGroup, TextArea } from "@blueprintjs/core"
 
-/*
-    check if wallet,
-    connect to wallet,
-    get testnet accts,
-    fill out token info
-    create token
-        get net status
-        submit transaction
-
-*/
 
 class AlgorandTokenizer extends React.Component {
     constructor(props) {
@@ -103,18 +93,19 @@ class AlgorandTokenizer extends React.Component {
     }
 
     render() {
+
         if(typeof AlgoSigner === 'undefined'){
             return ( <p>Please Download AlgoSigner to create a token</p>)
         }                
 
         return (                    
             <div>
-                <form onSubmit={this.createToken}>
-                    <input name='assetName' id='assetName' value={this.state.assetName} onChange={this.handleChange}></input>
-                    <input name='unitName' id='unitName' value={this.state.unitName} onChange={this.handleChange}></input>
-                    <textarea name='note' id='note' value={this.state.note} onChange={this.handleChange}/>
-                    <input type='submit' value='Submit' />
-                </form>
+                <FormGroup>
+                    <InputGroup name='assetName' id='assetName' value={this.state.assetName} onChange={this.handleChange}></InputGroup>
+                    <InputGroup name='unitName' id='unitName' value={this.state.unitName} onChange={this.handleChange}></InputGroup>
+                    <TextArea name='note' id='note' value={this.state.note} onChange={this.handleChange}/>
+                    <Button onClick={this.createToken} value='Submit' >Mint</Button>
+                </FormGroup>
             </div>
         )
 
