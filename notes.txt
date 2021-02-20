@@ -1,6 +1,36 @@
-Follow instructions here:
-
 https://github.com/ipfs/js-ipfs/tree/master/examples/browser-http-client-upload-file
 
 
 
+Connect Wallet
+
+Seller:
+    Upload Document
+    Show just uploaded thing
+    Fields for Metadata
+        Title
+        Description
+        File Type
+        Artist
+        Created Wallet ID
+        Created Date 
+        Searchable Tags
+    Upload Metadata and provide link to entire package rare.af/XXXYYY
+
+    Fields for Token Creation
+        Name, URL, Description, Wallet creation
+
+    Create Token
+
+    Create Smart Contract for new token with Acct information
+
+    Artist Set Minimum cost/Buy now
+    Auction duration
+    Include resale fee?
+
+
+Buyer:
+    Display running auctions
+    Bid:
+        Check that there are enough funds in Acct
+        

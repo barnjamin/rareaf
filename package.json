@@ -15,6 +15,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "algosdk": "^1.8.1",
     "ipfs-http-client": "^49.0.2"
   },
   "devDependencies": {
