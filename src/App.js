@@ -4,6 +4,7 @@
 const React = require('react')
 const ipfsClient = require('ipfs-http-client')
 const Uploader = require('./Uploader')
+const AlgorandTokenizer = require('./AlgorandTokenizer')
 
 class App extends React.Component {
   constructor () {
@@ -11,7 +12,10 @@ class App extends React.Component {
   }
   render () {
     return (
-      <Uploader />
+      <div>
+        <Uploader />
+        <AlgorandTokenizer />
+      </div>
     )
   }
 }
