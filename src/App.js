@@ -2,12 +2,12 @@
 'use strict'
 
 const React = require('react')
-const ipfsClient = require('ipfs-http-client')
 const Uploader = require('./Uploader')
 const AlgorandTokenizer = require('./AlgorandTokenizer')
 
-import { Alignment, Button, Navbar } from "@blueprintjs/core"
+import { Alignment, Button, Navbar, Divider } from "@blueprintjs/core"
 
+//Get id of metadata payload from uploader and send to tokenizer
 
 class App extends React.Component {
   constructor () {
@@ -25,11 +25,12 @@ class App extends React.Component {
             <Button className='bp3-minimal' icon='new-object' text='Create' />
           </Navbar.Group >
         </Navbar>
-        <div class='container'>
-          <Uploader />
-        </div>
-        <div class='container'>
-          <AlgorandTokenizer />
+        <Uploader />
+        <Divider />
+        <AlgorandTokenizer />
+        <Divider />
+        <div className='container-mint'>
+          <Button onClick={this.createToken} rightIcon='clean' >Mint</Button>
         </div>
       </div>
     )

@@ -3,7 +3,7 @@
 
 const React = require('react')
 const ipfsClient = require('ipfs-http-client')
-import { Button,FileInput, FormGroup, InputGroup, TextArea } from "@blueprintjs/core"
+import { Divider,Card,Button,FileInput, FormGroup, InputGroup, TextArea } from "@blueprintjs/core"
 
 class Uploader extends React.Component {
   constructor(props) {
@@ -91,22 +91,31 @@ class Uploader extends React.Component {
   }
 
   render() {
+
+    let imgtag=undefined;
+    let disabled= this.state.file_hash === null
     if (!this.state.file_hash) {
-      return (
-        <div>
-          <FileInput large={true} disabled={false} text="Choose file..." onInputChange={this.captureFile} />
-        </div>
-      )
+      imgtag =  
+          <div className='container content-piece'>
+              <FileInput large={true} disabled={false} text="Choose file..." onInputChange={this.captureFile} /> 
+          </div>
+    }else{
+      imgtag =  
+          <div className='container content-piece'>
+            <img  id="gateway-link" target='_blank' src={'https://ipfs.io/ipfs/' + this.state.file_hash} alt={this.state.file_hash} />
+          </div>
     }
+
     return (
-      <div>
-        <img height='300' width='200' id="gateway-link" target='_blank' src={'https://ipfs.io/ipfs/' + this.state.file_hash} alt={this.state.file_hash} />
-        <FormGroup  >
-          <InputGroup onChange={this.handleInputChange} type='text' name='title' id='title' value={this.state.title}></InputGroup>
-          <InputGroup onChange={this.handleInputChange} type='text' name='artist' id='artist' value={this.state.artist}></InputGroup>
-          <TextArea onChange={this.handleInputChange} type='text' name='description' id='description' value={this.state.description}></TextArea>
-          <Button onClick={this.captureMetadata} icon='floppy-disk'>Save</Button>
-        </FormGroup>
+      <div className='content'>
+        {imgtag}
+        <div className='container' >
+          <input className='details-basic details-title bp3-input bp3-large' onChange={this.handleInputChange} type='text' name='title' id='title' value={this.state.title}></input>
+          <input className='details-basic details-artist bp3-input bp3-large' onChange={this.handleInputChange} type='text' name='artist' id='artist' value={this.state.artist}></input>
+        </div>
+        <div className='container'> 
+              <textarea className='details-description bp3-input bp3-large' onChange={this.handleInputChange} type='text' name='description' id='description' value={this.state.description}></textarea>
+        </div>
       </div>
     )
   }

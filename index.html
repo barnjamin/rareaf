@@ -1,20 +1,66 @@
 <html>
-  <head>
-    <title>Rare AF</title>
-    <link href="https://unpkg.com/normalize.css@^7.0.0" rel="stylesheet" />
-    <!-- Blueprint stylesheets -->
-    <link href="https://unpkg.com/@blueprintjs/icons@^3.4.0/lib/css/blueprint-icons.css" rel="stylesheet" />
-    <link href="https://unpkg.com/@blueprintjs/core@^3.10.0/lib/css/blueprint.css" rel="stylesheet" />
-    <style>
-      .container {
-        display:flex;
-        flex-flow: row wrap;
-      }
-    </style>
-  </head>
-  <body>
-    <div id='root'>
-    </div>
-    <script src="src/index.js"></script>
-  </body>
+
+<head>
+  <title>Rare AF</title>
+  <link href="https://unpkg.com/normalize.css@^7.0.0" rel="stylesheet" />
+  <!-- Blueprint stylesheets -->
+  <link href="https://unpkg.com/@blueprintjs/icons@^3.4.0/lib/css/blueprint-icons.css" rel="stylesheet" />
+  <link href="https://unpkg.com/@blueprintjs/core@^3.10.0/lib/css/blueprint.css" rel="stylesheet" />
+  <style>
+    .container {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-around;
+    }
+
+    .content {
+      width: 100%;
+    }
+
+    .content-piece {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid lightgray;
+    }
+
+    .content-piece img {
+      width: 80%
+    }
+
+    .details-basic {
+      flex-grow: 1;
+      padding: 10px;
+      margin: 10px;
+    }
+
+    .details-description {
+      flex-grow: 1;
+      padding: 10px;
+      margin: 10px;
+    }
+
+    .token-mint {
+      width: 100%
+    }
+
+    .token-details {
+      flex-grow: 1;
+      padding: 10px;
+      margin: 10px;
+    }
+    .container-mint {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: flex-end;
+      padding: 20px;
+  }
+  </style>
+</head>
+
+<body>
+  <div id='root'>
+  </div>
+  <script src="src/index.js"></script>
+</body>
+
 </html>

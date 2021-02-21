@@ -2,7 +2,7 @@
 'use strict'
 
 const React = require('react')
-import { Button,FileInput, FormGroup, InputGroup, TextArea } from "@blueprintjs/core"
+import { Button,Card, Divider, FormGroup, InputGroup, TextArea } from "@blueprintjs/core"
 
 
 class AlgorandTokenizer extends React.Component {
@@ -99,13 +99,12 @@ class AlgorandTokenizer extends React.Component {
         }                
 
         return (                    
-            <div>
-                <FormGroup>
-                    <InputGroup name='assetName' id='assetName' value={this.state.assetName} onChange={this.handleChange}></InputGroup>
-                    <InputGroup name='unitName' id='unitName' value={this.state.unitName} onChange={this.handleChange}></InputGroup>
-                    <TextArea name='note' id='note' value={this.state.note} onChange={this.handleChange}/>
-                    <Button onClick={this.createToken} value='Submit' >Mint</Button>
-                </FormGroup>
+            <div className='container'>
+                <div className='token-mint container'>
+                    <input className='token-details token-name bp3-input bp3-large' name='assetName' id='assetName' value={this.state.assetName} onChange={this.handleChange}></input>
+                    <input className='token-details token-unit-name bp3-input bp3-large ' name='unitName' id='unitName' value={this.state.unitName} onChange={this.handleChange}></input>
+                </div>
+                <textarea className='token-details token-note bp3-input bp3-large ' name='note' id='note' value={this.state.note} onChange={this.handleChange}/>
             </div>
         )
 
