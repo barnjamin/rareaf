@@ -2,7 +2,7 @@
 'use strict'
 
 const React = require('react')
-const ipfsClient = require('ipfs-http-client')
+import { uploadContent } from './ipfs'
 import { FileInput } from "@blueprintjs/core"
 
 class Uploader extends React.Component {
@@ -10,14 +10,12 @@ class Uploader extends React.Component {
     super(props)
 
     this.state = {
-      ipfs: ipfsClient("/ip4/127.0.0.1/tcp/5001"),
       file_hash: null,
     }
 
     // bind methods
     this.handleSubmit = this.handleSubmit.bind(this)
     this.captureFile = this.captureFile.bind(this)
-    this.saveFileToIpfs = this.saveFileToIpfs.bind(this)
   }
 
   handleSubmit(event) { event.preventDefault() }
@@ -25,23 +23,11 @@ class Uploader extends React.Component {
   captureFile(event) {
     event.stopPropagation()
     event.preventDefault()
-    this.saveFileToIpfs(event.target.files)
-  }
-
-  async saveFileToIpfs([file]) {
-    try {
-      const added = await this.state.ipfs.add(
-        file, { progress: (prog) => console.log(`received: ${prog}`) }
-      )
-      this.setState({ file_hash: added.cid.toString() })
-      this.props.onUploaded(this.state.file_hash)
-    } catch (err) {
-      console.error(err)
-    }
+    let file_hash = uploadContent(event.target.files)
+    this.setState({file_hash:file_hash})
   }
 
   render() {
-
     if (!this.state.file_hash) {
       return (
           <div className='content'>
@@ -51,6 +37,7 @@ class Uploader extends React.Component {
           </div>
           )
     }
+
     return (
     <div className='content'>
       <div className='container content-piece'>

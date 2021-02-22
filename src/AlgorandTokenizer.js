@@ -2,15 +2,12 @@
 'use strict'
 
 const React = require('react')
-const ipfsClient = require('ipfs-http-client')
 import { Button } from "@blueprintjs/core"
-
 
 class AlgorandTokenizer extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            ipfs: ipfsClient("/ip4/127.0.0.1/tcp/5001"),
             meta_hash: undefined,
             file_hash: this.props.file_hash,
             title: "unnamed",
@@ -21,48 +18,17 @@ class AlgorandTokenizer extends React.Component {
         this.handleChange = this.handleChange.bind(this)
         this.createToken = this.createToken.bind(this)
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this)
-        this.saveMetaToIpfs = this.saveMetaToIpfs.bind(this)
     }
 
     componentWillReceiveProps({ file_hash }) {
         this.setState({ file_hash: file_hash });
     }
 
-    async saveMetaToIpfs() {
-        try {
-            let md = JSON.stringify(this.captureMetadata())
-            const added = await this.state.ipfs.add(
-                md, { progress: (prog) => console.log(`received: ${prog}`) }
-            )
-            this.setState({ meta_hash: added.cid.toString() })
-        } catch (err) {
-            console.error(err)
-        }
-    }
-
-    async getMetaFromIpfs() {
-        try {
-            let md = JSON.stringify(this.captureMetadata())
-            const added = await this.state.ipfs.add(
-                md, { progress: (prog) => console.log(`received: ${prog}`) }
-            )
-            this.setState({ meta_hash: added.cid.toString() })
-        } catch (err) {
-            console.error(err)
-        }
-    }
-
     async createToken(event) {
         event.stopPropagation()
         event.preventDefault()
 
-        try {
-            await AlgoSigner.connect()
-        } catch (err) {
-            alert("Plz connect algosigner")
-        }
-
-        await this.saveMetaToIpfs()
+        await uploadMetadata(this.captureMetadata())
 
         //TODO: select box to pick which acct to use
         let accts = await AlgoSigner.accounts({ ledger: 'TestNet' })
@@ -90,7 +56,6 @@ class AlgorandTokenizer extends React.Component {
         });
 
         let tx = await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
-        console.log(tx)
     }
 
     handleChange(event) {
@@ -112,11 +77,6 @@ class AlgorandTokenizer extends React.Component {
     }
 
     render() {
-
-        if (typeof AlgoSigner === 'undefined') {
-            return (<p>Please Download AlgoSigner to create a token</p>)
-        }
-
         return (
             <div>
                 <div className='container' >
@@ -132,6 +92,5 @@ class AlgorandTokenizer extends React.Component {
             </div>
         )
     }
-
 }
 module.exports = AlgorandTokenizer

@@ -34,3 +34,8 @@ Buyer:
     Bid:
         Check that there are enough funds in Acct
         
+
+
+
+IPFS upload/download content
+upload/download metadata

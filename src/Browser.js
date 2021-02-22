@@ -3,37 +3,7 @@
 
 const React = require('react')
 import {Card} from '@blueprintjs/core'
-//import {listTokens, getTokenMetadata} from './AlgorandTokenizer'
-
-
-
-async function listTokens(){
-    const assets = await AlgoSigner.indexer({
-        ledger: 'TestNet',
-        path: `/v2/assets?name=RareAF&limit=100`,
-    });
-    console.log(assets.assets)
-
-    return assets.assets
-}
-
-async function getTokenMetadata(token_id, created_at) {
-    const tx = await AlgoSigner.indexer({
-        ledger: 'TestNet',
-        path: `/v2/assets/${token_id}/transactions?max-round=${created_at}`
-    });
-
-    let created_tx = tx.transactions[0]
-    // Just return the first one
-    let meta = {}
-    try {
-        meta = JSON.parse(atob(created_tx.note))
-    }catch (err){
-        console.error(err)
-    }
-    return meta
-}
-
+import {listTokens, getTokenMetadata} from './algorand'
 
 class Browser extends React.Component {
   constructor(props) {
@@ -47,15 +17,6 @@ class Browser extends React.Component {
         this.getTokens = this.getTokens.bind(this)
 
         this.getTokens()
-
-
-        AlgoSigner.algod({
-            ledger:'TestNet',
-            path:'/v2/'
-        })
-
-
-
     }
 
     async getTokens(){

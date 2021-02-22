@@ -25,7 +25,6 @@ class App extends React.Component {
     this.state = {
       file_hash: "XYZ"
     }
-
     this.setFileHash = this.setFileHash.bind(this)
   }
 
