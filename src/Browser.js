@@ -3,6 +3,37 @@
 
 const React = require('react')
 import {Card} from '@blueprintjs/core'
+//import {listTokens, getTokenMetadata} from './AlgorandTokenizer'
+
+
+
+async function listTokens(){
+    const assets = await AlgoSigner.indexer({
+        ledger: 'TestNet',
+        path: `/v2/assets?name=RareAF&limit=100`,
+    });
+    console.log(assets.assets)
+
+    return assets.assets
+}
+
+async function getTokenMetadata(token_id, created_at) {
+    const tx = await AlgoSigner.indexer({
+        ledger: 'TestNet',
+        path: `/v2/assets/${token_id}/transactions?max-round=${created_at}`
+    });
+
+    let created_tx = tx.transactions[0]
+    // Just return the first one
+    let meta = {}
+    try {
+        meta = JSON.parse(atob(created_tx.note))
+    }catch (err){
+        console.error(err)
+    }
+    return meta
+}
+
 
 class Browser extends React.Component {
   constructor(props) {
@@ -15,33 +46,30 @@ class Browser extends React.Component {
         }
         this.getTokens = this.getTokens.bind(this)
 
-        //this.getTokens()
+        this.getTokens()
+
+
+        AlgoSigner.algod({
+            ledger:'TestNet',
+            path:'/v2/'
+        })
+
+
 
     }
 
     async getTokens(){
-        AlgoSigner.connect().then((d)=>{}).catch((e) => { console.error(e); });
-
-        const assets = await AlgoSigner.indexer({
-            ledger: 'TestNet',
-            path: `/v2/assets?name=RareAF&limit=100`,
-        });
-        console.log(assets)
-        this.setState({tokens:assets.assets})
-
-
+        let tokens = await listTokens()
+        console.log(tokens)
         let notes = []
-        for(let x = 0; x<assets.assets.length; x++){
-            let a = assets.assets[x];
-            const tx = await AlgoSigner.indexer({
-                ledger: 'TestNet',
-                path: `/v2/assets/${a.index}/transactions?max-round=${a['created-at-round']}`
-            });
-            notes.push(JSON.parse(atob(tx.transactions[0].note)))
+        for (const idx in tokens){
+            let token = tokens[idx]
+            console.log(token)
+            let meta = await getTokenMetadata(token['index'], token['created-at-round'])
+            notes.push(meta)
         }
         this.setState({metas:notes})
     }
-
 
 
     render() {
