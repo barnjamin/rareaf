@@ -21,7 +21,8 @@
     "@emotion/styled": "^11.1.5",
     "algosdk": "^1.8.1",
     "framer-motion": "^3.6.2",
-    "ipfs-http-client": "^49.0.2"
+    "ipfs-http-client": "^49.0.2",
+    "react-router-dom": "^5.2.0"
   },
   "devDependencies": {
     "ipfs": "^0.54.2",
