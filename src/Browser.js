@@ -12,7 +12,7 @@ class Browser extends React.Component {
         this.state = {
             token_prefix: "RareAF",
             tokens:[],
-            metas:[{title:"adsf", artist:"asdfadf", description:"dsaf adsf adsf afdasdfasd asdf adsfasdf asdf asdf"},{},{},{},{}]
+            metas:[]
         }
         this.getTokens = this.getTokens.bind(this)
 
@@ -21,7 +21,7 @@ class Browser extends React.Component {
 
     async getTokens(){
         let tokens = await listTokens()
-        console.log(tokens)
+        this.setState({tokens:tokens})
         let notes = []
         for (const idx in tokens){
             let token = tokens[idx]
@@ -34,21 +34,22 @@ class Browser extends React.Component {
 
 
     render() {
+        console.log(this.state.metas)
         return (
         <div className='container' >
             
             { this.state.metas.map((m,i) => {     
                 // Return the element. Also pass key     
-                console.log(m)
+                const idx = this.state.tokens[i]['index']
                 return (
-                    <Card className='content-card' key={i} >
+                    <Card className='content-card' key={idx} >
                         <div className='container'>
-                            <a href={'/raf/'+i}>
+                            <a href={'/raf/'+idx}>
                                 <img src='http://via.placeholder.com/550'></img>
                             </a>
                         </div>
                         <div className='container'>
-                            <p><a href={'/raf/'+i}> <b>{m.title}</b> - <i>{m.artist}</i></a></p>
+                            <p><a href={'/raf/'+idx}> <b>{m.title}</b> - <i>{m.artist}</i></a></p>
                         </div>
                         <div className='container'>
                             <p>{m.description}</p>

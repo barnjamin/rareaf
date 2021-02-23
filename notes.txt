@@ -36,6 +36,17 @@ Buyer:
         
 
 
+token created
 
-IPFS upload/download content
-upload/download metadata
+user load rare.af/nft/0
+
+lookup token with this id
+
+get meta associated
+
+display image and meta
+
+
+
+
+
