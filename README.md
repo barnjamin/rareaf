@@ -12,3 +12,6 @@ TODO:
     * Artist Set Minimum cost/Buy now
     * Auction duration
     * Resale fee?
+    ...
+-   Refactor with best practices
+-   Make it pretty

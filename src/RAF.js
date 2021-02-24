@@ -15,7 +15,7 @@ function RAF() {
     if(md['title'] === ''){
         getTokenMetadata(parseInt(id)).then((md) =>{
             console.log(md)
-            setState({img_src:'http://ipfs.io/ipfs/'+md['file_hash'], title:md['title']})
+            setState({img_src:'http://ipfs.io/ipfs/'+md['file_hash'], title:md['title'], artist:md['artist']})
         }).catch((err)=>{console.error("Failed to get metadata:", err)})
     }
 
@@ -32,10 +32,10 @@ function RAF() {
             </div>
             <div className='container' >
                 <div className='content'>
-                    <h3><b>{md.title}</b></h3>
+                    <p><b>{md.title}</b> - <i>{md.artist}</i></p>
                 </div>
             </div>
-            <Button onClick={deleteToken} >Delete token</Button>
+            <Button onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
         </div>
     )
 }
