@@ -19,13 +19,12 @@ export async function listTokens(){
     return assets.assets
 }
 
+//export async function updateMetadata(){ }
 export async function getTokenCreatedAt(token_id){
-    console.log(token_id)
     const asset = await AlgoSigner.indexer({
         ledger: 'TestNet',
         path: `/v2/assets/${token_id}`,
     });
-    console.log(asset.asset)
     return asset.asset['created-at-round']
 }
 
@@ -43,18 +42,16 @@ export async function getTokenMetadata(token_id) {
     //Base64 decode it
     const data = atob(created_tx.note)
 
-    console.log(data)
+    //If its a json object, just decode it
     if(data.length > 2 && data.substr(0,2) == '{"'  ) {
         try {
             meta = JSON.parse(data)
-        }catch (err){
-            console.error(err)
-        }
+        }catch (err){ console.error(err) }
         return meta
     }
 
-    console.log(data.substr(9))
-    return await getMetaFromIpfs(data.substr(9))
+    //Otherwise get it from ipfs directly
+    return await getMetaFromIpfs(data)
 }
 
 export async function createToken(meta_hash) {
@@ -85,7 +82,6 @@ export async function createToken(meta_hash) {
 
     try{
         await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
-        console.log("sent")
     }catch(err){
         console.error(err)
     }
@@ -108,6 +104,5 @@ export async function destroyToken(token_id) {
 
     try{
         await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
-        console.log("sent")
     }catch(err){console.error(err)}
 }

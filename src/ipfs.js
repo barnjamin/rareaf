@@ -4,12 +4,11 @@ const ipfsClient = require('ipfs-http-client')
 
 const iclient = ipfsClient("/ip4/127.0.0.1/tcp/5001")
 
-export async function uploadConent([file]){
+export async function uploadContent([file]){
     try {
-      const added = await this.state.ipfs.add(
-        file, { progress: (prog) => console.log(`received: ${prog}`) }
-      )
-      return added.cid.toString()
+      const added = await iclient.add(file)
+      console.log(added)
+      return added.path
     } catch (err) {
       console.error(err)
     }
@@ -19,7 +18,7 @@ export async function uploadConent([file]){
 export async function uploadMetadata(md) {
     try {
         const added = await iclient.add(JSON.stringify(md))
-        return added.cid.toString()
+        return added.path
     } catch (err) {
         console.error(err)
     }

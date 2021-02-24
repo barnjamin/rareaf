@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 'use strict'
 
-const React = require('react')
+import React from 'react'
+import {uploadMetadata} from './ipfs'
+import {createToken} from './algorand'
 import { Button } from "@blueprintjs/core"
 
 class AlgorandTokenizer extends React.Component {
@@ -14,14 +16,17 @@ class AlgorandTokenizer extends React.Component {
             artist: "anon",
             description: "speaks for itself",
             tags: ["art", "is", "in", "your", "mind"],
+            props:props,
         }
         this.handleChange = this.handleChange.bind(this)
         this.createMetaAndToken = this.createMetaAndToken.bind(this)
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this)
     }
 
-    componentWillReceiveProps({ file_hash }) {
-        this.setState({ file_hash: file_hash });
+    static getDerivedStateFromProps(props, state) {
+        if (props.file_hash !== state.file_hash){
+            return { file_hash:props.file_hash }
+        }
+        return null
     }
 
     async createMetaAndToken(event) {
@@ -29,6 +34,7 @@ class AlgorandTokenizer extends React.Component {
         event.preventDefault()
 
         const meta_hash = await uploadMetadata(this.captureMetadata())
+        this.setState({meta_hash:meta_hash})
         await createToken(meta_hash)
     }
 
@@ -61,7 +67,7 @@ class AlgorandTokenizer extends React.Component {
                     <textarea className='details-description bp3-input bp3-large' onChange={this.handleChange} type='text' name='description' id='description' value={this.state.description}></textarea>
                 </div>
                 <div className='container-mint'>
-                    <Button onClick={this.createToken} rightIcon='clean' large={true} intent='success'>Mint</Button>
+                    <Button onClick={this.createMetaAndToken} rightIcon='clean' large={true} intent='success'>Mint</Button>
                 </div>
             </div>
         )

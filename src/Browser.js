@@ -25,8 +25,7 @@ class Browser extends React.Component {
         let notes = []
         for (const idx in tokens){
             let token = tokens[idx]
-            console.log(token)
-            let meta = await getTokenMetadata(token['index'], token['created-at-round'])
+            let meta = await getTokenMetadata(token['index'])
             notes.push(meta)
         }
         this.setState({metas:notes})
@@ -34,7 +33,6 @@ class Browser extends React.Component {
 
 
     render() {
-        console.log(this.state.metas)
         return (
         <div className='container' >
             

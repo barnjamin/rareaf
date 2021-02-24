@@ -9,26 +9,20 @@ class Uploader extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = {
-      file_hash: null,
-    }
 
     // bind methods
-    this.handleSubmit = this.handleSubmit.bind(this)
     this.captureFile = this.captureFile.bind(this)
   }
 
-  handleSubmit(event) { event.preventDefault() }
-
-  captureFile(event) {
+  async captureFile(event) {
     event.stopPropagation()
     event.preventDefault()
-    let file_hash = uploadContent(event.target.files)
-    this.setState({file_hash:file_hash})
+    let file_hash = await uploadContent(event.target.files)
+    this.props.onUploaded(file_hash)
   }
 
   render() {
-    if (!this.state.file_hash) {
+    if (this.props.file_hash === undefined) {
       return (
           <div className='content'>
             <div className='container content-piece'>
@@ -41,7 +35,7 @@ class Uploader extends React.Component {
     return (
     <div className='content'>
       <div className='container content-piece'>
-        <img  id="gateway-link" target='_blank' src={'https://ipfs.io/ipfs/' + this.state.file_hash} alt={this.state.file_hash} />
+        <img  id="gateway-link" target='_blank' src={'https://ipfs.io/ipfs/' + this.props.file_hash} alt={this.props.file_hash} />
       </div>
     </div>
     )

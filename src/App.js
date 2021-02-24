@@ -17,9 +17,7 @@ import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
 class App extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
-      file_hash: "XYZ"
-    }
+    this.state = { file_hash: undefined }
     this.setFileHash = this.setFileHash.bind(this)
   }
 
@@ -45,7 +43,7 @@ class App extends React.Component {
             <Browser />
           </Route>
           <Route path="/create" >
-            <Uploader onUploaded={this.setFileHash} >  </Uploader>
+            <Uploader onUploaded={this.setFileHash} file_hash={this.state.file_hash}>  </Uploader>
             <Divider />
             <AlgorandTokenizer file_hash={this.state.file_hash} />
           </Route>
