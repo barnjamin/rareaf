@@ -45,7 +45,7 @@ class Browser extends React.Component {
                     <Card className='content-card' key={idx} >
                         <div className='container'>
                             <a href={'/raf/'+idx}>
-                                <img src='http://via.placeholder.com/550'></img>
+                                <img src={'http://ipfs.io/ipfs/'+m.file_hash}></img>
                             </a>
                         </div>
                         <div className='container'>
@@ -56,7 +56,6 @@ class Browser extends React.Component {
                         </div>
                     </Card> 
                 ) 
-                    //    <img src={'http://ipfs.io/ipfs/'+m.file_hash} />
             })}
         </div>
         )

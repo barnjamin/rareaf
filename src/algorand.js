@@ -1,6 +1,8 @@
 
 /* eslint-disable no-console */
 
+import { getMetaFromIpfs } from "./ipfs";
+
 export async function connect(){
     try{
         await AlgoSigner.connect()
@@ -24,28 +26,37 @@ export async function getTokenCreatedAt(token_id){
         path: `/v2/assets/${token_id}`,
     });
     console.log(asset.asset)
-    return asset.asset.['created-at-round']
+    return asset.asset['created-at-round']
 }
 
 export async function getTokenMetadata(token_id) {
-
-    const created_at = await getTokenCreatedAt(token_id)
+    let meta = {}
 
     const tx = await AlgoSigner.indexer({
         ledger: 'TestNet',
-        path: `/v2/assets/${token_id}/transactions?max-round=${created_at}`
+        path: `/v2/assets/${token_id}/transactions?limit=1&tx-type=acfg`
     });
 
-    let created_tx = tx.transactions[0]
-    // Just return the first one
-    let meta = {}
-    try {
-        meta = JSON.parse(atob(created_tx.note))
-    }catch (err){
-        console.error(err)
+    // Just take the first one
+    const created_tx = tx.transactions[0]
+
+    //Base64 decode it
+    const data = atob(created_tx.note)
+
+    console.log(data)
+    if(data.length > 2 && data.substr(0,2) == '{"'  ) {
+        try {
+            meta = JSON.parse(data)
+        }catch (err){
+            console.error(err)
+        }
+        return meta
     }
-    console.log(meta)
-    return meta
+
+    console.log(data.substr(9))
+    return await getMetaFromIpfs(data.substr(9))
 }
 
+export async function deleteToken(token_id) {
 
+}

@@ -27,12 +27,15 @@ export async function uploadMetadata(md) {
 }
 
 export async function getMetaFromIpfs(meta_hash) {
+    console.log("Getting metadata for: ", meta_hash)
     try {
-        const meta_string = await iclient.get(meta_hash)
-        console.log(meta_string)
+        let meta_string = "" 
+        for await (const chunk of iclient.cat(meta_hash)) {
+            meta_string = new TextDecoder("utf-8").decode(chunk);
+        }
         return JSON.parse(meta_string) 
     } catch (err) {
-        console.error(err)
+        console.error("Failed to get Metadata from IPFS:", err)
     }
     return {}
 }

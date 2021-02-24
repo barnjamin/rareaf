@@ -7,17 +7,12 @@ const AlgorandTokenizer = require('./AlgorandTokenizer')
 const Browser = require('./Browser')
 
 import RAF from './RAF'
-
 import {
   BrowserRouter as Router,
   Route,
   Switch
 } from "react-router-dom";
-
-
 import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
-
-//Get id of metadata payload from uploader and send to tokenizer
 
 class App extends React.Component {
   constructor(props) {
