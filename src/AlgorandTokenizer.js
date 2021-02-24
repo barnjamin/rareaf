@@ -16,7 +16,7 @@ class AlgorandTokenizer extends React.Component {
             tags: ["art", "is", "in", "your", "mind"],
         }
         this.handleChange = this.handleChange.bind(this)
-        this.createToken = this.createToken.bind(this)
+        this.createMetaAndToken = this.createMetaAndToken.bind(this)
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this)
     }
 
@@ -24,38 +24,12 @@ class AlgorandTokenizer extends React.Component {
         this.setState({ file_hash: file_hash });
     }
 
-    async createToken(event) {
+    async createMetaAndToken(event) {
         event.stopPropagation()
         event.preventDefault()
 
-        await uploadMetadata(this.captureMetadata())
-
-        //TODO: select box to pick which acct to use
-        let accts = await AlgoSigner.accounts({ ledger: 'TestNet' })
-        const acct = accts[0]["address"]
-
-        let txParams = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/params' })
-
-        let signedTx = await AlgoSigner.sign({
-            from: acct,
-            assetManager: acct,
-            assetFreeze: acct,
-            assetClawback: acct,
-            assetName: "RareAF",
-            assetUnitName: "RAF",
-            assetTotal: 1,
-            assetDecimals: 0,
-            note: "RAF-MINT-" + this.state.meta_hash,
-            type: 'acfg',
-            fee: txParams['min-fee'],
-            firstRound: txParams['last-round'],
-            lastRound: txParams['last-round'] + 1000,
-            genesisID: txParams['genesis-id'],
-            genesisHash: txParams['genesis-hash'],
-            assetURL: "rare.af/"
-        });
-
-        let tx = await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
+        const meta_hash = await uploadMetadata(this.captureMetadata())
+        await createToken(meta_hash)
     }
 
     handleChange(event) {

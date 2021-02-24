@@ -57,6 +57,57 @@ export async function getTokenMetadata(token_id) {
     return await getMetaFromIpfs(data.substr(9))
 }
 
-export async function deleteToken(token_id) {
+export async function createToken(meta_hash) {
+    //TODO: select box to pick which acct to use
+    let accts = await AlgoSigner.accounts({ ledger: 'TestNet' })
+    const acct = accts[0]["address"]
 
+    let txParams = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/params' })
+
+    let signedTx = await AlgoSigner.sign({
+        from: acct,
+        assetManager: acct,
+        assetFreeze: acct,
+        assetClawback: acct,
+        assetName: "RareAF",
+        assetUnitName: "RAF",
+        assetTotal: 1,
+        assetDecimals: 0,
+        note: meta_hash,
+        type: 'acfg',
+        fee: txParams['min-fee'],
+        firstRound: txParams['last-round'],
+        lastRound: txParams['last-round'] + 1000,
+        genesisID: txParams['genesis-id'],
+        genesisHash: txParams['genesis-hash'],
+        assetURL: "rare.af/"
+    });
+
+    try{
+        await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
+        console.log("sent")
+    }catch(err){
+        console.error(err)
+    }
+}
+
+export async function destroyToken(token_id) {
+    let accts = await AlgoSigner.accounts({ ledger: 'TestNet' })
+    const acct = accts[0]["address"]
+    let txParams = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/params' })
+    let signedTx = await AlgoSigner.sign({
+        from: acct,
+        assetIndex : token_id,
+        type: 'acfg',
+        fee: txParams['min-fee'],
+        firstRound: txParams['last-round'],
+        lastRound: txParams['last-round'] + 1000,
+        genesisHash: txParams['genesis-hash'],
+        genesisID: txParams['genesis-id']
+    });
+
+    try{
+        await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
+        console.log("sent")
+    }catch(err){console.error(err)}
 }

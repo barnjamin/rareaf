@@ -3,7 +3,9 @@
 
 import React, {useState} from 'react'
 import {useParams} from 'react-router-dom'
-import {getTokenMetadata} from './algorand'
+import {getTokenMetadata, destroyToken} from './algorand'
+import {Button} from '@blueprintjs/core'
+
 
 function RAF() {
     let {id} = useParams();
@@ -17,6 +19,10 @@ function RAF() {
     }
 
 
+    function deleteToken(e){
+        destroyToken(parseInt(id))
+    }
+
 
     return (
         <div className='container'>
@@ -28,6 +34,7 @@ function RAF() {
                     <h3><b>{md.title}</b></h3>
                 </div>
             </div>
+            <Button onClick={deleteToken} >DeleteMe</Button>
         </div>
     )
 }
