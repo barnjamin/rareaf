@@ -1,5 +1,5 @@
 {
-  "name": "RareAF DApp",
+  "name": "RareAF-DApp",
   "version": "0.0.1",
   "description": "Upload files to ipfs and allow token creation against them",
   "private": true,
