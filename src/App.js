@@ -1,20 +1,23 @@
 /* eslint-disable no-console */
 'use strict'
 
-const React = require('react')
-const Uploader = require('./Uploader')
-const AlgorandTokenizer = require('./AlgorandTokenizer')
-const Browser = require('./Browser')
-
-import {isAlgorandWalletConnected} from './algorand'
-import AlgorandWalletConnector from './AlgorandWalletConnector'
-import RAF from './RAF'
+import React from 'react'
 import {
   BrowserRouter as Router,
   Route,
   Switch
 } from "react-router-dom";
 import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
+
+import {isAlgorandWalletConnected} from './algorand'
+
+import Uploader from './Uploader'
+import AlgorandTokenizer from './AlgorandTokenizer'
+import Browser  from './Browser'
+import AlgorandWalletConnector from './AlgorandWalletConnector'
+import RAF from './RAF'
+import Canvas from './Canvas'
+
 
 class App extends React.Component {
   constructor(props) {
@@ -49,6 +52,7 @@ class App extends React.Component {
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
             <AnchorButton className='bp3-minimal' icon='new-object' text='Create' href="/create" />
+            <AnchorButton className='bp3-minimal' icon='draw' text='Draw' href="/draw" />
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
             <AlgorandWalletConnector onConnected={this.setConnected} connected={this.state.wallet_connected}/>
@@ -64,6 +68,9 @@ class App extends React.Component {
             <AlgorandTokenizer file_hash={this.state.file_hash} />
           </Route>
           <Route path="/raf/:id" children={<RAF />}>
+          </Route>
+          <Route path="/draw">
+            <Canvas></Canvas>
           </Route>
         </Switch>
       </Router>

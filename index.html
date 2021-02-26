@@ -6,6 +6,7 @@
   <!-- Blueprint stylesheets -->
   <link href="https://unpkg.com/@blueprintjs/icons@^3.4.0/lib/css/blueprint-icons.css" rel="stylesheet" />
   <link href="https://unpkg.com/@blueprintjs/core@^3.10.0/lib/css/blueprint.css" rel="stylesheet" />
+  <link rel="stylesheet" href="http://leimi.github.io/drawingboard.js/bower_components/drawingboard.js/dist/drawingboard.min.css">
   <style>
     .container {
       display: flex;
@@ -72,6 +73,14 @@
   .content-viewer img {
     width:70%;
   }
+
+  #canvas {
+    height:800px;
+    width:100%;
+  }
+  .content-canvas {
+    padding:20px;
+  }
   </style>
 </head>
 
@@ -79,6 +88,23 @@
   <div id='root'>
   </div>
   <script src="src/index.js"></script>
+   <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+   <script src="http://leimi.github.io/drawingboard.js/bower_components/drawingboard.js/dist/drawingboard.min.js"></script>
+   <script type='text/javascript'>
+
+    var customBoard2 = new DrawingBoard.Board('canvas', {
+      controls: [
+        'Color',
+        { Size: { type: 'dropdown' } },
+        { DrawingMode: { filler: false } },
+        'Navigation',
+        'Download'
+      ],
+      size: 1,
+      webStorage: 'session',
+      enlargeYourContainer: true
+    });
+    </script>
 </body>
 
 </html>
