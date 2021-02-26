@@ -6,6 +6,8 @@ const Uploader = require('./Uploader')
 const AlgorandTokenizer = require('./AlgorandTokenizer')
 const Browser = require('./Browser')
 
+import {isAlgorandWalletConnected} from './algorand'
+import AlgorandWalletConnector from './AlgorandWalletConnector'
 import RAF from './RAF'
 import {
   BrowserRouter as Router,
@@ -17,17 +19,28 @@ import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
 class App extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { file_hash: undefined }
+
+    this.state = { 
+      file_hash: undefined ,
+      wallet_connected: false 
+    }
     this.setFileHash = this.setFileHash.bind(this)
+
+    this.setConnected = this.setConnected.bind(this)
+
+    isAlgorandWalletConnected().then((c)=>{this.setState({wallet_connected:c})})
   }
 
+
+  setConnected() {
+
+  }
 
   setFileHash(name) {
     this.setState({ file_hash: name })
   }
 
   render() {
-
     return (
       <Router>
         <Navbar >
@@ -37,6 +50,9 @@ class App extends React.Component {
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
             <AnchorButton className='bp3-minimal' icon='new-object' text='Create' href="/create" />
           </Navbar.Group >
+          <Navbar.Group align={Alignment.RIGHT}>
+            <AlgorandWalletConnector onConnected={this.setConnected} connected={this.state.wallet_connected}/>
+          </Navbar.Group>
         </Navbar>
         <Switch>
           <Route exact path="/" >

@@ -3,12 +3,15 @@
 
 import { getMetaFromIpfs } from "./ipfs";
 
-export async function connect(){
+
+export async function algoConnectWallet(){
+    if(typeof AlgoSigner === 'undefined') {
+        alert('Make Sure AlgoSigner wallet is installed and connected');
+    }
+
     try{
         await AlgoSigner.connect()
-    }catch(err){
-        alert("connect algosigner bro")
-    }
+    }catch(err){ console.log("Failed to connect: ", err) }
 }
 
 export async function listTokens(){
@@ -54,10 +57,22 @@ export async function getTokenMetadata(token_id) {
     return await getMetaFromIpfs(data)
 }
 
-export async function createToken(meta_hash) {
+export async function isAlgorandWalletConnected(){
+    try{
+        await getAccount()
+        return true
+    }catch(err){
+        return false
+    }
+}
+export async function getAccount(){
     //TODO: select box to pick which acct to use
     let accts = await AlgoSigner.accounts({ ledger: 'TestNet' })
-    const acct = accts[0]["address"]
+    return accts[0]["address"]
+}
+
+export async function createToken(meta_hash) {
+    const acct = getAccount()
 
     let txParams = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/params' })
 
