@@ -17,6 +17,7 @@ class AlgorandTokenizer extends React.Component {
             description: "speaks for itself",
             tags: ["art", "is", "in", "your", "mind"],
             props:props,
+            waiting_for_created:false
         }
         this.handleChange = this.handleChange.bind(this)
         this.createMetaAndToken = this.createMetaAndToken.bind(this)
@@ -32,10 +33,16 @@ class AlgorandTokenizer extends React.Component {
     async createMetaAndToken(event) {
         event.stopPropagation()
         event.preventDefault()
-        const metadata = this.captureMetadata()
-        const meta_hash = await uploadMetadata(metadata)
-        this.setState({meta_hash:meta_hash})
-        await createToken(meta_hash, metadata.file_hash)
+        this.setState({waiting_for_created:true})
+        try{
+            const metadata = this.captureMetadata()
+            const meta_hash = await uploadMetadata(metadata)
+            this.setState({meta_hash:meta_hash})
+            await createToken(meta_hash, metadata.file_hash)
+        }catch(err){
+            console.error(err)
+        }
+        this.setState({waiting_for_created:false})
     }
 
     handleChange(event) {
@@ -67,7 +74,7 @@ class AlgorandTokenizer extends React.Component {
                     <textarea className='details-description bp3-input bp3-large' onChange={this.handleChange} type='text' name='description' id='description' value={this.state.description}></textarea>
                 </div>
                 <div className='container-mint'>
-                    <Button onClick={this.createMetaAndToken} rightIcon='clean' large={true} intent='success'>Mint</Button>
+                    <Button loading={this.state.waiting_for_created} onClick={this.createMetaAndToken} rightIcon='clean' large={true} intent='success'>Mint</Button>
                 </div>
             </div>
         )

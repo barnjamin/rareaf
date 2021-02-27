@@ -76,21 +76,17 @@ export async function getAccount(){
     return accts[0]["address"]
 }
 
-export async function createToken(file_hash, meta_hash) {
-    const acct = getAccount()
-
-    let txParams = await AlgoSigner.algod({ledger: 'TestNet', path: '/v2/transactions/params' })
-
-    let signedTx = await AlgoSigner.sign({
+export async function createToken(meta_hash) {
+    const acct = await getAccount()
+    const txParams = await AlgoSigner.algod({ledger: 'TestNet', path: '/v2/transactions/params' })
+    const signedTx = await AlgoSigner.sign({
         from: acct,
         assetManager: acct,
-        assetFreeze: acct,
-        assetClawback: acct,
         assetName: "RareAF",
         assetUnitName: "RAF",
         assetTotal: 1,
         assetDecimals: 0,
-        note: [file_hash,meta_hash].join(),
+        note:meta_hash,
         type: 'acfg',
         fee: txParams['min-fee'],
         firstRound: txParams['last-round'],
@@ -100,12 +96,40 @@ export async function createToken(file_hash, meta_hash) {
         assetURL: "rare.af/"
     });
 
+    let tx;
     try{
-        await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
+        tx = await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
     }catch(err){
+        //TODO: alert error
         console.error(err)
+        return
+    }
+
+    await checkCompleted(tx)
+}
+
+
+export async function checkCompleted(tx) {
+    let completed = false;
+    while (!completed) {
+        try{
+            const result = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/pending/' + tx.txId })
+            console.log(result)
+            if(result['pool-error']!=""){
+                console.error(result['pool-error'])
+                return
+            }
+
+            if(result['confirmed-round']!=0){
+                completed=true
+            }
+        }catch(err){
+            console.error(err)
+            return
+        }
     }
 }
+
 
 export async function destroyToken(token_id) {
     let accts = await AlgoSigner.accounts({ ledger: 'TestNet' })

@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 'use strict'
 
+import $ from 'jquery'
 import React from 'react'
 import {
   BrowserRouter as Router,
@@ -16,7 +17,7 @@ import AlgorandTokenizer from './AlgorandTokenizer'
 import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
 import RAF from './RAF'
-import Canvas from './Canvas'
+//import Canvas from './Canvas'
 
 
 class App extends React.Component {
@@ -52,7 +53,6 @@ class App extends React.Component {
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
             <AnchorButton className='bp3-minimal' icon='new-object' text='Create' href="/create" />
-            <AnchorButton className='bp3-minimal' icon='draw' text='Draw' href="/draw" />
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
             <AlgorandWalletConnector onConnected={this.setConnected} connected={this.state.wallet_connected}/>
@@ -69,15 +69,16 @@ class App extends React.Component {
           </Route>
           <Route path="/raf/:id" children={<RAF />}>
           </Route>
-          <Route path="/draw">
-            <Canvas></Canvas>
-            <Button>DL it</Button>
-            <Divider />
-            <AlgorandTokenizer file_hash={this.state.file_hash} />
-          </Route>
         </Switch>
       </Router>
     )
+
+          //<AnchorButton className='bp3-minimal' icon='draw' text='Draw' href="/draw" />
+          //<Route path="/draw">
+          //  <Canvas></Canvas>
+          //  <Divider />
+          //  <AlgorandTokenizer file_hash={this.state.file_hash} />
+          //</Route>
   }
 }
 module.exports = App
