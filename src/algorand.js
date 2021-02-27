@@ -44,7 +44,6 @@ export async function getTokenCreatedAt(token_id){
 }
 
 export async function getTokenMetadata(token_id) {
-    let meta = {}
 
     const tx = await AlgoSigner.indexer({
         ledger: 'TestNet',
@@ -60,10 +59,12 @@ export async function getTokenMetadata(token_id) {
     //If its a json object, just decode it
     if(data.length > 2 && data.substr(0,2) == '{"'  ) {
         try {
-            meta = JSON.parse(data)
+            return JSON.parse(data)
         }catch (err){ console.error(err) }
-        return meta
     }
+
+    const d = data.split(",")
+    const meta = d[d.length-1]
 
     //Otherwise get it from ipfs directly
     return await getMetaFromIpfs(data)
@@ -75,10 +76,10 @@ export async function getAccount(){
     return accts[0]["address"]
 }
 
-export async function createToken(meta_hash) {
+export async function createToken(file_hash, meta_hash) {
     const acct = getAccount()
 
-    let txParams = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/params' })
+    let txParams = await AlgoSigner.algod({ledger: 'TestNet', path: '/v2/transactions/params' })
 
     let signedTx = await AlgoSigner.sign({
         from: acct,
@@ -89,7 +90,7 @@ export async function createToken(meta_hash) {
         assetUnitName: "RAF",
         assetTotal: 1,
         assetDecimals: 0,
-        note: meta_hash,
+        note: [file_hash,meta_hash].join(),
         type: 'acfg',
         fee: txParams['min-fee'],
         firstRound: txParams['last-round'],

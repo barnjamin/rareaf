@@ -8,26 +8,28 @@
   <link href="https://unpkg.com/@blueprintjs/core@^3.10.0/lib/css/blueprint.css" rel="stylesheet" />
   <link rel="stylesheet" href="http://leimi.github.io/drawingboard.js/bower_components/drawingboard.js/dist/drawingboard.min.css">
   <style>
+    
     .container {
       display: flex;
       flex-flow: row wrap;
       justify-content: space-around;
-    }
-
-    .content {
-      width: 100%;
+      align-items: center;
     }
 
     .content-piece {
-      width: 100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      width: 90%;
+      height:250px;
       padding: 10px;
-      border: 1px solid lightgray;
+      margin:10px;
+      background: whitesmoke;
+    }
+    .content-piece img{
+      height:100%
     }
 
-    .content-piece img {
-      width: 80%
-    }
-    
     .content-card  {
       margin:10px;
       width: 30%
@@ -75,12 +77,13 @@
   }
 
   #canvas {
-    height:800px;
-    width:100%;
+    height:300px;
+    width:800px;
   }
   .content-canvas {
-    padding:20px;
+    padding:10px;
   }
+
   </style>
 </head>
 

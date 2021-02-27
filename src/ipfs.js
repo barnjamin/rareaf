@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-const ipfsClient = require('ipfs-http-client')
+import ipfsClient from 'ipfs-http-client'
 
 const iclient = ipfsClient("/ip4/127.0.0.1/tcp/5001")
 
@@ -26,13 +26,12 @@ export async function uploadMetadata(md) {
 }
 
 export async function getMetaFromIpfs(meta_hash) {
-    console.log("Getting metadata for: ", meta_hash)
     try {
-        let meta_string = "" 
+        let data = "" 
         for await (const chunk of iclient.cat(meta_hash)) {
-            meta_string = new TextDecoder("utf-8").decode(chunk);
+            data += new TextDecoder("utf-8").decode(chunk);
         }
-        return JSON.parse(meta_string) 
+        return JSON.parse(data) 
     } catch (err) {
         console.error("Failed to get Metadata from IPFS:", err)
     }

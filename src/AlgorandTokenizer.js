@@ -32,10 +32,10 @@ class AlgorandTokenizer extends React.Component {
     async createMetaAndToken(event) {
         event.stopPropagation()
         event.preventDefault()
-
-        const meta_hash = await uploadMetadata(this.captureMetadata())
+        const metadata = this.captureMetadata()
+        const meta_hash = await uploadMetadata(metadata)
         this.setState({meta_hash:meta_hash})
-        await createToken(meta_hash)
+        await createToken(meta_hash, metadata.file_hash)
     }
 
     handleChange(event) {
@@ -60,8 +60,8 @@ class AlgorandTokenizer extends React.Component {
         return (
             <div>
                 <div className='container' >
-                    <input className='details-basic details-title bp3-input bp3-large' onChange={this.handleChange} type='text' name='title' id='title' value={this.state.title}></input>
-                    <input className='details-basic details-artist bp3-input bp3-large' onChange={this.handleChange} type='text' name='artist' id='artist' value={this.state.artist}></input>
+                    <input name='title' className='details-basic details-title bp3-input bp3-large' onChange={this.handleChange} type='text' name='title' id='title' value={this.state.title}></input>
+                    <input name='artist' className='details-basic details-artist bp3-input bp3-large' onChange={this.handleChange} type='text' name='artist' id='artist' value={this.state.artist}></input>
                 </div>
                 <div className='container'>
                     <textarea className='details-description bp3-input bp3-large' onChange={this.handleChange} type='text' name='description' id='description' value={this.state.description}></textarea>

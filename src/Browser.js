@@ -14,6 +14,7 @@ class Browser extends React.Component {
             tokens:[],
             metas:[]
         }
+
         this.getTokens = this.getTokens.bind(this)
 
         this.getTokens()
@@ -35,7 +36,6 @@ class Browser extends React.Component {
     render() {
         return (
         <div className='container' >
-            
             { this.state.metas.map((m,i) => {     
                 // Return the element. Also pass key     
                 const idx = this.state.tokens[i]['index']

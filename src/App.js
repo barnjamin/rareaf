@@ -71,6 +71,9 @@ class App extends React.Component {
           </Route>
           <Route path="/draw">
             <Canvas></Canvas>
+            <Button>DL it</Button>
+            <Divider />
+            <AlgorandTokenizer file_hash={this.state.file_hash} />
           </Route>
         </Switch>
       </Router>

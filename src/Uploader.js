@@ -24,8 +24,8 @@ class Uploader extends React.Component {
   render() {
     if (this.props.file_hash === undefined) {
       return (
-          <div className='content'>
-            <div className='container content-piece'>
+          <div className='container'>
+            <div className='content content-piece'>
                 <FileInput large={true} disabled={false} text="Choose file..." onInputChange={this.captureFile} /> 
             </div>
           </div>
@@ -33,8 +33,8 @@ class Uploader extends React.Component {
     }
 
     return (
-    <div className='content'>
-      <div className='container content-piece'>
+    <div className='container' >
+      <div className='content content-piece'>
         <img  id="gateway-link" target='_blank' src={'https://ipfs.io/ipfs/' + this.props.file_hash} alt={this.props.file_hash} />
       </div>
     </div>
