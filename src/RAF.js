@@ -3,25 +3,41 @@
 
 import React, {useState} from 'react'
 import {useParams} from 'react-router-dom'
-import {getTokenMetadata, destroyToken} from './algorand'
+import {getToken, destroyToken} from './algorand'
+import {getCIDFromMetadataHash, getMetaFromIpfs} from './ipfs'
 import {Button} from '@blueprintjs/core'
 
 
 function RAF() {
     let {id} = useParams();
-    const [md, setState] = useState({'img_src':'http://via.placeholder.com/550', 'title':''})
+    const [md, setMeta] = useState({'img_src':'http://via.placeholder.com/550', 'title':''})
+    const [waiting_for_tx, setWaiting] = useState(false)
     
 
-    if(md['title'] === ''){
-        getTokenMetadata(parseInt(id)).then((md) =>{
-            console.log(md)
-            setState({img_src:'http://ipfs.io/ipfs/'+md['file_hash'], title:md['title'], artist:md['artist']})
-        }).catch((err)=>{console.error("Failed to get metadata:", err)})
+    if(md.title==''){
+        getTokenMetadata()
+        .then((md)=>{
+            setMeta({img_src:'http://ipfs.io/ipfs/'+md['file_hash'], title:md['title'], artist:md['artist']})
+        })
+        .catch((err)=>{
+            console.log("Error:", err)
+        })
     }
 
 
-    function deleteToken(e){
-        destroyToken(parseInt(id))
+    async function getTokenMetadata() {
+        const token = await getToken(id)
+        const cid = getCIDFromMetadataHash(token['params']['metadata-hash'])
+        const md = await getMetaFromIpfs(cid.toString())
+        return md
+    }
+
+
+    async function deleteToken(e){
+        setWaiting(true)
+        await destroyToken(parseInt(id))
+        setWaiting(false)
+        //TODO: send user to browse page?
     }
 
 
@@ -35,7 +51,7 @@ function RAF() {
                     <p><b>{md.title}</b> - <i>{md.artist}</i></p>
                 </div>
             </div>
-            <Button onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
+            <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
         </div>
     )
 }

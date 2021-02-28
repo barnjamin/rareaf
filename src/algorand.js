@@ -31,8 +31,17 @@ export async function listTokens(){
         ledger: 'TestNet',
         path: `/v2/assets?name=RareAF&limit=100`,
     });
-    console.log(assets.assets)
+    console.log("All assets: ", assets.assets)
     return assets.assets
+}
+
+export async function getToken(id){
+    const assets = await AlgoSigner.indexer({
+        ledger: 'TestNet',
+        path: `/v2/assets/`+id,
+    });
+    console.log("Asset id: ", id, assets.asset)
+    return assets.asset
 }
 
 //export async function updateMetadata(){ }
@@ -44,7 +53,7 @@ export async function getTokenCreatedAt(token_id){
     return asset.asset['created-at-round']
 }
 
-export async function getTokenMetadata(token_id) {
+export async function getTokenMetadataFromTransaction(token_id) {
 
     const tx = await AlgoSigner.indexer({
         ledger: 'TestNet',
@@ -53,6 +62,10 @@ export async function getTokenMetadata(token_id) {
 
     // Just take the first one
     const created_tx = tx.transactions[0]
+
+    if(created_tx.note === undefined || created_tx.note.length==0){
+        return {}
+    }
 
     //Base64 decode it
     const data = atob(created_tx.note)
@@ -122,7 +135,7 @@ export async function checkCompleted(tx) {
                 return
             }
 
-            if(result['confirmed-round']!=0){
+            if(result['confirmed-round']!== undefined && result['confirmed-round']>0 ){
                 completed=true
             }
         }catch(err){
@@ -149,6 +162,7 @@ export async function destroyToken(token_id) {
     });
 
     try{
-        await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
+        const tx = await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
+        await checkCompleted(tx)
     }catch(err){console.error(err)}
 }
