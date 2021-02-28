@@ -10,8 +10,8 @@ class AlgorandTokenizer extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            meta_hash: undefined,
-            file_hash: this.props.file_hash,
+            meta_cid: {},
+            file_hash: undefined,
             title: "unnamed",
             artist: "anon",
             description: "speaks for itself",
@@ -24,8 +24,8 @@ class AlgorandTokenizer extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state) {
-        if (props.file_hash !== state.file_hash){
-            return { file_hash:props.file_hash }
+        if (props.cid !== undefined && props.cid.path !== state.file_hash){
+            return { file_hash:props.cid.path }
         }
         return null
     }
@@ -35,10 +35,9 @@ class AlgorandTokenizer extends React.Component {
         event.preventDefault()
         this.setState({waiting_for_created:true})
         try{
-            const metadata = this.captureMetadata()
-            const meta_hash = await uploadMetadata(metadata)
-            this.setState({meta_hash:meta_hash})
-            await createToken(meta_hash, metadata.file_hash)
+            const meta_cid = await uploadMetadata(this.captureMetadata())
+            this.setState({meta_cid:meta_cid})
+            await createToken(meta_cid)
         }catch(err){
             console.error(err)
         }

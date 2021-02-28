@@ -25,23 +25,15 @@ class App extends React.Component {
     super(props)
 
     this.state = { 
-      file_hash: undefined ,
+      cid: undefined,
       wallet_connected: false 
     }
-    this.setFileHash = this.setFileHash.bind(this)
-
-    this.setConnected = this.setConnected.bind(this)
-
+    this.setCID = this.setCID.bind(this)
     isAlgorandWalletConnected().then((c)=>{this.setState({wallet_connected:c})})
   }
 
-
-  setConnected() {
-
-  }
-
-  setFileHash(name) {
-    this.setState({ file_hash: name })
+  setCID(cid) {
+    this.setState({ cid: cid })
   }
 
   render() {
@@ -63,9 +55,9 @@ class App extends React.Component {
             <Browser />
           </Route>
           <Route path="/create" >
-            <Uploader onUploaded={this.setFileHash} file_hash={this.state.file_hash}>  </Uploader>
+            <Uploader onUploaded={this.setCID} cid={this.state.cid}>  </Uploader>
             <Divider />
-            <AlgorandTokenizer file_hash={this.state.file_hash} />
+            <AlgorandTokenizer cid={this.state.cid} />
           </Route>
           <Route path="/raf/:id" children={<RAF />}>
           </Route>

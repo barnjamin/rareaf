@@ -31,6 +31,7 @@ export async function listTokens(){
         ledger: 'TestNet',
         path: `/v2/assets?name=RareAF&limit=100`,
     });
+    console.log(assets.assets)
     return assets.assets
 }
 
@@ -76,7 +77,8 @@ export async function getAccount(){
     return accts[0]["address"]
 }
 
-export async function createToken(meta_hash) {
+export async function createToken(meta_cid) {
+    console.log("create token ", meta_cid.cid)
     const acct = await getAccount()
     const txParams = await AlgoSigner.algod({ledger: 'TestNet', path: '/v2/transactions/params' })
     const signedTx = await AlgoSigner.sign({
@@ -86,7 +88,7 @@ export async function createToken(meta_hash) {
         assetUnitName: "RAF",
         assetTotal: 1,
         assetDecimals: 0,
-        note:meta_hash,
+        assetMetadataHash:Array.from(meta_cid.cid.multihash.subarray(2)),
         type: 'acfg',
         fee: txParams['min-fee'],
         firstRound: txParams['last-round'],

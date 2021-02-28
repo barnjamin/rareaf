@@ -1,14 +1,12 @@
 /* eslint-disable no-console */
 
 import ipfsClient from 'ipfs-http-client'
-
 const iclient = ipfsClient("/ip4/127.0.0.1/tcp/5001")
 
 export async function uploadContent([file]){
     try {
       const added = await iclient.add(file)
-      console.log(added)
-      return added.path
+      return added 
     } catch (err) {
       console.error(err)
     }
@@ -18,11 +16,11 @@ export async function uploadContent([file]){
 export async function uploadMetadata(md) {
     try {
         const added = await iclient.add(JSON.stringify(md))
-        return added.path
+        return added
     } catch (err) {
         console.error(err)
     }
-    return ""
+    return {} 
 }
 
 export async function getMetaFromIpfs(meta_hash) {

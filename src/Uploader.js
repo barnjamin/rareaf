@@ -8,21 +8,18 @@ import { FileInput } from "@blueprintjs/core"
 class Uploader extends React.Component {
   constructor(props) {
     super(props)
-
-
-    // bind methods
     this.captureFile = this.captureFile.bind(this)
   }
 
   async captureFile(event) {
     event.stopPropagation()
     event.preventDefault()
-    let file_hash = await uploadContent(event.target.files)
-    this.props.onUploaded(file_hash)
+    let cid = await uploadContent(event.target.files)
+    this.props.onUploaded(cid)
   }
 
   render() {
-    if (this.props.file_hash === undefined) {
+    if (this.props.cid === undefined) {
       return (
           <div className='container'>
             <div className='content content-piece'>
@@ -35,7 +32,7 @@ class Uploader extends React.Component {
     return (
     <div className='container' >
       <div className='content content-piece'>
-        <img  id="gateway-link" target='_blank' src={'https://ipfs.io/ipfs/' + this.props.file_hash} alt={this.props.file_hash} />
+        <img  id="gateway-link" target='_blank' src={'https://ipfs.io/ipfs/' + this.props.cid.path} />
       </div>
     </div>
     )
