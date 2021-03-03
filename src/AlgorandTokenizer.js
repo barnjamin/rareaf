@@ -42,6 +42,7 @@ class AlgorandTokenizer extends React.Component {
             console.error(err)
         }
         this.setState({waiting_for_tx:false})
+
     }
 
     handleChange(event) {

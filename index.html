@@ -1,116 +1,13 @@
 <!doctype html>
-
 <head>
   <title>Rare AF</title>
-  <link href="https://unpkg.com/normalize.css@^7.0.0" rel="stylesheet" />
   <!-- Blueprint stylesheets -->
   <link href="https://unpkg.com/@blueprintjs/icons@^3.4.0/lib/css/blueprint-icons.css" rel="stylesheet" />
   <link href="https://unpkg.com/@blueprintjs/core@^3.10.0/lib/css/blueprint.css" rel="stylesheet" />
-  <link rel="stylesheet" href="http://leimi.github.io/drawingboard.js/bower_components/drawingboard.js/dist/drawingboard.min.css">
-  <style>
-    
-    .container {
-      display: flex;
-      flex-flow: row wrap;
-      justify-content: space-around;
-      align-items: center;
-    }
-
-    .content-piece {
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      width: 90%;
-      height:250px;
-      padding: 10px;
-      margin:10px;
-      background: whitesmoke;
-    }
-    .content-piece img{
-      height:100%
-    }
-
-    .content-card  {
-      margin:10px;
-      width: 30%
-    }
-    .content-card img {
-      width: 100%; 
-    }
-
-    .details-basic {
-      flex-grow: 1;
-      padding: 10px;
-      margin: 10px;
-    }
-
-    .details-description {
-      flex-grow: 1;
-      padding: 10px;
-      margin: 10px;
-    }
-
-    .token-mint {
-      width: 100%
-    }
-
-    .token-details {
-      flex-grow: 1;
-      padding: 10px;
-      margin: 10px;
-    }
-    .container-mint {
-      display: flex;
-      flex-flow: row wrap;
-      justify-content: flex-end;
-      padding: 20px;
-  }
-
-  .content-viewer {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    padding: 10px;
-  }
-  .content-viewer img {
-    width:70%;
-  }
-
-  #canvas {
-    height:300px;
-    width:800px;
-  }
-  .content-canvas {
-    padding:10px;
-  }
-
-  </style>
+  <link rel="stylesheet" href="src/styles/main.css" >
 </head>
-
 <body>
-  <div id='root'>
-  </div>
+  <div id='root'> </div>
   <script src="src/index.js"></script>
-  <!--
-   <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-   <script src="http://leimi.github.io/drawingboard.js/bower_components/drawingboard.js/dist/drawingboard.min.js"></script>
-   <script type='text/javascript'>
-
-    var customBoard2 = new DrawingBoard.Board('canvas', {
-      controls: [
-        'Color',
-        { Size: { type: 'dropdown' } },
-        { DrawingMode: { filler: false } },
-        'Navigation',
-        'Download'
-      ],
-      size: 1,
-      webStorage: 'session',
-      enlargeYourContainer: true
-    });
-  </script>
-  -->
-
 </body>
-
 </html>
