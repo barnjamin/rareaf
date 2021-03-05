@@ -23,7 +23,7 @@ export async function algoConnectWallet(){
 
     try{
         await AlgoSigner.connect()
-    }catch(err){ console.log("Failed to connect: ", err) }
+    }catch(err){ console.error("Failed to connect: ", err) }
 }
 
 export async function listTokens(){
@@ -31,7 +31,6 @@ export async function listTokens(){
         ledger: 'TestNet',
         path: `/v2/assets?name=RareAF&limit=100`,
     });
-    console.log("All assets: ", assets.assets)
     return assets.assets
 }
 
@@ -40,7 +39,6 @@ export async function getToken(id){
         ledger: 'TestNet',
         path: `/v2/assets/`+id,
     });
-    console.log("Asset id: ", id, assets.asset)
     return assets.asset
 }
 
@@ -91,7 +89,6 @@ export async function getAccount(){
 }
 
 export async function createToken(meta_cid) {
-    console.log("create token ", meta_cid.cid)
     const acct = await getAccount()
     const txParams = await AlgoSigner.algod({ledger: 'TestNet', path: '/v2/transactions/params' })
     const signedTx = await AlgoSigner.sign({
@@ -129,7 +126,6 @@ export async function checkCompleted(tx) {
     while (!completed) {
         try{
             const result = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/pending/' + tx.txId })
-            console.log(result)
             if(result['pool-error']!=""){
                 console.error(result['pool-error'])
                 return
