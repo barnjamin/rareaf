@@ -20,7 +20,8 @@
     "framer-motion": "^3.6.2",
     "ipfs-http-client": "^49.0.2",
     "jquery": "^3.5.1",
-    "react-router-dom": "^5.2.0"
+    "react-router-dom": "^5.2.0",
+    "rebass": "^4.0.7"
   },
   "devDependencies": {
     "ipfs": "^0.54.2",

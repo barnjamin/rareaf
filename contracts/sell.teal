@@ -1,45 +1,10 @@
 #pragma version 2
 global GroupSize
-int 1
-==
-txn Fee
-int 1000
-<
-&&
-txn TypeEnum
-int axfer
-==
-&&
-txn CloseRemainderTo
-global ZeroAddress
-==
-&&
-txn RekeyTo
-global ZeroAddress
-==
-&&
-txn ConfigAsset
-int 0
-==
-&&
-txn AssetAmount
-int 1
-==
-&&
-txn Sender
-addr LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI
-==
-&&
-global GroupSize
 int 2
 ==
 gtxn 0 Fee
 int 1000
 <
-&&
-gtxn 0 TypeEnum
-int pay
-==
 &&
 gtxn 0 CloseRemainderTo
 global ZeroAddress
@@ -49,21 +14,9 @@ gtxn 0 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 0 Amount
-int 0
-==
-&&
-gtxn 0 Receiver
-addr LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI
-==
-&&
 gtxn 1 Fee
 int 1000
 <
-&&
-gtxn 1 TypeEnum
-int axfer
-==
 &&
 gtxn 1 CloseRemainderTo
 global ZeroAddress
@@ -73,44 +26,31 @@ gtxn 1 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 1 ConfigAsset
-int 0
+gtxn 0 TypeEnum
+int axfer
+==
+gtxn 0 ConfigAsset
+int 3
 ==
 &&
-gtxn 1 AssetAmount
+gtxn 0 AssetAmount
 int 1
+==
+&&
+gtxn 0 Sender
+addr LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI
+==
+&&
+&&
+gtxn 1 TypeEnum
+int pay
+==
+gtxn 1 Amount
+int 100
 ==
 &&
 gtxn 1 Receiver
-txn Sender
+addr LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI
 ==
 &&
-||
-global GroupSize
-int 1
-==
-txn Fee
-int 1000
-<
 &&
-txn TypeEnum
-int axfer
-==
-&&
-txn CloseRemainderTo
-global ZeroAddress
-==
-&&
-txn RekeyTo
-global ZeroAddress
-==
-&&
-txn ConfigAsset
-int 0
-==
-&&
-txn AssetAmount
-int 1
-==
-&&
-||
