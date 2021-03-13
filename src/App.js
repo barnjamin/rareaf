@@ -10,7 +10,7 @@ import {
 } from "react-router-dom";
 import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
 
-import {isAlgorandWalletConnected} from './algorand'
+import {isAlgorandWalletConnected} from './lib/algorand'
 
 import Uploader from './Uploader'
 import AlgorandTokenizer from './AlgorandTokenizer'

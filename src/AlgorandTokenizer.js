@@ -2,8 +2,8 @@
 'use strict'
 
 import React from 'react'
-import {uploadMetadata} from './ipfs'
-import {createToken} from './algorand'
+import {uploadMetadata} from './lib/ipfs'
+import {createToken} from './lib/algorand'
 import { Button } from "@blueprintjs/core"
 
 class AlgorandTokenizer extends React.Component {

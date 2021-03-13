@@ -3,8 +3,8 @@
 
 import React, {useState} from 'react'
 import {useParams, useHistory} from 'react-router-dom'
-import {getToken, destroyToken} from './algorand'
-import {getCIDFromMetadataHash, getMetaFromIpfs} from './ipfs'
+import {getToken, destroyToken} from './lib/algorand'
+import {getCIDFromMetadataHash, getMetaFromIpfs} from './lib/ipfs'
 import {Button} from '@blueprintjs/core'
 
 

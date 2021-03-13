@@ -20,7 +20,7 @@ echo "Opting into Platform token"
 
 echo "Funding contract acct with algos"
 #echo "Sending Algos"
-./sandbox goal clerk send -a 500000  -f$CREATOR_ACCT -t$CONTRACT_ACCT
+./sandbox goal clerk send -a 500000 -f $CREATOR_ACCT -t$CONTRACT_ACCT
 
 
 echo "Opting into NFT"

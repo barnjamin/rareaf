@@ -2,7 +2,7 @@
 'use strict'
 
 import React, {useState} from 'react'
-import {algoConnectWallet} from './algorand'
+import {algoConnectWallet} from './lib/algorand'
 import {Button} from '@blueprintjs/core'
 
 

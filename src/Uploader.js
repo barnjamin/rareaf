@@ -2,7 +2,7 @@
 'use strict'
 
 const React = require('react')
-import { uploadContent } from './ipfs'
+import { uploadContent } from './lib/ipfs'
 import { FileInput } from "@blueprintjs/core"
 
 class Uploader extends React.Component {

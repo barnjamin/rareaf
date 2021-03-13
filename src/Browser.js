@@ -3,8 +3,8 @@
 
 const React = require('react')
 import {Card} from '@blueprintjs/core'
-import {listTokens, getTokenMetadataFromTransaction} from './algorand'
-import { getMetaFromIpfs, getCIDFromMetadataHash } from './ipfs'
+import {listTokens, getTokenMetadataFromTransaction} from './lib/algorand'
+import { getMetaFromIpfs, getCIDFromMetadataHash } from './lib/ipfs'
 
 class Browser extends React.Component {
   constructor(props) {
