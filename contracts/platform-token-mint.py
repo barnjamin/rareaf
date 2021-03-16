@@ -19,23 +19,24 @@ def get_byte_positions(program):
     return positions 
 
 def main():
+    price_val, asa_val = Bytes("0"),Bytes("0")
     acct, price, asa = get_byte_positions(compileTeal(listing(), Mode.Signature))
 
-    blank_contract = Bytes(Txn.note())
+    blank_contract = Txn.note()
 
     pre_acct    = Substring(blank_contract, Int(0), Int(acct[0]))
     pre_price   = Substring(blank_contract, Int(acct[1]), Int(price[0]))
     pre_asa     = Substring(blank_contract, Int(price[1]), Int(asa[0])) 
-    rest        = Substring(blank_contract, Int(asa[1]))
+    rest        = Substring(blank_contract, Int(asa[1]), Len(blank_contract))
 
-    contract = Concat(pre_acct, "addr ", Txn.sender(), "\n")
-    contract = Concat(contract, pre_price, "int ", price, "\n")
-    contract = Concat(contract, pre_asa, "int ", asa, "\n")
+    contract = Concat(pre_acct, Bytes("addr "), Txn.sender(), Bytes("\n"))
+    contract = Concat(contract, pre_price, Bytes("int "), price_val, Bytes("\n"))
+    contract = Concat(contract, pre_asa, Bytes("int "), asa_val, Bytes("\n"))
     contract = Concat(contract, rest)
 
     valid = And(
         # Make sure the contract template matches
-        Sha256(blanked_contract) == blank_contract_hash,
+        Sha256(blank_contract) == blank_contract_hash,
         # Make sure this is the contract being distributed to 
         Sha512_256(contract) ==  Txn.receiver()
     )
