@@ -5,13 +5,24 @@ platform_token = Int(1)
 platform_account = Addr("UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA") 
 platform_fee = Int(100)
 
-def listing(price=Int(0), asset_id=Int(0), creator=Global.zero_address()):
+def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_address()):
+
+    creator = ScratchVar(TealType.bytes)
+    creator.store(tmpl_creator)
+
+    price = ScratchVar(TealType.uint64)
+    price.store(tmpl_price)
+
+    asset_id = ScratchVar(TealType.uint64)
+    asset_id.store(tmpl_asset_id)
+
+
 
     opt_in_asa = And(
        Txn.type_enum() == TxnType.AssetTransfer,
        Txn.asset_close_to() == Global.zero_address(),
        Txn.rekey_to() == Global.zero_address(),
-       Txn.xfer_asset() == asset_id,
+       Txn.xfer_asset() == asset_id.load(),
        Txn.asset_amount() == Int(0),
     )
 
@@ -43,10 +54,10 @@ def listing(price=Int(0), asset_id=Int(0), creator=Global.zero_address()):
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].rekey_to() == Global.zero_address(),
         # is for asset id token
-        Gtxn[1].xfer_asset() == asset_id,
+        Gtxn[1].xfer_asset() == asset_id.load(),
         # rece1iver/close to is platform account
-        Gtxn[1].asset_receiver() == creator,
-        Gtxn[1].asset_close_to() == creator,
+        Gtxn[1].asset_receiver() == creator.load(),
+        Gtxn[1].asset_close_to() == creator.load(),
     )
 
     # Send algo balance back to creator
@@ -55,8 +66,8 @@ def listing(price=Int(0), asset_id=Int(0), creator=Global.zero_address()):
         Gtxn[2].type_enum() == TxnType.Payment,
         Gtxn[2].rekey_to() == Global.zero_address(),
         # Is to creator, close  to creator
-        Gtxn[2].receiver() == creator,
-        Gtxn[2].close_remainder_to() == creator,
+        Gtxn[2].receiver() == creator.load(),
+        Gtxn[2].close_remainder_to() == creator.load(),
         # Is for 0 algo
         Gtxn[2].amount() == Int(0)
     )
@@ -81,9 +92,9 @@ def listing(price=Int(0), asset_id=Int(0), creator=Global.zero_address()):
         Gtxn[0].rekey_to() == Global.zero_address(),
         Gtxn[0].close_remainder_to() == Global.zero_address(),
         # Is To creator
-        Gtxn[0].receiver() == creator,
+        Gtxn[0].receiver() == creator.load(),
         # Is for $PRICE algo
-        Gtxn[0].amount() == price
+        Gtxn[0].amount() == price.load()
     )
 
     purchase_asa = And(
@@ -94,7 +105,7 @@ def listing(price=Int(0), asset_id=Int(0), creator=Global.zero_address()):
         Gtxn[1].asset_receiver() == Gtxn[0].sender(),
         Gtxn[1].asset_close_to() == Gtxn[0].sender(),
         # is for asset id
-        Gtxn[1].xfer_asset() == asset_id,
+        Gtxn[1].xfer_asset() == asset_id.load(),
     )
 
     purchase_platform = And(
@@ -104,8 +115,8 @@ def listing(price=Int(0), asset_id=Int(0), creator=Global.zero_address()):
         # is for platform token
         Gtxn[2].xfer_asset() == platform_token,
         # Is to creator, rest to platform account
-        Gtxn[2].asset_receiver() == creator,
-        Gtxn[2].asset_close_to() == platform_account,
+        Gtxn[2].asset_receiver() == creator.load(),
+        Gtxn[2].asset_close_to() == platform_account.load(),
         # is for 1 tokens
         Gtxn[2].asset_amount() == Int(1)
     )
@@ -115,9 +126,9 @@ def listing(price=Int(0), asset_id=Int(0), creator=Global.zero_address()):
         Gtxn[3].rekey_to() == Global.zero_address(),
         # Is to platform, remainder to creator
         Gtxn[3].receiver() == platform_account,
-        Gtxn[3].close_remainder_to() == creator,
+        Gtxn[3].close_remainder_to() == creator.load(),
         # is for fee units
-        Gtxn[3].amount() == platform_fee 
+        Gtxn[3].amount() == platform_fee
     )
 
 
@@ -133,10 +144,18 @@ def listing(price=Int(0), asset_id=Int(0), creator=Global.zero_address()):
         purchase_fee
     )
 
-    return Cond([Global.group_size() == Int(1), opt_in],
-                [Global.group_size() == Int(3), delist],
-                [Global.group_size() == Int(4), purchase])
+    set_vars = Seq([
+        ScratchStore(creator),
+        ScratchStore(price),
+        ScratchStore(asset_id),
+        Int(1)
+    ])
+
+
+    return And(set_vars, Or(opt_in, delist, purchase))
+
 
 if __name__ == "__main__":
-     prog = listing(price=Int(500), asset_id=Int(2), creator=Addr("LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI"))
+     #prog = listing(price=Int(500), asset_id=Int(2), creator=Addr("LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI"))
+     prog = listing()
      print(compileTeal(prog, Mode.Signature))
