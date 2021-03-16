@@ -7,16 +7,15 @@ platform_fee = Int(100)
 
 def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_address()):
 
-    creator = ScratchVar(TealType.bytes)
-    creator.store(tmpl_creator)
-
-    price = ScratchVar(TealType.uint64)
-    price.store(tmpl_price)
-
+    creator  = ScratchVar(TealType.bytes)
+    price    = ScratchVar(TealType.uint64)
     asset_id = ScratchVar(TealType.uint64)
-    asset_id.store(tmpl_asset_id)
-
-
+    setup = Seq([
+        creator.store(tmpl_creator),
+        price.store(tmpl_price),
+        asset_id.store(tmpl_asset_id),
+        Int(0)
+    ])
 
     opt_in_asa = And(
        Txn.type_enum() == TxnType.AssetTransfer,
@@ -116,7 +115,7 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
         Gtxn[2].xfer_asset() == platform_token,
         # Is to creator, rest to platform account
         Gtxn[2].asset_receiver() == creator.load(),
-        Gtxn[2].asset_close_to() == platform_account.load(),
+        Gtxn[2].asset_close_to() == platform_account,
         # is for 1 tokens
         Gtxn[2].asset_amount() == Int(1)
     )
@@ -144,18 +143,14 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
         purchase_fee
     )
 
-    set_vars = Seq([
-        ScratchStore(creator),
-        ScratchStore(price),
-        ScratchStore(asset_id),
-        Int(1)
-    ])
+    noop = Int(0)
 
-
-    return And(set_vars, Or(opt_in, delist, purchase))
+    return Cond([setup, noop],
+                [Global.group_size() == Int(1), opt_in], 
+                [Global.group_size() == Int(3), delist], 
+                [Global.group_size() == Int(4), purchase])
 
 
 if __name__ == "__main__":
-     #prog = listing(price=Int(500), asset_id=Int(2), creator=Addr("LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI"))
-     prog = listing()
+     prog = listing(tmpl_price=Int(500), tmpl_asset_id=Int(2), tmpl_creator=Addr("LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI"))
      print(compileTeal(prog, Mode.Signature))

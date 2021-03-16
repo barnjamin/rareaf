@@ -1,23 +1,37 @@
 from pyteal import *
 
-blank_acct = Global.ZeroAddress 
+from listing import listing
+
+blank_acct = Global.zero_address()
 blank_contract_hash = Bytes("") # Get hash of listing.teal after being blanked out
 max_int_length = 10
 
+def get_byte_positions(program):
+    # Find the store commands, get the strpos of the 
+    # variable on the line prior
+    positions, position = [], 0
+    lines = program.split("\n")
+    for idx in range(len(lines)):
+        if lines[idx][:5] == "store":
+            l = len(lines[idx-1])
+            positions.append((position - (l +1), l))
+        position += len(lines[idx]) + 1
+    return positions 
+
 def main():
-    contract = Bytes(Txn.note())
+    acct, price, asa = get_byte_positions(compileTeal(listing(), Mode.Signature))
 
-    pre_acct = Substring(contract, Int(0), Int(acct_pos))
-    post_acct = Substring(contract, Int(acct_pos+len(Txn.sender()))) 
-    blanked_contract = Concat(pre_acct, blank_acct, post_acct)
+    blank_contract = Bytes(Txn.note())
 
-    pre_price = Substring(blanked_contract, Int(0), Int(price_pos))
-    post_price = Substring(blanked_contract, Int(price_pos+max_int_length)) 
-    blanked_ contract = Concat(pre_price, blank_price, post_price)
-    
-    pre_asa = Substring(blanked_contract, Int(0), Int(asa_pos))
-    post_asa = Substring(blanked_contract, Int(asa_pos+max_int_length)) 
-    blanked_contract = Concat(pre_asa, blank_asa, post_asa)
+    pre_acct    = Substring(blank_contract, Int(0), Int(acct[0]))
+    pre_price   = Substring(blank_contract, Int(acct[1]), Int(price[0]))
+    pre_asa     = Substring(blank_contract, Int(price[1]), Int(asa[0])) 
+    rest        = Substring(blank_contract, Int(asa[1]))
+
+    contract = Concat(pre_acct, "addr ", Txn.sender(), "\n")
+    contract = Concat(contract, pre_price, "int ", price, "\n")
+    contract = Concat(contract, pre_asa, "int ", asa, "\n")
+    contract = Concat(contract, rest)
 
     valid = And(
         # Make sure the contract template matches
@@ -26,7 +40,7 @@ def main():
         Sha512_256(contract) ==  Txn.receiver()
     )
 
-
+    return valid
 
 if __name__ == "__main__":
     print(compileTeal(main(), Mode.Signature))

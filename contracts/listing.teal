@@ -1,0 +1,220 @@
+#pragma version 2
+addr LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI
+store 0
+int 500
+store 1
+int 2
+store 2
+int 0
+bnz l8
+global GroupSize
+int 1
+==
+bnz l7
+global GroupSize
+int 3
+==
+bnz l6
+global GroupSize
+int 4
+==
+bnz l5
+err
+l5:
+gtxn 0 TypeEnum
+int pay
+==
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 Receiver
+load 0
+==
+&&
+gtxn 0 Amount
+load 1
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetReceiver
+gtxn 0 Sender
+==
+&&
+gtxn 1 AssetCloseTo
+gtxn 0 Sender
+==
+&&
+gtxn 1 XferAsset
+load 2
+==
+&&
+&&
+gtxn 2 TypeEnum
+int axfer
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 XferAsset
+int 1
+==
+&&
+gtxn 2 AssetReceiver
+load 0
+==
+&&
+gtxn 2 AssetCloseTo
+addr UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA
+==
+&&
+gtxn 2 AssetAmount
+int 1
+==
+&&
+&&
+gtxn 3 TypeEnum
+int pay
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 Receiver
+addr UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA
+==
+&&
+gtxn 3 CloseRemainderTo
+load 0
+==
+&&
+gtxn 3 Amount
+int 100
+==
+&&
+&&
+b l9
+l6:
+gtxn 0 Sender
+gtxn 1 Sender
+==
+gtxn 1 Sender
+gtxn 2 Sender
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 Receiver
+load 0
+==
+&&
+gtxn 2 CloseRemainderTo
+load 0
+==
+&&
+gtxn 2 Amount
+int 0
+==
+&&
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 XferAsset
+load 2
+==
+&&
+gtxn 1 AssetReceiver
+load 0
+==
+&&
+gtxn 1 AssetCloseTo
+load 0
+==
+&&
+&&
+gtxn 0 TypeEnum
+int axfer
+==
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 XferAsset
+int 1
+==
+&&
+gtxn 0 AssetReceiver
+addr UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA
+==
+&&
+gtxn 0 AssetCloseTo
+addr UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA
+==
+&&
+&&
+b l9
+l7:
+txn TypeEnum
+int axfer
+==
+txn AssetCloseTo
+global ZeroAddress
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn XferAsset
+load 2
+==
+&&
+txn AssetAmount
+int 0
+==
+&&
+txn TypeEnum
+int axfer
+==
+txn AssetCloseTo
+global ZeroAddress
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn XferAsset
+int 1
+==
+&&
+txn AssetAmount
+int 0
+==
+&&
+||
+b l9
+l8:
+int 1
+l9:
