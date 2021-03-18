@@ -16,7 +16,8 @@ the platform.
 - A Grouped transaction containing the contract signature and variables is validated against the delegated signature.  One tx in the grouped tx contains the blank template contract 
   which is compared to the prestored hash (validating behavior).  Additionally, the variables are populated with those passed by the user and compared with the reciever 
   of the tokens (validating receiver is the one implementing the behavior).
-- Once validated, the tokens are distributed to the contract account and the account is considered as part of the platform.
+- Once validated, the tokens are distributed to the contract account and the account is considered as part of the platform. Accounts holding the tokens can be searched for
+  using one of the services that index the blockchain.
 
 In the case of this example, part of the required logic is that the tokens can only be sent back to the platform and the contract account only accepts 1 asset id. 
 On close of contract (delisting or purchase here) the tokens are returned to the platform account. 
