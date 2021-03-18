@@ -29,5 +29,5 @@ Questions
 - Does this already have a name?
 - How does this get broken?
 
-
+The platform delegated signature logic has not been finished yet, it still needs to validate the rest of the transactions.
  
