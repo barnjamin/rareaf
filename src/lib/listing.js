@@ -1,13 +1,26 @@
 import algosdk from 'algosdk'
 
 const platform_settings = {
+    algod : {
+        token:"",
+        server:"",
+        port:0        
+    },
     token: {
         name: "RareAF",
         unit: "RAF",
         total: 10000,
         id: 0
     },
+    account: "",
     domain: "rare.af",
+}
+
+
+async function get_client(){
+    const {token, server, port} = platform_settings.algod
+    const client = new algosdk.Algodv2(token, server, port)
+    return client
 }
 
 async function create_platform() {
@@ -16,11 +29,11 @@ async function create_platform() {
     // Create token with name and units
     // Create Delegated sig to give out this token
     // save
+
 }
 
 async function create_listing () {
-    const client = algosdk.Algodv2()
-
+    const client = get_client()
     // Check user opted into PlatformToken
     // If not, opt into PlatformToken 
 

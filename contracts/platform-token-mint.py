@@ -19,7 +19,9 @@ def get_byte_positions(program):
     return positions 
 
 def main():
+    # TODO: Get these from note? as args? 
     price_val, asa_val = Bytes("0"),Bytes("0")
+
     acct, price, asa = get_byte_positions(compileTeal(listing(), Mode.Signature))
 
     blank_contract = Txn.note()
@@ -34,14 +36,23 @@ def main():
     contract = Concat(contract, pre_asa, Bytes("int "), asa_val, Bytes("\n"))
     contract = Concat(contract, rest)
 
-    valid = And(
+    correct_behavior = And(
         # Make sure the contract template matches
         Sha256(blank_contract) == blank_contract_hash,
         # Make sure this is the contract being distributed to 
         Sha512_256(contract) ==  Txn.receiver()
     )
 
-    return valid
+
+    #TODO: check that there are the following grouped transactions
+    #   - an asa xfer that matches the asset id
+    #   - an asa config change to make manager the contract account
+    #   - a funding tx to cover cost of other transactions and fee
+    #   - a platform token xfer for listing the contract
+
+
+
+    return correct_behavior
 
 if __name__ == "__main__":
     print(compileTeal(main(), Mode.Signature))
