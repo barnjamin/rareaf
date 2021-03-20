@@ -2,9 +2,11 @@ from pyteal import *
 
 from listing import listing
 
-blank_acct = Global.zero_address()
-blank_contract_hash = Bytes("") # Get hash of listing.teal after being blanked out
-max_int_length = 10
+blank_contract_hash = Bytes("") # TODO:: Get hash of listing.teal after being blanked out
+
+platform_token = Int(1)
+platform_acct = Addr("UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA") 
+platform_fee = Int(100)
 
 def get_byte_positions(program):
     # Find the store commands, get the strpos of the 
@@ -19,40 +21,111 @@ def get_byte_positions(program):
     return positions 
 
 def main():
-    # TODO: Get these from note? as args? 
-    price_val, asa_val = Bytes("0"),Bytes("0")
+    blank_contract  = ScratchVar(TealType.bytes)
 
+    # TODO: Get these from note? as args? 
     acct, price, asa = get_byte_positions(compileTeal(listing(), Mode.Signature))
 
-    blank_contract = Txn.note()
+    pre_acct        = ScratchVar(TealType.bytes)
+    pre_price       = ScratchVar(TealType.bytes)
+    pre_asa         = ScratchVar(TealType.bytes)
+    rest            = ScratchVar(TealType.bytes)
 
-    pre_acct    = Substring(blank_contract, Int(0), Int(acct[0]))
-    pre_price   = Substring(blank_contract, Int(acct[1]), Int(price[0]))
-    pre_asa     = Substring(blank_contract, Int(price[1]), Int(asa[0])) 
-    rest        = Substring(blank_contract, Int(asa[1]), Len(blank_contract))
+    populated_contract = ScratchVar(TealType.bytes)
 
-    contract = Concat(pre_acct, Bytes("addr "), Txn.sender(), Bytes("\n"))
-    contract = Concat(contract, pre_price, Bytes("int "), price_val, Bytes("\n"))
-    contract = Concat(contract, pre_asa, Bytes("int "), asa_val, Bytes("\n"))
-    contract = Concat(contract, rest)
+    contract_acct = ScratchVar(TealType.bytes)
+    creator_acct = ScratchVar(TealType.bytes)
+
+    price_val, asa_val = Int(0), Int(0),
+
+    prep_contract = Seq([
+        contract_acct.store(Txn.asset_receiver()),
+        creator_acct.store(Txn.asset_sender()),
+
+        blank_contract.store(Txn.note()),
+
+        #TODO: find a way to not have to reload blank contract every time
+        pre_acct.store(Substring(blank_contract.load(), Int(0), Int(acct[0]))),
+        pre_price.store(Substring(blank_contract.load(), Int(acct[1]), Int(price[0]))),
+        pre_asa.store(Substring(blank_contract.load(), Int(price[1]), Int(asa[0]))),
+        rest.store(Substring(blank_contract.load(), Int(asa[1]), Len(blank_contract.load()))),
+
+        #TODO can concat work on the entire stack at once?
+        populated_contract.store(
+                        Concat(pre_acct.load(), Bytes("addr "), Txn.sender(), Bytes("\n"),
+                            pre_price.load(), Bytes("int "), Itob(price_val), Bytes("\n"),
+                            pre_asa.load(), Bytes("int "), Itob(asa_val), Bytes("\n"), rest.load())),
+        Int(1)
+    ])
 
     correct_behavior = And(
+        prep_contract,
         # Make sure the contract template matches
-        Sha256(blank_contract) == blank_contract_hash,
+        Sha256(blank_contract.load()) == blank_contract_hash,
         # Make sure this is the contract being distributed to 
-        Sha512_256(contract) ==  Txn.receiver()
+        Sha512_256(populated_contract.load()) ==  Txn.receiver(),
     )
 
+    asa_xfer = And(
+        # Is safe asset transfer
+        Gtxn[0].type_enum() == TxnType.AssetTransfer,
+        Gtxn[0].rekey_to() == Global.zero_address(),
+        Gtxn[0].asset_close_to() == Global.zero_address(),
+        # is for asa token
+        Gtxn[0].xfer_asset() == asa_val,
+        # Is to contract, from creator 
+        Gtxn[0].asset_receiver() == contract_acct.load(),
+        Gtxn[0].asset_sender() == creator_acct.load(),
+        # is for 1 tokens
+        Gtxn[0].asset_amount() == Int(1)
+    )
 
-    #TODO: check that there are the following grouped transactions
-    #   - an asa xfer that matches the asset id
-    #   - an asa config change to make manager the contract account
-    #   - a funding tx to cover cost of other transactions and fee
-    #   - a platform token xfer for listing the contract
+    asa_config = And(
+        # Is safe platform token close out, creator gets 5 and the rest goes back to platform
+        Gtxn[1].type_enum() == TxnType.AssetConfig,
+        Gtxn[1].rekey_to() == Global.zero_address(),
+        Gtxn[1].asset_close_to() == Global.zero_address(),
+        # is for asa token
+        Gtxn[1].config_asset() == asa_val,
+        # Is to creator, rest to platform account
+        Gtxn[1].config_asset_manager() == contract_acct.load(),
+    )
 
+    funding = And(
+        # Is safe payment
+        Gtxn[2].type_enum() == TxnType.Payment,
+        Gtxn[2].rekey_to() == Global.zero_address(),
+        Gtxn[2].close_remainder_to() == Global.zero_address(),
+        # Is To Contract Acct 
+        Gtxn[2].receiver() == contract_acct.load(),
+        # Is for some amt algo
+        Gtxn[2].amount() ==  Int(int(1e9))
+    )
 
+    platform_xfer = And(
+        # Is safe asset transfer
+        Gtxn[3].type_enum() == TxnType.AssetTransfer,
+        Gtxn[3].rekey_to() == Global.zero_address(),
+        Gtxn[3].asset_close_to() == Global.zero_address(),
+        # is for platform token
+        Gtxn[3].xfer_asset() == platform_token,
+        # Is to contract, from  platform 
+        Gtxn[3].asset_receiver() == contract_acct.load(),
+        Gtxn[3].asset_sender() == platform_acct,
+        # is for 1 tokens
+        Gtxn[3].asset_amount() == Int(1)
+    )
 
-    return correct_behavior
+    valid = And(
+        Global.group_size() == Int(4),
+        correct_behavior,
+        asa_xfer,
+        asa_config,
+        funding,
+        platform_xfer
+    )
+
+    return valid 
 
 if __name__ == "__main__":
     print(compileTeal(main(), Mode.Signature))
