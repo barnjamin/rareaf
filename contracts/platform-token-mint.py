@@ -21,22 +21,19 @@ def get_byte_positions(program):
     return positions 
 
 def main():
-    blank_contract  = ScratchVar(TealType.bytes)
-
-    # TODO: Get these from note? as args? 
     acct, price, asa = get_byte_positions(compileTeal(listing(), Mode.Signature))
 
-    pre_acct        = ScratchVar(TealType.bytes)
-    pre_price       = ScratchVar(TealType.bytes)
-    pre_asa         = ScratchVar(TealType.bytes)
-    rest            = ScratchVar(TealType.bytes)
-
-    populated_contract = ScratchVar(TealType.bytes)
+    blank_contract      = ScratchVar(TealType.bytes)
+    pre_acct            = ScratchVar(TealType.bytes)
+    pre_price           = ScratchVar(TealType.bytes)
+    pre_asa             = ScratchVar(TealType.bytes)
+    rest                = ScratchVar(TealType.bytes)
+    populated_contract  = ScratchVar(TealType.bytes)
 
     contract_acct = ScratchVar(TealType.bytes)
     creator_acct = ScratchVar(TealType.bytes)
 
-    price_val, asa_val = Int(0), Int(0),
+    price_val, asa_val = Btoi(Arg(0)), Btoi(Arg(1))
 
     prep_contract = Seq([
         contract_acct.store(Txn.asset_receiver()),
