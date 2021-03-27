@@ -1,5 +1,5 @@
 #pragma version 2
-intcblock 500 2 0 1 3 4 100
+intcblock 0 0 0 1 3 4 100
 bytecblock 0x5d8a526a6c26ffaa46e0e27d3e215daff477ae373af306975645785b13a7d647 0xa61a609379970b5182efc3ec9f9a032008b02e6e97a399ded9dbd55613b9786b
 bytec_0
 store 0

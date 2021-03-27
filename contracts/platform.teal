@@ -10,17 +10,17 @@ txn Note
 store 0
 load 0
 int 0
-int 18
+int 14
 substring3
 store 1
 load 0
-int 18
-int 45
+int 46
+int 2
 substring3
 store 2
 load 0
-int 5
-int 59
+int 4
+int 4
 substring3
 store 3
 load 0
@@ -62,7 +62,7 @@ store 5
 int 1
 load 0
 sha256
-byte ""
+byte "db13023df8c99976bd0ba0fcd4946b13413679f0b3d1b2c925287a45191a5cbd"
 ==
 &&
 load 5

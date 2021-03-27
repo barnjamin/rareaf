@@ -153,4 +153,5 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
 
 if __name__ == "__main__":
      prog = listing(tmpl_price=Int(500), tmpl_asset_id=Int(2), tmpl_creator=Addr("LWFFE2TME372URXA4J6T4IK5V72HPLRXHLZQNF2WIV4FWE5H2ZDW5K7GOI"))
+     #prog = listing()
      print(compileTeal(prog, Mode.Signature))

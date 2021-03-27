@@ -1,27 +1,18 @@
 from pyteal import *
-
 from listing import listing
-
-blank_contract_hash = Bytes("") # TODO:: Get hash of listing.teal after being blanked out
+from algosdk.logic import read_program, parse_uvarint
 
 platform_token = Int(1)
 platform_acct = Addr("UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA") 
 platform_fee = Int(100)
 
-def get_byte_positions(program):
-    # Find the store commands, get the strpos of the 
-    # variable on the line prior
-    positions, position = [], 0
-    lines = program.split("\n")
-    for idx in range(len(lines)):
-        if lines[idx][:5] == "store":
-            l = len(lines[idx-1])
-            positions.append((position - (l +1), l))
-        position += len(lines[idx]) + 1
-    return positions 
+blank_contract_hash = Bytes("") # TODO:: Get hash of listing.teal after being blanked out
 
 def main():
-    acct, price, asa = get_byte_positions(compileTeal(listing(), Mode.Signature))
+
+    acct, price, asa = get_byte_positions('listing.teal.tok')
+
+    blank_contract_hash = Bytes(get_blank_hash('listing.teal.tok', acct, price, asa))
 
     blank_contract      = ScratchVar(TealType.bytes)
     pre_acct            = ScratchVar(TealType.bytes)
@@ -39,15 +30,14 @@ def main():
         contract_acct.store(Txn.asset_receiver()),
         creator_acct.store(Txn.asset_sender()),
 
+        #TODO: make this a note?
         blank_contract.store(Txn.note()),
 
-        #TODO: find a way to not have to reload blank contract every time
-        pre_acct.store(Substring(blank_contract.load(), Int(0), Int(acct[0]))),
-        pre_price.store(Substring(blank_contract.load(), Int(acct[1]), Int(price[0]))),
-        pre_asa.store(Substring(blank_contract.load(), Int(price[1]), Int(asa[0]))),
-        rest.store(Substring(blank_contract.load(), Int(asa[1]), Len(blank_contract.load()))),
+        pre_acct.store(Substring(blank_contract.load(), Int(0), Int(acct[1]))),
+        pre_price.store(Substring(blank_contract.load(), Int(acct[1]+acct[2]), Int(price[1]))),
+        pre_asa.store(Substring(blank_contract.load(), Int(price[1]+price[2]), Int(asa[1]))),
+        rest.store(Substring(blank_contract.load(), Int(asa[1]+asa[2]), Len(blank_contract.load()))),
 
-        #TODO can concat work on the entire stack at once?
         populated_contract.store(
                         Concat(pre_acct.load(), Bytes("addr "), Txn.sender(), Bytes("\n"),
                             pre_price.load(), Bytes("int "), Itob(price_val), Bytes("\n"),
@@ -124,5 +114,76 @@ def main():
 
     return valid 
 
+
+def get_blank_hash(assembled_name, *args):
+    import hashlib
+
+    program_bytes = [] #Will be list of bytes
+    with  open(assembled_name, mode='rb') as f:
+        program_bytes = f.read()
+
+    for arg in args:
+        program_bytes = program_bytes[:arg[1]] + program_bytes[arg[1]+arg[2]:]
+
+    m = hashlib.sha256()
+    m.update(program_bytes)
+
+    return m.hexdigest()
+
+
+def get_bytec_byte_positions(program, pc):
+    size = 1
+    bytearrays = []
+    num_ints, bytes_used = parse_uvarint(program[pc + size:])
+    if bytes_used <= 0:
+        return 0,[]
+
+    size += bytes_used
+    for i in range(0, num_ints):
+        if pc + size >= len(program):
+            return 0,[]
+
+        item_len, bytes_used = parse_uvarint(program[pc + size:])
+        if bytes_used <= 0:
+            return 0,[] 
+
+        size += bytes_used
+        if pc + size + item_len > len(program):
+            return 0,[]
+
+        bytearrays.append((program[pc+size:pc+size+item_len], pc+size, item_len))
+        size += item_len
+    return size, bytearrays
+
+def get_intc_byte_positions(program, pc):
+    size = 1
+    ints = []
+    num_ints, bytes_used = parse_uvarint(program[pc + size:])
+    if bytes_used <= 0:
+        return 0,[]
+    size += bytes_used
+    for i in range(0, num_ints):
+        if pc + size >= len(program):
+            return 0, []
+        num, bytes_used = parse_uvarint(program[pc + size:])
+        if bytes_used <= 0:
+            return 0,[]
+        ints.append((num, size, bytes_used))
+        size += bytes_used
+    return size, ints
+
+def get_byte_positions(assembled_name):
+    program_bytes = [] #Will be list of bytes
+    with  open(assembled_name, mode='rb') as f:
+        program_bytes = f.read()
+
+    pos = 1 # Version byte
+    size, intc = get_intc_byte_positions(program_bytes, pos)
+    pos += size
+    size, bytec = get_bytec_byte_positions(program_bytes, pos)
+
+    return [bytec[0], intc[0], intc[1]]
+
 if __name__ == "__main__":
     print(compileTeal(main(), Mode.Signature))
+    #main()

@@ -1,0 +1,173 @@
+// version 2
+intcblock 4 0 14 46 2 5 1 3 1000000000
+bytecblock 0x6164647220 0x0a 0x696e7420 0x64623133303233646638633939393736626430626130666364343934366231333431333637396630623364316232633932353238376134353139316135636264 0xa61a609379970b5182efc3ec9f9a032008b02e6e97a399ded9dbd55613b9786b
+global GroupSize
+intc_0
+==
+txn AssetReceiver
+store 6
+txn AssetSender
+store 7
+txn Note
+store 0
+load 0
+intc_1
+intc_2
+substring3
+store 1
+load 0
+intc_3
+intc 4
+substring3
+store 2
+load 0
+intc_0
+intc_0
+substring3
+store 3
+load 0
+intc 5
+load 0
+len
+substring3
+store 4
+load 1
+bytec_0
+concat
+txn Sender
+concat
+bytec_1
+concat
+load 2
+concat
+bytec_2
+concat
+arg_0
+btoi
+itob
+concat
+bytec_1
+concat
+load 3
+concat
+bytec_2
+concat
+arg_1
+btoi
+itob
+concat
+bytec_1
+concat
+load 4
+concat
+store 5
+intc 6
+load 0
+sha256
+bytec_3
+==
+&&
+load 5
+sha512_256
+txn Receiver
+==
+&&
+&&
+gtxn 0 TypeEnum
+intc_0
+==
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 0 XferAsset
+arg_1
+btoi
+==
+&&
+gtxn 0 AssetReceiver
+load 6
+==
+&&
+gtxn 0 AssetSender
+load 7
+==
+&&
+gtxn 0 AssetAmount
+intc 6
+==
+&&
+&&
+gtxn 1 TypeEnum
+intc 7
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 ConfigAsset
+arg_1
+btoi
+==
+&&
+gtxn 1 ConfigAssetManager
+load 6
+==
+&&
+&&
+gtxn 2 TypeEnum
+intc 6
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 Receiver
+load 6
+==
+&&
+gtxn 2 Amount
+intc 8
+==
+&&
+&&
+gtxn 3 TypeEnum
+intc_0
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 3 XferAsset
+intc 6
+==
+&&
+gtxn 3 AssetReceiver
+load 6
+==
+&&
+gtxn 3 AssetSender
+bytec 4
+==
+&&
+gtxn 3 AssetAmount
+intc 6
+==
+&&
+&&
