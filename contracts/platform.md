@@ -29,5 +29,15 @@ Questions
 - Does this already have a name?
 - How does this get broken?
 
-The platform delegated signature logic has not been finished yet, it still needs to validate the rest of the transactions.
- 
+
+
+
+submit to platform:  
+	the populated contract
+	the variables for price/asa as args
+	
+platform knows hash for blanked contract and can remove bytes for variables to generate hash
+can also hash populated contract and validate that it is the receiver 
+
+
+

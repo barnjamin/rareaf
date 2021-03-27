@@ -3,69 +3,60 @@ global GroupSize
 int 4
 ==
 txn AssetReceiver
-store 6
+store 5
 txn AssetSender
-store 7
+store 6
 txn Note
-store 0
-load 0
+store 4
+load 4
 int 0
-int 14
-substring3
-store 1
-load 0
-int 46
 int 2
 substring3
-store 2
-load 0
-int 4
-int 4
+store 1
+load 4
+int 2
+arg 0
+len
++
+arg 1
+len
++
+int 11
+arg 0
+len
++
+arg 1
+len
++
 substring3
-store 3
-load 0
-int 5
-load 0
+store 2
+load 4
+int 11
+arg 0
+len
++
+arg 1
+len
++
+int 32
++
+load 4
 len
 substring3
-store 4
+store 3
 load 1
-byte "addr "
-concat
-txn Sender
-concat
-byte "\n"
-concat
 load 2
-concat
-byte "int "
-concat
-arg 0
-btoi
-itob
-concat
-byte "\n"
 concat
 load 3
 concat
-byte "int "
-concat
-arg 1
-btoi
-itob
-concat
-byte "\n"
-concat
-load 4
-concat
-store 5
+store 0
 int 1
 load 0
 sha256
 byte "db13023df8c99976bd0ba0fcd4946b13413679f0b3d1b2c925287a45191a5cbd"
 ==
 &&
-load 5
+load 4
 sha512_256
 txn Receiver
 ==
@@ -88,11 +79,11 @@ btoi
 ==
 &&
 gtxn 0 AssetReceiver
-load 6
+load 5
 ==
 &&
 gtxn 0 AssetSender
-load 7
+load 6
 ==
 &&
 gtxn 0 AssetAmount
@@ -117,7 +108,7 @@ btoi
 ==
 &&
 gtxn 1 ConfigAssetManager
-load 6
+load 5
 ==
 &&
 &&
@@ -133,7 +124,7 @@ global ZeroAddress
 ==
 &&
 gtxn 2 Receiver
-load 6
+load 5
 ==
 &&
 gtxn 2 Amount
@@ -157,7 +148,7 @@ int 1
 ==
 &&
 gtxn 3 AssetReceiver
-load 6
+load 5
 ==
 &&
 gtxn 3 AssetSender

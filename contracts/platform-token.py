@@ -1,47 +1,44 @@
 from pyteal import *
 from listing import listing
-from algosdk.logic import read_program, parse_uvarint
+from algosdk.logic import parse_uvarint
 
 platform_token = Int(1)
 platform_acct = Addr("UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA") 
 platform_fee = Int(100)
 
-blank_contract_hash = Bytes("") # TODO:: Get hash of listing.teal after being blanked out
-
 def main():
 
     acct, price, asa = get_byte_positions('listing.teal.tok')
-
     blank_contract_hash = Bytes(get_blank_hash('listing.teal.tok', acct, price, asa))
 
     blank_contract      = ScratchVar(TealType.bytes)
-    pre_acct            = ScratchVar(TealType.bytes)
-    pre_price           = ScratchVar(TealType.bytes)
-    pre_asa             = ScratchVar(TealType.bytes)
+
+    pre_ints            = ScratchVar(TealType.bytes)
+    post_ints           = ScratchVar(TealType.bytes)
     rest                = ScratchVar(TealType.bytes)
+
     populated_contract  = ScratchVar(TealType.bytes)
 
     contract_acct = ScratchVar(TealType.bytes)
     creator_acct = ScratchVar(TealType.bytes)
 
     price_val, asa_val = Btoi(Arg(0)), Btoi(Arg(1))
+    intc_start = Int(price[1]) # version, intcblock, number of ints
+    bytec_start = Int(acct[1] - (price[2] + asa[2]))
+    addr_len = Int(32)
 
     prep_contract = Seq([
         contract_acct.store(Txn.asset_receiver()),
         creator_acct.store(Txn.asset_sender()),
 
-        #TODO: make this a note?
-        blank_contract.store(Txn.note()),
+        populated_contract.store(Txn.note()),
 
-        pre_acct.store(Substring(blank_contract.load(), Int(0), Int(acct[1]))),
-        pre_price.store(Substring(blank_contract.load(), Int(acct[1]+acct[2]), Int(price[1]))),
-        pre_asa.store(Substring(blank_contract.load(), Int(price[1]+price[2]), Int(asa[1]))),
-        rest.store(Substring(blank_contract.load(), Int(asa[1]+asa[2]), Len(blank_contract.load()))),
+        # Cut out the variables, this assumes the 2 vars are adjacent in the assembly
+        pre_ints.store(Substring(populated_contract.load(), Int(0), intc_start)), 
+        post_ints.store(Substring(populated_contract.load(), intc_start + Len(Arg(0))+Len(Arg(1)), bytec_start + Len(Arg(0))+Len(Arg(1)))),
+        rest.store(Substring(populated_contract.load(), bytec_start + Len(Arg(0))+Len(Arg(1)) + addr_len, Len(populated_contract.load()))),
 
-        populated_contract.store(
-                        Concat(pre_acct.load(), Bytes("addr "), Txn.sender(), Bytes("\n"),
-                            pre_price.load(), Bytes("int "), Itob(price_val), Bytes("\n"),
-                            pre_asa.load(), Bytes("int "), Itob(asa_val), Bytes("\n"), rest.load())),
+        blank_contract.store(Concat(pre_ints.load(), post_ints.load(), rest.load())),
         Int(1)
     ])
 
