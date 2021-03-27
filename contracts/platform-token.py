@@ -37,8 +37,9 @@ def main():
     ])
 
     #correct_behavior = And(
-    #    # Make sure the contract template matches
     #    # Make sure this is the contract being distributed to 
+            #Sha256(blank_contract.load()) == blank_contract_hash,
+        # Make sure the contract template matches
     #    Sha512_256(populated_contract.load()) ==  Txn.asset_receiver(),
     #)
     #correct_behavior = Sha512_256(Concat(Bytes("Program"), populated_contract.load())) ==  Txn.asset_receiver()
