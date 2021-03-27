@@ -3,13 +3,13 @@ from listing import listing
 from algosdk.logic import parse_uvarint
 
 platform_token = Int(1)
-platform_acct = Addr("UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA") 
+platform_acct = Addr("NFMVG5PCLPEWGL5ACNHYEZOIUHXJBUW4SI754W6APBCCRUVVJKRQOAFAE4") 
 platform_fee = Int(100)
 
 def main():
 
     acct, price, asa = get_byte_positions('listing.teal.tok')
-    blank_contract_hash = Bytes(get_blank_hash('listing.teal.tok', acct, price, asa))
+    blank_contract_hash = Bytes('base64', get_blank_hash('listing.teal.tok', acct, price, asa))
 
     blank_contract      = ScratchVar(TealType.bytes)
 
@@ -19,19 +19,13 @@ def main():
 
     populated_contract  = ScratchVar(TealType.bytes)
 
-    contract_acct = ScratchVar(TealType.bytes)
-    creator_acct = ScratchVar(TealType.bytes)
-
-    price_val, asa_val = Btoi(Arg(0)), Btoi(Arg(1))
+    asa_val, contract_val = Btoi(Arg(1)), Arg(2)
     intc_start = Int(price[1]) # version, intcblock, number of ints
     bytec_start = Int(acct[1] - (price[2] + asa[2]))
     addr_len = Int(32)
 
     prep_contract = Seq([
-        contract_acct.store(Txn.asset_receiver()),
-        creator_acct.store(Txn.asset_sender()),
-
-        populated_contract.store(Txn.note()),
+        populated_contract.store(contract_val),
 
         # Cut out the variables, this assumes the 2 vars are adjacent in the assembly
         pre_ints.store(Substring(populated_contract.load(), Int(0), intc_start)), 
@@ -42,13 +36,13 @@ def main():
         Int(1)
     ])
 
-    correct_behavior = And(
-        prep_contract,
-        # Make sure the contract template matches
-        Sha256(blank_contract.load()) == blank_contract_hash,
-        # Make sure this is the contract being distributed to 
-        Sha512_256(populated_contract.load()) ==  Txn.receiver(),
-    )
+    #correct_behavior = And(
+    #    # Make sure the contract template matches
+    #    # Make sure this is the contract being distributed to 
+    #    Sha512_256(populated_contract.load()) ==  Txn.asset_receiver(),
+    #)
+    #correct_behavior = Sha512_256(Concat(Bytes("Program"), populated_contract.load())) ==  Txn.asset_receiver()
+    correct_behavior = Sha256(blank_contract.load()) == blank_contract_hash
 
     asa_xfer = And(
         # Is safe asset transfer
@@ -57,9 +51,6 @@ def main():
         Gtxn[0].asset_close_to() == Global.zero_address(),
         # is for asa token
         Gtxn[0].xfer_asset() == asa_val,
-        # Is to contract, from creator 
-        Gtxn[0].asset_receiver() == contract_acct.load(),
-        Gtxn[0].asset_sender() == creator_acct.load(),
         # is for 1 tokens
         Gtxn[0].asset_amount() == Int(1)
     )
@@ -72,7 +63,7 @@ def main():
         # is for asa token
         Gtxn[1].config_asset() == asa_val,
         # Is to creator, rest to platform account
-        Gtxn[1].config_asset_manager() == contract_acct.load(),
+        Gtxn[1].config_asset_manager() == Txn.asset_receiver(),
     )
 
     funding = And(
@@ -81,7 +72,7 @@ def main():
         Gtxn[2].rekey_to() == Global.zero_address(),
         Gtxn[2].close_remainder_to() == Global.zero_address(),
         # Is To Contract Acct 
-        Gtxn[2].receiver() == contract_acct.load(),
+        Gtxn[2].receiver() == Txn.asset_receiver(),
         # Is for some amt algo
         Gtxn[2].amount() ==  Int(int(1e9))
     )
@@ -94,14 +85,15 @@ def main():
         # is for platform token
         Gtxn[3].xfer_asset() == platform_token,
         # Is to contract, from  platform 
-        Gtxn[3].asset_receiver() == contract_acct.load(),
-        Gtxn[3].asset_sender() == platform_acct,
+        Gtxn[3].asset_receiver() == Txn.asset_receiver(),
+        #Gtxn[3].asset_sender() == platform_acct,
         # is for 1 tokens
         Gtxn[3].asset_amount() == Int(1)
     )
 
     valid = And(
         Global.group_size() == Int(4),
+        prep_contract,
         correct_behavior,
         asa_xfer,
         asa_config,
@@ -113,6 +105,7 @@ def main():
 
 
 def get_blank_hash(assembled_name, *args):
+    import base64
     import hashlib
 
     program_bytes = [] #Will be list of bytes
@@ -122,10 +115,8 @@ def get_blank_hash(assembled_name, *args):
     for arg in args:
         program_bytes = program_bytes[:arg[1]] + program_bytes[arg[1]+arg[2]:]
 
-    m = hashlib.sha256()
-    m.update(program_bytes)
-
-    return m.hexdigest()
+    h = hashlib.sha256(program_bytes)
+    return base64.b64encode(h.digest()).decode('ascii')
 
 
 def get_bytec_byte_positions(program, pc):

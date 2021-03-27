@@ -2,11 +2,7 @@
 global GroupSize
 int 4
 ==
-txn AssetReceiver
-store 5
-txn AssetSender
-store 6
-txn Note
+arg 2
 store 4
 load 4
 int 0
@@ -51,16 +47,11 @@ load 3
 concat
 store 0
 int 1
+&&
 load 0
 sha256
-byte "db13023df8c99976bd0ba0fcd4946b13413679f0b3d1b2c925287a45191a5cbd"
+byte base64(2xMCPfjJmXa9C6D81JRrE0E2efCz0bLJJSh6RRkaXL0=)
 ==
-&&
-load 4
-sha512_256
-txn Receiver
-==
-&&
 &&
 gtxn 0 TypeEnum
 int axfer
@@ -76,14 +67,6 @@ global ZeroAddress
 gtxn 0 XferAsset
 arg 1
 btoi
-==
-&&
-gtxn 0 AssetReceiver
-load 5
-==
-&&
-gtxn 0 AssetSender
-load 6
 ==
 &&
 gtxn 0 AssetAmount
@@ -108,7 +91,7 @@ btoi
 ==
 &&
 gtxn 1 ConfigAssetManager
-load 5
+txn AssetReceiver
 ==
 &&
 &&
@@ -124,7 +107,7 @@ global ZeroAddress
 ==
 &&
 gtxn 2 Receiver
-load 5
+txn AssetReceiver
 ==
 &&
 gtxn 2 Amount
@@ -148,11 +131,7 @@ int 1
 ==
 &&
 gtxn 3 AssetReceiver
-load 5
-==
-&&
-gtxn 3 AssetSender
-addr UYNGBE3ZS4FVDAXPYPWJ7GQDEAELALTOS6RZTXWZ3PKVME5ZPBVQYS3NHA
+txn AssetReceiver
 ==
 &&
 gtxn 3 AssetAmount
