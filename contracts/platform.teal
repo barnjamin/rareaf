@@ -3,11 +3,11 @@ global GroupSize
 int 4
 ==
 arg 2
-store 4
+store 0
 arg 0
 btoi
 int 72057594037927935
-<
+<=
 bnz l2
 int 8
 b l21
@@ -15,7 +15,7 @@ l2:
 arg 0
 btoi
 int 281474976710655
-<
+<=
 bnz l4
 int 7
 b l20
@@ -23,7 +23,7 @@ l4:
 arg 0
 btoi
 int 1099511627775
-<
+<=
 bnz l6
 int 6
 b l19
@@ -31,7 +31,7 @@ l6:
 arg 0
 btoi
 int 4294967295
-<
+<=
 bnz l8
 int 5
 b l18
@@ -39,7 +39,7 @@ l8:
 arg 0
 btoi
 int 16777215
-<
+<=
 bnz l10
 int 4
 b l17
@@ -47,7 +47,7 @@ l10:
 arg 0
 btoi
 int 65535
-<
+<=
 bnz l12
 int 3
 b l16
@@ -55,7 +55,7 @@ l12:
 arg 0
 btoi
 int 255
-<
+<=
 bnz l14
 int 2
 b l15
@@ -72,7 +72,7 @@ store 6
 arg 1
 btoi
 int 72057594037927935
-<
+<=
 bnz l23
 int 8
 b l42
@@ -80,7 +80,7 @@ l23:
 arg 1
 btoi
 int 281474976710655
-<
+<=
 bnz l25
 int 7
 b l41
@@ -88,7 +88,7 @@ l25:
 arg 1
 btoi
 int 1099511627775
-<
+<=
 bnz l27
 int 6
 b l40
@@ -96,7 +96,7 @@ l27:
 arg 1
 btoi
 int 4294967295
-<
+<=
 bnz l29
 int 5
 b l39
@@ -104,7 +104,7 @@ l29:
 arg 1
 btoi
 int 16777215
-<
+<=
 bnz l31
 int 4
 b l38
@@ -112,7 +112,7 @@ l31:
 arg 1
 btoi
 int 65535
-<
+<=
 bnz l33
 int 3
 b l37
@@ -120,7 +120,7 @@ l33:
 arg 1
 btoi
 int 255
-<
+<=
 bnz l35
 int 2
 b l36
@@ -138,12 +138,12 @@ load 6
 load 5
 +
 store 7
-load 4
+load 0
 int 0
 int 3
 substring3
-store 1
-load 4
+store 2
+load 0
 int 3
 load 7
 +
@@ -151,31 +151,31 @@ int 11
 load 7
 +
 substring3
-store 2
-load 4
+store 3
+load 0
 int 11
 load 7
 +
 int 33
 +
-load 4
+load 0
 len
 substring3
-store 3
-load 1
+store 4
 load 2
-concat
 load 3
 concat
-store 0
+load 4
+concat
+store 1
 int 1
 &&
-load 0
+load 1
 sha256
-byte base64(zdtUZhP+EEVYui0XltN1ahD0JI5KuYFOmRueL64rY10=)
+byte base64(q+GczJuTi9tVQjCT99arXzVznY1q23opnVHvNC00f+8=)
 ==
 byte "Program"
-load 4
+load 0
 concat
 sha512_256
 txn AssetReceiver

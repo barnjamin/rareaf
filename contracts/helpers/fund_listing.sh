@@ -7,6 +7,9 @@ SIGNED_DELEGATE=platform-delegate.signed
 cp ~/rareaf/contracts/$CONTRACT_NAME .
 ./sandbox copy $CONTRACT_NAME
 
+cp ~/rareaf/contracts/$CONTRACT_NAME.tok .
+./sandbox copy $CONTRACT_NAME.tok
+
 cp ~/rareaf/contracts/$DELEGATE_NAME .
 ./sandbox copy $DELEGATE_NAME
 

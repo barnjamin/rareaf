@@ -35,7 +35,6 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
 
     opt_in = Or(opt_in_asa, opt_in_platform)
 
-
     # Send Platform tokens back to platform account
     delist_platform = And(
         # Is safe Asset xfer
@@ -70,8 +69,6 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
         # Is for 0 algo
         Gtxn[2].amount() == Int(0)
     )
-
-
 
     # Delist 
     #   ASA/Algos back to creator 
@@ -153,5 +150,4 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
 
 if __name__ == "__main__":
      prog = listing(tmpl_price=Int(500), tmpl_asset_id=Int(2), tmpl_creator=Addr("OVMCDUOLZQX23CIKYEUTBCUWW44H6IYF64LY5736HAV5TQNP77JKS45YZA"))
-     #prog = listing()
      print(compileTeal(prog, Mode.Signature))
