@@ -4,6 +4,140 @@ int 4
 ==
 arg 2
 store 4
+arg 0
+btoi
+int 72057594037927935
+<
+bnz l2
+int 8
+b l21
+l2:
+arg 0
+btoi
+int 281474976710655
+<
+bnz l4
+int 7
+b l20
+l4:
+arg 0
+btoi
+int 1099511627775
+<
+bnz l6
+int 6
+b l19
+l6:
+arg 0
+btoi
+int 4294967295
+<
+bnz l8
+int 5
+b l18
+l8:
+arg 0
+btoi
+int 16777215
+<
+bnz l10
+int 4
+b l17
+l10:
+arg 0
+btoi
+int 65535
+<
+bnz l12
+int 3
+b l16
+l12:
+arg 0
+btoi
+int 255
+<
+bnz l14
+int 2
+b l15
+l14:
+int 1
+l15:
+l16:
+l17:
+l18:
+l19:
+l20:
+l21:
+store 6
+arg 1
+btoi
+int 72057594037927935
+<
+bnz l23
+int 8
+b l42
+l23:
+arg 1
+btoi
+int 281474976710655
+<
+bnz l25
+int 7
+b l41
+l25:
+arg 1
+btoi
+int 1099511627775
+<
+bnz l27
+int 6
+b l40
+l27:
+arg 1
+btoi
+int 4294967295
+<
+bnz l29
+int 5
+b l39
+l29:
+arg 1
+btoi
+int 16777215
+<
+bnz l31
+int 4
+b l38
+l31:
+arg 1
+btoi
+int 65535
+<
+bnz l33
+int 3
+b l37
+l33:
+arg 1
+btoi
+int 255
+<
+bnz l35
+int 2
+b l36
+l35:
+int 1
+l36:
+l37:
+l38:
+l39:
+l40:
+l41:
+l42:
+store 5
+load 6
+load 5
++
+store 7
 load 4
 int 0
 int 2
@@ -11,28 +145,16 @@ substring3
 store 1
 load 4
 int 2
-arg 0
-len
-+
-arg 1
-len
+load 7
 +
 int 11
-arg 0
-len
-+
-arg 1
-len
+load 7
 +
 substring3
 store 2
 load 4
 int 11
-arg 0
-len
-+
-arg 1
-len
+load 7
 +
 int 32
 +
@@ -132,6 +254,10 @@ int 1
 &&
 gtxn 3 AssetReceiver
 txn AssetReceiver
+==
+&&
+gtxn 3 Sender
+addr NFMVG5PCLPEWGL5ACNHYEZOIUHXJBUW4SI754W6APBCCRUVVJKRQOAFAE4
 ==
 &&
 gtxn 3 AssetAmount
