@@ -9,7 +9,7 @@ platform_fee = Int(100)
 def main():
 
     acct, price, asa = get_byte_positions('listing.teal.tok')
-    blank_contract_hash = Bytes('base64', get_blank_hash('listing.teal.tok', acct, price, asa))
+    blank_contract_hash = Bytes('base64', get_blank_hash('listing.teal.tok', price, asa, acct))
 
     blank_contract      = ScratchVar(TealType.bytes)
 
@@ -35,7 +35,7 @@ def main():
     price_val, asa_val, contract_val = Btoi(Arg(0)), Btoi(Arg(1)), Arg(2)
     intc_start = Int(price[1]) # version, intcblock, number of ints
     bytec_start = Int(acct[1] - (price[2] + asa[2]))
-    addr_len = Int(32)
+    addr_len = Int(33)
 
     prep_contract = Seq([
         populated_contract.store(contract_val),
@@ -68,14 +68,15 @@ def main():
         Int(1)
     ])
 
-    #correct_behavior = And(
-    #    # Make sure this is the contract being distributed to 
-            #Sha256(blank_contract.load()) == blank_contract_hash,
-        # Make sure the contract template matches
-    #    Sha512_256(populated_contract.load()) ==  Txn.asset_receiver(),
-    #)
+    correct_behavior = And(
+        # Make sure this is the contract being distributed to 
+        Sha256(blank_contract.load()) == blank_contract_hash,
+       # Make sure the contract template matches
+        Sha512_256(Concat(Bytes("Program"), populated_contract.load())) ==  Txn.asset_receiver(),
+    )
+
     #correct_behavior = Sha512_256(Concat(Bytes("Program"), populated_contract.load())) ==  Txn.asset_receiver()
-    correct_behavior = Sha256(blank_contract.load()) == blank_contract_hash
+    #correct_behavior = Sha256(blank_contract.load()) == blank_contract_hash
 
     asa_xfer = And(
         # Is safe asset transfer
@@ -143,10 +144,12 @@ def get_blank_hash(assembled_name, *args):
 
     program_bytes = [] #Will be list of bytes
     with  open(assembled_name, mode='rb') as f:
-        program_bytes = f.read()
+        program_bytes = bytearray(f.read())
 
+    removed = 0
     for arg in args:
-        program_bytes = program_bytes[:arg[1]] + program_bytes[arg[1]+arg[2]:]
+        program_bytes = program_bytes[:arg[1]-removed] + program_bytes[(arg[1]+arg[2])-removed:]
+        removed += arg[2]
 
     h = hashlib.sha256(program_bytes)
     return base64.b64encode(h.digest()).decode('ascii')
@@ -172,7 +175,7 @@ def get_bytec_byte_positions(program, pc):
         if pc + size + item_len > len(program):
             return 0,[]
 
-        bytearrays.append((program[pc+size:pc+size+item_len], pc+size, item_len))
+        bytearrays.append((program[pc+size:pc+size+item_len], pc+size, item_len+1))
         size += item_len
     return size, bytearrays
 
@@ -189,7 +192,7 @@ def get_intc_byte_positions(program, pc):
         num, bytes_used = parse_uvarint(program[pc + size:])
         if bytes_used <= 0:
             return 0,[]
-        ints.append((num, size, bytes_used))
+        ints.append((num, pc+size, bytes_used))
         size += bytes_used
     return size, ints
 

@@ -140,11 +140,11 @@ load 5
 store 7
 load 4
 int 0
-int 2
+int 3
 substring3
 store 1
 load 4
-int 2
+int 3
 load 7
 +
 int 11
@@ -156,7 +156,7 @@ load 4
 int 11
 load 7
 +
-int 32
+int 33
 +
 load 4
 len
@@ -172,8 +172,15 @@ int 1
 &&
 load 0
 sha256
-byte base64(2xMCPfjJmXa9C6D81JRrE0E2efCz0bLJJSh6RRkaXL0=)
+byte base64(zdtUZhP+EEVYui0XltN1ahD0JI5KuYFOmRueL64rY10=)
 ==
+byte "Program"
+load 4
+concat
+sha512_256
+txn AssetReceiver
+==
+&&
 &&
 gtxn 0 TypeEnum
 int axfer
