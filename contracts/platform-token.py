@@ -8,22 +8,28 @@ platform_fee = Int(100)
 
 def main():
 
+    # Get byte positions in template contract
     acct, price, asa = get_byte_positions('listing.teal.tok')
+
+    # Get the sha256 hash of the contract with the variables removed
     blank_contract_hash = Bytes('base64', get_blank_hash('listing.teal.tok', price, asa, acct))
 
+    # Scratch space for the contract submitted
+    populated_contract  = ScratchVar(TealType.bytes)
+    # Scratch space for the blanked contract
     blank_contract      = ScratchVar(TealType.bytes)
 
+    #Scratch space for the bytes before and after variables
     pre_ints            = ScratchVar(TealType.bytes)
     post_ints           = ScratchVar(TealType.bytes)
     rest                = ScratchVar(TealType.bytes)
 
-    populated_contract  = ScratchVar(TealType.bytes)
-
-
+    # Byte lengths of uint variables
     asa_len   = ScratchVar(TealType.uint64)
     price_len = ScratchVar(TealType.uint64)
     vars_len  = ScratchVar(TealType.uint64)
 
+    # Hacky way to find how many bytes a uint occupies in the assembled program
     two     = Int(255)
     three   = Int(65535)
     four    = Int(16777215)
@@ -32,33 +38,43 @@ def main():
     seven   = Int(281474976710655)
     eight   = Int(72057594037927935)
 
+    # Get arg values
     price_val, asa_val, contract_val = Btoi(Arg(0)), Btoi(Arg(1)), Arg(2)
+
+    # Location in assembly where variables start
     intc_start = Int(price[1]) # version, intcblock, number of ints
     bytec_start = Int(acct[1] - (price[2] + asa[2]))
-    addr_len = Int(33)
 
+    # Address length + 1 for space
+    addr_len = Int(32 + 1)
+
+    # Prepare the blank contract 
     prep_contract = Seq([
+
         populated_contract.store(contract_val),
 
+        # Store the number of bytes necessary to represent uint in assembly
         price_len.store(
-            If(price_val<eight, 
-            If(price_val<seven, 
-            If(price_val<six, 
-            If(price_val<five, 
-            If(price_val<four, 
-            If(price_val<three, 
-            If(price_val<two, Int(1),Int(2)), Int(3)), Int(4)), Int(5)), Int(6)), Int(7)), Int(8))),
+            If(price_val<=eight, 
+            If(price_val<=seven, 
+            If(price_val<=six, 
+            If(price_val<=five, 
+            If(price_val<=four, 
+            If(price_val<=three, 
+            If(price_val<=two, Int(1),Int(2)), Int(3)), Int(4)), Int(5)), Int(6)), Int(7)), Int(8))),
 
         asa_len.store(
-            If(asa_val<eight, 
-            If(asa_val<seven, 
-            If(asa_val<six, 
-            If(asa_val<five, 
-            If(asa_val<four, 
-            If(asa_val<three, 
-            If(asa_val<two, Int(1),Int(2)), Int(3)), Int(4)), Int(5)), Int(6)), Int(7)), Int(8))),
+            If(asa_val<=eight, 
+            If(asa_val<=seven, 
+            If(asa_val<=six, 
+            If(asa_val<=five, 
+            If(asa_val<=four, 
+            If(asa_val<=three, 
+            If(asa_val<=two, Int(1),Int(2)), Int(3)), Int(4)), Int(5)), Int(6)), Int(7)), Int(8))),
 
+        # Simplify lookup at cost of space
         vars_len.store(price_len.load() + asa_len.load()),
+
         # Cut out the variables, this assumes the 2 vars are adjacent in the assembly
         pre_ints.store(Substring(populated_contract.load(), Int(0), intc_start)), 
         post_ints.store(Substring(populated_contract.load(), intc_start + vars_len.load(), bytec_start + vars_len.load())),
@@ -75,8 +91,8 @@ def main():
         Sha512_256(Concat(Bytes("Program"), populated_contract.load())) ==  Txn.asset_receiver(),
     )
 
-    #correct_behavior = Sha512_256(Concat(Bytes("Program"), populated_contract.load())) ==  Txn.asset_receiver()
-    #correct_behavior = Sha256(blank_contract.load()) == blank_contract_hash
+
+    # Validate transactions
 
     asa_xfer = And(
         # Is safe asset transfer
@@ -125,7 +141,7 @@ def main():
         Gtxn[3].asset_amount() == Int(1)
     )
 
-    valid = And(
+    return And(
         Global.group_size() == Int(4),
         prep_contract,
         correct_behavior,
@@ -134,8 +150,6 @@ def main():
         funding,
         platform_xfer
     )
-
-    return valid 
 
 
 def get_blank_hash(assembled_name, *args):
