@@ -11,7 +11,7 @@ the platform.
   a delegated signature to distribute the tokens.
 - 2 stateless smart contracts are created
     1) Template Contract Signature - The variables in the contract will be set by the user of the platform (here as listing.teal)
-    2) Delegated Signature - Distributes tokens only to contract accounts that have been created using the Template Contract Signature logic (here as platform-token-mint.teal)
+    2) Delegated Signature - Distributes tokens only to contract accounts that have been created using the Template Contract Signature logic (here as platform.teal)
 - The hash of a blank template is generated ahead of time and stored.  When an account wants to join the platform, the variables are filled in and the contract account is created.
 - A Grouped transaction containing the contract signature and variables is validated against the delegated signature.  One tx in the grouped tx contains the blank template contract 
   which is compared to the prestored hash (validating behavior).  Additionally, the variables are populated with those passed by the user and compared with the reciever 
