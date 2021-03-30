@@ -1,9 +1,6 @@
 Platform Contract Pair
 ======================
 
-For a Distributed Application, there is no central database except the blockchain.  For a DApp then to find accounts or assets related to it, some method for identification
-of those elements must be developed. This document aims to describe a method to identify those elements with a Platform Contract Pair.
-
 In General, a pair of contracts is created where one implements the logic for the platform the other checks that it is valid before distibuting a token signifiying admission onto
 the platform. 
 
