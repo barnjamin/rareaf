@@ -2,7 +2,9 @@
 
 import CID from 'cids'
 import ipfsClient from 'ipfs-http-client'
-const iclient = ipfsClient("/ip4/127.0.0.1/tcp/5001")
+import {platform_settings} from './platform-conf'
+
+const iclient = ipfsClient(platform_settings.ipfs.host)
 
 export async function uploadContent([file]){
     try {

@@ -1,15 +1,16 @@
 import { ControlBox } from '@chakra-ui/control-box'
-import {platform_settings} from './platform-conf'
+import {platform_settings as ps} from './platform-conf'
 import template from '../contracts/listing.teal.tmpl'
 
 import algosdk from 'algosdk'
 import {decodeAddress} from 'algosdk/src/encoding/address'
+import { get_pay_txn } from './algorand'
 //import {encodeUint64} from 'algosdk/src/encoding/uint64'
 const Buffer = require('buffer/').Buffer
 
 
 export async function getClient(){
-    const {token, server, port} = platform_settings.algod
+    const {token, server, port} = ps.algod
     return new algosdk.Algodv2(token, server, port)
 }
 
@@ -23,7 +24,7 @@ export async function create_platform() {
 
 }
 
-export function EncodeUint64(num) {
+export function encodeUint64(num) {
     const buf = Buffer.allocUnsafe(8);
     buf.writeBigUInt64BE(BigInt(num));
     return new Uint8Array(buf);
@@ -32,19 +33,20 @@ export function EncodeUint64(num) {
 export async function createListing (addr, price, asset_id) {
     const client = await getClient()
 
-    const arg_price = Buffer.from(EncodeUint64(price)).toString('base64')
-    const arg_id = Buffer.from(EncodeUint64(asset_id)).toString('base64')
+    const arg_price = Buffer.from(encodeUint64(price)).toString('base64')
+    const arg_id = Buffer.from(encodeUint64(asset_id)).toString('base64')
 
     const tmpaddr = decodeAddress(addr)
     const arg_addr =  Buffer.from(tmpaddr.publicKey).toString('base64')
 
     let variables = {
-        TMPL_PLATFORM_ID:platform_settings.token.id,
-        TMPL_PLATFORM_FEE:platform_settings.fee,
-        TMPL_PLATFORM_ADDR:platform_settings.address,
+        TMPL_PLATFORM_ID      : ps.token.id,
+        TMPL_PLATFORM_FEE     : ps.fee,
+        TMPL_PLATFORM_ADDR    : ps.address,
+
         TMPL_PRICE_MICROALGOS : `base64(${arg_price})`,
-        TMPL_ASSET_ID : `base64(${arg_id})`,
-        TMPL_CREATOR_ADDR: `base64(${arg_addr})`
+        TMPL_ASSET_ID         : `base64(${arg_id})`,
+        TMPL_CREATOR_ADDR     : `base64(${arg_addr})`
     }
 
     const program =  await fetch(template)
@@ -67,16 +69,16 @@ export async function createListing (addr, price, asset_id) {
     console.log(arg_id)
     console.log(compiledProgram.result)
 
-    // source ./vars.sh
-    // 
     // echo "Creator funding contract acct with algos"
     // ./sandbox goal clerk send -a 500000  -f$CREATOR_ACCT -t$CONTRACT_ACCT
-    // 
+    const seed_txn = await sign(get_pay_txn(addr, contract_addr, ps.seed))
+    console.log(seed_txn)
+     
     // echo "Contract Account Opting into NFT"
     // ./sandbox goal asset send -a 0 -o nft-opt-in.txn --assetid $NFT_ID -f $CONTRACT_ACCT -t $CONTRACT_ACCT
     // ./sandbox goal clerk sign -i nft-opt-in.txn -o nft-opt-in.txn.signed -p $CONTRACT_NAME
     // ./sandbox goal clerk rawsend -f nft-opt-in.txn.signed
-    // 
+     
     // echo "Contract Acct Opting into Platform token"
     // ./sandbox goal asset send -a 0 -o platform-opt-in.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $CONTRACT_ACCT
     // ./sandbox goal clerk sign -i platform-opt-in.txn -o platform-opt-in.txn.signed -p $CONTRACT_NAME
