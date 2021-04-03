@@ -3,7 +3,7 @@ from listing import listing
 from algosdk.logic import parse_uvarint
 
 platform_token = Int(1)
-platform_acct = Addr("ZGAWJJXOUDT2E5CJ2KJMUZ4HYHYZVUSES3A6DYPPEYCNYPOMN3CQOCVVB4") 
+platform_acct = Addr("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM") 
 platform_fee = Int(100)
 
 class TemplateVar(object):

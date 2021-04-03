@@ -1,4 +1,4 @@
-#pragma version 3
+#pragma version 2
 global GroupSize
 int 4
 ==
@@ -34,11 +34,11 @@ substring3
 concat
 store 0
 int 1
-&&
 load 0
 sha256
-byte base64(53zZLszH9aDo8cKwpip6lnELpJg2cSyC1DY0qdViC/E=)
+byte base64(+6JTNXPoBFgmAvQW8QpK1A2Cu3sBvlhR8zsI4HjoFkY=)
 ==
+&&
 byte "Program"
 arg 2
 concat
@@ -129,7 +129,7 @@ txn AssetReceiver
 ==
 &&
 gtxn 3 Sender
-addr ZGAWJJXOUDT2E5CJ2KJMUZ4HYHYZVUSES3A6DYPPEYCNYPOMN3CQOCVVB4
+addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 ==
 &&
 gtxn 3 AssetAmount

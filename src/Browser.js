@@ -3,7 +3,7 @@
 
 const React = require('react')
 import {Card} from '@blueprintjs/core'
-import {listTokens, getTokenMetadataFromTransaction} from './lib/algorand'
+import {getListings, getTokenMetadataFromTransaction} from './lib/algorand'
 import { getMetaFromIpfs, getCIDFromMetadataHash } from './lib/ipfs'
 
 class Browser extends React.Component {
@@ -22,16 +22,15 @@ class Browser extends React.Component {
     }
 
     async getTokens(){
-        let tokens = await listTokens()
+        let tokens = await getListings()
         this.setState({tokens:tokens})
         let notes = []
         console.log(tokens)
         for (const idx in tokens){
             let token = tokens[idx]
             let meta = {}
-            if(token['index'] == 14216913) {
-                continue
-            }
+
+            if(token['index'] == 14216913)  continue;
 
             if(token['params']['metadata-hash'] !== undefined) {
                 const cid = getCIDFromMetadataHash(token['params']['metadata-hash'])

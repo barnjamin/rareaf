@@ -32,8 +32,8 @@ echo "Signing individual Txns"
 ./sandbox goal clerk sign -i split-2 -o $FUND_ACCT
 
 echo "Signing tx with delegate sig"
-b64_price=`python3 -c "import base64;print(base64.b64encode((500).to_bytes(8,'big')).decode('ascii'))"`
-b64_nft_id=`python3 -c "import base64;print(base64.b64encode((2).to_bytes(8,'big')).decode('ascii'))"`
+b64_price=`python3 -c "import base64;print(base64.b64encode(($LISTING_PRICE).to_bytes(8,'big')).decode('ascii'))"`
+b64_nft_id=`python3 -c "import base64;print(base64.b64encode(($NFT_ID).to_bytes(8,'big')).decode('ascii'))"`
 ./sandbox goal clerk sign -i split-3 -o $PLATFORM_SEND -L$SIGNED_DELEGATE --argb64 $b64_price  --argb64 $b64_nft_id --argb64 `cat $CONTRACT_NAME.tok | base64 -w0`
 
 echo "Recombining Txns"

@@ -2,6 +2,12 @@
 /* eslint-disable no-console */
 import { getMetaFromIpfs } from "./ipfs";
 
+
+//const network = "TestNet"
+const network = "sandnet"
+const platform_token = 1
+const platform_account = "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM"
+
 export async function isAlgorandWalletConnected(){
     if(typeof AlgoSigner === 'undefined') {
         return false
@@ -25,35 +31,51 @@ export async function algoConnectWallet(){
     }catch(err){ console.error("Failed to connect: ", err) }
 }
 
-export async function listTokens(){
-    const assets = await AlgoSigner.indexer({
-        ledger: 'TestNet',
-        path: `/v2/assets?name=RareAF&limit=100`,
+export async function getListings(){
+    const balances = await AlgoSigner.indexer({
+        ledger: network,
+        path: `/v2/assets/${platform_token}/balances?currency-greater-than=0`,
     });
-    return assets.assets
+
+    let listings = []
+    for(let bidx in balances.balances){
+        const b = balances.balances[bidx]
+        if(b.address==platform_account || b.amount == 0) continue;
+
+
+        const acct_resp = await AlgoSigner.indexer({
+            ledger:network,
+            path:`/v2/accounts/${b.address}`
+        });
+
+        console.log(acct_resp)
+        for(let aid in acct_resp.account.assets){
+            const asa = acct_resp.account.assets[aid]
+            if(asa['asset-id'] == platform_token) continue;
+            const token =  await getToken(asa['asset-id'])
+            listings.push(token)
+        }
+    }
+
+    return listings
 }
 
-export async function getToken(id){
+export async function getToken(asset_id){
     const assets = await AlgoSigner.indexer({
-        ledger: 'TestNet',
-        path: `/v2/assets/`+id,
+        ledger: network,
+        path: `/v2/assets/${asset_id}`,
     });
     return assets.asset
 }
 
-//export async function updateMetadata(){ }
-export async function getTokenCreatedAt(token_id){
-    const asset = await AlgoSigner.indexer({
-        ledger: 'TestNet',
-        path: `/v2/assets/${token_id}`,
-    });
-    return asset.asset['created-at-round']
+export async function getTokenCreatedAt(asset_id){
+    const a = await getToken(asset_id)
+    return a['created-at-round']
 }
 
 export async function getTokenMetadataFromTransaction(token_id) {
-
     const tx = await AlgoSigner.indexer({
-        ledger: 'TestNet',
+        ledger: network,
         path: `/v2/assets/${token_id}/transactions?limit=1&tx-type=acfg`
     });
 
@@ -83,13 +105,13 @@ export async function getTokenMetadataFromTransaction(token_id) {
 
 export async function getAccount(){
     //TODO: select box to pick which acct to use
-    let accts = await AlgoSigner.accounts({ ledger: 'TestNet' })
+    let accts = await AlgoSigner.accounts({ ledger: network })
     return accts[0]["address"]
 }
 
 export async function createToken(meta_cid) {
     const acct = await getAccount()
-    const txParams = await AlgoSigner.algod({ledger: 'TestNet', path: '/v2/transactions/params' })
+    const txParams = await AlgoSigner.algod({ledger: network, path: '/v2/transactions/params' })
     const signedTx = await AlgoSigner.sign({
         from: acct,
         assetManager: acct,
@@ -109,7 +131,7 @@ export async function createToken(meta_cid) {
 
     let tx;
     try{
-        tx = await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
+        tx = await AlgoSigner.send({ ledger: network, tx: signedTx.blob })
     }catch(err){
         //TODO: alert error
         console.error(err)
@@ -124,7 +146,7 @@ export async function checkCompleted(tx) {
     let completed = false;
     while (!completed) {
         try{
-            const result = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/pending/' + tx.txId })
+            const result = await AlgoSigner.algod({ ledger: network, path: '/v2/transactions/pending/' + tx.txId })
             if(result['pool-error']!=""){
                 console.error(result['pool-error'])
                 return
@@ -142,9 +164,9 @@ export async function checkCompleted(tx) {
 
 
 export async function destroyToken(token_id) {
-    let accts = await AlgoSigner.accounts({ ledger: 'TestNet' })
+    let accts = await AlgoSigner.accounts({ ledger: network })
     const acct = accts[0]["address"]
-    let txParams = await AlgoSigner.algod({ ledger: 'TestNet', path: '/v2/transactions/params' })
+    let txParams = await AlgoSigner.algod({ ledger: network, path: '/v2/transactions/params' })
     let signedTx = await AlgoSigner.sign({
         from: acct,
         assetIndex : token_id,
@@ -157,7 +179,7 @@ export async function destroyToken(token_id) {
     });
 
     try{
-        const tx = await AlgoSigner.send({ ledger: 'TestNet', tx: signedTx.blob })
+        const tx = await AlgoSigner.send({ ledger: network, tx: signedTx.blob })
         await checkCompleted(tx)
     }catch(err){console.error(err)}
 }
