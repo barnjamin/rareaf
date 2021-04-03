@@ -32,25 +32,21 @@ export function EncodeUint64(num) {
 export async function createListing (addr, price, asset_id) {
     const client = await getClient()
 
-    let variables = {
-        TMPL_PLATFORM_ID:platform_settings.token.id,
-        TMPL_PLATFORM_FEE:platform_settings.fee,
-        TMPL_PLATFORM_ADDR:platform_settings.address
-    }
-
-    const pricebytes = (price).toString(16)
-    variables.TMPL_PRICE_MICROALGOS = "0x"+ "0".repeat(8 - pricebytes.length) + pricebytes
-
-    const assetbytes = (asset_id).toString(16)
-    variables.TMPL_ASSET_ID = "0x"+ "0".repeat(8 - assetbytes.length) + assetbytes
-
-    const tmpaddr = decodeAddress(addr)
-    variables.TMPL_CREATOR_ADDR = "0x" +Buffer.from(tmpaddr.publicKey).toString('hex')
-
     const arg_price = Buffer.from(EncodeUint64(price)).toString('base64')
     const arg_id = Buffer.from(EncodeUint64(asset_id)).toString('base64')
 
-    console.log(variables)
+    const tmpaddr = decodeAddress(addr)
+    const arg_addr =  Buffer.from(tmpaddr.publicKey).toString('base64')
+
+    let variables = {
+        TMPL_PLATFORM_ID:platform_settings.token.id,
+        TMPL_PLATFORM_FEE:platform_settings.fee,
+        TMPL_PLATFORM_ADDR:platform_settings.address,
+        TMPL_PRICE_MICROALGOS : `base64(${arg_price})`,
+        TMPL_ASSET_ID : `base64(${arg_id})`,
+        TMPL_CREATOR_ADDR: `base64(${arg_addr})`
+    }
+
     const program =  await fetch(template)
     .then(response => checkStatus(response) && response.arrayBuffer())
     .then(buffer => {
@@ -64,13 +60,12 @@ export async function createListing (addr, price, asset_id) {
 
     const compiledProgram = await client.compile(program).do();
 
+    const contract_addr = compiledProgram.hash
+
+    console.log(contract_addr)
     console.log(arg_price)
     console.log(arg_id)
     console.log(compiledProgram.result)
-
-    //const programBytes = new Uint8Array(
-    //  Buffer.from(compiledProgram.result, 'base64')
-    //);
 
     // source ./vars.sh
     // 
