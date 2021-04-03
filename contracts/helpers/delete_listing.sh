@@ -1,17 +1,6 @@
 #!/bin/bash
 
-cp ~/rareaf/contracts/listing.teal .
-./sandbox copy listing.teal
-
-PLATFORM_ACCT=NFMVG5PCLPEWGL5ACNHYEZOIUHXJBUW4SI754W6APBCCRUVVJKRQOAFAE4
-PLATFORM_ID=1
-
-CREATOR_ACCT=OVMCDUOLZQX23CIKYEUTBCUWW44H6IYF64LY5736HAV5TQNP77JKS45YZA
-NFT_ID=2
-
-CONTRACT_NAME=listing.teal
-CONTRACT_ACCT=`./sandbox goal clerk compile -a$CREATOR_ACCT $CONTRACT_NAME  | awk '{print $2}' | tr '\r' ' '`
-
+source ./vars.sh
 
 ## Send Platform tokens back to platform acct
 ./sandbox goal asset send -a 0 -o delist-platform.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $PLATFORM_ACCT --close-to $PLATFORM_ACCT

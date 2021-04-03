@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ./vars.sh
+
 SIGNED_DELEGATE=platform-delegate.signed
 
 ASA_SEND=asa_send.txn
