@@ -5,6 +5,7 @@ import template from '../contracts/listing.teal.tmpl'
 import algosdk from 'algosdk'
 import {decodeAddress} from 'algosdk/src/encoding/address'
 //import {encodeUint64} from 'algosdk/src/encoding/uint64'
+const Buffer = require('buffer/').Buffer
 
 
 export async function getClient(){
@@ -24,9 +25,7 @@ export async function create_platform() {
 
 export function EncodeUint64(num) {
     const buf = Buffer.allocUnsafe(8);
-    console.log(buf)
-    buf.writeBigUInt64BE(num)
-    //buf.writeBigUInt64BE(BigInt(num));
+    buf.writeBigUInt64BE(BigInt(num));
     return new Uint8Array(buf);
 }
 
@@ -48,8 +47,8 @@ export async function createListing (addr, price, asset_id) {
     const tmpaddr = decodeAddress(addr)
     variables.TMPL_CREATOR_ADDR = "0x" +Buffer.from(tmpaddr.publicKey).toString('hex')
 
-    console.log(price)
-    console.log(EncodeUint64(price))
+    const arg_price = Buffer.from(EncodeUint64(price)).toString('base64')
+    const arg_id = Buffer.from(EncodeUint64(asset_id)).toString('base64')
 
     console.log(variables)
     const program =  await fetch(template)
@@ -64,7 +63,10 @@ export async function createListing (addr, price, asset_id) {
     }).catch(err => console.error(err)); 
 
     const compiledProgram = await client.compile(program).do();
-    console.log(compiledProgram.reseult)
+
+    console.log(arg_price)
+    console.log(arg_id)
+    console.log(compiledProgram.result)
 
     //const programBytes = new Uint8Array(
     //  Buffer.from(compiledProgram.result, 'base64')

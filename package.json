@@ -16,7 +16,7 @@
     "@emotion/react": "^11.1.5",
     "@emotion/styled": "^11.1.5",
     "algosdk": "^1.8.1",
-    "buffer": "^5.7.1",
+    "buffer": "^6.0.3",
     "cids": "^1.1.5",
     "framer-motion": "^3.6.2",
     "ipfs-http-client": "^49.0.2",
