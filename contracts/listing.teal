@@ -1,5 +1,5 @@
 #pragma version 3
-pushbytes  b64(Y2SnVkDG8jptG0B2pbuHrED9vuqaCRYSuMS57eN0VME=)
+pushbytes b64(Y2SnVkDG8jptG0B2pbuHrED9vuqaCRYSuMS57eN0VME=)
 store 0
 pushbytes b64(AAAAAAAAAfQ=) 
 btoi

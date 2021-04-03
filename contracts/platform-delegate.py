@@ -10,52 +10,46 @@ class TemplateVar(object):
     length = 0
     is_integer = False
     start = 0
-
     def __init__(self, length, is_integer):
         self.length = length
         self.is_integer = is_integer
-    
 
 def main():
 
+    # Creator Acct, Price, NFT id
     tmpl_vars = [TemplateVar(32, False), TemplateVar(8, True), TemplateVar(8, True)] 
+
     # Get byte positions in template contract
     set_start_positions('listing.teal.tok', tmpl_vars)
 
     # Get the sha256 hash of the contract with the variables removed
     blank_contract_hash = Bytes('base64', get_blank_hash('listing.teal.tok', tmpl_vars))
 
-    # Scratch space for the blanked contract
-    blank_contract     = ScratchVar(TealType.bytes)
-
-    #Scratch space for the bytes before and after variables
-    chunks = [ScratchVar(TealType.bytes)]
-    for _ in tmpl_vars:
-        chunks.append(ScratchVar(TealType.bytes))
-
     # Get arg values
     asa_val, contract_val = Btoi(Arg(1)), Arg(2)
 
+    # Construct operations to build out contract with blanked var fields 
 
-    concat_ops = [ blank_contract.store(Bytes("")) ]
-    pos = 0
+    blank_contract     = ScratchVar(TealType.bytes)
+    concat_ops         = [blank_contract.store(Bytes(""))]
+    pos                = 0
     for idx in range(len(tmpl_vars)):
         concat_ops.append(blank_contract.store(Concat(blank_contract.load(), Substring(contract_val, Int(pos), Int(tmpl_vars[idx].start)))))
         pos = tmpl_vars[idx].start + tmpl_vars[idx].length
     concat_ops.append(blank_contract.store(Concat(blank_contract.load(), Substring(contract_val, Int(pos), Len(contract_val)))))
     concat_ops.append(Int(1))
 
-    # Prepare the blank contract 
-    prep_contract = Seq(concat_ops)
-
     correct_behavior = And(
+        Seq(concat_ops), # prepare the blank contract
         # Make sure this is the contract being distributed to 
         Sha256(blank_contract.load()) == blank_contract_hash,
        # Make sure the contract template matches
         Sha512_256(Concat(Bytes("Program"), contract_val)) ==  Txn.asset_receiver(),
     )
 
+
     # Validate transactions
+
     asa_xfer = And(
         # Is safe asset transfer
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
@@ -105,7 +99,6 @@ def main():
 
     return And(
         Global.group_size() == Int(4),
-        prep_contract,
         correct_behavior,
         asa_xfer,
         asa_config,

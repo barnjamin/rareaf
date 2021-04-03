@@ -111,7 +111,7 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
         # is for platform token
         Gtxn[2].xfer_asset() == platform_token,
         # Is to creator, rest to platform account
-        Gtxn[2].asset_receiver() == creator.load(),
+        Gtxn[2].asset_receiver() == platform_account,
         Gtxn[2].asset_close_to() == platform_account,
         # is for 1 tokens
         Gtxn[2].asset_amount() == Int(1)
@@ -127,22 +127,14 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
         Gtxn[3].amount() == platform_fee
     )
 
-
-    # Purchase
-    #   Algo payment to creator 
-    #   ASA to sender
-    #   Creator gets half a platform token, rest goes back to platform account
-    #   Fee to platform account, close out account with algos
     purchase = And(
-        purchase_algo,
-        purchase_asa,
-        purchase_platform,
-        purchase_fee
+        purchase_algo,    # Algo payment to creator 
+        purchase_asa,     # ASA to sender
+        purchase_platform,# Platform token goes back to platform acct
+        purchase_fee      # Fee to platform account, close out account with algos
     )
 
-    noop = Int(0)
-
-    return Cond([setup, noop],
+    return Cond([setup, Int(0)], #NoOp
                 [Global.group_size() == Int(1), opt_in], 
                 [Global.group_size() == Int(3), delist], 
                 [Global.group_size() == Int(4), purchase])
