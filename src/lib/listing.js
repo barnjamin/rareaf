@@ -1,8 +1,10 @@
 import { ControlBox } from '@chakra-ui/control-box'
-import algosdk from 'algosdk'
-import {decodeAddress} from 'algosdk/src/encoding/address'
 import {platform_settings} from './platform-conf'
 import template from '../contracts/listing.teal.tmpl'
+
+import algosdk from 'algosdk'
+import {decodeAddress} from 'algosdk/src/encoding/address'
+//import {encodeUint64} from 'algosdk/src/encoding/uint64'
 
 
 export async function getClient(){
@@ -20,9 +22,16 @@ export async function create_platform() {
 
 }
 
+export function EncodeUint64(num) {
+    const buf = Buffer.allocUnsafe(8);
+    console.log(buf)
+    buf.writeBigUInt64BE(num)
+    //buf.writeBigUInt64BE(BigInt(num));
+    return new Uint8Array(buf);
+}
+
 export async function createListing (addr, price, asset_id) {
     const client = await getClient()
-    console.log(client)
 
     let variables = {
         TMPL_PLATFORM_ID:platform_settings.token.id,
@@ -39,8 +48,10 @@ export async function createListing (addr, price, asset_id) {
     const tmpaddr = decodeAddress(addr)
     variables.TMPL_CREATOR_ADDR = "0x" +Buffer.from(tmpaddr.publicKey).toString('hex')
 
-    console.log(variables)
+    console.log(price)
+    console.log(EncodeUint64(price))
 
+    console.log(variables)
     const program =  await fetch(template)
     .then(response => checkStatus(response) && response.arrayBuffer())
     .then(buffer => {
@@ -52,8 +63,9 @@ export async function createListing (addr, price, asset_id) {
         return program
     }).catch(err => console.error(err)); 
 
-    console.log(program)
     const compiledProgram = await client.compile(program).do();
+    console.log(compiledProgram.reseult)
+
     //const programBytes = new Uint8Array(
     //  Buffer.from(compiledProgram.result, 'base64')
     //);
@@ -73,25 +85,6 @@ export async function createListing (addr, price, asset_id) {
     // ./sandbox goal clerk sign -i platform-opt-in.txn -o platform-opt-in.txn.signed -p $CONTRACT_NAME
     // ./sandbox goal clerk rawsend -f platform-opt-in.txn.signed
 
-
-
-    // Compile 
-    // Check user opted into PlatformToken
-    // If not, opt into PlatformToken 
-
-    // Compile Teal script with appropriate arguments (nft_id, price, creator acct)
-    // Set contract acct variable
-
-    // Fund contract acct with 5 algos 
-    // Note contains teal source in case its lost
-
-    // Contract acct Opt into NFT
-    // Contract acct Opt into Platform Tokens 
-
-    // Send Tx with 
-    //   Delegated Sig PlatformToken xfer 
-    //   Contract Sig NFT xfer
-    //   Contract Sig NFT manager change 
 }
 
 async function destroy_listing(){
