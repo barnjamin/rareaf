@@ -1,39 +1,81 @@
+import { ControlBox } from '@chakra-ui/control-box'
 import algosdk from 'algosdk'
-
-const platform_settings = {
-    algod : {
-        token:"",
-        server:"",
-        port:0        
-    },
-    token: {
-        name: "RareAF",
-        unit: "RAF",
-        total: 10000,
-        id: 0
-    },
-    account: "",
-    domain: "rare.af",
-}
+import {decodeAddress} from 'algosdk/src/encoding/address'
+import {platform_settings} from './platform-conf'
+import template from '../contracts/listing.teal.tmpl'
 
 
-async function get_client(){
+export async function getClient(){
     const {token, server, port} = platform_settings.algod
-    const client = new algosdk.Algodv2(token, server, port)
-    return client
+    return new algosdk.Algodv2(token, server, port)
 }
 
-async function create_platform() {
+export async function create_platform() {
     // If platform settings are empty this can get called
 
     // Create token with name and units
     // Create Delegated sig to give out this token
     // save
+    return
 
 }
 
-async function create_listing () {
-    const client = get_client()
+export async function createListing (addr, price, asset_id) {
+    const client = await getClient()
+    console.log(client)
+
+    let variables = {
+        TMPL_PLATFORM_ID:platform_settings.token.id,
+        TMPL_PLATFORM_FEE:platform_settings.fee,
+        TMPL_PLATFORM_ADDR:platform_settings.address
+    }
+
+    const pricebytes = (price).toString(16)
+    variables.TMPL_PRICE_MICROALGOS = "0x"+ "0".repeat(8 - pricebytes.length) + pricebytes
+
+    const assetbytes = (asset_id).toString(16)
+    variables.TMPL_ASSET_ID = "0x"+ "0".repeat(8 - assetbytes.length) + assetbytes
+
+    const tmpaddr = decodeAddress(addr)
+    variables.TMPL_CREATOR_ADDR = "0x" +Buffer.from(tmpaddr.publicKey).toString('hex')
+
+    console.log(variables)
+
+    const program =  await fetch(template)
+    .then(response => checkStatus(response) && response.arrayBuffer())
+    .then(buffer => {
+        const td = new TextDecoder()
+        let program = td.decode(buffer)
+        for(let v in variables){
+            program = program.replace("$"+v, variables[v])
+        }
+        return program
+    }).catch(err => console.error(err)); 
+
+    console.log(program)
+    const compiledProgram = await client.compile(program).do();
+    //const programBytes = new Uint8Array(
+    //  Buffer.from(compiledProgram.result, 'base64')
+    //);
+
+    // source ./vars.sh
+    // 
+    // echo "Creator funding contract acct with algos"
+    // ./sandbox goal clerk send -a 500000  -f$CREATOR_ACCT -t$CONTRACT_ACCT
+    // 
+    // echo "Contract Account Opting into NFT"
+    // ./sandbox goal asset send -a 0 -o nft-opt-in.txn --assetid $NFT_ID -f $CONTRACT_ACCT -t $CONTRACT_ACCT
+    // ./sandbox goal clerk sign -i nft-opt-in.txn -o nft-opt-in.txn.signed -p $CONTRACT_NAME
+    // ./sandbox goal clerk rawsend -f nft-opt-in.txn.signed
+    // 
+    // echo "Contract Acct Opting into Platform token"
+    // ./sandbox goal asset send -a 0 -o platform-opt-in.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $CONTRACT_ACCT
+    // ./sandbox goal clerk sign -i platform-opt-in.txn -o platform-opt-in.txn.signed -p $CONTRACT_NAME
+    // ./sandbox goal clerk rawsend -f platform-opt-in.txn.signed
+
+
+
+    // Compile 
     // Check user opted into PlatformToken
     // If not, opt into PlatformToken 
 
@@ -96,6 +138,11 @@ async function purchase_listing(){
     // 
     // 
     // ./sandbox goal clerk rawsend -f purchase.tx.signed
+}
 
-
+function checkStatus(response) {
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+    }
+    return response;
 }

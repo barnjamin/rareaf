@@ -1,19 +1,24 @@
 from pyteal import *
 
-#RaF
-platform_token   = Int(1)
-platform_account = Addr("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM") 
-platform_fee     = Int(100)
-
-def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_address()):
+def listing():
 
     creator  = ScratchVar(TealType.bytes)
     price    = ScratchVar(TealType.uint64)
     asset_id = ScratchVar(TealType.uint64)
+
+    platform_token = ScratchVar(TealType.uint64)
+    platform_fee   = ScratchVar(TealType.uint64)
+    platform_addr  = ScratchVar(TealType.bytes)
+
     setup = Seq([
-        creator.store(tmpl_creator),
-        price.store(tmpl_price),
-        asset_id.store(tmpl_asset_id),
+        creator.store(Bytes("")),
+        price.store(Int(0)),
+        asset_id.store(Int(0)),
+
+        platform_token.store(Int(1)),
+        platform_fee.store(Int(1000)),
+        platform_addr.store(Bytes("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM")),
+
         Int(0)
     ])
 
@@ -29,7 +34,7 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
        Txn.type_enum() == TxnType.AssetTransfer,
        Txn.asset_close_to() == Global.zero_address(),
        Txn.rekey_to() == Global.zero_address(),
-       Txn.xfer_asset() == platform_token,
+       Txn.xfer_asset() == platform_token.load(),
        Txn.asset_amount() == Int(0),
     )
 
@@ -41,10 +46,10 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
         Gtxn[0].rekey_to() == Global.zero_address(),
         # Is for platform token
-        Gtxn[0].xfer_asset() == platform_token,
+        Gtxn[0].xfer_asset() == platform_token.load(),
         # Is from creator, to platform account
-        Gtxn[0].asset_receiver() == platform_account,
-        Gtxn[0].asset_close_to() == platform_account,
+        Gtxn[0].asset_receiver() == platform_addr.load(),
+        Gtxn[0].asset_close_to() == platform_addr.load(),
     )
 
     delist_asa = And(
@@ -109,10 +114,10 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
         Gtxn[2].type_enum() == TxnType.AssetTransfer,
         Gtxn[2].rekey_to() == Global.zero_address(),
         # is for platform token
-        Gtxn[2].xfer_asset() == platform_token,
+        Gtxn[2].xfer_asset() == platform_token.load(),
         # Is to creator, rest to platform account
-        Gtxn[2].asset_receiver() == platform_account,
-        Gtxn[2].asset_close_to() == platform_account,
+        Gtxn[2].asset_receiver() == platform_addr.load(),
+        Gtxn[2].asset_close_to() == platform_addr.load(),
         # is for 1 tokens
         Gtxn[2].asset_amount() == Int(1)
     )
@@ -121,10 +126,10 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
         Gtxn[3].type_enum() == TxnType.Payment,
         Gtxn[3].rekey_to() == Global.zero_address(),
         # Is to platform, remainder to creator
-        Gtxn[3].receiver() == platform_account,
+        Gtxn[3].receiver() == platform_addr.load(),
         Gtxn[3].close_remainder_to() == creator.load(),
         # is for fee units
-        Gtxn[3].amount() == platform_fee
+        Gtxn[3].amount() == platform_fee.load()
     )
 
     purchase = And(
@@ -141,5 +146,5 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
 
 
 if __name__ == "__main__":
-     prog = listing(tmpl_price=Int(500), tmpl_asset_id=Int(2), tmpl_creator=Addr("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM"))
+     prog = listing()
      print(compileTeal(prog, Mode.Signature))

@@ -17,7 +17,6 @@ import AlgorandTokenizer from './AlgorandTokenizer'
 import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
 import RAF from './RAF'
-//import Canvas from './Canvas'
 
 
 class App extends React.Component {

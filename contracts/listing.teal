@@ -1,5 +1,5 @@
 #pragma version 3
-pushbytes b64(8SucztRjhouT6r9pDtjQHC62+BDpF0pA9gvHKMx8/8g=)
+pushbytes b64(8SucztRjhouT6r9pDtjQHC62+BDpF0pA9gvHKMx8/8g=) 
 store 0
 pushbytes b64(AAAAAAAAAfQ=)
 btoi
@@ -7,6 +7,12 @@ store 1
 pushbytes b64(AAAAAAAAAAI=)
 btoi
 store 2
+int 1 
+store 3
+int 1000 
+store 4
+addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM 
+store 5
 int 0
 bnz l8
 global GroupSize
@@ -70,15 +76,15 @@ global ZeroAddress
 ==
 &&
 gtxn 2 XferAsset
-int 1
+load 3
 ==
 &&
 gtxn 2 AssetReceiver
-addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+load 5
 ==
 &&
 gtxn 2 AssetCloseTo
-addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+load 5
 ==
 &&
 gtxn 2 AssetAmount
@@ -94,7 +100,7 @@ global ZeroAddress
 ==
 &&
 gtxn 3 Receiver
-addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+load 5
 ==
 &&
 gtxn 3 CloseRemainderTo
@@ -102,7 +108,7 @@ load 0
 ==
 &&
 gtxn 3 Amount
-int 100
+load 4
 ==
 &&
 &&
@@ -163,15 +169,15 @@ global ZeroAddress
 ==
 &&
 gtxn 0 XferAsset
-int 1
+load 3
 ==
 &&
 gtxn 0 AssetReceiver
-addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+load 5
 ==
 &&
 gtxn 0 AssetCloseTo
-addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+load 5
 ==
 &&
 &&
@@ -208,7 +214,7 @@ global ZeroAddress
 ==
 &&
 txn XferAsset
-int 1
+load 3
 ==
 &&
 txn AssetAmount

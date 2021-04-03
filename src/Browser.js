@@ -2,8 +2,8 @@
 'use strict'
 
 const React = require('react')
-import {Card} from '@blueprintjs/core'
-import {getListings, getTokenMetadataFromTransaction} from './lib/algorand'
+import { Card} from '@blueprintjs/core'
+import { getListings, getTokenMetadataFromTransaction } from './lib/algorand'
 import { getMetaFromIpfs, getCIDFromMetadataHash } from './lib/ipfs'
 
 class Browser extends React.Component {

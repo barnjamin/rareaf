@@ -2,8 +2,9 @@
 'use strict'
 
 import React from 'react'
+import { createListing } from './lib/listing.js'
 import {uploadMetadata} from './lib/ipfs'
-import {createToken} from './lib/algorand'
+import {createToken, getAccount} from './lib/algorand'
 import { Button } from "@blueprintjs/core"
 
 class AlgorandTokenizer extends React.Component {
@@ -21,6 +22,9 @@ class AlgorandTokenizer extends React.Component {
         }
         this.handleChange = this.handleChange.bind(this)
         this.createMetaAndToken = this.createMetaAndToken.bind(this)
+        getAccount().then(acct =>{
+            createListing(acct, 500, 2)
+        })
     }
 
     static getDerivedStateFromProps(props, state) {
