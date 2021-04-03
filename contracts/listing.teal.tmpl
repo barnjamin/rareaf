@@ -1,10 +1,10 @@
 #pragma version 3
-pushbytes  b64(Y2SnVkDG8jptG0B2pbuHrED9vuqaCRYSuMS57eN0VME=)
+pushbytes $TMPL_CREATOR_ADDR 
 store 0
-pushbytes b64(AAAAAAAAAfQ=) 
+pushbytes $TMPL_PRICE_MICROALGOS
 btoi
 store 1
-pushbytes b64(AAAAAAAAAAI=)
+pusbbytes $TMPL_ASSET_ID
 btoi
 store 2
 int 0

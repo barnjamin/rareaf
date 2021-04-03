@@ -1,9 +1,9 @@
 from pyteal import *
 
 #RaF
-platform_token = Int(1)
-platform_account = Addr("NFMVG5PCLPEWGL5ACNHYEZOIUHXJBUW4SI754W6APBCCRUVVJKRQOAFAE4") 
-platform_fee = Int(100)
+platform_token   = Int(1)
+platform_account = Addr("ZGAWJJXOUDT2E5CJ2KJMUZ4HYHYZVUSES3A6DYPPEYCNYPOMN3CQOCVVB4") 
+platform_fee     = Int(100)
 
 def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_address()):
 
@@ -149,5 +149,5 @@ def listing(tmpl_price=Int(0), tmpl_asset_id=Int(0), tmpl_creator=Global.zero_ad
 
 
 if __name__ == "__main__":
-     prog = listing(tmpl_price=Int(500), tmpl_asset_id=Int(2), tmpl_creator=Addr("OVMCDUOLZQX23CIKYEUTBCUWW44H6IYF64LY5736HAV5TQNP77JKS45YZA"))
+     prog = listing(tmpl_price=Int(500), tmpl_asset_id=Int(2), tmpl_creator=Addr(""))
      print(compileTeal(prog, Mode.Signature))

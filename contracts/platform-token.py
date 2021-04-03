@@ -3,97 +3,59 @@ from listing import listing
 from algosdk.logic import parse_uvarint
 
 platform_token = Int(1)
-platform_acct = Addr("NFMVG5PCLPEWGL5ACNHYEZOIUHXJBUW4SI754W6APBCCRUVVJKRQOAFAE4") 
+platform_acct = Addr("ZGAWJJXOUDT2E5CJ2KJMUZ4HYHYZVUSES3A6DYPPEYCNYPOMN3CQOCVVB4") 
 platform_fee = Int(100)
+
+class TemplateVar(object):
+    length = 0
+    is_integer = False
+    start = 0
+
+    def __init__(self, length, is_integer):
+        self.length = length
+        self.is_integer = is_integer
+    
 
 def main():
 
+    tmpl_vars = [TemplateVar(32, False), TemplateVar(8, True), TemplateVar(8, True)] 
     # Get byte positions in template contract
-    acct, price, asa = get_byte_positions('listing.teal.tok')
+    set_start_positions('listing.teal.tok', tmpl_vars)
 
     # Get the sha256 hash of the contract with the variables removed
-    blank_contract_hash = Bytes('base64', get_blank_hash('listing.teal.tok', price, asa, acct))
+    blank_contract_hash = Bytes('base64', get_blank_hash('listing.teal.tok', tmpl_vars))
 
-    # Scratch space for the contract submitted
-    populated_contract  = ScratchVar(TealType.bytes)
     # Scratch space for the blanked contract
-    blank_contract      = ScratchVar(TealType.bytes)
+    blank_contract     = ScratchVar(TealType.bytes)
 
     #Scratch space for the bytes before and after variables
-    pre_ints            = ScratchVar(TealType.bytes)
-    post_ints           = ScratchVar(TealType.bytes)
-    rest                = ScratchVar(TealType.bytes)
-
-    # Byte lengths of uint variables
-    asa_len   = ScratchVar(TealType.uint64)
-    price_len = ScratchVar(TealType.uint64)
-    vars_len  = ScratchVar(TealType.uint64)
-
-    # Hacky way to find how many bytes a uint occupies in the assembled program
-    two     = Int(255)
-    three   = Int(65535)
-    four    = Int(16777215)
-    five    = Int(4294967295)
-    six     = Int(1099511627775)
-    seven   = Int(281474976710655)
-    eight   = Int(72057594037927935)
+    chunks = [ScratchVar(TealType.bytes)]
+    for _ in tmpl_vars:
+        chunks.append(ScratchVar(TealType.bytes))
 
     # Get arg values
-    price_val, asa_val, contract_val = Btoi(Arg(0)), Btoi(Arg(1)), Arg(2)
+    asa_val, contract_val = Btoi(Arg(1)), Arg(2)
 
-    # Location in assembly where variables start
-    intc_start = Int(price[1]) # version, intcblock, number of ints
-    bytec_start = Int(acct[1] - (price[2] + asa[2]))
 
-    # Address length + 1 for space
-    addr_len = Int(32 + 1)
+    concat_ops = [ blank_contract.store(Bytes("")) ]
+    pos = 0
+    for idx in range(len(tmpl_vars)):
+        concat_ops.append(blank_contract.store(Concat(blank_contract.load(), Substring(contract_val, Int(pos), Int(tmpl_vars[idx].start)))))
+        pos = tmpl_vars[idx].start + tmpl_vars[idx].length
+    concat_ops.append(blank_contract.store(Concat(blank_contract.load(), Substring(contract_val, Int(pos), Len(contract_val)))))
+    concat_ops.append(Int(1))
 
     # Prepare the blank contract 
-    prep_contract = Seq([
-
-        populated_contract.store(contract_val),
-
-        # Store the number of bytes necessary to represent uint in assembly
-        price_len.store(
-            If(price_val<=eight, 
-            If(price_val<=seven, 
-            If(price_val<=six, 
-            If(price_val<=five, 
-            If(price_val<=four, 
-            If(price_val<=three, 
-            If(price_val<=two, Int(1),Int(2)), Int(3)), Int(4)), Int(5)), Int(6)), Int(7)), Int(8))),
-
-        asa_len.store(
-            If(asa_val<=eight, 
-            If(asa_val<=seven, 
-            If(asa_val<=six, 
-            If(asa_val<=five, 
-            If(asa_val<=four, 
-            If(asa_val<=three, 
-            If(asa_val<=two, Int(1),Int(2)), Int(3)), Int(4)), Int(5)), Int(6)), Int(7)), Int(8))),
-
-        # Simplify lookup at cost of space
-        vars_len.store(price_len.load() + asa_len.load()),
-
-        # Cut out the variables, this assumes the 2 vars are adjacent in the assembly
-        pre_ints.store(Substring(populated_contract.load(), Int(0), intc_start)), 
-        post_ints.store(Substring(populated_contract.load(), intc_start + vars_len.load(), bytec_start + vars_len.load())),
-        rest.store(Substring(populated_contract.load(), bytec_start + vars_len.load() + addr_len, Len(populated_contract.load()))),
-
-        blank_contract.store(Concat(pre_ints.load(), post_ints.load(), rest.load())),
-        Int(1)
-    ])
+    prep_contract = Seq(concat_ops)
 
     correct_behavior = And(
         # Make sure this is the contract being distributed to 
         Sha256(blank_contract.load()) == blank_contract_hash,
        # Make sure the contract template matches
-        Sha512_256(Concat(Bytes("Program"), populated_contract.load())) ==  Txn.asset_receiver(),
+        Sha512_256(Concat(Bytes("Program"), contract_val)) ==  Txn.asset_receiver(),
     )
 
-
     # Validate transactions
-
     asa_xfer = And(
         # Is safe asset transfer
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
@@ -152,7 +114,7 @@ def main():
     )
 
 
-def get_blank_hash(assembled_name, *args):
+def get_blank_hash(assembled_name, tmpl_vars):
     import base64
     import hashlib
 
@@ -161,9 +123,9 @@ def get_blank_hash(assembled_name, *args):
         program_bytes = bytearray(f.read())
 
     removed = 0
-    for arg in args:
-        program_bytes = program_bytes[:arg[1]-removed] + program_bytes[(arg[1]+arg[2])-removed:]
-        removed += arg[2]
+    for v in tmpl_vars:
+        program_bytes = program_bytes[:v.start-removed] + program_bytes[(v.start+v.length)-removed:]
+        removed += v.length 
 
     h = hashlib.sha256(program_bytes)
     return base64.b64encode(h.digest()).decode('ascii')
@@ -210,18 +172,26 @@ def get_intc_byte_positions(program, pc):
         size += bytes_used
     return size, ints
 
-def get_byte_positions(assembled_name):
+def set_start_positions(assembled_name, tmpl_vars):
     program_bytes = [] #Will be list of bytes
     with  open(assembled_name, mode='rb') as f:
         program_bytes = f.read()
 
     pos = 1 # Version byte
-    size, intc = get_intc_byte_positions(program_bytes, pos)
-    pos += size
-    size, bytec = get_bytec_byte_positions(program_bytes, pos)
 
-    return [bytec[0], intc[0], intc[1]]
+    size, _ = get_intc_byte_positions(program_bytes, pos)
+    pos += size
+
+    size, _ = get_bytec_byte_positions(program_bytes, pos)
+    pos += size 
+
+    for var in tmpl_vars:
+        pos += 2 # pushbytes opcode byte + length of bytes byte
+        var.start = pos
+        pos += var.length
+        if var.is_integer:
+            pos += 1 # btoi
+        pos += 3 #store opcode + int slot 
 
 if __name__ == "__main__":
     print(compileTeal(main(), Mode.Signature))
-    #main()

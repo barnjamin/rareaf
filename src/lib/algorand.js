@@ -1,8 +1,6 @@
 
 /* eslint-disable no-console */
-
 import { getMetaFromIpfs } from "./ipfs";
-
 
 export async function isAlgorandWalletConnected(){
     if(typeof AlgoSigner === 'undefined') {

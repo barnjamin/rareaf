@@ -41,12 +41,9 @@ export async function getMetaFromIpfs(meta_hash) {
 
 export function getCIDFromMetadataHash(b64_string) {
     const u8a = new Uint8Array(Buffer.from(b64_string, 'base64'))
-
     let cid_hash = new Uint8Array(34)
     //Magic numbers to set CIDv0
     cid_hash.set([18,32], 0)
-
     cid_hash.set(u8a, 2)
-
     return new CID(cid_hash)
 }

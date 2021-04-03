@@ -64,13 +64,6 @@ class App extends React.Component {
         </Switch>
       </Router>
     )
-
-          //<AnchorButton className='bp3-minimal' icon='draw' text='Draw' href="/draw" />
-          //<Route path="/draw">
-          //  <Canvas></Canvas>
-          //  <Divider />
-          //  <AlgorandTokenizer file_hash={this.state.file_hash} />
-          //</Route>
   }
 }
 module.exports = App

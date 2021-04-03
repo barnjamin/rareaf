@@ -1,32 +1,6 @@
 #!/bin/bash
 
-CONTRACT_NAME=listing.teal
-DELEGATE_NAME=platform.teal
 SIGNED_DELEGATE=platform-delegate.signed
-
-cp ~/rareaf/contracts/$CONTRACT_NAME .
-./sandbox copy $CONTRACT_NAME
-
-cp ~/rareaf/contracts/$CONTRACT_NAME.tok .
-./sandbox copy $CONTRACT_NAME.tok
-
-cp ~/rareaf/contracts/$DELEGATE_NAME .
-./sandbox copy $DELEGATE_NAME
-
-
-
-CREATOR_ACCT=OVMCDUOLZQX23CIKYEUTBCUWW44H6IYF64LY5736HAV5TQNP77JKS45YZA
-NFT_ID=2
-
-PLATFORM_ACCT=NFMVG5PCLPEWGL5ACNHYEZOIUHXJBUW4SI754W6APBCCRUVVJKRQOAFAE4
-PLATFORM_ID=1
-
-DELEGATE_SIG=`./sandbox goal clerk compile -a$PLATFORM_ACCT $DELEGATE_NAME | awk '{print $2}' | tr '\r' ' '`
-CONTRACT_ACCT=`./sandbox goal clerk compile -a$CREATOR_ACCT $CONTRACT_NAME | awk '{print $2}' | tr '\r' ' '`
-
-echo "Delegate sig: $DELEGATE_SIG"
-echo "Contract account: $CONTRACT_ACCT"
-
 
 ASA_SEND=asa_send.txn
 ASA_CFG=asa_cfg.txn
