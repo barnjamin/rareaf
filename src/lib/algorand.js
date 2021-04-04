@@ -1,14 +1,9 @@
-
-
 /* eslint-disable no-console */
-import { sign } from "algosdk/src/nacl/naclWrappers";
 import { getMetaFromIpfs } from "./ipfs";
 import {platform_settings as ps} from './platform-conf'
 
 export async function isAlgorandWalletConnected(){
-    if(typeof AlgoSigner === 'undefined') {
-        return false
-    }
+    if(typeof AlgoSigner === 'undefined') return false;
 
     try{
         await getAccount()
@@ -19,9 +14,8 @@ export async function isAlgorandWalletConnected(){
 }
 
 export async function algoConnectWallet(){
-    if(typeof AlgoSigner === 'undefined') {
+    if(typeof AlgoSigner === 'undefined')  
         alert('Make Sure AlgoSigner wallet is installed and connected');
-    }
 
     try{
         await AlgoSigner.connect()
@@ -31,24 +25,22 @@ export async function algoConnectWallet(){
 export async function getListings(){
     const balances = await AlgoSigner.indexer({
         ledger: ps.algod.network,
-        path: `/v2/assets/${ps.platform.token}/balances?currency-greater-than=0`,
+        path: `/v2/assets/${ps.token.id}/balances?currency-greater-than=0`,
     });
 
     let listings = []
     for(let bidx in balances.balances){
         const b = balances.balances[bidx]
-        if(b.address==ps.platform.address || b.amount == 0) continue;
-
+        if(b.address==ps.address || b.amount == 0) continue;
 
         const acct_resp = await AlgoSigner.indexer({
             ledger:ps.algod.network,
             path:`/v2/accounts/${b.address}`
         });
 
-        console.log(acct_resp)
         for(let aid in acct_resp.account.assets){
             const asa = acct_resp.account.assets[aid]
-            if(asa['asset-id'] == ps.platform.token) continue;
+            if(asa['asset-id'] == ps.token.id) continue;
             const token =  await getToken(asa['asset-id'])
             listings.push(token)
         }
@@ -100,9 +92,12 @@ export async function getTokenMetadataFromTransaction(token_id) {
     return await getMetaFromIpfs(data)
 }
 
+export async function getAccounts(){
+    return await AlgoSigner.accounts({ ledger: ps.algod.network })
+}
+
 export async function getAccount(){
-    //TODO: select box to pick which acct to use
-    let accts = await AlgoSigner.accounts({ ledger: ps.algod.network })
+    let accts = getAccounts()
     return accts[0]["address"]
 }
 
@@ -122,9 +117,8 @@ export async function get_pay_txn(from, to, amount) {
 }
 
 export async function group() {
-
+    return
 }
-
 export async function sign(txn){
     return await AlgoSigner.sign(txn)
 }

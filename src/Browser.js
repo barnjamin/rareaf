@@ -17,7 +17,9 @@ class Browser extends React.Component {
         }
 
         this.getTokens = this.getTokens.bind(this)
+    }
 
+    async componentDidMount(){
         this.getTokens()
     }
 

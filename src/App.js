@@ -23,17 +23,11 @@ class App extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = { 
-      cid: undefined,
-      wallet_connected: false 
-    }
+    this.state = { cid: undefined, }
     this.setCID = this.setCID.bind(this)
-    isAlgorandWalletConnected().then((c)=>{this.setState({wallet_connected:c})})
   }
 
-  setCID(cid) {
-    this.setState({ cid: cid })
-  }
+  setCID(cid) { this.setState({ cid: cid }) }
 
   render() {
     return (
@@ -46,7 +40,7 @@ class App extends React.Component {
             <AnchorButton className='bp3-minimal' icon='new-object' text='Create' href="/create" />
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
-            <AlgorandWalletConnector onConnected={this.setConnected} connected={this.state.wallet_connected}/>
+            <AlgorandWalletConnector />
           </Navbar.Group>
         </Navbar>
         <Switch>
