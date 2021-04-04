@@ -4,7 +4,7 @@ import template from '../contracts/listing.teal.tmpl'
 
 import algosdk from 'algosdk'
 import {decodeAddress} from 'algosdk/src/encoding/address'
-import { get_pay_txn } from './algorand'
+import { get_pay_txn, get_optin_txn, sign, send } from './algorand'
 //import {encodeUint64} from 'algosdk/src/encoding/uint64'
 const Buffer = require('buffer/').Buffer
 
@@ -69,12 +69,37 @@ export async function createListing (addr, price, asset_id) {
     console.log(arg_id)
     console.log(compiledProgram.result)
 
+   // let program_bytes = new Uint8Array(Buffer.from(compiledProgram.result , "base64"));
+   // let lsig = algosdk.makeLogicSig(program_bytes);   
+
+   // console.log(lsig.address())
+
+   // // create a transaction
+   // let sender = lsig.address();
+   // let receiver = lsig.address();
+   // let amount = 10000;
+   // let closeToRemaninder = undefined;
+   // let note = undefined;
+   // let txn = algosdk.makePaymentTxnWithSuggestedParams(sender, receiver, amount, closeToRemaninder, note, params)
+   // console.log(txn);
+
+
+    // //integer parameter
+    // let args = [[123]];
+    // let lsig = algosdk.makeLogicSig(program, args);
+
     // echo "Creator funding contract acct with algos"
-    // ./sandbox goal clerk send -a 500000  -f$CREATOR_ACCT -t$CONTRACT_ACCT
-    const seed_txn = await sign(get_pay_txn(addr, contract_addr, ps.seed))
-    console.log(seed_txn)
+    //const seed_txn = await get_pay_txn(addr, contract_addr, ps.seed)
+    //console.log(seed_txn)
+    //const signed_seed_txn = await sign(seed_txn)
+    //console.log(signed)
      
     // echo "Contract Account Opting into NFT"
+    //const nft_optin = await get_optin_txn(contract_addr, asset_id)
+    //console.log(nft_optin)
+    //const nft_optin_signed = await sign(nft_optin) 
+    //console.log(nft_optin_signed)
+
     // ./sandbox goal asset send -a 0 -o nft-opt-in.txn --assetid $NFT_ID -f $CONTRACT_ACCT -t $CONTRACT_ACCT
     // ./sandbox goal clerk sign -i nft-opt-in.txn -o nft-opt-in.txn.signed -p $CONTRACT_NAME
     // ./sandbox goal clerk rawsend -f nft-opt-in.txn.signed

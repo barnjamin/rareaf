@@ -1,10 +1,9 @@
 export const platform_settings = {
     algod:{
-        //server:"http://localhost",
-        //port:"4001",
-        //token:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        //network: "sandnet"
-        network:"TestNet"
+        server:"http://localhost",
+        port:"4001",
+        token:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        network: "sandnet"
     },
 
     ipfs:{

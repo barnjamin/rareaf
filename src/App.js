@@ -23,8 +23,26 @@ class App extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = { cid: undefined, }
+    this.state = { 
+      cid: undefined, 
+      accounts: [],
+      account_idx: 0
+    }
     this.setCID = this.setCID.bind(this)
+
+    this.setAccounts = this.setAccounts.bind(this)
+    this.onAccountChange = this.onAccountChange.bind(this)
+
+  }
+
+  setAccounts(accts) {
+    this.setState({accounts:accts})
+  }
+
+  onAccountChange(v) {
+    this.setState({account_idx:v})
+    console.log("Set to ", v)
+    console.log("Corresponds to", this.state.accounts[v])
   }
 
   setCID(cid) { this.setState({ cid: cid }) }
@@ -40,7 +58,11 @@ class App extends React.Component {
             <AnchorButton className='bp3-minimal' icon='new-object' text='Create' href="/create" />
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
-            <AlgorandWalletConnector />
+            <AlgorandWalletConnector 
+              connected={this.state.accounts.length>0}
+              accounts={this.state.accounts}
+              setAccounts={this.setAccounts} 
+              onAccountChange={this.onAccountChange}/>
           </Navbar.Group>
         </Navbar>
         <Switch>

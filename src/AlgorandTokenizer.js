@@ -20,6 +20,7 @@ class AlgorandTokenizer extends React.Component {
             props:props,
             waiting_for_tx:false
         }
+
         this.handleChange = this.handleChange.bind(this)
         this.createMetaAndToken = this.createMetaAndToken.bind(this)
         getAccount().then(acct =>{

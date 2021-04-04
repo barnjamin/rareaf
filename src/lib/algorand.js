@@ -97,7 +97,7 @@ export async function getAccounts(){
 }
 
 export async function getAccount(){
-    let accts = getAccounts()
+    let accts = await getAccounts()
     return accts[0]["address"]
 }
 
@@ -119,13 +119,12 @@ export async function get_pay_txn(from, to, amount) {
 export async function group() {
     return
 }
-export async function sign(txn){
-    return await AlgoSigner.sign(txn)
-}
+
+export async function sign(txn){ return await AlgoSigner.sign(txn) }
 
 export async function send() {
     const txn = await AlgoSigner.send({ ledger: ps.algod.network, tx: signedTx.blob })
-    await checkCompleted(tx)
+    await checkCompleted(txn)
 }
 
 export async function get_optin_txn(addr, id) {
@@ -135,7 +134,8 @@ export async function get_optin_txn(addr, id) {
 export async function get_asa_txn(from, to, id, amt) {
     const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
     return {
-        from: addr,
+        from: from,
+        to: to,
         assetIndex: id,
         type: 'axfer',
         amount:amt,
