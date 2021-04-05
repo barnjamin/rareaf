@@ -41,8 +41,5 @@ Rare AF showrooms let you display your digital assets.  Showrooms can be persona
 Fork it for free, Configure it for the cost of about 0.301A (0.2A temporary). Publish it for the cost of a dns name. Then you set fees on the works that sell on your site.
 
 
-
-*how much do you get?*
-
-only what you send to this address (charity? Dao?)
+donate to this address (charity? Dao?)
 
