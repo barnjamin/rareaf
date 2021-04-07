@@ -18,22 +18,22 @@
 
 Rare AF is _your_ NFT Marketplace
 
-- Fork it
-- Configure it
-- Publish it
-- Create
-
+- Fork this repo and configure it
+- Publish it on Cloudflare or Fleek
+- Mint NFTs, Exhibit them, List them for sale, Host others
+- Profit?
 
 
 *huh?*
 
-Rare AF showrooms let you display your digital assets.  Showrooms can be personal collections you want to exhibit. Or you can choose to list your assets for sale. You can also choose to host curated guest collections as an exhibit or for sale. 
+You own the platform, decide who has access and can customize its appearance. 
 
+Rare AF showrooms let you display your digital assets.  Showrooms can be personal collections you want to exhibit. Or you can choose to list your assets for sale. You can also choose to host curated guest collections as an exhibibition or for sale. 
 
 
 *how much tho?*
 
-Fork it for free, Configure it for the cost of about 0.301A (0.2A temporary). Publish it for the cost of a dns name. Then you set fees on the works that sell on your site.
+Fork it for free, Configure it for the cost of about 0.301A (0.2A temporary check). Publish it for the cost of a dns name. Then you set fees on the works that sell on your site.
 
 
 donate to this address (charity? Dao?)
