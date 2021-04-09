@@ -2,11 +2,12 @@ import { ControlBox } from '@chakra-ui/control-box'
 import {platform_settings as ps} from './platform-conf'
 import template from '../contracts/listing.teal.tmpl'
 
-import algosdk from 'algosdk'
-import {decodeAddress} from 'algosdk/src/encoding/address'
 import { get_pay_txn, get_optin_txn, sign, send } from './algorand'
 //import {encodeUint64} from 'algosdk/src/encoding/uint64'
+
 const Buffer = require('buffer/').Buffer
+//const algosdk = require('algosdk/').algosdk
+import 'algosdk' ;
 
 
 export async function getClient(){
@@ -36,7 +37,8 @@ export async function createListing (addr, price, asset_id) {
     const arg_price = Buffer.from(encodeUint64(price)).toString('base64')
     const arg_id = Buffer.from(encodeUint64(asset_id)).toString('base64')
 
-    const tmpaddr = decodeAddress(addr)
+    console.log(algosdk)
+    const tmpaddr = algosdk.decodeAddress(addr)
     const arg_addr =  Buffer.from(tmpaddr.publicKey).toString('base64')
 
     let variables = {
@@ -69,19 +71,21 @@ export async function createListing (addr, price, asset_id) {
     console.log(arg_id)
     console.log(compiledProgram.result)
 
-   // let program_bytes = new Uint8Array(Buffer.from(compiledProgram.result , "base64"));
-   // let lsig = algosdk.makeLogicSig(program_bytes);   
+    let program_bytes = new Uint8Array(Buffer.from(compiledProgram.result , "base64"));
+    let lsig = algosdk.makeLogicSig(program_bytes);   
 
-   // console.log(lsig.address())
+    console.log(lsig.address())
 
-   // // create a transaction
-   // let sender = lsig.address();
-   // let receiver = lsig.address();
-   // let amount = 10000;
-   // let closeToRemaninder = undefined;
-   // let note = undefined;
-   // let txn = algosdk.makePaymentTxnWithSuggestedParams(sender, receiver, amount, closeToRemaninder, note, params)
-   // console.log(txn);
+    const params = await client.getTransactionParams().do();
+
+    //// create a transaction
+    let sender = lsig.address();
+    let receiver = lsig.address();
+    let amount = 10000;
+    let closeToRemaninder = undefined;
+    let note = undefined;
+    let txn = algosdk.makePaymentTxnWithSuggestedParams(sender, receiver, amount, closeToRemaninder, note, params)
+    console.log(txn);
 
 
     // //integer parameter
@@ -112,7 +116,7 @@ export async function createListing (addr, price, asset_id) {
 }
 
 async function destroy_listing(){
-    const client = algosdk.Algodv2()
+    //const client = algosdk.Algodv2()
 
     // Send assets and algos back to creator or platform wallet 
     // goal asset send -a 0 -o delist-platform.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $PLATFORM_ACCT --close-to $PLATFORM_ACCT
@@ -128,7 +132,7 @@ async function destroy_listing(){
 
 
 async function purchase_listing(){
-    const client = algosdk.Algodv2()
+    //const client = algosdk.Algodv2()
     //  Buyer Opt in to NFT
     //  goal asset send -a 0 --assetid $NFT_ID -f $BUYER_ACCT -t$BUYER_ACCT
 
