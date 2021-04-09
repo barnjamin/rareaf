@@ -1,16 +1,40 @@
 
-Initial example taken from here:
-https://github.com/ipfs/js-ipfs/tree/master/examples/browser-http-client-upload-file
+
+```
+
+   _____                _____   ________) 
+  (, /   )             (, /  | (, /       
+    /__ / _  __  _       /---|   /___,    
+ ) /   \_(_(/ (_(/_   ) /    |) /         
+(_/                  (_/     (_/          
+                                          
+
+```
+
+**Do not use**
 
 
+**For real, don't**
 
-TODO:
-=====
--   Allow listing/delisting for sale
--   Create Smart Contract for token sales 
-    * Artist Set Minimum cost/Buy now
-    * Auction duration
-    * Resale fee?
-    ...
--   Refactor with best practices
--   Make it pretty
+Rare AF is _your_ NFT Marketplace
+
+- Fork this repo and configure it
+- Publish it on Cloudflare or Fleek
+- Mint NFTs, Exhibit them, List them for sale, Host others
+- Profit?
+
+
+*huh?*
+
+You own the platform, decide who has access and can customize its appearance. 
+
+Rare AF showrooms let you display your digital assets.  Showrooms can be personal collections you want to exhibit. Or you can choose to list your assets for sale. You can also choose to host curated guest collections as an exhibibition or for sale. 
+
+
+*how much tho?*
+
+Fork it for free, Configure it for the cost of about 0.301A (0.2A temporary check). Publish it for the cost of a dns name. Then you set fees on the works that sell on your site.
+
+
+donate to this address (charity? Dao?)
+
