@@ -101,6 +101,28 @@ export async function getAccount(){
     return accts[0]["address"]
 }
 
+export async function get_asa_cfg_txn(from, asset, new_config) {
+
+    return {}
+    //const signedTx = await AlgoSigner.sign({
+    //    from: acct,
+    //    assetManager: acct,
+    //    assetName: "RareAF",
+    //    assetUnitName: "RAF",
+    //    assetTotal: 1,
+    //    assetDecimals: 0,
+    //    assetMetadataHash:Array.from(meta_cid.cid.multihash.subarray(2)),
+    //    type: 'acfg',
+    //    fee: txParams['min-fee'],
+    //    firstRound: txParams['last-round'],
+    //    lastRound: txParams['last-round'] + 1000,
+    //    genesisID: txParams['genesis-id'],
+    //    genesisHash: txParams['genesis-hash'],
+    //    assetURL: "rare.af/"
+    //});
+
+}
+
 export async function get_pay_txn(from, to, amount) {
     const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
     return {
@@ -116,14 +138,42 @@ export async function get_pay_txn(from, to, amount) {
     }
 }
 
+export async function populate_contract(template, variables) {
+    //Read the program, Swap vars, spit out the filled out tmplate
+
+    let program = await get_teal(template)
+    for(let v in variables){
+        program = program.replace("$"+v, variables[v])
+    }
+    return program
+}
+
+export async function get_teal(program){
+    return  await fetch(program)
+    .then(response => checkStatus(response) && response.arrayBuffer())
+    .then(buffer => {
+        const td = new TextDecoder()
+        return td.decode(buffer)
+    }).catch(err => console.error(err)); 
+}
+
+function checkStatus(response) {
+    if (!response.ok) {
+    throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+    }
+    return response;
+}
+
 export async function group() {
     return
 }
 
 export async function sign(txn){ return await AlgoSigner.sign(txn) }
 
-export async function send() {
-    const txn = await AlgoSigner.send({ ledger: ps.algod.network, tx: signedTx.blob })
+export async function send(signed_tx) {
+    console.log(signed_tx)
+    const txn = await AlgoSigner.send({ ledger: ps.algod.network, tx: signed_tx.blob })
+    console.log(txn)
     await checkCompleted(txn)
 }
 
@@ -139,16 +189,17 @@ export async function get_asa_txn(from, to, id, amt) {
         assetIndex: id,
         type: 'axfer',
         amount:amt,
-        fee: txParams['min-fee'],
-        firstRound: txParams['last-round'],
-        lastRound: txParams['last-round'] + 10,
-        genesisID: txParams['genesis-id'],
-        genesisHash: txParams['genesis-hash']
+        suggestedParams:{
+            fee: txParams['min-fee'],
+            firstRound: txParams['last-round'],
+            lastRound: txParams['last-round'] + 10,
+            genesisID: txParams['genesis-id'],
+            genesisHash: txParams['genesis-hash']
+        }
     }
 }
 
-export async function createToken(meta_cid) {
-    const acct = await getAccount()
+export async function createToken(acct, meta_cid) {
     const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
     const signedTx = await AlgoSigner.sign({
         from: acct,

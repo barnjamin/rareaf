@@ -1,0 +1,139 @@
+#pragma version 3
+global GroupSize
+int 4
+==
+byte ""
+store 0
+load 0
+arg 2
+int 0
+int 45
+substring3
+concat
+store 0
+load 0
+arg 2
+int 77
+int 82
+substring3
+concat
+store 0
+load 0
+arg 2
+int 90
+int 96
+substring3
+concat
+store 0
+load 0
+arg 2
+int 104
+arg 2
+len
+substring3
+concat
+store 0
+int 1
+load 0
+sha256
+byte base64(+6JTNXPoBFgmAvQW8QpK1A2Cu3sBvlhR8zsI4HjoFkY=)
+==
+&&
+byte "Program"
+arg 2
+concat
+sha512_256
+txn AssetReceiver
+==
+&&
+&&
+gtxn 0 TypeEnum
+int axfer
+==
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 0 XferAsset
+arg 1
+btoi
+==
+&&
+gtxn 0 AssetAmount
+int 1
+==
+&&
+&&
+gtxn 1 TypeEnum
+int acfg
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 ConfigAsset
+arg 1
+btoi
+==
+&&
+gtxn 1 ConfigAssetManager
+txn AssetReceiver
+==
+&&
+&&
+gtxn 2 TypeEnum
+int pay
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 Receiver
+txn AssetReceiver
+==
+&&
+gtxn 2 Amount
+int 1000000000
+==
+&&
+&&
+gtxn 3 TypeEnum
+int axfer
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 3 XferAsset
+int 1
+==
+&&
+gtxn 3 AssetReceiver
+txn AssetReceiver
+==
+&&
+gtxn 3 Sender
+addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 3 AssetAmount
+int 1
+==
+&&
+&&

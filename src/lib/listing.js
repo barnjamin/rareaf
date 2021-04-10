@@ -1,13 +1,12 @@
-import { ControlBox } from '@chakra-ui/control-box'
 import {platform_settings as ps} from './platform-conf'
-import template from '../contracts/listing.teal.tmpl'
-
-import { get_pay_txn, get_optin_txn, sign, send } from './algorand'
-//import {encodeUint64} from 'algosdk/src/encoding/uint64'
+import listing_template from '../contracts/listing.teal.tmpl'
+import platform_delegate from '../contracts/platform.teal'
+import platform_delegate_signed from '../contracts/platform.signed'
+import { get_teal, get_pay_txn, get_optin_txn, sign, send, populate_contract, get_asa_txn } from './algorand'
 
 const Buffer = require('buffer/').Buffer
-//const algosdk = require('algosdk/').algosdk
-import 'algosdk' ;
+
+import 'algosdk';
 
 
 export async function getClient(){
@@ -22,7 +21,6 @@ export async function create_platform() {
     // Create Delegated sig to give out this token
     // save
     return
-
 }
 
 export function encodeUint64(num) {
@@ -31,87 +29,103 @@ export function encodeUint64(num) {
     return new Uint8Array(buf);
 }
 
-export async function createListing (addr, price, asset_id) {
+export async function createListing (creator_addr, price, asset_id) {
     const client = await getClient()
 
-    const arg_price = Buffer.from(encodeUint64(price)).toString('base64')
-    const arg_id = Buffer.from(encodeUint64(asset_id)).toString('base64')
+    // Encode vars for inclusion in contract
+    // TODO: do this in populate_contract
+    const var_price = Buffer.from(encodeUint64(price)).toString('base64')
+    const var_id    = Buffer.from(encodeUint64(asset_id)).toString('base64')
+    const var_addr  = Buffer.from(algosdk.decodeAddress(creator_addr).publicKey).toString('base64')
 
-    console.log(algosdk)
-    const tmpaddr = algosdk.decodeAddress(addr)
-    const arg_addr =  Buffer.from(tmpaddr.publicKey).toString('base64')
-
-    let variables = {
+    const vars = {
         TMPL_PLATFORM_ID      : ps.token.id,
         TMPL_PLATFORM_FEE     : ps.fee,
         TMPL_PLATFORM_ADDR    : ps.address,
 
-        TMPL_PRICE_MICROALGOS : `base64(${arg_price})`,
-        TMPL_ASSET_ID         : `base64(${arg_id})`,
-        TMPL_CREATOR_ADDR     : `base64(${arg_addr})`
+        TMPL_PRICE_MICROALGOS : `base64(${var_price})`,
+        TMPL_ASSET_ID         : `base64(${var_id})`,
+        TMPL_CREATOR_ADDR     : `base64(${var_addr})`
     }
 
-    const program =  await fetch(template)
-    .then(response => checkStatus(response) && response.arrayBuffer())
-    .then(buffer => {
-        const td = new TextDecoder()
-        let program = td.decode(buffer)
-        for(let v in variables){
-            program = program.replace("$"+v, variables[v])
-        }
-        return program
-    }).catch(err => console.error(err)); 
+    //Swap tmpl vars for actual values
+    const populated_program = await populate_contract(listing_template, vars)
 
-    const compiledProgram = await client.compile(program).do();
+    // Compile program, create logic sig 
+    const compiled_program  = await client.compile(populated_program).do();
+    const contract_addr     = compiled_program.hash
 
-    const contract_addr = compiledProgram.hash
-
-    console.log(contract_addr)
-    console.log(arg_price)
-    console.log(arg_id)
-    console.log(compiledProgram.result)
-
-    let program_bytes = new Uint8Array(Buffer.from(compiledProgram.result , "base64"));
-    let lsig = algosdk.makeLogicSig(program_bytes);   
-
-    console.log(lsig.address())
-
-    const params = await client.getTransactionParams().do();
-
-    //// create a transaction
-    let sender = lsig.address();
-    let receiver = lsig.address();
-    let amount = 10000;
-    let closeToRemaninder = undefined;
-    let note = undefined;
-    let txn = algosdk.makePaymentTxnWithSuggestedParams(sender, receiver, amount, closeToRemaninder, note, params)
-    console.log(txn);
+    // Make logic sig for listing contract
+    const program_bytes     = new Uint8Array(Buffer.from(compiled_program.result , "base64"));
+    const lsig              = algosdk.makeLogicSig(program_bytes);   
 
 
-    // //integer parameter
-    // let args = [[123]];
-    // let lsig = algosdk.makeLogicSig(program, args);
+    /// Initialize listing
+    //console.log("Seeding contract acct")
+    //let seed_txn = await get_pay_txn(creator_addr, contract_addr, ps.seed)
+    //seed_txn = await sign(seed_txn)
+    //await send(seed_txn)
 
-    // echo "Creator funding contract acct with algos"
-    //const seed_txn = await get_pay_txn(addr, contract_addr, ps.seed)
-    //console.log(seed_txn)
-    //const signed_seed_txn = await sign(seed_txn)
-    //console.log(signed)
-     
-    // echo "Contract Account Opting into NFT"
-    //const nft_optin = await get_optin_txn(contract_addr, asset_id)
-    //console.log(nft_optin)
-    //const nft_optin_signed = await sign(nft_optin) 
-    //console.log(nft_optin_signed)
+    //console.log("Opting contract acct into nft")
+    //let nft_optin = await get_optin_txn(contract_addr, asset_id)
+    //nft_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(nft_optin)
+    //nft_optin = algosdk.signLogicSigTransactionObject(nft_optin, lsig);
+    //await client.sendRawTransaction(nft_optin.blob).do()
+    //console.log("Opted in")
 
-    // ./sandbox goal asset send -a 0 -o nft-opt-in.txn --assetid $NFT_ID -f $CONTRACT_ACCT -t $CONTRACT_ACCT
-    // ./sandbox goal clerk sign -i nft-opt-in.txn -o nft-opt-in.txn.signed -p $CONTRACT_NAME
-    // ./sandbox goal clerk rawsend -f nft-opt-in.txn.signed
-     
-    // echo "Contract Acct Opting into Platform token"
-    // ./sandbox goal asset send -a 0 -o platform-opt-in.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $CONTRACT_ACCT
-    // ./sandbox goal clerk sign -i platform-opt-in.txn -o platform-opt-in.txn.signed -p $CONTRACT_NAME
-    // ./sandbox goal clerk rawsend -f platform-opt-in.txn.signed
+    //console.log("Opting contract acct into platform")
+    //let platform_optin = await get_optin_txn(contract_addr, ps.token.id)
+    //platform_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_optin)
+    //platform_optin = algosdk.signLogicSigTransactionObject(platform_optin, lsig);
+    //await client.sendRawTransaction(platform_optin.blob).do()
+    //console.log("Opted in")
+
+
+    //// Fund listing
+
+    //const delegate_program      = await get_teal(platform_delegate)
+    //const compiled_delegate     = await client.compile(delegate_program).do()
+    //const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_delegate.result , "base64"));
+
+    const compiled_bytes        = await get_teal(platform_delegate_signed)
+    const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes , "base64"));
+    const del_sig = algosdk.logicSigFromByte(delegate_program_bytes)
+    del_sig.args = [var_price, var_id, program_bytes]
+    console.log(del_sig)
+
+    
+    ////TODO: variable amount
+    //let asa_send = get_asa_txn(creator_addr, contract_addr, asset_id, 1)
+    //let asa_cfg = get_asa_cfg(creator_addr, asset_id, {})
+    //let fee_txn = get_pay_txn(creator_addr, contract_addr, ps.fee)
+    //let platform_send  = get_asa_txn(ps.address, contract_addr, ps.token.id, 1)
+
+    //const fund_txn_group = [asa_send, asa_cfg, fee_txn, platform_send]
+    //algosdk.assignGroupID(fund_txn_group)
+    
+    //asa_send = await sign(asa_send)
+    //asa_cfg = await sign(asa_cfg)
+    //fee_txn = await sign(fee_txn)
+
+    ////b64_price=`python3 -c "import base64;print(base64.b64encode(($LISTING_PRICE).to_bytes(8,'big')).decode('ascii'))"`
+    ////b64_nft_id=`python3 -c "import base64;print(base64.b64encode(($NFT_ID).to_bytes(8,'big')).decode('ascii'))"`
+    ////./sandbox goal clerk sign -i split-3 -o $PLATFORM_SEND -L$SIGNED_DELEGATE --argb64 $b64_price  --argb64 $b64_nft_id --argb64 `cat $CONTRACT_NAME.tok | base64 -w0`
+    //platform_send = algosdk.signLogicSigTransactionObject(platform_send, platform_sig, args);
+
+    ////echo "Sned it"
+    ////./sandbox goal clerk rawsend -f $COMBINED
+    //const {txid} = await client.sendRawTransaction(fund_txn_group)
+
+    //console.log('Awaiting confirmation (this will take several seconds)...');
+    //const roundTimeout = 2;
+    //await utils.waitForConfirmation(client, txId, roundTimeout);
+    //console.log('Transactions successful.');
+}
+
+async function fund_listing(){
+
+
+
 
 }
 
@@ -159,11 +173,4 @@ async function purchase_listing(){
     // 
     // 
     // ./sandbox goal clerk rawsend -f purchase.tx.signed
-}
-
-function checkStatus(response) {
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-    }
-    return response;
 }
