@@ -2,11 +2,12 @@ import {platform_settings as ps} from './platform-conf'
 import listing_template from '../contracts/listing.teal.tmpl'
 import platform_delegate from '../contracts/platform.teal'
 import platform_delegate_signed from '../contracts/platform.signed'
-import { get_teal, get_pay_txn, get_optin_txn, sign, send, populate_contract, get_asa_txn } from './algorand'
+import { get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, sign, send, populate_contract, get_asa_txn } from './algorand'
 
 const Buffer = require('buffer/').Buffer
 
 import 'algosdk';
+//import algosdk from 'algosdk'
 
 
 export async function getClient(){
@@ -91,31 +92,29 @@ export async function createListing (creator_addr, price, asset_id) {
     const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes , "base64"));
     const del_sig = algosdk.logicSigFromByte(delegate_program_bytes)
     del_sig.args = [var_price, var_id, program_bytes]
-    console.log(del_sig)
 
+    let asa_send      = await get_asa_txn(true, creator_addr, contract_addr, asset_id, 1)
+    let asa_cfg       = await get_asa_cfg(true, creator_addr, asset_id, {manager:contract_addr, reserve:contract_addr, freeze:contract_addr, clawback:contract_addr})
+    let fee_txn       = await get_pay_txn(true, creator_addr, contract_addr, ps.fee)
+    let platform_send = await get_asa_txn(true, ps.address, contract_addr, ps.token.id, 1)
+
+    asa_send = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(asa_send)
+    asa_cfg = algosdk.makeAssetConfigTxnWithSuggestedParamsFromObject(asa_cfg)
+    fee_txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject(fee_txn)
+    platform_send = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_send)
+
+    const fund_txn_group = [asa_send, asa_cfg, fee_txn, platform_send]
+    algosdk.assignGroupID(fund_txn_group)
     
-    ////TODO: variable amount
-    //let asa_send = get_asa_txn(creator_addr, contract_addr, asset_id, 1)
-    //let asa_cfg = get_asa_cfg(creator_addr, asset_id, {})
-    //let fee_txn = get_pay_txn(creator_addr, contract_addr, ps.fee)
-    //let platform_send  = get_asa_txn(ps.address, contract_addr, ps.token.id, 1)
+    asa_send      = await sign(asa_send)
+    asa_cfg       = await sign(asa_cfg)
+    fee_txn       = await sign(fee_txn)
 
-    //const fund_txn_group = [asa_send, asa_cfg, fee_txn, platform_send]
-    //algosdk.assignGroupID(fund_txn_group)
-    
-    //asa_send = await sign(asa_send)
-    //asa_cfg = await sign(asa_cfg)
-    //fee_txn = await sign(fee_txn)
+    platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
-    ////b64_price=`python3 -c "import base64;print(base64.b64encode(($LISTING_PRICE).to_bytes(8,'big')).decode('ascii'))"`
-    ////b64_nft_id=`python3 -c "import base64;print(base64.b64encode(($NFT_ID).to_bytes(8,'big')).decode('ascii'))"`
-    ////./sandbox goal clerk sign -i split-3 -o $PLATFORM_SEND -L$SIGNED_DELEGATE --argb64 $b64_price  --argb64 $b64_nft_id --argb64 `cat $CONTRACT_NAME.tok | base64 -w0`
-    //platform_send = algosdk.signLogicSigTransactionObject(platform_send, platform_sig, args);
+    console.log(fund_txn_group)
 
-    ////echo "Sned it"
-    ////./sandbox goal clerk rawsend -f $COMBINED
     //const {txid} = await client.sendRawTransaction(fund_txn_group)
-
     //console.log('Awaiting confirmation (this will take several seconds)...');
     //const roundTimeout = 2;
     //await utils.waitForConfirmation(client, txId, roundTimeout);

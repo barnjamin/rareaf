@@ -101,46 +101,9 @@ export async function getAccount(){
     return accts[0]["address"]
 }
 
-export async function get_asa_cfg_txn(from, asset, new_config) {
-
-    return {}
-    //const signedTx = await AlgoSigner.sign({
-    //    from: acct,
-    //    assetManager: acct,
-    //    assetName: "RareAF",
-    //    assetUnitName: "RAF",
-    //    assetTotal: 1,
-    //    assetDecimals: 0,
-    //    assetMetadataHash:Array.from(meta_cid.cid.multihash.subarray(2)),
-    //    type: 'acfg',
-    //    fee: txParams['min-fee'],
-    //    firstRound: txParams['last-round'],
-    //    lastRound: txParams['last-round'] + 1000,
-    //    genesisID: txParams['genesis-id'],
-    //    genesisHash: txParams['genesis-hash'],
-    //    assetURL: "rare.af/"
-    //});
-
-}
-
-export async function get_pay_txn(from, to, amount) {
-    const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
-    return {
-        from: from,
-        to: to,
-        type: 'pay',
-        amount:amount,
-        fee: txParams['min-fee'],
-        firstRound: txParams['last-round'],
-        lastRound: txParams['last-round'] + 10,
-        genesisID: txParams['genesis-id'],
-        genesisHash: txParams['genesis-hash']
-    }
-}
 
 export async function populate_contract(template, variables) {
     //Read the program, Swap vars, spit out the filled out tmplate
-
     let program = await get_teal(template)
     for(let v in variables){
         program = program.replace("$"+v, variables[v])
@@ -158,45 +121,103 @@ export async function get_teal(program){
 }
 
 function checkStatus(response) {
-    if (!response.ok) {
-    throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-    }
+    if (!response.ok)  throw new Error(`HTTP ${response.status} - ${response.statusText}`);
     return response;
-}
-
-export async function group() {
-    return
 }
 
 export async function sign(txn){ return await AlgoSigner.sign(txn) }
 
 export async function send(signed_tx) {
-    console.log(signed_tx)
     const txn = await AlgoSigner.send({ ledger: ps.algod.network, tx: signed_tx.blob })
-    console.log(txn)
     await checkCompleted(txn)
 }
 
-export async function get_optin_txn(addr, id) {
-    return get_asa_txn(addr, addr, id, 0)
+export async function get_asa_cfg(withSuggested, from, asset, new_config) {
+    const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
+    const suggested = {
+        fee: txParams['min-fee'],
+        firstRound: txParams['last-round'],
+        lastRound: txParams['last-round'] + 1000,
+        genesisID: txParams['genesis-id'],
+        genesisHash: txParams['genesis-hash'],
+    }
+    let tmp = {
+        from: from,
+        assetIndex:asset,
+        type: 'acfg',
+        ...new_config
+    }
+    if (withSuggested ){
+        tmp.suggestedParams=suggested
+    }else{
+        tmp = {
+            ...tmp,
+            ...suggestede
+        } 
+    }
+    return tmp
 }
 
-export async function get_asa_txn(from, to, id, amt) {
+
+export async function get_pay_txn(withSuggested, from, to, amount) {
     const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
-    return {
+    const suggested =  {
+        fee: txParams['min-fee'],
+        firstRound: txParams['last-round'],
+        lastRound: txParams['last-round'] + 10,
+        genesisID: txParams['genesis-id'],
+        genesisHash: txParams['genesis-hash']
+    }
+    let tmp = {
+        from: from,
+        to: to,
+        type: 'pay',
+        amount:amount,
+    }
+
+    if(withSuggested) {
+        tmp.suggestedParams = suggested
+    }else{
+        tmp = {
+            ...tmp,
+            ...suggested
+        }
+    }
+    return tmp
+}
+
+export async function get_optin_txn(withSuggested, addr, id) {
+    return get_asa_txn(withSuggested, addr, addr, id, 0)
+}
+
+export async function get_asa_txn(withSuggested, from, to, id, amt) {
+    const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
+    const suggested = {
+        fee: txParams['min-fee'],
+        firstRound: txParams['last-round'],
+        lastRound: txParams['last-round'] + 10,
+        genesisID: txParams['genesis-id'],
+        genesisHash: txParams['genesis-hash']
+    }
+
+    let tmp = {
         from: from,
         to: to,
         assetIndex: id,
         type: 'axfer',
         amount:amt,
-        suggestedParams:{
-            fee: txParams['min-fee'],
-            firstRound: txParams['last-round'],
-            lastRound: txParams['last-round'] + 10,
-            genesisID: txParams['genesis-id'],
-            genesisHash: txParams['genesis-hash']
+    }
+
+    if (withSuggested) {
+        tmp.suggestedParams = suggested
+    }else{
+        tmp = {
+            ...tmp,
+            ...suggested
         }
     }
+
+    return tmp
 }
 
 export async function createToken(acct, meta_cid) {
