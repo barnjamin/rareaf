@@ -98,19 +98,23 @@ export async function createListing (creator_addr, price, asset_id) {
     let fee_txn       = await get_pay_txn(true, creator_addr, contract_addr, ps.fee)
     let platform_send = await get_asa_txn(true, ps.address, contract_addr, ps.token.id, 1)
 
-    asa_send = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(asa_send)
-    asa_cfg = algosdk.makeAssetConfigTxnWithSuggestedParamsFromObject(asa_cfg)
-    fee_txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject(fee_txn)
+    asa_send      = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(asa_send)
+    asa_cfg       = algosdk.makeAssetConfigTxnWithSuggestedParamsFromObject(asa_cfg)
+    fee_txn       = algosdk.makePaymentTxnWithSuggestedParamsFromObject(fee_txn)
     platform_send = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_send)
+
+
 
     const fund_txn_group = [asa_send, asa_cfg, fee_txn, platform_send]
     algosdk.assignGroupID(fund_txn_group)
     
-    asa_send      = await sign(asa_send)
-    asa_cfg       = await sign(asa_cfg)
-    fee_txn       = await sign(fee_txn)
+    console.log(asa_send)
+    
+    asa_send      = await sign(asa_send.get_obj_for_encoding())
+    //asa_cfg       = await sign(asa_cfg)
+    //fee_txn       = await sign(fee_txn)
 
-    platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
+    //platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
     console.log(fund_txn_group)
 
