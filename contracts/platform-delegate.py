@@ -27,7 +27,6 @@ def main():
         Sha512_256(Concat(Bytes("Program"), contract_val)) ==  Txn.asset_receiver(),
     )
 
-
     # Validate transactions
     asa_xfer = And(
         # Is safe asset transfer

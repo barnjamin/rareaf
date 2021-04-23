@@ -73,18 +73,12 @@ class TemplateContract(object):
             # Find strings starting with TMPL_
             if "TMPL_" in line:
                 chunks = line.split(" ")
-                if chunks[0]  not in ("pushbytes", "pushint"):
-                    print("""
-                        Warning: must use pushbytes or pushint to prevent this variable from being included
-                        in the constants blocks
-                    """)
-                    continue
-
-                tv = TemplateVar(lines[l+1] == "btoi", chunks[1])
-                if tv.is_integer:
-                    teal_source = teal_source.replace(chunks[1], dummy_int)
-                else:
-                    teal_source = teal_source.replace(chunks[1], dummy_string)
+                if chunks[0] in ("pushbytes", "pushint"):
+                    tv = TemplateVar(lines[l+1] == "btoi", chunks[1])
+                    if tv.is_integer:
+                        teal_source = teal_source.replace(chunks[1], dummy_int)
+                    else:
+                        teal_source = teal_source.replace(chunks[1], dummy_string)
 
                 self.template_vars.append(tv)
         return teal_source
