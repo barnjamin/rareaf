@@ -7,7 +7,6 @@ import { get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, sign, send, populate
 const Buffer = require('buffer/').Buffer
 
 import 'algosdk';
-//import algosdk from 'algosdk'
 
 
 export async function getClient(){
@@ -103,18 +102,14 @@ export async function createListing (creator_addr, price, asset_id) {
     fee_txn       = algosdk.makePaymentTxnWithSuggestedParamsFromObject(fee_txn)
     platform_send = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_send)
 
-
-
     const fund_txn_group = [asa_send, asa_cfg, fee_txn, platform_send]
     algosdk.assignGroupID(fund_txn_group)
     
-    console.log(asa_send)
-    
-    asa_send      = await sign(asa_send.get_obj_for_encoding())
-    //asa_cfg       = await sign(asa_cfg)
-    //fee_txn       = await sign(fee_txn)
+    asa_send      = await sign(translate_txn(asa_send))
+    asa_cfg       = await sign(asa_cfg)
+    fee_txn       = await sign(translate_txn(fee_txn))
 
-    //platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
+    platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
     console.log(fund_txn_group)
 
@@ -176,4 +171,13 @@ async function purchase_listing(){
     // 
     // 
     // ./sandbox goal clerk rawsend -f purchase.tx.signed
+}
+
+function translate_txn(o) {
+    delete o.name;
+    delete o.tag;
+    delete o.appArgs;
+    o.from = algosdk.encodeAddress(o.from.publicKey)
+    o.to = algosdk.encodeAddress(o.to.publicKey)
+    return o
 }
