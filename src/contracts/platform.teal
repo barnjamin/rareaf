@@ -105,7 +105,7 @@ txn AssetReceiver
 ==
 &&
 gtxn 2 Amount
-int 1000000000
+int 1000000
 ==
 &&
 &&

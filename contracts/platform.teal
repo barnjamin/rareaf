@@ -10,7 +10,7 @@ load 0
 arg 2
 load 1
 load 1
-int 46
+int 47
 +
 substring3
 concat
@@ -18,11 +18,11 @@ store 0
 load 1
 arg 2
 load 1
-int 45
+int 46
 +
 getbyte
 +
-int 46
+int 47
 +
 store 1
 load 0
@@ -74,7 +74,7 @@ store 0
 int 1
 load 0
 sha256
-byte base64(rbA8nFCgFBsq6jSgStNpSZSI+bo3w+o7B8EqRtVhxjg=)
+byte base64(mZKRNTNRc7UzD/R3yrMDeoJ2Qtjs2MrpDNhrtKZnI/g=)
 ==
 &&
 byte "Program"
@@ -143,7 +143,7 @@ txn AssetReceiver
 ==
 &&
 gtxn 2 Amount
-int 1000000000
+int 5000000
 ==
 &&
 &&

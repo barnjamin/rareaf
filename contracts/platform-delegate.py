@@ -11,7 +11,7 @@ client  = algod.AlgodClient(token,address)
 
 platform_token = Int(1)
 platform_acct = Addr("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM") 
-platform_fee = Int(100)
+seed_amt = Int(int(5e6))
 
 def main():
 
@@ -58,7 +58,7 @@ def main():
         # Is To Contract Acct 
         Gtxn[2].receiver() == Txn.asset_receiver(),
         # Is for some amt algo
-        Gtxn[2].amount() ==  Int(int(1e9))
+        Gtxn[2].amount() ==  seed_amt 
     )
 
     platform_xfer = And(

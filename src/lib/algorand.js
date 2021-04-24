@@ -146,6 +146,10 @@ export function sign(txn, addr) {
     return txn.signTxn(pkToSk[addr].sk)
 }
 
+export async function algosign(txn) {
+    return await AlgoSigner.sign(txn)
+}
+
 export async function send(signed_tx) {
     const txn = await AlgoSigner.send({ ledger: ps.algod.network, tx: signed_tx.blob })
     await checkCompleted(txn)

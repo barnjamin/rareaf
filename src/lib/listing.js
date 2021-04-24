@@ -2,7 +2,7 @@ import {platform_settings as ps} from './platform-conf'
 import listing_template from '../contracts/listing.teal.tmpl'
 import platform_delegate from '../contracts/platform.teal'
 import platform_delegate_signed from '../contracts/platform.signed'
-import { get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, sign, send, populate_contract, get_asa_txn } from './algorand'
+import { algosign, get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, sign, send, populate_contract, get_asa_txn } from './algorand'
 
 const Buffer = require('buffer/').Buffer
 
@@ -60,24 +60,24 @@ export async function createListing (creator_addr, price, asset_id) {
 
 
     /// Initialize listing
-    //console.log("Seeding contract acct")
-    //let seed_txn = await get_pay_txn(creator_addr, contract_addr, ps.seed)
-    //seed_txn = await sign(seed_txn)
-    //await send(seed_txn)
+    console.log("Seeding contract acct")
+    let stxn = await get_pay_txn(false, creator_addr, contract_addr, ps.seed)
+    stxn = await algosign(stxn)
+    await send(stxn)
 
-    //console.log("Opting contract acct into nft")
-    //let nft_optin = await get_optin_txn(contract_addr, asset_id)
-    //nft_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(nft_optin)
-    //nft_optin = algosdk.signLogicSigTransactionObject(nft_optin, lsig);
-    //await client.sendRawTransaction(nft_optin.blob).do()
-    //console.log("Opted in")
+    console.log("Opting contract acct into nft")
+    let nft_optin = await get_optin_txn(true, contract_addr, asset_id)
+    nft_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(nft_optin)
+    nft_optin = algosdk.signLogicSigTransactionObject(nft_optin, lsig);
+    await client.sendRawTransaction(nft_optin.blob).do()
+    console.log("Opted in")
 
-    //console.log("Opting contract acct into platform")
-    //let platform_optin = await get_optin_txn(contract_addr, ps.token.id)
-    //platform_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_optin)
-    //platform_optin = algosdk.signLogicSigTransactionObject(platform_optin, lsig);
-    //await client.sendRawTransaction(platform_optin.blob).do()
-    //console.log("Opted in")
+    console.log("Opting contract acct into platform")
+    let platform_optin = await get_optin_txn(true, contract_addr, ps.token.id)
+    platform_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_optin)
+    platform_optin = algosdk.signLogicSigTransactionObject(platform_optin, lsig);
+    await client.sendRawTransaction(platform_optin.blob).do()
+    console.log("Opted in")
 
 
     //// Fund listing
@@ -95,25 +95,29 @@ export async function createListing (creator_addr, price, asset_id) {
 
     let asa_send      = await get_asa_txn(true, creator_addr, contract_addr, asset_id, 1)
     let asa_cfg       = await get_asa_cfg(true, creator_addr, asset_id, {manager:contract_addr, reserve:contract_addr, freeze:contract_addr, clawback:contract_addr})
-    let fee_txn       = await get_pay_txn(true, creator_addr, contract_addr, ps.fee)
+    let seed_txn       = await get_pay_txn(true, creator_addr, contract_addr, ps.seed)
     let platform_send = await get_asa_txn(true, ps.address, contract_addr, ps.token.id, 1)
 
     asa_send      = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(asa_send)
     asa_cfg       = algosdk.makeAssetConfigTxnWithSuggestedParamsFromObject(asa_cfg)
-    fee_txn       = algosdk.makePaymentTxnWithSuggestedParamsFromObject(fee_txn)
+    seed_txn      = algosdk.makePaymentTxnWithSuggestedParamsFromObject(seed_txn)
     platform_send = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_send)
 
-    const fund_txn_group = [asa_send, asa_cfg, fee_txn, platform_send]
+    const fund_txn_group = [asa_send, asa_cfg, seed_txn, platform_send]
     algosdk.assignGroupID(fund_txn_group)
+
+    console.log(asa_send, asa_cfg, seed_txn)
 
     const s_asa_send = sign(asa_send, creator_addr)
     const s_asa_cfg = sign(asa_cfg, creator_addr)
-    const s_fee_txn = sign(fee_txn, creator_addr)
+    const s_seed_txn = sign(seed_txn, creator_addr)
     const s_platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
-    const x = [s_asa_send, s_asa_cfg, s_fee_txn, s_platform_send.blob]
 
-    //download_txns("grouped.txns", x)
+
+    const x = [s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob]
+
+    download_txns("grouped.txns", x)
 
     console.log(x)
     const {txid} = await client.sendRawTransaction(x).do()
