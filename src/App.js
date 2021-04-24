@@ -41,8 +41,6 @@ class App extends React.Component {
 
   onAccountChange(v) {
     this.setState({account_idx:v})
-    console.log("Set to ", v)
-    console.log("Corresponds to", this.state.accounts[v])
   }
 
   setCID(cid) { this.setState({ cid: cid }) }

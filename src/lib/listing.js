@@ -7,6 +7,7 @@ import { algosign, get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, sign, send
 const Buffer = require('buffer/').Buffer
 
 import 'algosdk';
+//import 'algosdk.utils';
 
 
 export async function getClient(){
@@ -16,7 +17,6 @@ export async function getClient(){
 
 export async function create_platform() {
     // If platform settings are empty this can get called
-
     // Create token with name and units
     // Create Delegated sig to give out this token
     // save
@@ -58,30 +58,21 @@ export async function createListing (creator_addr, price, asset_id) {
     const program_bytes     = new Uint8Array(Buffer.from(compiled_program.result , "base64"));
     const lsig              = algosdk.makeLogicSig(program_bytes);   
 
-
-    /// Initialize listing
-    console.log("Seeding contract acct")
     let stxn = await get_pay_txn(false, creator_addr, contract_addr, ps.seed)
     stxn = await algosign(stxn)
     await send(stxn)
 
-    console.log("Opting contract acct into nft")
     let nft_optin = await get_optin_txn(true, contract_addr, asset_id)
     nft_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(nft_optin)
     nft_optin = algosdk.signLogicSigTransactionObject(nft_optin, lsig);
     await client.sendRawTransaction(nft_optin.blob).do()
-    console.log("Opted in")
 
-    console.log("Opting contract acct into platform")
     let platform_optin = await get_optin_txn(true, contract_addr, ps.token.id)
     platform_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_optin)
     platform_optin = algosdk.signLogicSigTransactionObject(platform_optin, lsig);
     await client.sendRawTransaction(platform_optin.blob).do()
-    console.log("Opted in")
-
 
     //// Fund listing
-
     //const delegate_program      = await get_teal(platform_delegate)
     //const compiled_delegate     = await client.compile(delegate_program).do()
     //const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_delegate.result , "base64"));
@@ -95,7 +86,7 @@ export async function createListing (creator_addr, price, asset_id) {
 
     let asa_send      = await get_asa_txn(true, creator_addr, contract_addr, asset_id, 1)
     let asa_cfg       = await get_asa_cfg(true, creator_addr, asset_id, {manager:contract_addr, reserve:contract_addr, freeze:contract_addr, clawback:contract_addr})
-    let seed_txn       = await get_pay_txn(true, creator_addr, contract_addr, ps.seed)
+    let seed_txn      = await get_pay_txn(true, creator_addr, contract_addr, ps.seed)
     let platform_send = await get_asa_txn(true, ps.address, contract_addr, ps.token.id, 1)
 
     asa_send      = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(asa_send)
@@ -106,36 +97,17 @@ export async function createListing (creator_addr, price, asset_id) {
     const fund_txn_group = [asa_send, asa_cfg, seed_txn, platform_send]
     algosdk.assignGroupID(fund_txn_group)
 
-    console.log(asa_send, asa_cfg, seed_txn)
-
-    const s_asa_send = sign(asa_send, creator_addr)
-    const s_asa_cfg = sign(asa_cfg, creator_addr)
-    const s_seed_txn = sign(seed_txn, creator_addr)
+    const s_asa_send      = sign(asa_send, creator_addr)
+    const s_asa_cfg       = sign(asa_cfg, creator_addr)
+    const s_seed_txn      = sign(seed_txn, creator_addr)
     const s_platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
-
-
-    const x = [s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob]
-
-    download_txns("grouped.txns", x)
-
-    console.log(x)
-    const {txid} = await client.sendRawTransaction(x).do()
-    console.log('Awaiting confirmation (this will take several seconds)...');
-
-    const roundTimeout = 2;
-    await utils.waitForConfirmation(client, txId, roundTimeout);
-    console.log('Transactions successful.');
-}
-
-async function fund_listing(){
-
-
-
+    const {txid} = await client.sendRawTransaction([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob]).do()
+    await algosdk.utils.waitForConfirmation(client, txId, 2);
 }
 
 async function destroy_listing(){
-    //const client = algosdk.Algodv2()
+    const client = await getClient()
 
     // Send assets and algos back to creator or platform wallet 
     // goal asset send -a 0 -o delist-platform.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $PLATFORM_ACCT --close-to $PLATFORM_ACCT

@@ -245,6 +245,9 @@ export async function get_asa_txn(withSuggested, from, to, id, amt) {
 
 export async function createToken(acct, meta_cid) {
     const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
+
+    console.log(acct, meta_cid)
+
     const signedTx = await AlgoSigner.sign({
         from: acct,
         assetManager: acct,

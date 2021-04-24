@@ -23,9 +23,10 @@ class AlgorandTokenizer extends React.Component {
 
         this.handleChange = this.handleChange.bind(this)
         this.createMetaAndToken = this.createMetaAndToken.bind(this)
-        getAccount().then(acct =>{
-            createListing(acct, 500, 2)
-        })
+
+        //then(acct =>{
+        //    createListing(acct, 500, 2)
+        //})
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -42,12 +43,12 @@ class AlgorandTokenizer extends React.Component {
         try{
             const meta_cid = await uploadMetadata(this.captureMetadata())
             this.setState({meta_cid:meta_cid})
-            await createToken(meta_cid)
+            const addr = await getAccount()
+            await createToken(addr, meta_cid)
         }catch(err){
             console.error(err)
         }
         this.setState({waiting_for_tx:false})
-
     }
 
     handleChange(event) {
