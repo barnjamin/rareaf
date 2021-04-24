@@ -165,4 +165,4 @@ def set_start_positions(assembled_name, tmpl_vars):
         pos += 3 #store opcode + int slot 
 
 if __name__ == "__main__":
-    print(compileTeal(main(), Mode.Signature))
+    print(compileTeal(main(), Mode.Signature, version=3))

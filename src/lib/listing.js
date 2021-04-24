@@ -33,7 +33,6 @@ export async function createListing (creator_addr, price, asset_id) {
     const client = await getClient()
 
     // Encode vars for inclusion in contract
-    // TODO: do this in populate_contract
     const var_price = Buffer.from(encodeUint64(price)).toString('base64')
     const var_id    = Buffer.from(encodeUint64(asset_id)).toString('base64')
     const var_addr  = Buffer.from(algosdk.decodeAddress(creator_addr).publicKey).toString('base64')
@@ -89,8 +88,10 @@ export async function createListing (creator_addr, price, asset_id) {
 
     const compiled_bytes        = await get_teal(platform_delegate_signed)
     const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes , "base64"));
-    const del_sig = algosdk.logicSigFromByte(delegate_program_bytes)
-    del_sig.args = [var_price, var_id, program_bytes]
+    const del_sig               = algosdk.logicSigFromByte(delegate_program_bytes)
+    del_sig.args                = [ new Uint8Array(Buffer.from(var_price, "base64")), 
+                                    new Uint8Array(Buffer.from(var_id, "base64")), 
+                                    new Uint8Array(Buffer.from(program_bytes, "base64")) ]
 
     let asa_send      = await get_asa_txn(true, creator_addr, contract_addr, asset_id, 1)
     let asa_cfg       = await get_asa_cfg(true, creator_addr, asset_id, {manager:contract_addr, reserve:contract_addr, freeze:contract_addr, clawback:contract_addr})
@@ -104,24 +105,26 @@ export async function createListing (creator_addr, price, asset_id) {
 
     const fund_txn_group = [asa_send, asa_cfg, fee_txn, platform_send]
     algosdk.assignGroupID(fund_txn_group)
-    
-    asa_send      = await sign(translate_txn(asa_send))
-    asa_cfg       = await sign(asa_cfg)
-    fee_txn       = await sign(translate_txn(fee_txn))
 
-    platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
+    const s_asa_send = sign(asa_send, creator_addr)
+    const s_asa_cfg = sign(asa_cfg, creator_addr)
+    const s_fee_txn = sign(fee_txn, creator_addr)
+    const s_platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
-    console.log(fund_txn_group)
+    const x = [s_asa_send, s_asa_cfg, s_fee_txn, s_platform_send.blob]
 
-    //const {txid} = await client.sendRawTransaction(fund_txn_group)
-    //console.log('Awaiting confirmation (this will take several seconds)...');
-    //const roundTimeout = 2;
-    //await utils.waitForConfirmation(client, txId, roundTimeout);
-    //console.log('Transactions successful.');
+    //download_txns("grouped.txns", x)
+
+    console.log(x)
+    const {txid} = await client.sendRawTransaction(x).do()
+    console.log('Awaiting confirmation (this will take several seconds)...');
+
+    const roundTimeout = 2;
+    await utils.waitForConfirmation(client, txId, roundTimeout);
+    console.log('Transactions successful.');
 }
 
 async function fund_listing(){
-
 
 
 
@@ -180,4 +183,25 @@ function translate_txn(o) {
     o.from = algosdk.encodeAddress(o.from.publicKey)
     o.to = algosdk.encodeAddress(o.to.publicKey)
     return o
+}
+
+function download_txns(name, txns) {
+    let b = new Uint8Array(0);
+    for(const txn in txns){
+        b = concatTypedArrays(b, txns[txn])
+    }
+    var blob = new Blob([b], {type: "application/octet-stream"});
+
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = name;
+    link.click();
+}
+
+
+function concatTypedArrays(a, b) { // a, b TypedArray of same type
+    var c = new (a.constructor)(a.length + b.length);
+    c.set(a, 0);
+    c.set(b, a.length);
+    return c;
 }

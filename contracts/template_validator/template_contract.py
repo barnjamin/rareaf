@@ -3,12 +3,13 @@ import hashlib
 from algosdk.logic import parse_uvarint, check_byte_const_block, check_int_const_block
 from pyteal import *
 
-dummy_string = "b64(bG9yZW0=)"
+dummy_string = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
 dummy_int = "b64(AAAAAAAAAHs=)"
 
 class TemplateVar(object):
     start, length = 0, 0
     is_integer = False
+    distance = 0
     name = ""
     def __init__(self, is_integer, name):
         self.is_integer = is_integer
@@ -40,20 +41,23 @@ class TemplateContract(object):
         blank_hash = self.get_blank_hash()
 
         blank_contract = ScratchVar(TealType.bytes)
-        concat_ops     = [blank_contract.store(Bytes(""))]
-        pos            = 0
+        pos            = ScratchVar(TealType.uint64)
+
+        concat_ops     = [blank_contract.store(Bytes("")), pos.store(Int(0))]
 
         for idx in range(len(self.template_vars)):
             tv = self.template_vars[idx]
-            concat_ops.append(blank_contract.store(
-                Concat(blank_contract.load(), 
-                    Substring(contract_val, Int(pos), Int(tv.start))))) 
-
-            pos = tv.start + tv.length
 
             concat_ops.append(blank_contract.store(
                 Concat(blank_contract.load(), 
-                Substring(contract_val, Int(pos), Len(contract_val)))))
+                    Substring(contract_val, pos.load(), pos.load() + Int(tv.distance)))))
+            
+            length = GetByte(contract_val, pos.load() + Int(tv.distance-1))
+            concat_ops.append(pos.store(pos.load() + length + Int(tv.distance)))
+
+        concat_ops.append(blank_contract.store(
+            Concat(blank_contract.load(), 
+            Substring(contract_val, pos.load(), Len(contract_val)))))
 
         concat_ops.append(Int(1))
 
@@ -61,7 +65,7 @@ class TemplateContract(object):
             # prepare the blank contract
             Seq(concat_ops), 
             # Make sure this is the contract being distributed to
-            Sha256(blank_contract.load()) == Bytes(blank_hash),
+            Sha256(blank_contract.load()) == Bytes("base64",blank_hash),
         )
 
     def populate_tmpl_vars(self):
@@ -93,13 +97,12 @@ class TemplateContract(object):
 
     def get_blank_hash(self):
         removed = 0 
-
         blanked = self.assembled_bytes
         for v in self.template_vars:
             blanked = blanked[:v.start-removed] + blanked[(v.start+v.length)-removed:]
             removed += v.length 
-
         h = hashlib.sha256(blanked)
+
         return base64.b64encode(h.digest()).decode('ascii')
 
 
@@ -112,12 +115,23 @@ class TemplateContract(object):
         if self.assembled_bytes[pos] == 0x26:
             pos += check_byte_const_block(self.assembled_bytes, pos)
 
-        for var in self.template_vars:
+        for vidx in range(len(self.template_vars)):
+            var = self.template_vars[vidx]
+
             pos += 1 # pushbytes opcode byte 
-            var.length = int(self.assembled_bytes[pos]) # Get length
-            pos += 1 
-            var.start = pos
+            var.length = int(self.assembled_bytes[pos]) # Get length byte
+            pos += 1  # length opcode byte
+            var.start = pos 
+
+            if vidx == 0:
+                var.distance = pos
+            else:
+                pre = self.template_vars[vidx-1]
+                var.distance = pos - (pre.start + pre.length)
+
             pos += var.length
+
             if var.is_integer:
                 pos += 1 # btoi
+
             pos += 2 #store opcode + slot id byte

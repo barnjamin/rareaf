@@ -1,47 +1,64 @@
 /* eslint-disable no-console */
 import { getMetaFromIpfs } from "./ipfs";
-import {platform_settings as ps} from './platform-conf'
+import { platform_settings as ps } from './platform-conf'
+import 'algosdk'
 
-export async function isAlgorandWalletConnected(){
-    if(typeof AlgoSigner === 'undefined') return false;
+export const pkToSk = {
+    "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": algosdk.mnemonicToSecretKey(
+        ["loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below", 
+         "when", "false", "ripple", "cute", "buffalo", "tissue", "again", "boring", "manual", "excuse", "absent", "injury"].join(" ")
+    ),
+    "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM": algosdk.mnemonicToSecretKey(
+        ["genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found", 
+         "please", "then", "snack", "nice", "arrest", "coin", "seminar", "pyramid", "adult", "flip", "absorb", "apology"].join(" ")
+    ),
+    "DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4": algosdk.mnemonicToSecretKey(
+        ["train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox", 
+         "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"].join(" ")
+    ),
+}
 
-    try{
+
+export async function isAlgorandWalletConnected() {
+    if (typeof AlgoSigner === 'undefined') return false;
+
+    try {
         await getAccount()
         return true
-    }catch(err){
+    } catch (err) {
         return false
     }
 }
 
-export async function algoConnectWallet(){
-    if(typeof AlgoSigner === 'undefined')  
+export async function algoConnectWallet() {
+    if (typeof AlgoSigner === 'undefined')
         alert('Make Sure AlgoSigner wallet is installed and connected');
 
-    try{
+    try {
         await AlgoSigner.connect()
-    }catch(err){ console.error("Failed to connect: ", err) }
+    } catch (err) { console.error("Failed to connect: ", err) }
 }
 
-export async function getListings(){
+export async function getListings() {
     const balances = await AlgoSigner.indexer({
         ledger: ps.algod.network,
         path: `/v2/assets/${ps.token.id}/balances?currency-greater-than=0`,
     });
 
     let listings = []
-    for(let bidx in balances.balances){
+    for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
-        if(b.address==ps.address || b.amount == 0) continue;
+        if (b.address == ps.address || b.amount == 0) continue;
 
         const acct_resp = await AlgoSigner.indexer({
-            ledger:ps.algod.network,
-            path:`/v2/accounts/${b.address}`
+            ledger: ps.algod.network,
+            path: `/v2/accounts/${b.address}`
         });
 
-        for(let aid in acct_resp.account.assets){
+        for (let aid in acct_resp.account.assets) {
             const asa = acct_resp.account.assets[aid]
-            if(asa['asset-id'] == ps.token.id) continue;
-            const token =  await getToken(asa['asset-id'])
+            if (asa['asset-id'] == ps.token.id) continue;
+            const token = await getToken(asa['asset-id'])
             listings.push(token)
         }
     }
@@ -49,7 +66,7 @@ export async function getListings(){
     return listings
 }
 
-export async function getToken(asset_id){
+export async function getToken(asset_id) {
     const assets = await AlgoSigner.indexer({
         ledger: ps.algod.network,
         path: `/v2/assets/${asset_id}`,
@@ -57,7 +74,7 @@ export async function getToken(asset_id){
     return assets.asset
 }
 
-export async function getTokenCreatedAt(asset_id){
+export async function getTokenCreatedAt(asset_id) {
     const a = await getToken(asset_id)
     return a['created-at-round']
 }
@@ -71,7 +88,7 @@ export async function getTokenMetadataFromTransaction(token_id) {
     // Just take the first one
     const created_tx = tx.transactions[0]
 
-    if(created_tx.note === undefined || created_tx.note.length==0){
+    if (created_tx.note === undefined || created_tx.note.length == 0) {
         return {}
     }
 
@@ -79,24 +96,24 @@ export async function getTokenMetadataFromTransaction(token_id) {
     const data = atob(created_tx.note)
 
     //If its a json object, just decode it
-    if(data.length > 2 && data.substr(0,2) == '{"'  ) {
+    if (data.length > 2 && data.substr(0, 2) == '{"') {
         try {
             return JSON.parse(data)
-        }catch (err){ console.error(err) }
+        } catch (err) { console.error(err) }
     }
 
     const d = data.split(",")
-    const meta = d[d.length-1]
+    const meta = d[d.length - 1]
 
     //Otherwise get it from ipfs directly
     return await getMetaFromIpfs(data)
 }
 
-export async function getAccounts(){
+export async function getAccounts() {
     return await AlgoSigner.accounts({ ledger: ps.algod.network })
 }
 
-export async function getAccount(){
+export async function getAccount() {
     let accts = await getAccounts()
     return accts[0]["address"]
 }
@@ -105,27 +122,29 @@ export async function getAccount(){
 export async function populate_contract(template, variables) {
     //Read the program, Swap vars, spit out the filled out tmplate
     let program = await get_teal(template)
-    for(let v in variables){
-        program = program.replace("$"+v, variables[v])
+    for (let v in variables) {
+        program = program.replace("$" + v, variables[v])
     }
     return program
 }
 
-export async function get_teal(program){
-    return  await fetch(program)
-    .then(response => checkStatus(response) && response.arrayBuffer())
-    .then(buffer => {
-        const td = new TextDecoder()
-        return td.decode(buffer)
-    }).catch(err => console.error(err)); 
+export async function get_teal(program) {
+    return await fetch(program)
+        .then(response => checkStatus(response) && response.arrayBuffer())
+        .then(buffer => {
+            const td = new TextDecoder()
+            return td.decode(buffer)
+        }).catch(err => console.error(err));
 }
 
 function checkStatus(response) {
-    if (!response.ok)  throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
     return response;
 }
 
-export async function sign(txn){ return await AlgoSigner.sign(txn) }
+export function sign(txn, addr) { 
+    return txn.signTxn(pkToSk[addr].sk)
+}
 
 export async function send(signed_tx) {
     const txn = await AlgoSigner.send({ ledger: ps.algod.network, tx: signed_tx.blob })
@@ -133,7 +152,7 @@ export async function send(signed_tx) {
 }
 
 export async function get_asa_cfg(withSuggested, from, asset, new_config) {
-    const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
+    const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
     const suggested = {
         fee: txParams['min-fee'],
         firstRound: txParams['last-round'],
@@ -143,25 +162,25 @@ export async function get_asa_cfg(withSuggested, from, asset, new_config) {
     }
     let tmp = {
         from: from,
-        assetIndex:asset,
+        assetIndex: asset,
         type: 'acfg',
         ...new_config
     }
-    if (withSuggested ){
-        tmp.suggestedParams=suggested
-    }else{
+    if (withSuggested) {
+        tmp.suggestedParams = suggested
+    } else {
         tmp = {
             ...tmp,
             ...suggestede
-        } 
+        }
     }
     return tmp
 }
 
 
 export async function get_pay_txn(withSuggested, from, to, amount) {
-    const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
-    const suggested =  {
+    const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
+    const suggested = {
         fee: txParams['min-fee'],
         firstRound: txParams['last-round'],
         lastRound: txParams['last-round'] + 10,
@@ -172,12 +191,12 @@ export async function get_pay_txn(withSuggested, from, to, amount) {
         from: from,
         to: to,
         type: 'pay',
-        amount:amount,
+        amount: amount,
     }
 
-    if(withSuggested) {
+    if (withSuggested) {
         tmp.suggestedParams = suggested
-    }else{
+    } else {
         tmp = {
             ...tmp,
             ...suggested
@@ -191,7 +210,7 @@ export async function get_optin_txn(withSuggested, addr, id) {
 }
 
 export async function get_asa_txn(withSuggested, from, to, id, amt) {
-    const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
+    const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
     const suggested = {
         fee: txParams['min-fee'],
         firstRound: txParams['last-round'],
@@ -205,12 +224,12 @@ export async function get_asa_txn(withSuggested, from, to, id, amt) {
         to: to,
         assetIndex: id,
         type: 'axfer',
-        amount:amt,
+        amount: amt,
     }
 
     if (withSuggested) {
         tmp.suggestedParams = suggested
-    }else{
+    } else {
         tmp = {
             ...tmp,
             ...suggested
@@ -221,7 +240,7 @@ export async function get_asa_txn(withSuggested, from, to, id, amt) {
 }
 
 export async function createToken(acct, meta_cid) {
-    const txParams = await AlgoSigner.algod({ledger: ps.algod.network, path: '/v2/transactions/params' })
+    const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
     const signedTx = await AlgoSigner.sign({
         from: acct,
         assetManager: acct,
@@ -229,7 +248,7 @@ export async function createToken(acct, meta_cid) {
         assetUnitName: "RAF",
         assetTotal: 1,
         assetDecimals: 0,
-        assetMetadataHash:Array.from(meta_cid.cid.multihash.subarray(2)),
+        assetMetadataHash: Array.from(meta_cid.cid.multihash.subarray(2)),
         type: 'acfg',
         fee: txParams['min-fee'],
         firstRound: txParams['last-round'],
@@ -240,9 +259,9 @@ export async function createToken(acct, meta_cid) {
     });
 
     let tx;
-    try{
+    try {
         tx = await AlgoSigner.send({ ledger: ps.algod.network, tx: signedTx.blob })
-    }catch(err){
+    } catch (err) {
         //TODO: alert error
         console.error(err)
         return
@@ -255,17 +274,17 @@ export async function createToken(acct, meta_cid) {
 export async function checkCompleted(tx) {
     let completed = false;
     while (!completed) {
-        try{
+        try {
             const result = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/pending/' + tx.txId })
-            if(result['pool-error']!=""){
+            if (result['pool-error'] != "") {
                 console.error(result['pool-error'])
                 return
             }
 
-            if(result['confirmed-round']!== undefined && result['confirmed-round']>0 ){
-                completed=true
+            if (result['confirmed-round'] !== undefined && result['confirmed-round'] > 0) {
+                completed = true
             }
-        }catch(err){
+        } catch (err) {
             console.error(err)
             return
         }
@@ -279,7 +298,7 @@ export async function destroyToken(token_id) {
     let txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
     let signedTx = await AlgoSigner.sign({
         from: acct,
-        assetIndex : token_id,
+        assetIndex: token_id,
         type: 'acfg',
         fee: txParams['min-fee'],
         firstRound: txParams['last-round'],
@@ -288,8 +307,8 @@ export async function destroyToken(token_id) {
         genesisID: txParams['genesis-id']
     });
 
-    try{
+    try {
         const tx = await AlgoSigner.send({ ledger: ps.algod.network, tx: signedTx.blob })
         await checkCompleted(tx)
-    }catch(err){console.error(err)}
+    } catch (err) { console.error(err) }
 }

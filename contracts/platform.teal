@@ -1,33 +1,71 @@
-#pragma version 2
+#pragma version 3
 global GroupSize
 int 4
 ==
 byte ""
 store 0
-load 0
-arg 2
 int 0
+store 1
+load 0
+arg 2
+load 1
+load 1
+int 46
++
+substring3
+concat
+store 0
+load 1
+arg 2
+load 1
 int 45
++
+getbyte
++
+int 46
++
+store 1
+load 0
+arg 2
+load 1
+load 1
+int 4
++
 substring3
 concat
 store 0
+load 1
+arg 2
+load 1
+int 3
++
+getbyte
++
+int 4
++
+store 1
 load 0
 arg 2
-int 77
-int 82
+load 1
+load 1
+int 5
++
 substring3
 concat
 store 0
+load 1
+arg 2
+load 1
+int 4
++
+getbyte
++
+int 5
++
+store 1
 load 0
 arg 2
-int 90
-int 96
-substring3
-concat
-store 0
-load 0
-arg 2
-int 104
+load 1
 arg 2
 len
 substring3
@@ -36,7 +74,7 @@ store 0
 int 1
 load 0
 sha256
-byte base64(+6JTNXPoBFgmAvQW8QpK1A2Cu3sBvlhR8zsI4HjoFkY=)
+byte base64(rbA8nFCgFBsq6jSgStNpSZSI+bo3w+o7B8EqRtVhxjg=)
 ==
 &&
 byte "Program"
