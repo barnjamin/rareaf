@@ -2,7 +2,7 @@ import {platform_settings as ps} from './platform-conf'
 import listing_template from '../contracts/listing.teal.tmpl'
 import platform_delegate from '../contracts/platform.teal'
 import platform_delegate_signed from '../contracts/platform.signed'
-import { algosign, get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, sign, send, populate_contract, get_asa_txn } from './algorand'
+import { algosign, get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, sign, send, populate_contract, get_asa_txn, getAccount } from './algorand'
 
 const Buffer = require('buffer/').Buffer
 
@@ -29,8 +29,12 @@ export function encodeUint64(num) {
     return new Uint8Array(buf);
 }
 
-export async function createListing (creator_addr, price, asset_id) {
+export async function createListing (price, asset_id) {
     const client = await getClient()
+
+    const creator_addr = await getAccount()
+
+    console.log(price, asset_id)
 
     // Encode vars for inclusion in contract
     const var_price = Buffer.from(encodeUint64(price)).toString('base64')
@@ -53,6 +57,8 @@ export async function createListing (creator_addr, price, asset_id) {
     // Compile program, create logic sig 
     const compiled_program  = await client.compile(populated_program).do();
     const contract_addr     = compiled_program.hash
+
+    console.log(contract_addr)
 
     // Make logic sig for listing contract
     const program_bytes     = new Uint8Array(Buffer.from(compiled_program.result , "base64"));
@@ -104,6 +110,8 @@ export async function createListing (creator_addr, price, asset_id) {
 
     const {txid} = await client.sendRawTransaction([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob]).do()
     await algosdk.utils.waitForConfirmation(client, txId, 2);
+
+    return contract_addr
 }
 
 async function destroy_listing(){

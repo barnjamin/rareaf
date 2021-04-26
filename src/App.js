@@ -16,7 +16,8 @@ import Uploader from './Uploader'
 import AlgorandTokenizer from './AlgorandTokenizer'
 import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
-import RAF from './RAF'
+import RAF from './RAF.js'
+import Listing from './Listing.js'
 
 
 class App extends React.Component {
@@ -72,7 +73,9 @@ class App extends React.Component {
             <Divider />
             <AlgorandTokenizer cid={this.state.cid} />
           </Route>
-          <Route path="/raf/:id" children={<RAF />}>
+          <Route path="/raf/:id" children={<RAF  />}>
+          </Route>
+          <Route path="/listing/:addr" children={<Listing  />}>
           </Route>
         </Switch>
       </Router>

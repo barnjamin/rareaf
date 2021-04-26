@@ -27,7 +27,6 @@ export async function uploadMetadata(md) {
 }
 
 export async function getMetaFromIpfs(meta_hash) {
-    console.log(meta_hash)
     try {
         let data = "" 
         for await (const chunk of iclient.cat(meta_hash)) {

@@ -49,20 +49,27 @@ export async function getListings() {
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
         if (b.address == ps.address || b.amount == 0) continue;
-
-        const acct_resp = await AlgoSigner.indexer({
-            ledger: ps.algod.network,
-            path: `/v2/accounts/${b.address}`
-        });
-
-        for (let aid in acct_resp.account.assets) {
-            const asa = acct_resp.account.assets[aid]
-            if (asa['asset-id'] == ps.token.id) continue;
-            const token = await getToken(asa['asset-id'])
-            listings.push(token)
-        }
+        const tokens = getTokensFromListingAddress(b.address)
+        listings.push(tokens)
     }
 
+    return listings
+}
+
+export async function getTokensFromListingAddress(address) {
+    const acct_resp = await AlgoSigner.indexer({
+        ledger: ps.algod.network,
+        path: `/v2/accounts/${address}`
+    });
+
+
+    let listings = []
+    for (let aid in acct_resp.account.assets) {
+        const asa = acct_resp.account.assets[aid]
+        if (asa['asset-id'] == ps.token.id) continue;
+        const token = await getToken(asa['asset-id'])
+        listings.push(token)
+    }
     return listings
 }
 
@@ -245,8 +252,6 @@ export async function get_asa_txn(withSuggested, from, to, id, amt) {
 
 export async function createToken(acct, meta_cid) {
     const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
-
-    console.log(acct, meta_cid)
 
     const signedTx = await AlgoSigner.sign({
         from: acct,
