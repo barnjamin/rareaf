@@ -74,7 +74,7 @@ store 0
 int 1
 load 0
 sha256
-byte base64(mZKRNTNRc7UzD/R3yrMDeoJ2Qtjs2MrpDNhrtKZnI/g=)
+byte base64(oPKSYxH1GUUfh3bskK5z95BH0LXg/LMvgSVR1h8FSlk=)
 ==
 &&
 byte "Program"
@@ -159,7 +159,7 @@ global ZeroAddress
 ==
 &&
 gtxn 3 XferAsset
-int 1
+int 4
 ==
 &&
 gtxn 3 AssetReceiver

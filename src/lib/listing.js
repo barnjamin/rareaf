@@ -68,15 +68,19 @@ export async function createListing (price, asset_id) {
     stxn = await algosign(stxn)
     await send(stxn)
 
+    console.log("Sending payment")
     let nft_optin = await get_optin_txn(true, contract_addr, asset_id)
     nft_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(nft_optin)
     nft_optin = algosdk.signLogicSigTransactionObject(nft_optin, lsig);
     await client.sendRawTransaction(nft_optin.blob).do()
+    console.log("Opting into nft")
 
     let platform_optin = await get_optin_txn(true, contract_addr, ps.token.id)
     platform_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_optin)
     platform_optin = algosdk.signLogicSigTransactionObject(platform_optin, lsig);
     await client.sendRawTransaction(platform_optin.blob).do()
+    console.log("Opting into platform")
+
 
     //// Fund listing
     //const delegate_program      = await get_teal(platform_delegate)
@@ -108,6 +112,7 @@ export async function createListing (price, asset_id) {
     const s_seed_txn      = sign(seed_txn, creator_addr)
     const s_platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
+    download_txns("grouped.txns", [s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob])
     const {txid} = await client.sendRawTransaction([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob]).do()
     await algosdk.utils.waitForConfirmation(client, txId, 2);
 

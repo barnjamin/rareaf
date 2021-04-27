@@ -15,7 +15,7 @@ def listing():
         price.store(Int(0)),
         asset_id.store(Int(0)),
 
-        platform_token.store(Int(1)),
+        platform_token.store(Int(4)),
         platform_fee.store(Int(1000)),
         platform_addr.store(Bytes("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM")),
 
