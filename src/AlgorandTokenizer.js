@@ -49,9 +49,12 @@ class AlgorandTokenizer extends React.Component {
 
         const create_txn = await create_asa_txn(false, this.props.wallet.getDefaultAccount(), {cid:meta_cid, name:this.state.title})
         const signed = await this.props.wallet.sign(create_txn) 
-        const sent = await send_wait(signed)
+        await send_wait(signed)
 
         this.setState({waiting_for_tx:false})
+
+        //TODO:  redirect to /raf/:id
+
     }
 
     handleChange(event) {

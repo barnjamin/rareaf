@@ -1,8 +1,8 @@
-import {Transaction} from 'algosdk';
+import {TransactionParams} from 'algosdk';
 
 export interface SignedTxn {
-    txn: string;
-    blob: string;
+    txID: string;
+    blob: Uint8Array;
 }
 
 export interface Wallet {
@@ -15,7 +15,7 @@ export interface Wallet {
 
     getDefaultAccount(): string;
 
-    sign(txn: Transaction): Promise<SignedTxn>;
+    sign(txn: TransactionParams): Promise<SignedTxn>;
     signBytes(b: Uint8Array): Promise<Uint8Array>;
     signTeal(teal: Uint8Array): Promise<Uint8Array>;
 }

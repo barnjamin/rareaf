@@ -1,26 +1,55 @@
-import { Transaction } from 'algosdk'
-import {Wallet} from './wallet'
+import { TransactionParams } from 'algosdk'
+import {SignedTxn, Wallet} from './wallet'
+import {MyAlgo, Txn} from '@randlabs/myalgo-connect';
+
 
 
 class MyAlgoConnectWallet implements Wallet {
+    accounts: Array<string>
+    default_account: number
     network: string
-    connect(): Promise<boolean> {
-        throw new Error('Method not implemented.')
+
+    walletConn: MyAlgo 
+
+    constructor(network: string) {
+        this.network = network
+        this.accounts = []
+        this.default_account = 0
+
+        this.walletConn = new MyAlgo()
     }
+
+    async connect(): Promise<boolean> {
+        try {
+            const accounts = await this.walletConn.connect();
+            this.accounts = accounts.map((account) => account.address);
+        }catch(err){
+            alert("Failed to do the thing")
+            return false
+        }
+
+        return true;
+    }
+
     isConnected(): boolean {
-        throw new Error('Method not implemented.')
+        return this.accounts.length>0;
     }
-    sign(txn: Transaction): Promise<Uint8Array> {
-        throw new Error('Method not implemented.')
+
+    getDefaultAccount(): string {
+        return this.accounts[this.default_account];
     }
+
+    async sign(txn: TransactionParams): Promise<SignedTxn> {
+        return await this.walletConn.signTransaction(txn);
+    }
+
     signBytes(b: Uint8Array): Promise<Uint8Array> {
         throw new Error('Method not implemented.')
     }
-    signTeal(teal: Uint8Array): Promise<Uint8Array> {
-        throw new Error('Method not implemented.')
+
+    async signTeal(teal: Uint8Array): Promise<Uint8Array> {
+        return await this.walletConn.signLogicSig(teal, this.getDefaultAccount())
     }
-    accounts: Array<string>
-    default_account: number
 }
 
 export default MyAlgoConnectWallet

@@ -281,26 +281,19 @@ export async function destroy_asa_txn(addr, token_id) {
 
 export async function send_wait(signed){
     const client = getAlgodClient()
-    const txn = new Uint8Array(Buffer.from(signed.blob, 'base64'))
-    await client.sendRawTransaction([txn]).do()
+    await client.sendRawTransaction([signed.blob]).do()
     await waitForConfirmation(client, signed.txID, 3)
 }
 
 export async function waitForConfirmation(algodclient, txId, timeout) {
-    // Wait until the transaction is confirmed or rejected, or until 'timeout'
-    // number of rounds have passed.
-    //     Args:
-    // txId(str): the transaction to wait for
-    // timeout(int): maximum number of rounds to wait
-    // Returns:
-    // pending transaction information, or throws an error if the transaction
-    // is not confirmed or rejected in the next timeout rounds
     if (algodclient == null || txId == null || timeout < 0) {
       throw new Error('Bad arguments.');
     }
+
     const status = await algodclient.status().do();
     if (typeof status === 'undefined')
       throw new Error('Unable to get node status');
+
     const startround = status['last-round'] + 1;
     let currentround = startround;
   
@@ -309,6 +302,7 @@ export async function waitForConfirmation(algodclient, txId, timeout) {
       const pendingInfo = await algodclient
         .pendingTransactionInformation(txId)
         .do();
+
       if (pendingInfo !== undefined) {
         if (
           pendingInfo['confirmed-round'] !== null &&
@@ -331,6 +325,7 @@ export async function waitForConfirmation(algodclient, txId, timeout) {
       await algodclient.statusAfterBlock(currentround).do();
       currentround += 1;
     }
+
     /* eslint-enable no-await-in-loop */
     throw new Error(`Transaction not confirmed after ${timeout} rounds!`);
 }
