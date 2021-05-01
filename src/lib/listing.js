@@ -7,8 +7,6 @@ import {
     sign, send, populate_contract, get_asa_txn, getAccount 
 } from './algorand'
 
-const Buffer = require('buffer/').Buffer
-
 import algosdk from 'algosdk';
 
 export async function createListing (price, asset_id) {

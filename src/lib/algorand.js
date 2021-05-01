@@ -1,10 +1,8 @@
 /* eslint-disable no-console */
-import {getCIDFromMetadataHash, getMetaFromIpfs, resolveMetadataFromMetaHash } from "./ipfs";
+import { resolveMetadataFromMetaHash } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
-
 import algosdk from 'algosdk'  
 
-const Buffer = require('buffer/').Buffer
 
 export const pkToSk = {
     "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": algosdk.mnemonicToSecretKey(
