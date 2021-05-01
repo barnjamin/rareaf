@@ -63,10 +63,6 @@ export async function createListing (price, asset_id) {
 
 
     //// Fund listing
-    //const delegate_program      = await get_teal(platform_delegate)
-    //const compiled_delegate     = await client.compile(delegate_program).do()
-    //const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_delegate.result , "base64"));
-
     const compiled_bytes        = await get_teal(platform_delegate_signed)
     const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes , "base64"));
     const del_sig               = algosdk.logicSigFromByte(delegate_program_bytes)
@@ -101,8 +97,6 @@ export async function createListing (price, asset_id) {
 
 async function destroy_listing(){
     const client = await getClient()
-
-
 
     // Send assets and algos back to creator or platform wallet 
     // goal asset send -a 0 -o delist-platform.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $PLATFORM_ACCT --close-to $PLATFORM_ACCT
@@ -145,34 +139,4 @@ async function purchase_listing(){
     // 
     // 
     // ./sandbox goal clerk rawsend -f purchase.tx.signed
-}
-
-function translate_txn(o) {
-    delete o.name;
-    delete o.tag;
-    delete o.appArgs;
-    o.from = algosdk.encodeAddress(o.from.publicKey)
-    o.to = algosdk.encodeAddress(o.to.publicKey)
-    return o
-}
-
-function download_txns(name, txns) {
-    let b = new Uint8Array(0);
-    for(const txn in txns){
-        b = concatTypedArrays(b, txns[txn])
-    }
-    var blob = new Blob([b], {type: "application/octet-stream"});
-
-    var link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = name;
-    link.click();
-}
-
-
-function concatTypedArrays(a, b) { // a, b TypedArray of same type
-    var c = new (a.constructor)(a.length + b.length);
-    c.set(a, 0);
-    c.set(b, a.length);
-    return c;
 }
