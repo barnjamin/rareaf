@@ -4,7 +4,7 @@
 import React from 'react'
 import { createListing } from './lib/listing.js'
 import {uploadMetadata} from './lib/ipfs'
-import {createToken, getAccount} from './lib/algorand'
+import {create_asa_txn, send_wait} from './lib/algorand'
 import { Button } from "@blueprintjs/core"
 
 class AlgorandTokenizer extends React.Component {
@@ -23,10 +23,6 @@ class AlgorandTokenizer extends React.Component {
 
         this.handleChange = this.handleChange.bind(this)
         this.createMetaAndToken = this.createMetaAndToken.bind(this)
-
-        //then(acct =>{
-        //    createListing(acct, 500, 2)
-        //})
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -39,15 +35,22 @@ class AlgorandTokenizer extends React.Component {
     async createMetaAndToken(event) {
         event.stopPropagation()
         event.preventDefault()
+
         this.setState({waiting_for_tx:true})
+
+        let meta_cid;
         try{
-            const meta_cid = await uploadMetadata(this.captureMetadata())
+            meta_cid = await uploadMetadata(this.captureMetadata())
             this.setState({meta_cid:meta_cid})
-            const addr = await getAccount()
-            await createToken(addr, meta_cid)
         }catch(err){
-            console.error(err)
+            console.log("Failed to upload metadata")
+            return
         }
+
+        const create_txn = await create_asa_txn(false, this.props.wallet.getDefaultAccount(), {cid:meta_cid, name:this.state.title})
+        const signed = await this.props.wallet.sign(create_txn) 
+        const sent = await send_wait(signed)
+
         this.setState({waiting_for_tx:false})
     }
 

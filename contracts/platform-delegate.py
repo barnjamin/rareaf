@@ -9,7 +9,7 @@ address = "http://localhost:4001"
 client  = algod.AlgodClient(token,address)
 
 
-platform_token = Int(4)
+platform_token = Int(7)
 platform_acct = Addr("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM") 
 seed_amt = Int(int(5e6))
 

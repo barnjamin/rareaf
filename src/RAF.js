@@ -6,7 +6,6 @@ import {useParams, useHistory} from 'react-router-dom'
 import {getToken, destroyToken} from './lib/algorand'
 import {getCIDFromMetadataHash, getMetaFromIpfs} from './lib/ipfs'
 import {FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput} from '@blueprintjs/core'
-import { ButtonProps } from '@chakra-ui/react'
 import { createListing } from './lib/listing'
 
 

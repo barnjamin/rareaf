@@ -1,33 +1,15 @@
 import {platform_settings as ps} from './platform-conf'
 import listing_template from '../contracts/listing.teal.tmpl'
-import platform_delegate from '../contracts/platform.teal'
 import platform_delegate_signed from '../contracts/platform.signed'
-import { algosign, get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, sign, send, populate_contract, get_asa_txn, getAccount } from './algorand'
+import { 
+    waitForConfirmation, algosign, 
+    get_asa_cfg, get_teal, get_pay_txn, get_optin_txn, 
+    sign, send, populate_contract, get_asa_txn, getAccount 
+} from './algorand'
 
 const Buffer = require('buffer/').Buffer
 
-import 'algosdk';
-//import 'algosdk.utils';
-
-
-export async function getClient(){
-    const {token, server, port} = ps.algod
-    return new algosdk.Algodv2(token, server, port)
-}
-
-export async function create_platform() {
-    // If platform settings are empty this can get called
-    // Create token with name and units
-    // Create Delegated sig to give out this token
-    // save
-    return
-}
-
-export function encodeUint64(num) {
-    const buf = Buffer.allocUnsafe(8);
-    buf.writeBigUInt64BE(BigInt(num));
-    return new Uint8Array(buf);
-}
+import algosdk from 'algosdk';
 
 export async function createListing (price, asset_id) {
     const client = await getClient()
@@ -37,8 +19,8 @@ export async function createListing (price, asset_id) {
     console.log(price, asset_id)
 
     // Encode vars for inclusion in contract
-    const var_price = Buffer.from(encodeUint64(price)).toString('base64')
-    const var_id    = Buffer.from(encodeUint64(asset_id)).toString('base64')
+    const var_price = Buffer.from(algosdk.encodeUint64(price)).toString('base64')
+    const var_id    = Buffer.from(algosdk.encodeUint64(asset_id)).toString('base64')
     const var_addr  = Buffer.from(algosdk.decodeAddress(creator_addr).publicKey).toString('base64')
 
     const vars = {
@@ -114,13 +96,15 @@ export async function createListing (price, asset_id) {
 
     download_txns("grouped.txns", [s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob])
     const {txid} = await client.sendRawTransaction([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob]).do()
-    await algosdk.utils.waitForConfirmation(client, txId, 2);
+    await waitForConfirmation(client, txId, 2);
 
     return contract_addr
 }
 
 async function destroy_listing(){
     const client = await getClient()
+
+
 
     // Send assets and algos back to creator or platform wallet 
     // goal asset send -a 0 -o delist-platform.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $PLATFORM_ACCT --close-to $PLATFORM_ACCT

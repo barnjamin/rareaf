@@ -26,22 +26,20 @@ class App extends React.Component {
 
     this.state = { 
       cid: undefined, 
-      accounts: [],
-      account_idx: 0
+      wallet: undefined
     }
     this.setCID = this.setCID.bind(this)
 
-    this.setAccounts = this.setAccounts.bind(this)
-    this.onAccountChange = this.onAccountChange.bind(this)
-
+    this.setWallet = this.setWallet.bind(this)
+    this.walletConnected = this.walletConnected.bind(this)
   }
 
-  setAccounts(accts) {
-    this.setState({accounts:accts})
+  walletConnected(){
+    return (this.state.wallet !== undefined && this.state.wallet.isConnected())
   }
 
-  onAccountChange(v) {
-    this.setState({account_idx:v})
+  setWallet(wallet) {
+    this.setState({wallet:wallet})
   }
 
   setCID(cid) { this.setState({ cid: cid }) }
@@ -58,10 +56,10 @@ class App extends React.Component {
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
             <AlgorandWalletConnector 
-              connected={this.state.accounts.length>0}
-              accounts={this.state.accounts}
-              setAccounts={this.setAccounts} 
-              onAccountChange={this.onAccountChange}/>
+              walletConnected={this.walletConnected()} 
+              wallet={this.state.wallet}
+              setWallet={this.setWallet}
+              />
           </Navbar.Group>
         </Navbar>
         <Switch>
@@ -69,9 +67,9 @@ class App extends React.Component {
             <Browser />
           </Route>
           <Route path="/create" >
-            <Uploader onUploaded={this.setCID} cid={this.state.cid}>  </Uploader>
+            <Uploader onUploaded={this.setCID} cid={this.state.cid} wallet={this.state.wallet}>  </Uploader>
             <Divider />
-            <AlgorandTokenizer cid={this.state.cid} />
+            <AlgorandTokenizer cid={this.state.cid} wallet={this.state.wallet} />
           </Route>
           <Route path="/raf/:id" children={<RAF  />}>
           </Route>

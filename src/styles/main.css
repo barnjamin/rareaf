@@ -68,3 +68,10 @@
 .content-viewer img {
     width: 50%;
 }
+
+.wallet-option-list {
+    list-style:none
+}
+.wallet-option-list li {
+    margin: 10px;
+}

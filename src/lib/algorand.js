@@ -1,7 +1,11 @@
 /* eslint-disable no-console */
 import { getMetaFromIpfs } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
-import 'algosdk'
+
+import algosdk from 'algosdk'  
+
+const Buffer = require('buffer/').Buffer
+
 
 export const pkToSk = {
     "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": algosdk.mnemonicToSecretKey(
@@ -18,25 +22,13 @@ export const pkToSk = {
     ),
 }
 
-
-export async function isAlgorandWalletConnected() {
-    if (typeof AlgoSigner === 'undefined') return false;
-
-    try {
-        await getAccount()
-        return true
-    } catch (err) {
-        return false
+let client = undefined;
+export function getAlgodClient(){
+    if(client===undefined){
+        const {token, server, port} = ps.algod
+        client = new algosdk.Algodv2(token, server, port)
     }
-}
-
-export async function algoConnectWallet() {
-    if (typeof AlgoSigner === 'undefined')
-        alert('Make Sure AlgoSigner wallet is installed and connected');
-
-    try {
-        await AlgoSigner.connect()
-    } catch (err) { console.error("Failed to connect: ", err) }
+    return client
 }
 
 export async function getListings() {
@@ -71,6 +63,24 @@ export async function getTokensFromListingAddress(address) {
         listings.push(token)
     }
     return listings
+}
+
+export async function getDetailsOfListing(address) {
+    const txn_resp = await AlgoSigner.indexer({
+        ledger: ps.algod.network,
+        path: `/v2/transactions?address=${address}&asset-id=${ps.token.id}`
+    });
+    for(let idx in txn_resp.transactions) {
+        const txn = txn_resp.transactions[idx]
+        if (txn['asset-transfer-transaction'].amount==0) continue
+
+        return txn.signature.logicsig.args.map((a)=>{
+            const raw_bytes = Buffer.from(a, 'base64')
+            if(raw_bytes.length==8) return algosdk.decodeUint64(raw_bytes)
+            return raw_bytes
+        })
+    }
+    return []
 }
 
 export async function getToken(asset_id) {
@@ -116,16 +126,6 @@ export async function getTokenMetadataFromTransaction(token_id) {
     return await getMetaFromIpfs(data)
 }
 
-export async function getAccounts() {
-    return await AlgoSigner.accounts({ ledger: ps.algod.network })
-}
-
-export async function getAccount() {
-    let accts = await getAccounts()
-    return accts[0]["address"]
-}
-
-
 export async function populate_contract(template, variables) {
     //Read the program, Swap vars, spit out the filled out tmplate
     let program = await get_teal(template)
@@ -153,15 +153,6 @@ export function sign(txn, addr) {
     return txn.signTxn(pkToSk[addr].sk)
 }
 
-export async function algosign(txn) {
-    return await AlgoSigner.sign(txn)
-}
-
-export async function send(signed_tx) {
-    const txn = await AlgoSigner.send({ ledger: ps.algod.network, tx: signed_tx.blob })
-    await checkCompleted(txn)
-}
-
 export async function get_asa_cfg(withSuggested, from, asset, new_config) {
     const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
     const suggested = {
@@ -187,7 +178,6 @@ export async function get_asa_cfg(withSuggested, from, asset, new_config) {
     }
     return tmp
 }
-
 
 export async function get_pay_txn(withSuggested, from, to, amount) {
     const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
@@ -250,77 +240,118 @@ export async function get_asa_txn(withSuggested, from, to, id, amt) {
     return tmp
 }
 
-export async function createToken(acct, meta_cid) {
-    const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
+export async function create_asa_txn(withSuggested, addr, meta) {
+    const client = getAlgodClient();
+    const suggestedParams = await client.getTransactionParams().do();
 
-    const signedTx = await AlgoSigner.sign({
-        from: acct,
-        assetManager: acct,
-        assetName: "RareAF",
-        assetUnitName: "RAF",
+    let tmp = {
+        from: addr,
+        assetManager: addr,
+        assetName: meta.name,
         assetTotal: 1,
         assetDecimals: 0,
-        assetMetadataHash: Array.from(meta_cid.cid.multihash.subarray(2)),
+        assetMetadataHash: Array.from(meta.cid.multihash.subarray(2)),
         type: 'acfg',
-        fee: txParams['min-fee'],
-        firstRound: txParams['last-round'],
-        lastRound: txParams['last-round'] + 1000,
-        genesisID: txParams['genesis-id'],
-        genesisHash: txParams['genesis-hash'],
-        assetURL: "rare.af/"
-    });
-
-    let tx;
-    try {
-        tx = await AlgoSigner.send({ ledger: ps.algod.network, tx: signedTx.blob })
-    } catch (err) {
-        //TODO: alert error
-        console.error(err)
-        return
+        assetURL: "rare.af/",
     }
 
-    await checkCompleted(tx)
+    if (withSuggested){
+        tmp.suggestedParams=suggestedParams
+    }else{
+        tmp = { ...tmp, ...suggestedParams }
+    }
+
+    return tmp
 }
 
+export async function destroy_asa_txn(addr, token_id) {
+    const client = getAlgodClient();
+    const suggestedParams = await client.getTransactionParams().do();
 
-export async function checkCompleted(tx) {
-    let completed = false;
-    while (!completed) {
-        try {
-            const result = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/pending/' + tx.txId })
-            if (result['pool-error'] != "") {
-                console.error(result['pool-error'])
-                return
-            }
+    let tmp = { from: acct, assetIndex: token_id, type: 'acfg' }
 
-            if (result['confirmed-round'] !== undefined && result['confirmed-round'] > 0) {
-                completed = true
-            }
-        } catch (err) {
-            console.error(err)
-            return
+    if (withSuggested){
+        tmp.suggestedParams=suggestedParams
+    }else{
+        tmp = { ...tmp, ...suggestedParams }
+    }
+
+    return tmp
+}
+
+export async function send_wait(signed){
+    const client = getAlgodClient()
+    const txn = new Uint8Array(Buffer.from(signed.blob, 'base64'))
+    await client.sendRawTransaction([txn]).do()
+    await waitForConfirmation(client, signed.txID, 3)
+}
+
+export async function waitForConfirmation(algodclient, txId, timeout) {
+    // Wait until the transaction is confirmed or rejected, or until 'timeout'
+    // number of rounds have passed.
+    //     Args:
+    // txId(str): the transaction to wait for
+    // timeout(int): maximum number of rounds to wait
+    // Returns:
+    // pending transaction information, or throws an error if the transaction
+    // is not confirmed or rejected in the next timeout rounds
+    if (algodclient == null || txId == null || timeout < 0) {
+      throw new Error('Bad arguments.');
+    }
+    const status = await algodclient.status().do();
+    if (typeof status === 'undefined')
+      throw new Error('Unable to get node status');
+    const startround = status['last-round'] + 1;
+    let currentround = startround;
+  
+    /* eslint-disable no-await-in-loop */
+    while (currentround < startround + timeout) {
+      const pendingInfo = await algodclient
+        .pendingTransactionInformation(txId)
+        .do();
+      if (pendingInfo !== undefined) {
+        if (
+          pendingInfo['confirmed-round'] !== null &&
+          pendingInfo['confirmed-round'] > 0
+        ) {
+          // Got the completed Transaction
+          return pendingInfo;
         }
+  
+        if (
+          pendingInfo['pool-error'] != null &&
+          pendingInfo['pool-error'].length > 0
+        ) {
+          // If there was a pool error, then the transaction has been rejected!
+          throw new Error(
+            `Transaction Rejected pool error${pendingInfo['pool-error']}`
+          );
+        }
+      }
+      await algodclient.statusAfterBlock(currentround).do();
+      currentround += 1;
     }
+    /* eslint-enable no-await-in-loop */
+    throw new Error(`Transaction not confirmed after ${timeout} rounds!`);
 }
 
 
-export async function destroyToken(token_id) {
-    let accts = await AlgoSigner.accounts({ ledger: ps.algod.network })
-    const acct = accts[0]["address"]
-    let txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
-    let signedTx = await AlgoSigner.sign({
-        from: acct,
-        assetIndex: token_id,
-        type: 'acfg',
-        fee: txParams['min-fee'],
-        firstRound: txParams['last-round'],
-        lastRound: txParams['last-round'] + 1000,
-        genesisHash: txParams['genesis-hash'],
-        genesisID: txParams['genesis-id']
-    });
+function download_txns(name, txns) {
+    let b = new Uint8Array(0);
+    for(const txn in txns){
+        b = concatTypedArrays(b, txns[txn])
+    }
+    var blob = new Blob([b], {type: "application/octet-stream"});
 
-    try {
-        const tx = await AlgoSigner.send({ ledger: ps.algod.network, tx: signedTx.blob })
-        await checkCompleted(tx)
-    } catch (err) { console.error(err) }
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = name;
+    link.click();
+}
+
+function concatTypedArrays(a, b) { // a, b TypedArray of same type
+    var c = new (a.constructor)(a.length + b.length);
+    c.set(a, 0);
+    c.set(b, a.length);
+    return c;
 }
