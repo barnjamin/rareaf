@@ -1,6 +1,6 @@
 import { TransactionParams } from 'algosdk'
 import {SignedTxn, Wallet} from './wallet'
-import {MyAlgo, Txn} from '@randlabs/myalgo-connect';
+import MyAlgo from '@randlabs/myalgo-connect';
 
 
 
