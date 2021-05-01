@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { getMetaFromIpfs } from "./ipfs";
+import {getCIDFromMetadataHash, getMetaFromIpfs } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
 
 import algosdk from 'algosdk'  
@@ -41,8 +41,28 @@ export async function getListings() {
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
         if (b.address == ps.address || b.amount == 0) continue;
-        const tokens = getTokensFromListingAddress(b.address)
-        listings.push(tokens)
+        const tokens = await getTokensFromListingAddress(b.address)
+        const details = await getDetailsOfListing(b.address)
+
+        let metas = []
+        for(let tid in tokens){
+            const token = tokens[tid]
+            const mhash = getCIDFromMetadataHash(token.params['metadata-hash']).toString()
+            const md = await getMetaFromIpfs(mhash)
+
+            metas.push({
+                img_src:'http://ipfs.io/ipfs/'+md['file_hash'],
+                artist: md['artist'],
+                title: md['title'],
+            })
+        }
+
+        listings.push({
+            address: b.address, 
+            token:tokens[0], 
+            details:details, 
+            meta:metas[0]
+        })
     }
 
     return listings

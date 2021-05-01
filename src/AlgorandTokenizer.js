@@ -39,6 +39,7 @@ class AlgorandTokenizer extends React.Component {
         this.setState({waiting_for_tx:true})
 
         let meta_cid;
+        
         try{
             meta_cid = await uploadMetadata(this.captureMetadata())
             this.setState({meta_cid:meta_cid})
@@ -49,12 +50,12 @@ class AlgorandTokenizer extends React.Component {
 
         const create_txn = await create_asa_txn(false, this.props.wallet.getDefaultAccount(), {cid:meta_cid, name:this.state.title})
         const signed = await this.props.wallet.sign(create_txn) 
-        await send_wait(signed)
+        const res = await send_wait(signed)
+        console.log(res)
 
         this.setState({waiting_for_tx:false})
 
-        //TODO:  redirect to /raf/:id
-
+        // TODO:  redirect to /raf/:id
     }
 
     handleChange(event) {

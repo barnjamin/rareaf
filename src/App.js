@@ -64,16 +64,16 @@ class App extends React.Component {
         </Navbar>
         <Switch>
           <Route exact path="/" >
-            <Browser />
+            <Browser wallet={this.state.wallet} />
           </Route>
           <Route path="/create" >
             <Uploader onUploaded={this.setCID} cid={this.state.cid} wallet={this.state.wallet}>  </Uploader>
             <Divider />
             <AlgorandTokenizer cid={this.state.cid} wallet={this.state.wallet} />
           </Route>
-          <Route path="/raf/:id" children={<RAF  />}>
+          <Route path="/raf/:id" children={<RAF wallet={this.state.wallet} />}  >
           </Route>
-          <Route path="/listing/:addr" children={<Listing  />}>
+          <Route path="/listing/:addr" children={<Listing  wallet={this.state.wallet} />} >
           </Route>
         </Switch>
       </Router>
