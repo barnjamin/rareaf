@@ -53,9 +53,6 @@ class Browser extends React.Component {
                         <div className='container'>
                             <p>{m.meta.description}</p>
                         </div>
-                        <div className=''>
-
-                        </div>
                     </Card> 
                 ) 
             })

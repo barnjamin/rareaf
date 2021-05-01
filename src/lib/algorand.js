@@ -1,11 +1,10 @@
 /* eslint-disable no-console */
-import {getCIDFromMetadataHash, getMetaFromIpfs } from "./ipfs";
+import {getCIDFromMetadataHash, getMetaFromIpfs, resolveMetadataFromMetaHash } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
 
 import algosdk from 'algosdk'  
 
 const Buffer = require('buffer/').Buffer
-
 
 export const pkToSk = {
     "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": algosdk.mnemonicToSecretKey(
@@ -31,11 +30,18 @@ export function getAlgodClient(){
     return client
 }
 
+let indexer = undefined;
+export function getIndexer(){
+    if(indexer===undefined){
+        const {token, server, port} = ps.indexer
+        indexer = new algosdk.Indexer(token, server, port)
+    }
+    return indexer
+}
+
 export async function getListings() {
-    const balances = await AlgoSigner.indexer({
-        ledger: ps.algod.network,
-        path: `/v2/assets/${ps.token.id}/balances?currency-greater-than=0`,
-    });
+    const indexer = getIndexer()
+    const balances = await indexer.lookupAssetBalances(ps.token.id).do()
 
     let listings = []
     for (let bidx in balances.balances) {
@@ -47,14 +53,7 @@ export async function getListings() {
         let metas = []
         for(let tid in tokens){
             const token = tokens[tid]
-            const mhash = getCIDFromMetadataHash(token.params['metadata-hash']).toString()
-            const md = await getMetaFromIpfs(mhash)
-
-            metas.push({
-                img_src:'http://ipfs.io/ipfs/'+md['file_hash'],
-                artist: md['artist'],
-                title: md['title'],
-            })
+            metas.push(await resolveMetadataFromMetaHash(token['params']['metadata-hash']))
         }
 
         listings.push({
@@ -69,16 +68,14 @@ export async function getListings() {
 }
 
 export async function getTokensFromListingAddress(address) {
-    const acct_resp = await AlgoSigner.indexer({
-        ledger: ps.algod.network,
-        path: `/v2/accounts/${address}`
-    });
-
+    const indexer = getIndexer()
+    const acct_resp = await indexer.lookupAccountByID(address).do()
 
     let listings = []
     for (let aid in acct_resp.account.assets) {
         const asa = acct_resp.account.assets[aid]
         if (asa['asset-id'] == ps.token.id) continue;
+
         const token = await getToken(asa['asset-id'])
         listings.push(token)
     }
@@ -86,10 +83,13 @@ export async function getTokensFromListingAddress(address) {
 }
 
 export async function getDetailsOfListing(address) {
-    const txn_resp = await AlgoSigner.indexer({
-        ledger: ps.algod.network,
-        path: `/v2/transactions?address=${address}&asset-id=${ps.token.id}`
-    });
+    const indexer = getIndexer()
+    const txnsearch = indexer.searchForTransactions()
+    txnsearch.address(address)
+    txnsearch.assetID(ps.token.id)
+    const txn_resp = await txnsearch.do()
+
+
     for(let idx in txn_resp.transactions) {
         const txn = txn_resp.transactions[idx]
         if (txn['asset-transfer-transaction'].amount==0) continue
@@ -104,46 +104,15 @@ export async function getDetailsOfListing(address) {
 }
 
 export async function getToken(asset_id) {
-    const assets = await AlgoSigner.indexer({
-        ledger: ps.algod.network,
-        path: `/v2/assets/${asset_id}`,
-    });
+    const indexer = getIndexer()
+    const assets = await indexer.lookupAssetByID(asset_id).do()
     return assets.asset
 }
+
 
 export async function getTokenCreatedAt(asset_id) {
     const a = await getToken(asset_id)
     return a['created-at-round']
-}
-
-export async function getTokenMetadataFromTransaction(token_id) {
-    const tx = await AlgoSigner.indexer({
-        ledger: ps.algod.network,
-        path: `/v2/assets/${token_id}/transactions?limit=1&tx-type=acfg`
-    });
-
-    // Just take the first one
-    const created_tx = tx.transactions[0]
-
-    if (created_tx.note === undefined || created_tx.note.length == 0) {
-        return {}
-    }
-
-    //Base64 decode it
-    const data = atob(created_tx.note)
-
-    //If its a json object, just decode it
-    if (data.length > 2 && data.substr(0, 2) == '{"') {
-        try {
-            return JSON.parse(data)
-        } catch (err) { console.error(err) }
-    }
-
-    const d = data.split(",")
-    const meta = d[d.length - 1]
-
-    //Otherwise get it from ipfs directly
-    return await getMetaFromIpfs(data)
 }
 
 export async function populate_contract(template, variables) {

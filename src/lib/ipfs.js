@@ -26,6 +26,14 @@ export async function uploadMetadata(md) {
     return {} 
 }
 
+export async function resolveMetadataFromMetaHash(meta_hash) {
+    const mhash = getCIDFromMetadataHash(meta_hash).toString()
+    let md = await getMetaFromIpfs(mhash)
+    md['img_src'] = 'http://ipfs.io/ipfs/'+md['file_hash']
+
+    return md
+}
+
 export async function getMetaFromIpfs(meta_hash) {
     try {
         let data = "" 

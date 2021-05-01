@@ -5,7 +5,11 @@ export const platform_settings = {
         token:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         network: "sandnet"
     },
-
+    indexer: {
+        server:"http://localhost",
+        port:8980,
+        token:""
+    },
     ipfs:{
         host: "/ip4/127.0.0.1/tcp/5001"
     },
