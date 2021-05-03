@@ -2,7 +2,7 @@ import {platform_settings as ps} from './platform-conf'
 import { get_listing_compiled, get_signed_platform_bytes } from './contracts'
 import { 
     getAlgodClient, sendWait, waitForConfirmation,
-    get_asa_cfg, get_pay_txn, get_optin_txn, get_asa_txn
+    get_asa_cfg, get_pay_txn, get_optin_txn, get_asa_txn, sendWaitGroup
 } from './algorand'
 import algosdk from 'algosdk';
 import { Wallet } from '../wallets/wallet';
@@ -78,19 +78,18 @@ class listing {
         await sendWait(stxn)
 
         
-        let nft_optin = await get_optin_txn(true, this.contract_addr, this.asset_id)
-        nft_optin = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_optin), lsig);
+        let nft_optin   = await get_optin_txn(true, this.contract_addr, this.asset_id)
+        nft_optin       = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_optin), lsig);
         sendWait(nft_optin)
 
-        let platform_optin = await get_optin_txn(true, this.contract_addr, ps.token.id)
-        platform_optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_optin)
-        platform_optin = algosdk.signLogicSigTransactionObject(platform_optin, lsig);
-        await client.sendRawTransaction(platform_optin.blob).do()
+        let platform_optin  = await get_optin_txn(true, this.contract_addr, ps.token.id)
+        platform_optin      = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_optin), lsig);
+        await sendWait(platform_optin)
 
 
         //// Fund listing
         const compiled_bytes              = await get_signed_platform_bytes()
-        const var_price: string, var_id, var_addr = this.getEncodedVars()
+        const var_price, var_id, var_addr = this.getEncodedVars()
 
         const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes , "base64"));
         const del_sig               = algosdk.logicSigFromByte(delegate_program_bytes)
@@ -121,39 +120,40 @@ class listing {
         const s_seed_txn      = wallet.sign(pay_txn)
         const s_platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
-        const {txid} = await client.sendRawTransaction([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob]).do()
-        await waitForConfirmation(client, txid, 2);
+        await sendWaitGroup([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob])
     }
 
     async destroy_listing(wallet){
-        const client = await getAlgodClient()
-
-        const creator_addr = wallet.getDefaultAccount()
-
-        // goal asset send -a 0 -o delist-platform.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $PLATFORM_ACCT --close-to $PLATFORM_ACCT
         let platform_close = await get_asa_txn(false, this.contract_addr, ps.address, ps.token.id, 0)
         platform_close.closeRemainderTo = ps.address
 
 
-        let asa_cfg = await get_asa_cfg(true, creator_addr, this.asset_id, {manager:creator_addr, reserve:creator_addr, freeze:creator_addr, clawback:creator_addr})
+        let asa_cfg = await get_asa_cfg(true, this.creator_addr, this.asset_id, {
+            manager: this.creator_addr, 
+            reserve: this.creator_addr, 
+            freeze:  this.creator_addr, 
+            clawback:this.creator_addr
+        })
         
-        // goal asset send -a 0 -o delist-nft.txn --assetid $NFT_ID -f $CONTRACT_ACCT -t $CREATOR_ACCT --close-to $CREATOR_ACCT 
-        let nft_close = await get_asa_txn(false, this.contract_addr, creator_addr, this.asset_id, 0)
-        nft_close.closeRemainderTo = creator_addr
+        let nft_close = await get_asa_txn(false, this.contract_addr, this.creator_addr, this.asset_id, 0)
+        nft_close.closeRemainderTo = this.creator_addr
 
-        // goal clerk send -a 0 -o delist-algo.txn -f $CONTRACT_ACCT -t $CREATOR_ACCT  -F $CONTRACT_NAME  --close-to $CREATOR_ACCT
-        let algo_close = await get_pay_txn(false, this.contract_addr, creator_addr, 0)
-        algo_close.closeRemainderTo = creator_addr
+        let algo_close = await get_pay_txn(false, this.contract_addr, this.creator_addr, 0)
+        algo_close.closeRemainderTo = this.creator_addr
 
-        // goal clerk group -i delist.txn -o delist.txn.grouped
         const destroy_txn_group = [platform_close, asa_cfg, nft_close, algo_close]
         algosdk.assignGroupID(destroy_txn_group)
 
-        //Compile && sign listing
+
+        const lsig = await this.getLsig()
+
+        const s_platform_close = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_close), lsig);
+        const s_asa_cfg        = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(asa_cfg), lsig);
+        const s_nft_close      = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_close), lsig);
+        const s_algo_close     = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(algo_close), lsig);
 
 
-        // goal clerk sign -i delist.txn.grouped -o delist.txn.grouped.signed -p $CONTRACT_NAME
-        // goal clerk rawsend -f delist.txn.grouped.signed
+        await sendWaitGroup([s_platform_close, s_asa_cfg, s_nft_close, s_algo_close])
     }
 
 
@@ -161,20 +161,13 @@ class listing {
         const client = getAlgodClient()
 
         const buyer_addr = wallet.getDefaultAccount()
-        //  Buyer Opt in to NFT
-        //  goal asset send -a 0 --assetid $NFT_ID -f $BUYER_ACCT -t$BUYER_ACCT
+
         const nft_optin = await get_optin_txn(false, buyer_addr, this.asset_id)
+        const payment   = await get_pay_txn(false, buyer_addr, this.creator_addr)
 
-        //   Send algos to creator
-        //   goal clerk send -a 500 -o purchase-payment.txn -f $BUYER_ACCT -t $CREATOR_ACCT 
-        const payment = await get_pay_txn(false, buyer_addr, this.creator_addr)
-
-        //   Send NFT to buyer 
-        //   goal asset send -a 1 -o purchase-nft.txn --assetid $NFT_ID -f $CONTRACT_ACCT -t $BUYER_ACCT --close-to $BUYER_ACCT
         let nft_xfer = await get_asa_txn(false, this.contract_addr,  buyer_addr, 1)
         nft_xfer.closeRemainderTo = buyer_addr
 
-        // Reconfigure to to make the buyer the admin
         const asa_cfg = await get_asa_cfg(true, this.creator_addr, this.asset_id, {
             manager: this.creator_addr, 
             reserve: this.creator_addr, 
@@ -182,35 +175,26 @@ class listing {
             clawback:this.creator_addr
         })
 
-        //   Send a Platform Token to creator
-        //   goal asset send -a 1 -o purchase-platform.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $CREATOR_ACCT --close-to $PLATFORM_ACCT
         let platform_xfer = await get_asa_txn(false, this.contract_addr, ps.address, 1)
         platform_xfer.closeRemainderTo = ps.address
 
-
-        //   Platform gets fee, rest closes out to creator
-        //   goal clerk send -a 100 -o purchase-fee.txn -f $CONTRACT_ACCT -t $PLATFORM_ACCT --close-to $CREATOR_ACCT 
         let platform_fee = await get_pay_txn(false, this.contract_addr, ps.address, ps.fee)
         platform_fee.closeRemainderTo = this.creator_addr
 
-
-        const purchase_group = [nft_optin, payment, nft_xfer, asa_cfg, platform_xfer, platform_fee]
+        const purchase_group = [nft_optin, payment, asa_cfg, nft_xfer, platform_xfer, platform_fee]
         algosdk.assignGroupID(purchase_group)
 
-        const s_nft_optin = wallet.sign(nft_optin)
-        const s_payment = wallet.sign(payment)
-        //const s_nft_xfer =  sign xfer by contract
-        //const s_asa_cfg = sign reconf by contract
-        //const s_platform_xfer = sign xfer by contract
-        //const platform_fee = sign payment by contract
-        
-        //  #Sign
-        //  ./sandbox goal clerk sign -i purchase-sub-0 -o purchase-sub-0.signed
-        //  ./sandbox goal clerk sign -i purchase-sub-1 -o purchase-sub-1.signed -p $CONTRACT_NAME
-        //  ./sandbox goal clerk sign -i purchase-sub-2 -o purchase-sub-2.signed -p $CONTRACT_NAME
-        //  ./sandbox goal clerk sign -i purchase-sub-3 -o purchase-sub-3.signed -p $CONTRACT_NAME
+        const lsig = await this.getLsig()
 
-        // ./sandbox goal clerk rawsend -f purchase.tx.signed
+        const s_nft_optin       = await wallet.sign(nft_optin)
+        const s_payment         = await wallet.sign(payment)
+
+        const s_asa_cfg         = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(asa_cfg), lsig);
+        const s_nft_xfer        = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_xfer), lsig);
+        const s_platform_xfer   = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_xfer), lsig);
+        const s_platform_fee    = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_fee), lsig);
+
+        await sendWaitGroup([s_nft_optin, s_payment, s_asa_cfg, s_nft_xfer, s_platform_xfer, s_platform_fee])
     }
 }
 
