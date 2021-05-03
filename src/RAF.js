@@ -6,7 +6,7 @@ import {useParams, useHistory} from 'react-router-dom'
 import {getToken, destroyToken} from './lib/algorand'
 import {getCIDFromMetadataHash, getMetaFromIpfs} from './lib/ipfs'
 import {FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput} from '@blueprintjs/core'
-import { createListing } from './lib/listing'
+import listing from './lib/listing.ts'
 
 
 function RAF() {
@@ -52,13 +52,14 @@ function RAF() {
 
         // call create listing function with arguments 
         // for price/assetid 
-        const new_addr = await createListing(price, parseInt(id), this.props.wallet)
+        const lst = new listing(price, parseInt(id), this.props.wallet.getDefaultAccount())
+        await lst.createListing(this.props.wallet)
 
         // Wait for it to return
         setWaiting(false);
 
         // Return addr of created account with contents
-        history.push("/listing/"+new_addr)
+        history.push("/listing/"+lst.contract_addr)
     }
 
     return (

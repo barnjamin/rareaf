@@ -1,5 +1,5 @@
 
-import { TransactionParams } from 'algosdk'
+import { Transaction,TransactionParams } from 'algosdk'
 import { SignedTxn, Wallet } from './wallet'
 import algosdk from 'algosdk'
 
@@ -32,7 +32,7 @@ class InsecureWallet implements Wallet {
 
     async sign(txn: TransactionParams): Promise<SignedTxn> {
         let addr = this.getDefaultAccount()
-        return algosdk.signTransaction(txn, this.pkToSk[addr])
+        return algosdk.signTransaction(new Transaction(txn), this.pkToSk[addr])
     }
 
     async signBytes(b: Uint8Array): Promise<Uint8Array> {

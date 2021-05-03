@@ -2,8 +2,6 @@
 import { resolveMetadataFromMetaHash } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
 import algosdk from 'algosdk'  
-import { add } from "ipfs-http-client/src/pin/remote/service";
-
 
 
 let client = undefined;
@@ -99,29 +97,6 @@ export async function getTokenCreatedAt(asset_id) {
     return a['created-at-round']
 }
 
-export async function populate_contract(template, variables) {
-    //Read the program, Swap vars, spit out the filled out tmplate
-    let program = await get_teal(template)
-    for (let v in variables) {
-        program = program.replace("$" + v, variables[v])
-    }
-    return program
-}
-
-export async function get_teal(program) {
-    return await fetch(program)
-        .then(response => checkStatus(response) && response.arrayBuffer())
-        .then(buffer => {
-            const td = new TextDecoder()
-            return td.decode(buffer)
-        }).catch(err => console.error(err));
-}
-
-function checkStatus(response) {
-    if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-    return response;
-}
-
 export async function get_asa_cfg(withSuggested, from, asset, new_config) {
     return addSuggested(withSuggested, {
         from: from,
@@ -196,6 +171,12 @@ export async function getSuggested(){
         genesisID: txParams['genesis-id'],
         genesisHash: txParams['genesis-hash']
     }
+}
+
+export async function sendWaitGroup(signed) {
+    const client = getAlgodClient()
+    await client.sendRawTransaction(signed.map(s=>{return s.blob})).do()
+    await waitForConfirmation(client, signed.txID, 3)
 }
 
 export async function sendWait(signed){

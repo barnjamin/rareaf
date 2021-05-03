@@ -5,9 +5,11 @@ import React, {useState, useEffect} from 'react'
 import {useParams, useHistory} from 'react-router-dom'
 import {getDetailsOfListing, getTokensFromListingAddress} from './lib/algorand'
 import {Button} from '@blueprintjs/core'
-import {getCIDFromMetadataHash, getMetaFromIpfs, resolveMetadataFromMetaHash} from './lib/ipfs'
+import { resolveMetadataFromMetaHash } from './lib/ipfs'
+import listing from './lib/listing.ts'
 
 function Listing() {
+
     const {addr} = useParams();
     const [token, setToken] = useState({});
     const [md, setMetadata] = useState({img_src:'', artist:'', title:''})

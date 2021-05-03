@@ -7,8 +7,8 @@ import InsecureWallet from './wallets/insecurewallet'
 
 import { platform_settings } from './lib/platform-conf'
 
-import React, {useState} from 'react'
-import {Dialog, Button, Classes, HTMLSelect, Icon} from '@blueprintjs/core'
+import React from 'react'
+import {Dialog, Button, Classes, HTMLSelect} from '@blueprintjs/core'
 
 const pkToMnemonic = {
     "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
@@ -24,8 +24,6 @@ const pkToMnemonic = {
         "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"
     ],
 }
-
-
 
 
 class AlgorandWalletConnector extends React.Component {
@@ -73,15 +71,11 @@ class AlgorandWalletConnector extends React.Component {
             const wallet = new this.state.allowedWallets[wname](platform_settings.algod.network)
 
             if (wname == 'insecure-wallet'){
-                console.log("hi")
                 if(!await wallet.connect(pkToMnemonic)){
-                console.log("bye")
-
                     alert("Couldn't connect to preferred wallet: ", wname)
                     this.disconnectWallet()
                     return
                 }
-                console.log("ok?")
             }else{
                 if(!await wallet.connect()){
                     alert("Couldn't connect to preferred wallet: ", wname)

@@ -2,7 +2,6 @@
 'use strict'
 
 import React from 'react'
-import { createListing } from './lib/listing.js'
 import {uploadMetadata} from './lib/ipfs'
 import {create_asa_txn, send_wait} from './lib/algorand'
 import { Button } from "@blueprintjs/core"
