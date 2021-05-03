@@ -32,7 +32,10 @@ export async function get_teal(program) {
         .then(buffer => {
             const td = new TextDecoder()
             return td.decode(buffer)
-        }).catch(err => console.error(err));
+        }).catch(err => {
+            console.error(err)
+            return ""
+        });
 }
 
 function checkStatus(response) {

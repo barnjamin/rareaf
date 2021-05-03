@@ -36,7 +36,7 @@ class listing {
 
     getVars(){
 
-        const var_price, var_id, var_addr = this.getEncodedVars()
+        const [var_price, var_id, var_addr] = this.getEncodedVars()
 
         return {
             TMPL_PLATFORM_ID      : ps.token.id,
@@ -89,13 +89,14 @@ class listing {
 
         //// Fund listing
         const compiled_bytes              = await get_signed_platform_bytes()
-        const var_price, var_id, var_addr = this.getEncodedVars()
+        const [var_price, var_id, var_addr] = this.getEncodedVars()
 
-        const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes , "base64"));
+
+        const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes, "base64"));
         const del_sig               = algosdk.logicSigFromByte(delegate_program_bytes)
-        del_sig.args                = [ new Uint8Array(Buffer.from(var_price, "base64")), 
-                                        new Uint8Array(Buffer.from(var_id, "base64")), 
-                                        new Uint8Array(Buffer.from(program_bytes, "base64")) ]
+        del_sig.args                = [
+            new Uint8Array(Buffer.from(var_price, "base64")), new Uint8Array(Buffer.from(var_id, "base64")), program_bytes 
+        ]
 
         let asa_send      = await get_asa_txn(true, this.creator_addr, this.contract_addr, this.asset_id, 1)
         let asa_cfg       = await get_asa_cfg(true, this.creator_addr, this.asset_id, {
