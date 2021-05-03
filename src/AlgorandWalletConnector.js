@@ -20,27 +20,64 @@ class AlgorandWalletConnector extends React.Component {
             },
             wallet: undefined
         }
-        //this.componentDidMount = this.componentDidMount.bind(this)
-        this.handleChange = this.handleChange.bind(this)
-        this.handleDisplayChooseWallet = this.handleDisplayChooseWallet.bind(this)
-        this.handleChoseWallet = this.handleChoseWallet.bind(this)
+
+        this.componentDidMount = this.componentDidMount.bind(this)
+
+        this.tryConnectWallet = this.tryConnectWallet.bind(this)
+        this.disconnectWallet = this.disconnectWallet.bind(this)
+
+        this.handleChange                  = this.handleChange.bind(this)
+        this.handleDisplayWalletSelection  = this.handleDisplayWalletSelection.bind(this)
+        this.handleSelectedWallet       = this.handleSelectedWallet.bind(this)
+        this.handleDisconnectWallet     = this.handleDisconnectWallet.bind(this)
     }
 
-    handleDisplayChooseWallet(){
+    componentDidMount(){
+        this.tryConnectWallet()
+    }
+
+
+    disconnectWallet(){
+        //Unset state
+        this.props.setWallet(undefined)
+        this.setState({wallet:undefined})
+        sessionStorage.setItem('wallet-preference','')
+    }
+
+    async tryConnectWallet(){
+        if(this.state.wallet === undefined){
+
+            const wname = sessionStorage.getItem('wallet-preference');
+            if(!(wname in this.state.allowedWallets)) return
+
+            const wallet = new this.state.allowedWallets[wname](platform_settings.algod.network)
+
+            if(!await wallet.connect()){
+                alert("Couldn't connect to preferred wallet: ", wname)
+
+                this.disconnectWallet()
+
+                return
+            }
+
+            this.setState({wallet: wallet})
+            this.props.setWallet(wallet)
+        }
+    }
+
+    handleDisconnectWallet(){
+        this.disconnectWallet()
+    }
+
+    handleDisplayWalletSelection(){
         this.setState({walletSelectorOpen:true})
     }
 
-    async handleChoseWallet(e){
+    async handleSelectedWallet(e){
         const tgt = e.currentTarget
         if(tgt.id in this.state.allowedWallets){
-            const wallet = new this.state.allowedWallets[tgt.id](platform_settings.algod.network)
-
-            this.setState({wallet: wallet})
-
-            if(!await wallet.connect())
-                alert("Failzore: Couldnt connect to wallet, is it definitely installed?")
-
-            this.props.setWallet(wallet)
+            sessionStorage.setItem('wallet-preference', tgt.id)
+            await this.tryConnectWallet()
         }
         this.setState({walletSelectorOpen:false})
     }
@@ -58,16 +95,16 @@ class AlgorandWalletConnector extends React.Component {
                         rightIcon='selection' 
                         intent='warning' 
                         outlined={true} 
-                        onClick={this.handleDisplayChooseWallet}>Connect Wallet</Button>
+                        onClick={this.handleDisplayWalletSelection}>Connect Wallet</Button>
 
-                    <Dialog isOpen={this.state.walletSelectorOpen} title='Select Wallet' onClose={this.handleChoseWallet} >
+                    <Dialog isOpen={this.state.walletSelectorOpen} title='Select Wallet' onClose={this.handleSelectedWallet} >
                         <div className={Classes.DIALOG_BODY}>
                             <ul className='wallet-option-list'>
                                 <li> 
-                                    <Button id={'algo-signer'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleChoseWallet}>Algo Signer</Button>
+                                    <Button id={'algo-signer'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>Algo Signer</Button>
                                 </li>
                                 <li> 
-                                    <Button id={'my-algo-connect'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleChoseWallet}>My Algo Connect</Button>
+                                    <Button id={'my-algo-connect'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>My Algo Connect</Button>
                                 </li>
                             </ul>
                         </div>
@@ -83,9 +120,12 @@ class AlgorandWalletConnector extends React.Component {
         const iconprops = {icon:'symbol-circle', intent:'success'}
 
         return (
+            <div>
             <HTMLSelect onChange={this.handleChange} minimal={true} iconProps={iconprops} >
                 {addr_list}
             </HTMLSelect>
+            <Button icon='log-out' minimal={true}  onClick={this.handleDisconnectWallet} ></Button>
+            </div>
         )
     }
 }

@@ -10,8 +10,6 @@ import {
 } from "react-router-dom";
 import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
 
-import {isAlgorandWalletConnected} from './lib/algorand'
-
 import Uploader from './Uploader'
 import AlgorandTokenizer from './AlgorandTokenizer'
 import Browser  from './Browser'
@@ -28,6 +26,7 @@ class App extends React.Component {
       cid: undefined, 
       wallet: undefined
     }
+
     this.setCID = this.setCID.bind(this)
 
     this.setWallet = this.setWallet.bind(this)
