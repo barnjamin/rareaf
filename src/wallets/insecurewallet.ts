@@ -1,31 +1,48 @@
 
 import { TransactionParams } from 'algosdk'
 import { SignedTxn, Wallet } from './wallet'
-
+import algosdk from 'algosdk'
 
 class InsecureWallet implements Wallet {
     accounts: string[]
     default_account: number
     network: string
 
-    connect(): Promise<boolean> {
-        //TODO: read in file containing wallet with pk => mneumonic
-        throw new Error('Method not implemented.')
+    pkToSk: object
+
+    async connect(settings: object): Promise<boolean> {
+        this.accounts = []
+        this.pkToSk  = {}
+        for(const pk in settings){
+            this.accounts.push(pk)
+            this.default_account = 0;
+            this.pkToSk[pk] = algosdk.mnemonicToSecretKey(settings[pk].join(" "))
+        }
+
+        return true
     }
+
     isConnected(): boolean {
-        throw new Error('Method not implemented.')
+        return this.accounts.length>0;
     }
+
     getDefaultAccount(): string {
-        throw new Error('Method not implemented.')
+        return this.accounts[0];
     }
-    sign(txn: TransactionParams): Promise<SignedTxn> {
-        throw new Error('Method not implemented.')
+
+    async sign(txn: TransactionParams): Promise<SignedTxn> {
+        let addr = this.getDefaultAccount()
+        return algosdk.signTransaction(txn, this.pkToSk[addr])
     }
-    signBytes(b: Uint8Array): Promise<Uint8Array> {
-        throw new Error('Method not implemented.')
+
+    async signBytes(b: Uint8Array): Promise<Uint8Array> {
+        let addr = this.getDefaultAccount()
+        return algosdk.signBytes(b, this.pkToSk[addr])
     }
+
     signTeal(teal: Uint8Array): Promise<Uint8Array> {
         throw new Error('Method not implemented.')
     }
-
 }
+
+export default InsecureWallet;

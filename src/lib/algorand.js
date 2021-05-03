@@ -2,22 +2,9 @@
 import { resolveMetadataFromMetaHash } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
 import algosdk from 'algosdk'  
+import { add } from "ipfs-http-client/src/pin/remote/service";
 
 
-export const pkToSk = {
-    "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": algosdk.mnemonicToSecretKey(
-        ["loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below", 
-         "when", "false", "ripple", "cute", "buffalo", "tissue", "again", "boring", "manual", "excuse", "absent", "injury"].join(" ")
-    ),
-    "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM": algosdk.mnemonicToSecretKey(
-        ["genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found", 
-         "please", "then", "snack", "nice", "arrest", "coin", "seminar", "pyramid", "adult", "flip", "absorb", "apology"].join(" ")
-    ),
-    "DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4": algosdk.mnemonicToSecretKey(
-        ["train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox", 
-         "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"].join(" ")
-    ),
-}
 
 let client = undefined;
 export function getAlgodClient(){
@@ -107,7 +94,6 @@ export async function getToken(asset_id) {
     return assets.asset
 }
 
-
 export async function getTokenCreatedAt(asset_id) {
     const a = await getToken(asset_id)
     return a['created-at-round']
@@ -136,102 +122,41 @@ function checkStatus(response) {
     return response;
 }
 
-export function sign(txn, addr) { 
-    return txn.signTxn(pkToSk[addr].sk)
-}
-
 export async function get_asa_cfg(withSuggested, from, asset, new_config) {
-    const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
-    const suggested = {
-        fee: txParams['min-fee'],
-        firstRound: txParams['last-round'],
-        lastRound: txParams['last-round'] + 1000,
-        genesisID: txParams['genesis-id'],
-        genesisHash: txParams['genesis-hash'],
-    }
-    let tmp = {
+    return addSuggested(withSuggested, {
         from: from,
         assetIndex: asset,
         type: 'acfg',
         ...new_config
-    }
-    if (withSuggested) {
-        tmp.suggestedParams = suggested
-    } else {
-        tmp = {
-            ...tmp,
-            ...suggestede
-        }
-    }
-    return tmp
+    })
 }
 
 export async function get_pay_txn(withSuggested, from, to, amount) {
-    const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
-    const suggested = {
-        fee: txParams['min-fee'],
-        firstRound: txParams['last-round'],
-        lastRound: txParams['last-round'] + 10,
-        genesisID: txParams['genesis-id'],
-        genesisHash: txParams['genesis-hash']
-    }
-    let tmp = {
+    return addSuggested(withSuggested, {
         from: from,
         to: to,
         type: 'pay',
         amount: amount,
-    }
-
-    if (withSuggested) {
-        tmp.suggestedParams = suggested
-    } else {
-        tmp = {
-            ...tmp,
-            ...suggested
-        }
-    }
-    return tmp
+    })
 }
 
 export async function get_optin_txn(withSuggested, addr, id) {
     return get_asa_txn(withSuggested, addr, addr, id, 0)
 }
 
-export async function get_asa_txn(withSuggested, from, to, id, amt) {
-    const txParams = await AlgoSigner.algod({ ledger: ps.algod.network, path: '/v2/transactions/params' })
-    const suggested = {
-        fee: txParams['min-fee'],
-        firstRound: txParams['last-round'],
-        lastRound: txParams['last-round'] + 10,
-        genesisID: txParams['genesis-id'],
-        genesisHash: txParams['genesis-hash']
-    }
 
-    let tmp = {
+export async function get_asa_txn(withSuggested, from, to, id, amt) {
+    return addSuggested(withSuggested, {
         from: from,
         to: to,
         assetIndex: id,
         type: 'axfer',
         amount: amt,
-    }
-
-    if (withSuggested) {
-        tmp.suggestedParams = suggested
-    } else {
-        tmp = {
-            ...tmp,
-            ...suggested
-        }
-    }
-
-    return tmp
+    })
 }
 
 export async function create_asa_txn(withSuggested, addr, meta) {
-    const client = getAlgodClient();
-    const suggestedParams = await client.getTransactionParams().do();
-
-    let tmp = {
+    return addSuggested(withSuggested, {
         from: addr,
         assetManager: addr,
         assetName: meta.name,
@@ -240,33 +165,40 @@ export async function create_asa_txn(withSuggested, addr, meta) {
         assetMetadataHash: Array.from(meta.cid.multihash.subarray(2)),
         type: 'acfg',
         assetURL: "rare.af/",
-    }
-
-    if (withSuggested){
-        tmp.suggestedParams=suggestedParams
-    }else{
-        tmp = { ...tmp, ...suggestedParams }
-    }
-
-    return tmp
+    })
 }
 
-export async function destroy_asa_txn(addr, token_id) {
+export async function destroy_asa_txn(withSuggested, addr, token_id) {
+    return addSuggested(withSuggested, {
+        from: addr, 
+        assetIndex: token_id, 
+        type: 'acfg' 
+    })
+}
+
+export async function addSuggested(named, tmp){
+    const suggestedParams = getSuggested()
+
+    if (named)
+        return tmp.suggestedParams=suggestedParams
+        
+    return  { ...tmp, ...suggestedParams }
+}
+
+export async function getSuggested(){
     const client = getAlgodClient();
-    const suggestedParams = await client.getTransactionParams().do();
+    const txParams = await client.getTransactionParams().do();
 
-    let tmp = { from: acct, assetIndex: token_id, type: 'acfg' }
-
-    if (withSuggested){
-        tmp.suggestedParams=suggestedParams
-    }else{
-        tmp = { ...tmp, ...suggestedParams }
+    return {
+        fee: txParams['min-fee'],
+        firstRound: txParams['last-round'],
+        lastRound: txParams['last-round'] + 10,
+        genesisID: txParams['genesis-id'],
+        genesisHash: txParams['genesis-hash']
     }
-
-    return tmp
 }
 
-export async function send_wait(signed){
+export async function sendWait(signed){
     const client = getAlgodClient()
     await client.sendRawTransaction([signed.blob]).do()
     await waitForConfirmation(client, signed.txID, 3)

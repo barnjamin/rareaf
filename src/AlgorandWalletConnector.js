@@ -3,11 +3,30 @@
 
 import AlgoSignerWallet from './wallets/algosignerwallet'
 import MyAlgoConnectWallet from './wallets/myalgoconnect'
+import InsecureWallet from './wallets/insecurewallet'
 
 import { platform_settings } from './lib/platform-conf'
 
 import React, {useState} from 'react'
 import {Dialog, Button, Classes, HTMLSelect, Icon} from '@blueprintjs/core'
+
+const pkToMnemonic = {
+    "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
+        "loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below", 
+        "when", "false", "ripple", "cute", "buffalo", "tissue", "again", "boring", "manual", "excuse", "absent", "injury"
+    ],
+    "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM": [
+        "genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found", 
+        "please", "then", "snack", "nice", "arrest", "coin", "seminar", "pyramid", "adult", "flip", "absorb", "apology"
+    ],
+    "DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4": [
+        "train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox", 
+        "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"
+    ],
+}
+
+
+
 
 class AlgorandWalletConnector extends React.Component {
     constructor(props) {
@@ -17,6 +36,7 @@ class AlgorandWalletConnector extends React.Component {
             allowedWallets:{
                 'algo-signer':AlgoSignerWallet,
                 'my-algo-connect':MyAlgoConnectWallet,
+                'insecure-wallet':InsecureWallet
             },
             wallet: undefined
         }
@@ -52,12 +72,22 @@ class AlgorandWalletConnector extends React.Component {
 
             const wallet = new this.state.allowedWallets[wname](platform_settings.algod.network)
 
-            if(!await wallet.connect()){
-                alert("Couldn't connect to preferred wallet: ", wname)
+            if (wname == 'insecure-wallet'){
+                console.log("hi")
+                if(!await wallet.connect(pkToMnemonic)){
+                console.log("bye")
 
-                this.disconnectWallet()
-
-                return
+                    alert("Couldn't connect to preferred wallet: ", wname)
+                    this.disconnectWallet()
+                    return
+                }
+                console.log("ok?")
+            }else{
+                if(!await wallet.connect()){
+                    alert("Couldn't connect to preferred wallet: ", wname)
+                    this.disconnectWallet()
+                    return
+                }
             }
 
             this.setState({wallet: wallet})
@@ -105,6 +135,9 @@ class AlgorandWalletConnector extends React.Component {
                                 </li>
                                 <li> 
                                     <Button id={'my-algo-connect'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>My Algo Connect</Button>
+                                </li>
+                                <li> 
+                                    <Button id={'insecure-wallet'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>Insecure Wallet</Button>
                                 </li>
                             </ul>
                         </div>

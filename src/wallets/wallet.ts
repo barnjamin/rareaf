@@ -5,12 +5,13 @@ export interface SignedTxn {
     blob: Uint8Array;
 }
 
+
 export interface Wallet {
     accounts: Array<string>;
     default_account: number;
     network: string;
 
-    connect(): Promise<boolean>;
+    connect(settings?: object): Promise<boolean>;
     isConnected(): boolean;
 
     getDefaultAccount(): string;

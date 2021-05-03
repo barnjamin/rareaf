@@ -52,7 +52,7 @@ function RAF() {
 
         // call create listing function with arguments 
         // for price/assetid 
-        const new_addr = await createListing(price, parseInt(id))
+        const new_addr = await createListing(price, parseInt(id), this.props.wallet)
 
         // Wait for it to return
         setWaiting(false);
