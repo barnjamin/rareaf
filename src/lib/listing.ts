@@ -6,6 +6,7 @@ import {
 } from './algorand'
 import algosdk from 'algosdk';
 import { Wallet } from '../wallets/wallet';
+import NFT from './nft'
 
 
 class listing {
@@ -15,6 +16,8 @@ class listing {
     creator_addr: string
     contract_addr: string
 
+    nft: NFT 
+
 
     constructor(price: number, asset_id: number, creator_addr: string, contract_addr?: string) {
         this.price          = price
@@ -22,8 +25,6 @@ class listing {
         this.creator_addr   = creator_addr
         this.contract_addr  = contract_addr
     }
-
-
 
     getEncodedVars(){
         // Encode vars for inclusion in contract

@@ -2,6 +2,8 @@
 import { resolveMetadataFromMetaHash } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
 import algosdk from 'algosdk'  
+import listing from "./listing";
+import NFT from "./nft";
 
 
 let client = undefined;
@@ -22,15 +24,32 @@ export function getIndexer(){
     return indexer
 }
 
+export async function getListing(addr) {
+    const tokens  = await getTokensFromListingAddress(addr)
+
+    if(tokens.length==0){
+        console.error("No nfts in that listing?")
+        return 
+    }
+
+    const details = await getDetailsOfListing(addr)
+    const creator = await getListingCreator(addr)
+    const md      = await resolveMetadataFromMetaHash(tokens[0]['params']['metadata-hash'])
+
+    let l = new listing(details[0], tokens[0]['index'], creator, addr)
+    l.nft = new NFT(md)
+    return l
+}
+
 export async function getListings() {
-    const indexer = getIndexer()
+    const indexer  = getIndexer()
     const balances = await indexer.lookupAssetBalances(ps.token.id).do()
 
     let listings = []
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
         if (b.address == ps.address || b.amount == 0) continue;
-        const tokens = await getTokensFromListingAddress(b.address)
+        const tokens  = await getTokensFromListingAddress(b.address)
         const details = await getDetailsOfListing(b.address)
 
         let metas = []
@@ -48,6 +67,11 @@ export async function getListings() {
     }
 
     return listings
+}
+
+export async function getListingCreator(addr) {
+
+
 }
 
 export async function getTokensFromListingAddress(address) {
@@ -70,11 +94,13 @@ export async function getDetailsOfListing(address) {
     const txnsearch = indexer.searchForTransactions()
     txnsearch.address(address)
     txnsearch.assetID(ps.token.id)
-    const txn_resp = await txnsearch.do()
 
+    const txn_resp = await txnsearch.do()
 
     for(let idx in txn_resp.transactions) {
         const txn = txn_resp.transactions[idx]
+
+        //TODO take out once indexer is fixed
         if (txn['asset-transfer-transaction'].amount==0) continue
 
         return txn.signature.logicsig.args.map((a)=>{
