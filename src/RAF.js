@@ -3,34 +3,29 @@
 
 import React, {useState, useEffect} from 'react'
 import {useParams, useHistory} from 'react-router-dom'
-import {getToken, destroyToken} from './lib/algorand'
-import {getCIDFromMetadataHash, getMetaFromIpfs} from './lib/ipfs'
+import {getNFT, destroyToken} from './lib/algorand'
 import {FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput} from '@blueprintjs/core'
 import listing from './lib/listing.ts'
+import NFT from './lib/nft'
 
 
 function RAF() {
     let {id} = useParams();
     let history = useHistory();
 
-    const [md, setMeta] = useState({'img_src':'http://via.placeholder.com/550', 'title':''})
+    const [nft, setNFT] = useState(new NFT({}))
+
     const [waiting_for_tx, setWaiting] = useState(false)
+
     const [listingVisible, setListingVisible] = useState(false)
     const [price, setPrice] = useState(0)
     
     useEffect(()=>{
-        if(md.title==''){
-            getTokenMetadata()
-            .then((md)=>{ setMeta({img_src:'http://ipfs.io/ipfs/'+md['file_hash'], title:md['title'], artist:md['artist']}) })
+        if(nft.asset_id === undefined){
+            getNFT(id).then((nft)=>{ setNFT(nft) })
             .catch((err)=>{ console.log("Error:", err) })
         }
     });
-
-    async function getTokenMetadata() {
-        const token = await getToken(id)
-        const cid = getCIDFromMetadataHash(token['params']['metadata-hash'])
-        return await getMetaFromIpfs(cid.toString())
-    }
 
 
     function handleCreateListing(){ setListingVisible(true) }
@@ -65,11 +60,11 @@ function RAF() {
     return (
         <div className='container'>
             <div className='content content-viewer' >
-                <img className='content-img' src={md.img_src} />
+                <img className='content-img' src={nft.imgSrc()} />
             </div>
             <div className='container' >
                 <div className='content'>
-                    <p><b>{md.title}</b> - <i>{md.artist}</i></p>
+                    <p><b>{nft.title}</b> - <i>{nft.artist}</i></p>
                 </div>
             </div>
 
@@ -84,12 +79,12 @@ function RAF() {
                 <DialogStep 
                     id="price" 
                     title="price" 
-                    panel={<ListingDetails tokenId={id} price={price} onPriceChange={handlePriceChange} ></ListingDetails>}>
+                    panel={<ListingDetails tokenId={nft.asset_id} price={price} onPriceChange={handlePriceChange} ></ListingDetails>}>
                 </DialogStep>
                 <DialogStep 
                     id="confirm" 
                     title="confirm" 
-                    panel={<ConfirmListingDetails tokenId={id} price={price} ></ConfirmListingDetails>} 
+                    panel={<ConfirmListingDetails tokenId={nft.asset_id} price={price} ></ConfirmListingDetails>} 
                     >
                 </DialogStep>
             </MultistepDialog>

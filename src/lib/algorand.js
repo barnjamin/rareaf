@@ -52,30 +52,13 @@ export async function getListings() {
     let listings = []
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
+
         if (b.address == ps.address || b.amount == 0) continue;
-        const tokens  = await getTokensFromListingAddress(b.address)
-        const details = await getDetailsOfListing(b.address)
 
-        let metas = []
-        for(let tid in tokens){
-            const token = tokens[tid]
-            metas.push(await resolveMetadataFromMetaHash(token['params']['metadata-hash']))
-        }
-
-        listings.push({
-            address: b.address, 
-            token:tokens[0], 
-            details:details, 
-            meta:metas[0]
-        })
+        listings.push(await getListing(b.address))
     }
 
     return listings
-}
-
-export async function getListingCreator(addr) {
-
-
 }
 
 export async function getTokensFromListingAddress(address) {
@@ -120,6 +103,14 @@ export async function getToken(asset_id) {
     const indexer = getIndexer()
     const assets = await indexer.lookupAssetByID(asset_id).do()
     return assets.asset
+}
+
+export async function getNFT(asset_id){
+    const token = await getToken(asset_id)
+    const md    = await resolveMetadataFromMetaHash(token['params']['metadata-hash'])
+    const nft   = new NFT(md)
+    nft.asset_id = asset_id
+    return nft
 }
 
 export async function getTokenCreatedAt(asset_id) {

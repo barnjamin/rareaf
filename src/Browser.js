@@ -31,27 +31,24 @@ class Browser extends React.Component {
         return (
         <div className='container' >
             { 
-            this.state.listings.map((m,i) => {     
-                /// Return the element. Also pass key     
-                console.log(m)
-                const idx = m.token.index
+            this.state.listings.map((l) => {     
                 return (
-                    <Card className='content-card' key={idx} >
+                    <Card className='content-card' key={l.asset_id} >
                         <div className='container'>
-                            <a href={'/listing/'+m.address}>
-                                <img src={m.meta.img_src}></img>
+                            <a href={'/listing/'+l.contract_addr}>
+                                <img src={l.nft.imgSrc()}></img>
                             </a>
                         </div>
                         <div className='container'>
                             <p>
-                                <a href={'/listing/'+m.address}> 
-                                    <b>{m.meta.title}</b> - <i>{m.meta.artist}</i> (${m.details[0]})
+                                <a href={'/listing/'+l.contract_addr}> 
+                                    <b>{l.nft.title}</b> - <i>{l.nft.artist}</i> (${l.price})
                                 </a>
 
                             </p>
                         </div>
                         <div className='container'>
-                            <p>{m.meta.description}</p>
+                            <p>{l.nft.description}</p>
                         </div>
                     </Card> 
                 ) 
