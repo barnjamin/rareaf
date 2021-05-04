@@ -1,4 +1,5 @@
 import listing_template from '../contracts/listing.teal.tmpl'
+import listing_var_positions from '../contracts/listing.teal.tmpl.json'
 import platform_delegate_signed from '../contracts/platform.signed'
 import getAlgodClient from './algorand'
 
@@ -39,7 +40,12 @@ export async function get_teal(program) {
 }
 
 export function extract_vars(teal){
-    console.log(teal)
+    let vars = {}
+    for(let vname in listing_var_positions){
+        const v = listing_var_positions[vname]
+        vars[vname] = teal.subarray(v.start, v.start+v.length)
+    }
+    return vars
 }
 
 function checkStatus(response) {

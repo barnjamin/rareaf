@@ -3,6 +3,7 @@ from validator import TemplateContract
 from listing import listing
 from algosdk.logic import parse_uvarint
 from algosdk.v2client import algod
+import json
 
 token   = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 address = "http://localhost:4001"
@@ -17,6 +18,9 @@ def main():
 
     tmpl_path = "./listing.teal.tmpl"
     tc = TemplateContract(tmpl_path, client)
+
+    with open('./listing.teal.tmpl.json', 'w') as f:
+        json.dump(tc.get_positions_obj(), f)
 
     # Get arg values
     asa_val, contract_val = Btoi(Arg(1)), Arg(2)

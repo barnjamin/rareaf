@@ -34,8 +34,10 @@ export async function getListing(addr) {
     }
 
     const details = await getDetailsOfListing(addr)
-    extract_vars(details[2])
-    const creator = ""
+
+    const vars    = extract_vars(details[2])
+    const creator = algosdk.encodeAddress(vars['$TMPL_CREATOR_ADDR'])
+    
     const md      = await resolveMetadataFromMetaHash(tokens[0]['params']['metadata-hash'])
 
     let l = new Listing(details[0], tokens[0]['index'], creator, addr)

@@ -25,7 +25,6 @@ class Listing {
         this.asset_id       = asset_id
         this.creator_addr   = creator_addr
         this.contract_addr  = contract_addr
-        this.nft = NFT({})
     }
 
     getEncodedVars(){

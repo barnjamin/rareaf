@@ -36,6 +36,17 @@ class TemplateContract(object):
 
         self.set_start_positions()
 
+    def get_positions_obj(self):
+        pos = {}
+        for tv in self.template_vars:
+            pos[tv.name] = {
+                'start':tv.start,
+                'length': tv.length,
+                'distance':tv.distance
+            }
+
+        return pos
+
     def get_validate_ops(self, contract_val):
 
         blank_hash = self.get_blank_hash()
