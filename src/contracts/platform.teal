@@ -4,30 +4,68 @@ int 4
 ==
 byte ""
 store 0
-load 0
-arg 2
 int 0
-int 45
+store 1
+load 0
+arg 2
+load 1
+load 1
+int 48
++
 substring3
 concat
 store 0
+load 1
+arg 2
+load 1
+int 47
++
+getbyte
++
+int 48
++
+store 1
 load 0
 arg 2
-int 77
-int 82
+load 1
+load 1
+int 4
++
 substring3
 concat
 store 0
+load 1
+arg 2
+load 1
+int 3
++
+getbyte
++
+int 4
++
+store 1
 load 0
 arg 2
-int 90
-int 96
+load 1
+load 1
+int 5
++
 substring3
 concat
 store 0
+load 1
+arg 2
+load 1
+int 4
++
+getbyte
++
+int 5
++
+store 1
 load 0
 arg 2
-int 104
+load 1
 arg 2
 len
 substring3
@@ -36,7 +74,7 @@ store 0
 int 1
 load 0
 sha256
-byte base64(+6JTNXPoBFgmAvQW8QpK1A2Cu3sBvlhR8zsI4HjoFkY=)
+byte base64(N6/k7PmpO+uaM/4UzYGs99IickGQZW9KavH32OtFsPc=)
 ==
 &&
 byte "Program"
@@ -105,7 +143,7 @@ txn AssetReceiver
 ==
 &&
 gtxn 2 Amount
-int 1000000
+int 5000000
 ==
 &&
 &&
@@ -121,7 +159,7 @@ global ZeroAddress
 ==
 &&
 gtxn 3 XferAsset
-int 1
+int 7
 ==
 &&
 gtxn 3 AssetReceiver

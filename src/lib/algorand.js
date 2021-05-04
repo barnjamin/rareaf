@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 import { resolveMetadataFromMetaHash } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
+import {extract_vars} from './contracts'
 import algosdk from 'algosdk'  
-import listing from "./listing";
+import Listing from "./listing";
 import NFT from "./nft";
 
 
@@ -33,10 +34,11 @@ export async function getListing(addr) {
     }
 
     const details = await getDetailsOfListing(addr)
-    const creator = await getListingCreator(addr)
+    extract_vars(details[2])
+    const creator = ""
     const md      = await resolveMetadataFromMetaHash(tokens[0]['params']['metadata-hash'])
 
-    let l = new listing(details[0], tokens[0]['index'], creator, addr)
+    let l = new Listing(details[0], tokens[0]['index'], creator, addr)
     l.nft = new NFT(md)
     return l
 }

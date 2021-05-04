@@ -9,7 +9,7 @@ import { Wallet } from '../wallets/wallet';
 import NFT from './nft'
 
 
-class listing {
+class Listing {
     asset_id: number
     price: number
 
@@ -18,12 +18,14 @@ class listing {
 
     nft: NFT 
 
+    source: string
 
     constructor(price: number, asset_id: number, creator_addr: string, contract_addr?: string) {
         this.price          = price
         this.asset_id       = asset_id
         this.creator_addr   = creator_addr
         this.contract_addr  = contract_addr
+        this.nft = NFT({})
     }
 
     getEncodedVars(){
@@ -50,6 +52,11 @@ class listing {
         }
     }
 
+    extractVars(teal_source: string){
+        console.log(teal_source)
+        //
+    }
+    
     async getCompiledProgram(){
         return await get_listing_compiled(this.getVars())
     }
@@ -200,4 +207,4 @@ class listing {
     }
 }
 
-export default listing;
+export default Listing;

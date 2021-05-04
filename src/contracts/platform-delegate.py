@@ -1,5 +1,5 @@
 from pyteal import *
-from template_validator import template_contract
+from validator import TemplateContract
 from listing import listing
 from algosdk.logic import parse_uvarint
 from algosdk.v2client import algod
@@ -16,7 +16,7 @@ seed_amt = Int(int(5e6))
 def main():
 
     tmpl_path = "./listing.teal.tmpl"
-    tc = template_contract.TemplateContract(tmpl_path, client)
+    tc = TemplateContract(tmpl_path, client)
 
     # Get arg values
     asa_val, contract_val = Btoi(Arg(1)), Arg(2)

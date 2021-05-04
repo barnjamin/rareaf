@@ -15,7 +15,7 @@ import AlgorandTokenizer from './AlgorandTokenizer'
 import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
 import RAF from './RAF.js'
-import Listing from './Listing.js'
+import ListingViewer from './ListingViewer.js'
 
 
 class App extends React.Component {
@@ -72,7 +72,7 @@ class App extends React.Component {
           </Route>
           <Route path="/raf/:id" children={<RAF wallet={this.state.wallet} />}  >
           </Route>
-          <Route path="/listing/:addr" children={<Listing  wallet={this.state.wallet} />} >
+          <Route path="/listing/:addr" children={<ListingViewer  wallet={this.state.wallet} />} >
           </Route>
         </Switch>
       </Router>

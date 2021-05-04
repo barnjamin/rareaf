@@ -38,6 +38,10 @@ export async function get_teal(program) {
         });
 }
 
+export function extract_vars(teal){
+    console.log(teal)
+}
+
 function checkStatus(response) {
     if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
     return response;
