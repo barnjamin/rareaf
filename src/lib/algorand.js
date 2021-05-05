@@ -108,8 +108,7 @@ export async function getToken(asset_id) {
 export async function getNFT(asset_id){
     const token = await getToken(asset_id)
     const md    = await resolveMetadataFromMetaHash(token['params']['metadata-hash'])
-    const nft   = new NFT(md)
-    nft.asset_id = asset_id
+    const nft   = new NFT(md, asset_id)
     return nft
 }
 
@@ -118,7 +117,7 @@ export async function getTokenCreatedAt(asset_id) {
     return a['created-at-round']
 }
 
-export async function get_asa_cfg(withSuggested, from, asset, new_config) {
+export async function get_asa_cfg_txn(withSuggested, from, asset, new_config) {
     return addSuggested(withSuggested, {
         from: from,
         assetIndex: asset,
@@ -136,12 +135,12 @@ export async function get_pay_txn(withSuggested, from, to, amount) {
     })
 }
 
-export async function get_optin_txn(withSuggested, addr, id) {
-    return get_asa_txn(withSuggested, addr, addr, id, 0)
+export async function get_asa_optin_txn(withSuggested, addr, id) {
+    return get_asa_xfer_txn(withSuggested, addr, addr, id, 0)
 }
 
 
-export async function get_asa_txn(withSuggested, from, to, id, amt) {
+export async function get_asa_xfer_txn(withSuggested, from, to, id, amt) {
     return addSuggested(withSuggested, {
         from: from,
         to: to,
@@ -151,20 +150,20 @@ export async function get_asa_txn(withSuggested, from, to, id, amt) {
     })
 }
 
-export async function create_asa_txn(withSuggested, addr, meta) {
+export async function get_asa_create_txn(withSuggested, addr, meta) {
     return addSuggested(withSuggested, {
         from: addr,
         assetManager: addr,
         assetName: meta.name,
         assetTotal: 1,
         assetDecimals: 0,
-        assetMetadataHash: Array.from(meta.cid.multihash.subarray(2)),
+        assetMetadataHash:meta,
         type: 'acfg',
         assetURL: "rare.af/",
     })
 }
 
-export async function destroy_asa_txn(withSuggested, addr, token_id) {
+export async function get_asa_destroy_txn(withSuggested, addr, token_id) {
     return addSuggested(withSuggested, {
         from: addr, 
         assetIndex: token_id, 
@@ -173,10 +172,12 @@ export async function destroy_asa_txn(withSuggested, addr, token_id) {
 }
 
 export async function addSuggested(named, tmp){
-    const suggestedParams = getSuggested()
+    const suggestedParams = await getSuggested()
 
-    if (named)
-        return tmp.suggestedParams=suggestedParams
+    if (named) {
+        tmp.suggestedParams=suggestedParams
+        return tmp
+    }
         
     return  { ...tmp, ...suggestedParams }
 }
@@ -184,20 +185,14 @@ export async function addSuggested(named, tmp){
 export async function getSuggested(){
     const client = getAlgodClient();
     const txParams = await client.getTransactionParams().do();
-
-    return {
-        fee: txParams['min-fee'],
-        firstRound: txParams['last-round'],
-        lastRound: txParams['last-round'] + 10,
-        genesisID: txParams['genesis-id'],
-        genesisHash: txParams['genesis-hash']
-    }
+    return { ...txParams, lastRound: txParams['firstRound'] + 10 }
 }
 
 export async function sendWaitGroup(signed) {
     const client = getAlgodClient()
-    await client.sendRawTransaction(signed.map(s=>{return s.blob})).do()
-    await waitForConfirmation(client, signed.txID, 3)
+    const {txID}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
+    console.log(txID)
+    await waitForConfirmation(client, txID, 3)
 }
 
 export async function sendWait(signed){

@@ -1,8 +1,8 @@
 import {platform_settings as ps} from './platform-conf'
 import { get_listing_compiled, get_signed_platform_bytes } from './contracts'
 import { 
-    getAlgodClient, sendWait, waitForConfirmation,
-    get_asa_cfg, get_pay_txn, get_optin_txn, get_asa_txn, sendWaitGroup
+    getAlgodClient, sendWait, sendWaitGroup,
+    get_asa_cfg_txn, get_asa_xfer_txn, get_asa_optin_txn,  get_pay_txn, 
 } from './algorand'
 import algosdk from 'algosdk';
 import { Wallet } from '../wallets/wallet';
@@ -85,11 +85,11 @@ class Listing {
         await sendWait(stxn)
 
         
-        let nft_optin   = await get_optin_txn(true, this.contract_addr, this.asset_id)
+        let nft_optin   = await get_asa_optin_txn(true, this.contract_addr, this.asset_id)
         nft_optin       = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_optin), lsig);
         sendWait(nft_optin)
 
-        let platform_optin  = await get_optin_txn(true, this.contract_addr, ps.token.id)
+        let platform_optin  = await get_asa_optin_txn(true, this.contract_addr, ps.token.id)
         platform_optin      = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_optin), lsig);
         await sendWait(platform_optin)
 
@@ -105,15 +105,15 @@ class Listing {
             new Uint8Array(Buffer.from(var_price, "base64")), new Uint8Array(Buffer.from(var_id, "base64")), program_bytes 
         ]
 
-        let asa_send      = await get_asa_txn(true, this.creator_addr, this.contract_addr, this.asset_id, 1)
-        let asa_cfg       = await get_asa_cfg(true, this.creator_addr, this.asset_id, {
+        let asa_send      = await get_asa_xfer_txn(true, this.creator_addr, this.contract_addr, this.asset_id, 1)
+        let asa_cfg       = await get_asa_cfg_txn(true, this.creator_addr, this.asset_id, {
             manager: this.contract_addr, 
             reserve: this.contract_addr, 
             freeze:  this.contract_addr, 
             clawback:this.contract_addr
         })
         let pay_txn       = await get_pay_txn(true, this.creator_addr, this.contract_addr, ps.seed)
-        let platform_send = await get_asa_txn(true, ps.address, this.contract_addr, ps.token.id, 1)
+        let platform_send = await get_asa_xfer_txn(true, ps.address, this.contract_addr, ps.token.id, 1)
 
         asa_send      = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(asa_send)
         asa_cfg       = algosdk.makeAssetConfigTxnWithSuggestedParamsFromObject(asa_cfg)
@@ -131,59 +131,56 @@ class Listing {
         await sendWaitGroup([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob])
     }
 
-    async destroy_listing(wallet){
-        let platform_close = await get_asa_txn(false, this.contract_addr, ps.address, ps.token.id, 0)
+    async destroyListing(wallet){
+        const platform_close = await get_asa_xfer_txn(false, this.contract_addr, ps.address, ps.token.id, 0)
         platform_close.closeRemainderTo = ps.address
 
 
-        let asa_cfg = await get_asa_cfg(true, this.creator_addr, this.asset_id, {
+        const asa_cfg = await get_asa_cfg_txn(true, this.creator_addr, this.asset_id, {
             manager: this.creator_addr, 
             reserve: this.creator_addr, 
             freeze:  this.creator_addr, 
             clawback:this.creator_addr
         })
         
-        let nft_close = await get_asa_txn(false, this.contract_addr, this.creator_addr, this.asset_id, 0)
+        const nft_close = await get_asa_xfer_txn(false, this.contract_addr, this.creator_addr, this.asset_id, 0)
         nft_close.closeRemainderTo = this.creator_addr
 
-        let algo_close = await get_pay_txn(false, this.contract_addr, this.creator_addr, 0)
+        const algo_close = await get_pay_txn(false, this.contract_addr, this.creator_addr, 0)
         algo_close.closeRemainderTo = this.creator_addr
 
-        const destroy_txn_group = [platform_close, asa_cfg, nft_close, algo_close]
-        algosdk.assignGroupID(destroy_txn_group)
-
+        const txns = algosdk.assignGroupID([platform_close, nft_close, algo_close])
 
         const lsig = await this.getLsig()
 
-        const s_platform_close = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_close), lsig);
-        const s_asa_cfg        = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(asa_cfg), lsig);
-        const s_nft_close      = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_close), lsig);
-        const s_algo_close     = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(algo_close), lsig);
+        const s_platform_close = algosdk.signLogicSigTransactionObject(txns[0], lsig);
+        //const s_asa_cfg        = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(asa_cfg), lsig);
+        const s_nft_close      = algosdk.signLogicSigTransactionObject(txns[1], lsig);
+        const s_algo_close     = algosdk.signLogicSigTransactionObject(txns[2], lsig);
 
-
-        await sendWaitGroup([s_platform_close, s_asa_cfg, s_nft_close, s_algo_close])
+        await sendWaitGroup([s_platform_close, s_nft_close, s_algo_close])
     }
 
 
-    async purchase_listing(wallet: Wallet){
+    async purchaseListing(wallet: Wallet){
         const client = getAlgodClient()
 
         const buyer_addr = wallet.getDefaultAccount()
 
-        const nft_optin = await get_optin_txn(false, buyer_addr, this.asset_id)
+        const nft_optin = await get_asa_optin_txn(false, buyer_addr, this.asset_id)
         const payment   = await get_pay_txn(false, buyer_addr, this.creator_addr)
 
-        let nft_xfer = await get_asa_txn(false, this.contract_addr,  buyer_addr, 1)
+        let nft_xfer = await get_asa_xfer_txn(false, this.contract_addr,  buyer_addr, 1)
         nft_xfer.closeRemainderTo = buyer_addr
 
-        const asa_cfg = await get_asa_cfg(true, this.creator_addr, this.asset_id, {
+        const asa_cfg = await get_asa_cfg_txn(true, this.creator_addr, this.asset_id, {
             manager: this.creator_addr, 
             reserve: this.creator_addr, 
             freeze:  this.creator_addr, 
             clawback:this.creator_addr
         })
 
-        let platform_xfer = await get_asa_txn(false, this.contract_addr, ps.address, 1)
+        let platform_xfer = await get_asa_xfer_txn(false, this.contract_addr, ps.address, 1)
         platform_xfer.closeRemainderTo = ps.address
 
         let platform_fee = await get_pay_txn(false, this.contract_addr, ps.address, ps.fee)

@@ -9,7 +9,7 @@ import listing from './lib/listing.ts'
 import NFT from './lib/nft'
 
 
-function RAF() {
+function RAF(props) {
     let {id} = useParams();
     let history = useHistory();
 
@@ -22,7 +22,7 @@ function RAF() {
     
     useEffect(()=>{
         if(nft.asset_id === undefined){
-            getNFT(id).then((nft)=>{ setNFT(nft) })
+            getNFT(parseInt(id)).then((nft)=>{ setNFT(nft) })
             .catch((err)=>{ console.log("Error:", err) })
         }
     });
@@ -33,9 +33,15 @@ function RAF() {
 
     async function deleteToken(e){
         setWaiting(true)
-        await destroyToken(parseInt(id))
+
+        try {
+            await nft.destroyToken(props.wallet)
+            history.push("/")
+        } catch (error) {
+            console.error(error) 
+        }
+
         setWaiting(false)
-        history.push("/")
     }
 
     async function handlePriceChange(price){
@@ -47,8 +53,8 @@ function RAF() {
 
         // call create listing function with arguments 
         // for price/assetid 
-        const lst = new listing(price, parseInt(id), this.props.wallet.getDefaultAccount())
-        await lst.createListing(this.props.wallet)
+        const lst = new listing(price, parseInt(id), props.wallet.getDefaultAccount())
+        await lst.createListing(props.wallet)
 
         // Wait for it to return
         setWaiting(false);
@@ -70,7 +76,7 @@ function RAF() {
 
             <div className='container'>
                 <div className='content'>
-                    <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='application' >Create Listing</Button>
+                    <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
                     <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
                 </div>
             </div>

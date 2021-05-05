@@ -82,9 +82,9 @@ def listing():
         # Make sure they're all from the same sender (contract acct)
         Gtxn[0].sender() == Gtxn[1].sender(),
         Gtxn[1].sender() == Gtxn[2].sender(),
-        delist_algo,
+        delist_platform,
         delist_asa,
-        delist_platform
+        delist_algo,
     )
 
     purchase_algo = And(

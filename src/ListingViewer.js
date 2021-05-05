@@ -9,7 +9,7 @@ import { resolveMetadataFromMetaHash } from './lib/ipfs'
 import Listing from './lib/listing.ts'
 import NFT from './lib/nft'
 
-function ListingViewer() {
+function ListingViewer(props) {
 
     const {addr} = useParams();
     const [listing, setListing] = useState(undefined);
@@ -22,6 +22,9 @@ function ListingViewer() {
         }
     })
 
+    function handleCancelListing(e){
+        listing.destroyListing(props.wallet)
+    }
     function handleBuy(e){
         // Create appropriate transactions 
         console.log("buyme")
@@ -37,7 +40,7 @@ function ListingViewer() {
 
                 <div className='container' >
                     <div className='content'>
-                        <p><b>{md.title}</b> - <i>{listing.nft.artist}</i></p>
+                        <p><b>{listing.nft.title}</b> - <i>{listing.nft.artist}</i></p>
                     </div>
                 </div>
 
@@ -50,6 +53,7 @@ function ListingViewer() {
 
                 <div>
                     <Button onClick={handleBuy}>Buy</Button>
+                    <Button onClick={handleCancelListing}>Cancel Listing</Button>
                 </div>
             </div>
 

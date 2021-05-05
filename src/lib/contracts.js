@@ -1,7 +1,7 @@
 import listing_template from '../contracts/listing.teal.tmpl'
 import listing_var_positions from '../contracts/listing.teal.tmpl.json'
 import platform_delegate_signed from '../contracts/platform.signed'
-import getAlgodClient from './algorand'
+import {getAlgodClient} from './algorand'
 
 
 export async function get_listing_source(vars) {
@@ -10,7 +10,7 @@ export async function get_listing_source(vars) {
 
 export async function get_listing_compiled(vars) {
     const client = getAlgodClient()
-    const populated = populate_contract(listing_template, vars)
+    const populated = await populate_contract(listing_template, vars)
     return client.compile(populated).do()
 }
 
