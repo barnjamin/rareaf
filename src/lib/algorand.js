@@ -159,7 +159,7 @@ export async function get_asa_create_txn(withSuggested, addr, meta) {
         assetDecimals: 0,
         assetMetadataHash:meta,
         type: 'acfg',
-        assetURL: "rare.af/",
+        assetURL: ps.domain,
     })
 }
 
