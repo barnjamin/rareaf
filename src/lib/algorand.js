@@ -38,10 +38,11 @@ export async function getListing(addr) {
     const vars    = extract_vars(details[2])
     const creator = algosdk.encodeAddress(vars['TMPL_CREATOR_ADDR'])
     
-    const md      = await resolveMetadataFromMetaHash(tokens[0]['params']['metadata-hash'])
+    const [cid, md] = await resolveMetadataFromMetaHash(tokens[0]['params']['metadata-hash'])
 
     let l = new Listing(details[0], tokens[0]['index'], creator, addr)
     l.nft = new NFT(md)
+    l.nft.cid = cid
     return l
 }
 
@@ -248,7 +249,7 @@ export async function waitForConfirmation(algodclient, txId, timeout) {
     throw new Error(`Transaction not confirmed after ${timeout} rounds!`);
 }
 
-function download_txns(name, txns) {
+export function download_txns(name, txns) {
     let b = new Uint8Array(0);
     for(const txn in txns){
         b = concatTypedArrays(b, txns[txn])

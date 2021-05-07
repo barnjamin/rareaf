@@ -11,7 +11,7 @@ int 7
 store 3
 int 1000000
 store 4
-byte "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM"
+addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 store 5
 int 0
 bnz l8
@@ -92,6 +92,34 @@ int 1
 ==
 &&
 &&
+gtxn 3 TypeEnum
+int acfg
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 ConfigAsset
+load 2
+==
+&&
+gtxn 3 ConfigAssetManager
+gtxn 0 Sender
+==
+&&
+gtxn 3 ConfigAssetReserve
+gtxn 0 Sender
+==
+&&
+gtxn 3 ConfigAssetFreeze
+gtxn 0 Sender
+==
+&&
+gtxn 3 ConfigAssetClawback
+gtxn 0 Sender
+==
+&&
+&&
 gtxn 4 TypeEnum
 int pay
 ==
@@ -118,7 +146,7 @@ gtxn 0 Sender
 gtxn 1 Sender
 ==
 gtxn 1 Sender
-gtxn 2 Sender
+gtxn 3 Sender
 ==
 &&
 gtxn 0 TypeEnum

@@ -10,7 +10,7 @@ load 0
 arg 2
 load 1
 load 1
-int 75
+int 49
 +
 substring3
 concat
@@ -18,11 +18,11 @@ store 0
 load 1
 arg 2
 load 1
-int 74
+int 48
 +
 getbyte
 +
-int 75
+int 49
 +
 store 1
 load 0
@@ -74,7 +74,7 @@ store 0
 int 1
 load 0
 sha256
-byte base64(JWlvaS2D6VMzO2zBz/O3CYtBPeAD497dlKrZDjAddxQ=)
+byte base64(Ywnz/HKUY4xHLVlp/2+kHMnvg+8F0Qy44aTDxv8yTTY=)
 ==
 &&
 byte "Program"

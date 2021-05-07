@@ -1,8 +1,8 @@
-import {platform_settings as ps} from './platform-conf'
+import { platform_settings as ps } from './platform-conf'
 import { get_listing_compiled, get_signed_platform_bytes } from './contracts'
 import { 
     getAlgodClient, sendWait, sendWaitGroup,
-    get_asa_cfg_txn, get_asa_xfer_txn, get_asa_optin_txn,  get_pay_txn, 
+    get_asa_cfg_txn, get_asa_xfer_txn, get_asa_optin_txn,  get_pay_txn, download_txns
 } from './algorand'
 import algosdk, { Transaction } from 'algosdk';
 import { Wallet } from '../wallets/wallet';
@@ -78,20 +78,19 @@ class Listing {
         this.contract_addr =  compiled_program.hash
 
         // Seed listing contract account
-        // const seed_txn = await get_pay_txn(false, this.creator_addr, this.contract_addr, ps.seed)
-        // const stxn = await wallet.sign(seed_txn)
-        // await sendWait(stxn)
+         const seed_txn = await get_pay_txn(false, this.creator_addr, this.contract_addr, ps.seed)
+         const stxn = await wallet.sign(seed_txn)
+         await sendWait(stxn)
 
         
-        // TODO: check if already opted in
-        // let nft_optin   = await get_asa_optin_txn(true, this.contract_addr, this.asset_id)
-        // nft_optin       = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_optin), lsig);
-        // await sendWait(nft_optin)
+         // TODO: check if already opted in
+         let nft_optin   = await get_asa_optin_txn(true, this.contract_addr, this.asset_id)
+         nft_optin       = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_optin), lsig);
+         await sendWait(nft_optin)
 
-        // let platform_optin  = await get_asa_optin_txn(true, this.contract_addr, ps.token.id)
-        // platform_optin      = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_optin), lsig);
-        // await sendWait(platform_optin)
-
+         let platform_optin  = await get_asa_optin_txn(true, this.contract_addr, ps.token.id)
+         platform_optin      = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_optin), lsig);
+         await sendWait(platform_optin)
 
         //// Fund listing
         const compiled_bytes                = await get_signed_platform_bytes()
@@ -141,10 +140,10 @@ class Listing {
 
 
         const asa_cfg = await get_asa_cfg_txn(true, this.creator_addr, this.asset_id, {
-            manager: this.creator_addr, 
-            reserve: this.creator_addr, 
-            freeze:  this.creator_addr, 
-            clawback:this.creator_addr
+            assetManager: this.creator_addr, 
+            assetReserve: this.creator_addr, 
+            assetFreeze:  this.creator_addr, 
+            assetClawback:this.creator_addr
         })
         
         const nft_close = await get_asa_xfer_txn(false, this.contract_addr, this.creator_addr, this.asset_id, 0)
@@ -158,10 +157,11 @@ class Listing {
         const lsig = await this.getLsig()
 
         const s_platform_close = algosdk.signLogicSigTransactionObject(txns[0], lsig);
-        const s_asa_cfg        = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(asa_cfg), lsig);
         const s_nft_close      = algosdk.signLogicSigTransactionObject(txns[1], lsig);
-        const s_algo_close     = algosdk.signLogicSigTransactionObject(txns[2], lsig);
+        const s_asa_cfg        = algosdk.signLogicSigTransactionObject(txns[2], lsig);
+        const s_algo_close     = algosdk.signLogicSigTransactionObject(txns[3], lsig);
 
+        await download_txns("grouped.txns", [s_platform_close.blob, s_nft_close.blob, s_asa_cfg.blob, s_algo_close.blob])
         await sendWaitGroup([s_platform_close, s_nft_close, s_asa_cfg, s_algo_close])
     }
 

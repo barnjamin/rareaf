@@ -21,7 +21,7 @@ def listing():
 
         platform_token.store(Int(config['token']['id'])),
         platform_fee.store(Int(int(config['fee']))),
-        platform_addr.store(Bytes(config['address'])),
+        platform_addr.store(Addr(config['address'])),
 
         Int(0) # return 0 so this cond case doesnt get executed
     ])
@@ -97,7 +97,7 @@ def listing():
     delist = And(
         # Make sure they're all from the same sender (contract acct)
         Gtxn[0].sender() == Gtxn[1].sender(),
-        Gtxn[1].sender() == Gtxn[2].sender(),
+        Gtxn[1].sender() == Gtxn[3].sender(),
         delist_platform,
         delist_asa,
         delist_cfg,
@@ -161,6 +161,7 @@ def listing():
         purchase_algo,    # Algo payment to creator 
         purchase_asa,     # ASA to sender
         purchase_platform,# Platform token goes back to platform acct
+        purchase_cfg,
         purchase_fee      # Fee to platform account, close out account with algos
     )
 

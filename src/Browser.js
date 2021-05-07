@@ -32,7 +32,7 @@ class Browser extends React.Component {
         <div className='container' >
             { 
             this.state.listings.map((l) => {     
-                if (l === undefined){ return (<Card></Card>) }
+                console.log(l)
                 return (
                     <Card className='content-card' key={l.asset_id} >
                         <div className='container'>
@@ -43,7 +43,7 @@ class Browser extends React.Component {
                         <div className='container'>
                             <p>
                                 <a href={'/listing/'+l.contract_addr}> 
-                                    <b>{l.nft.title}</b> - <i>{l.nft.artist}</i> (${l.price})
+                                    <b>{l.nft.metadata.title}</b> - <i>{l.nft.metadata.artist}</i> (${l.price})
                                 </a>
 
                             </p>
