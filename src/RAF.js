@@ -54,14 +54,18 @@ function RAF(props) {
 
         // call create listing function with arguments 
         // for price/assetid 
-        const lst = new listing(price, parseInt(id), props.wallet.getDefaultAccount())
-        await lst.createListing(props.wallet)
+        try{
+            const lst = new listing(price, parseInt(id), props.wallet.getDefaultAccount())
+            await lst.createListing(props.wallet)
+            // Return addr of created account with contents
+            history.push("/listing/"+lst.contract_addr)
+        }catch(error){
+            console.log(error)
+        }
 
         // Wait for it to return
         setWaiting(false);
 
-        // Return addr of created account with contents
-        history.push("/listing/"+lst.contract_addr)
     }
 
     return (
@@ -71,7 +75,7 @@ function RAF(props) {
             </div>
             <div className='container' >
                 <div className='content'>
-                    <p><b>{nft.title}</b> - <i>{nft.artist}</i></p>
+                    <p><b>{nft.metadata.title}</b> - <i>{nft.metadata.artist}</i></p>
                 </div>
             </div>
 

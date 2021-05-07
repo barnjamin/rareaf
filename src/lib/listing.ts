@@ -4,7 +4,7 @@ import {
     getAlgodClient, sendWait, sendWaitGroup,
     get_asa_cfg_txn, get_asa_xfer_txn, get_asa_optin_txn,  get_pay_txn, 
 } from './algorand'
-import algosdk from 'algosdk';
+import algosdk, { Transaction } from 'algosdk';
 import { Wallet } from '../wallets/wallet';
 import NFT from './nft'
 
@@ -78,25 +78,24 @@ class Listing {
         this.contract_addr =  compiled_program.hash
 
         // Seed listing contract account
-        const seed_txn = await get_pay_txn(false, this.creator_addr, this.contract_addr, ps.seed)
-        const stxn = await wallet.sign(seed_txn)
-
-        await sendWait(stxn)
+        // const seed_txn = await get_pay_txn(false, this.creator_addr, this.contract_addr, ps.seed)
+        // const stxn = await wallet.sign(seed_txn)
+        // await sendWait(stxn)
 
         
-        let nft_optin   = await get_asa_optin_txn(true, this.contract_addr, this.asset_id)
-        nft_optin       = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_optin), lsig);
-        sendWait(nft_optin)
+        // TODO: check if already opted in
+        // let nft_optin   = await get_asa_optin_txn(true, this.contract_addr, this.asset_id)
+        // nft_optin       = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(nft_optin), lsig);
+        // await sendWait(nft_optin)
 
-        let platform_optin  = await get_asa_optin_txn(true, this.contract_addr, ps.token.id)
-        platform_optin      = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_optin), lsig);
-        await sendWait(platform_optin)
+        // let platform_optin  = await get_asa_optin_txn(true, this.contract_addr, ps.token.id)
+        // platform_optin      = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(platform_optin), lsig);
+        // await sendWait(platform_optin)
 
 
         //// Fund listing
         const compiled_bytes                = await get_signed_platform_bytes()
         const [var_price, var_id, var_addr] = this.getEncodedVars()
-
 
         const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes, "base64"));
         const del_sig               = algosdk.logicSigFromByte(delegate_program_bytes)
@@ -106,31 +105,34 @@ class Listing {
             program_bytes 
         ]
 
-        let asa_send      = await get_asa_xfer_txn(true, this.creator_addr, this.contract_addr, this.asset_id, 1)
-        let asa_cfg       = await get_asa_cfg_txn(true, this.creator_addr, this.asset_id, {
-            manager: this.contract_addr, 
-            reserve: this.contract_addr, 
-            freeze:  this.contract_addr, 
-            clawback:this.contract_addr
+        let asa_send      = await get_asa_xfer_txn(false, this.creator_addr, this.contract_addr, this.asset_id, 1)
+        let asa_cfg       = await get_asa_cfg_txn(false, this.creator_addr, this.asset_id, {
+            assetManager: this.contract_addr, 
+            assetReserve: this.contract_addr, 
+            assetFreeze:  this.contract_addr, 
+            assetClawback:this.contract_addr
         })
+        let pay_txn       = await get_pay_txn(false, this.creator_addr, this.contract_addr, ps.seed)
 
-        let pay_txn       = await get_pay_txn(true, this.creator_addr, this.contract_addr, ps.seed)
         let platform_send = await get_asa_xfer_txn(true, ps.address, this.contract_addr, ps.token.id, 1)
 
-        asa_send      = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(asa_send)
-        asa_cfg       = algosdk.makeAssetConfigTxnWithSuggestedParamsFromObject(asa_cfg)
-        pay_txn       = algosdk.makePaymentTxnWithSuggestedParamsFromObject(pay_txn)
-        platform_send = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject(platform_send)
-
         const fund_txn_group = [asa_send, asa_cfg, pay_txn, platform_send]
-        algosdk.assignGroupID(fund_txn_group)
+        const grouped = algosdk.assignGroupID(fund_txn_group)
+        for(let x=0; x<fund_txn_group.length; x++){ fund_txn_group[x].group = Array.from(grouped[x].group) }
 
-        const s_asa_send      = wallet.sign(asa_send)
-        const s_asa_cfg       = wallet.sign(asa_cfg)
-        const s_seed_txn      = wallet.sign(pay_txn)
+        //TODO: Yikes
+        platform_send = new Transaction(platform_send)
+        platform_send.group = grouped[3].group
+
+        console.log(platform_send)
+
         const s_platform_send = algosdk.signLogicSigTransactionObject(platform_send, del_sig) 
 
-        await sendWaitGroup([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob])
+        const s_asa_send      = await wallet.sign(asa_send)
+        const s_asa_cfg       = await wallet.sign(asa_cfg)
+        const s_seed_txn      = await wallet.sign(pay_txn)
+
+        await sendWaitGroup([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send])
     }
 
     async destroyListing(wallet: Wallet){

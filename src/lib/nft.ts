@@ -55,7 +55,6 @@ export default class NFT {
 
     static async fromMetaHash(meta_hash: string): Promise<NFT> {
         const [cid, md] = await getMetaFromIpfs(meta_hash);
-        console.log(cid)
         const nft = new NFT(md)
         nft.meta_cid = cid
         return nft

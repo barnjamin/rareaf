@@ -16,7 +16,7 @@ def listing():
 
     setup = Seq([
         creator.store(Tmpl.Bytes("TMPL_CREATOR_ADDR")),
-        price.store(Tmpl.Int("TMPL_PRICE")),
+        price.store(Tmpl.Int("TMPL_PRICE_MICROALGOS")),
         asset_id.store(Tmpl.Int("TMPL_ASSET_ID")),
 
         platform_token.store(Int(config['token']['id'])),
