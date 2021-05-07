@@ -2,19 +2,15 @@
 'use strict'
 
 import React, {useState, useEffect} from 'react'
-import {useParams, useHistory} from 'react-router-dom'
+import { useParams, useHistory} from 'react-router-dom'
 import { getListing } from './lib/algorand'
 import {Button} from '@blueprintjs/core'
-import { resolveMetadataFromMetaHash } from './lib/ipfs'
-import Listing from './lib/listing.ts'
-import NFT from './lib/nft'
 
 function ListingViewer(props) {
 
     const {addr} = useParams();
     const [listing, setListing] = useState(undefined);
-    const [md, setMetadata] = useState({img_src:'', artist:'', title:''})
-    const [price, setPrice] = useState(0);
+    const [loading, setLoading] = useState(false);
 
     useEffect(()=>{
         if(listing === undefined){
@@ -23,11 +19,14 @@ function ListingViewer(props) {
     })
 
     function handleCancelListing(e){
+        setLoading(true)
         listing.destroyListing(props.wallet)
+        setLoading(false)
     }
     function handleBuy(e){
-        // Create appropriate transactions 
-        console.log("buyme")
+        setLoading(true)
+        listing.purchaseListing(props.wallet)
+        setLoading(false)
     }
 
     if(listing !== undefined){
@@ -52,8 +51,8 @@ function ListingViewer(props) {
                 </div>
 
                 <div>
-                    <Button onClick={handleBuy}>Buy</Button>
-                    <Button onClick={handleCancelListing}>Cancel Listing</Button>
+                    <Button loading={loading} onClick={handleBuy}>Buy</Button>
+                    <Button loading={loading} onClick={handleCancelListing}>Cancel Listing</Button>
                 </div>
             </div>
 

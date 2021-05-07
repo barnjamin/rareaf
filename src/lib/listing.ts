@@ -37,7 +37,6 @@ class Listing {
     }
 
     getVars(){
-
         const [var_price, var_id, var_addr] = this.getEncodedVars()
 
         return {
@@ -95,14 +94,16 @@ class Listing {
 
 
         //// Fund listing
-        const compiled_bytes              = await get_signed_platform_bytes()
+        const compiled_bytes                = await get_signed_platform_bytes()
         const [var_price, var_id, var_addr] = this.getEncodedVars()
 
 
         const delegate_program_bytes= new Uint8Array(Buffer.from(compiled_bytes, "base64"));
         const del_sig               = algosdk.logicSigFromByte(delegate_program_bytes)
         del_sig.args                = [
-            new Uint8Array(Buffer.from(var_price, "base64")), new Uint8Array(Buffer.from(var_id, "base64")), program_bytes 
+            new Uint8Array(Buffer.from(var_price, "base64")), 
+            new Uint8Array(Buffer.from(var_id, "base64")), 
+            program_bytes 
         ]
 
         let asa_send      = await get_asa_xfer_txn(true, this.creator_addr, this.contract_addr, this.asset_id, 1)
@@ -112,6 +113,7 @@ class Listing {
             freeze:  this.contract_addr, 
             clawback:this.contract_addr
         })
+
         let pay_txn       = await get_pay_txn(true, this.creator_addr, this.contract_addr, ps.seed)
         let platform_send = await get_asa_xfer_txn(true, ps.address, this.contract_addr, ps.token.id, 1)
 
@@ -131,7 +133,7 @@ class Listing {
         await sendWaitGroup([s_asa_send, s_asa_cfg, s_seed_txn, s_platform_send.blob])
     }
 
-    async destroyListing(wallet){
+    async destroyListing(wallet: Wallet){
         const platform_close = await get_asa_xfer_txn(false, this.contract_addr, ps.address, ps.token.id, 0)
         platform_close.closeRemainderTo = ps.address
 
@@ -149,16 +151,16 @@ class Listing {
         const algo_close = await get_pay_txn(false, this.contract_addr, this.creator_addr, 0)
         algo_close.closeRemainderTo = this.creator_addr
 
-        const txns = algosdk.assignGroupID([platform_close, nft_close, algo_close])
+        const txns = algosdk.assignGroupID([platform_close, nft_close, asa_cfg, algo_close])
 
         const lsig = await this.getLsig()
 
         const s_platform_close = algosdk.signLogicSigTransactionObject(txns[0], lsig);
-        //const s_asa_cfg        = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(asa_cfg), lsig);
+        const s_asa_cfg        = algosdk.signLogicSigTransactionObject(new algosdk.Transaction(asa_cfg), lsig);
         const s_nft_close      = algosdk.signLogicSigTransactionObject(txns[1], lsig);
         const s_algo_close     = algosdk.signLogicSigTransactionObject(txns[2], lsig);
 
-        await sendWaitGroup([s_platform_close, s_nft_close, s_algo_close])
+        await sendWaitGroup([s_platform_close, s_nft_close, s_asa_cfg, s_algo_close])
     }
 
 

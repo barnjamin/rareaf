@@ -10,9 +10,7 @@ export async function uploadContent([file]){
     try {
       const added = await iclient.add(file)
       return added 
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
     return ""
 }
 
@@ -20,9 +18,7 @@ export async function uploadMetadata(md) {
     try {
         const added = await iclient.add(JSON.stringify(md))
         return added
-    } catch (err) {
-        console.error(err)
-    }
+    } catch (err) { console.error(err) }
     return {} 
 }
 
@@ -39,9 +35,8 @@ export async function getMetaFromIpfs(meta_hash) {
         }
         let parsed =  JSON.parse(data) 
         return parsed
-    } catch (err) {
-        console.error("Failed to get Metadata from IPFS:", err)
-    }
+    } catch (err) { console.error("Failed to get Metadata from IPFS:", err) }
+
     return {}
 }
 

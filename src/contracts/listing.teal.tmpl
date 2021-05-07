@@ -1,17 +1,17 @@
 #pragma version 3
-pushbytes $TMPL_CREATOR_ADDR 
+pushbytes TMPL_CREATOR_ADDR
 store 0
-pushbytes $TMPL_PRICE_MICROALGOS
+pushbytes TMPL_PRICE
 btoi
 store 1
-pushbytes $TMPL_ASSET_ID
+pushbytes TMPL_ASSET_ID
 btoi
 store 2
-int 7 
+int 4
 store 3
 int 1000000
 store 4
-addr 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM 
+byte "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM"
 store 5
 int 0
 bnz l8
@@ -20,11 +20,11 @@ int 1
 ==
 bnz l7
 global GroupSize
-int 3
+int 4
 ==
 bnz l6
 global GroupSize
-int 4
+int 5
 ==
 bnz l5
 err
@@ -92,22 +92,22 @@ int 1
 ==
 &&
 &&
-gtxn 3 TypeEnum
+gtxn 4 TypeEnum
 int pay
 ==
-gtxn 3 RekeyTo
+gtxn 4 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 3 Receiver
+gtxn 4 Receiver
 load 5
 ==
 &&
-gtxn 3 CloseRemainderTo
+gtxn 4 CloseRemainderTo
 load 0
 ==
 &&
-gtxn 3 Amount
+gtxn 4 Amount
 load 4
 ==
 &&
@@ -121,23 +121,23 @@ gtxn 1 Sender
 gtxn 2 Sender
 ==
 &&
-gtxn 2 TypeEnum
-int pay
+gtxn 0 TypeEnum
+int axfer
 ==
-gtxn 2 RekeyTo
+gtxn 0 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 2 Receiver
-load 0
+gtxn 0 XferAsset
+load 3
 ==
 &&
-gtxn 2 CloseRemainderTo
-load 0
+gtxn 0 AssetReceiver
+load 5
 ==
 &&
-gtxn 2 Amount
-int 0
+gtxn 0 AssetCloseTo
+load 5
 ==
 &&
 &&
@@ -161,23 +161,51 @@ load 0
 ==
 &&
 &&
-gtxn 0 TypeEnum
-int axfer
+gtxn 2 TypeEnum
+int acfg
 ==
-gtxn 0 RekeyTo
+gtxn 2 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 0 XferAsset
-load 3
+gtxn 2 ConfigAsset
+load 2
 ==
 &&
-gtxn 0 AssetReceiver
-load 5
+gtxn 2 ConfigAssetManager
+load 0
 ==
 &&
-gtxn 0 AssetCloseTo
-load 5
+gtxn 2 ConfigAssetReserve
+load 0
+==
+&&
+gtxn 2 ConfigAssetFreeze
+load 0
+==
+&&
+gtxn 2 ConfigAssetClawback
+load 0
+==
+&&
+&&
+gtxn 3 TypeEnum
+int pay
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 Receiver
+load 0
+==
+&&
+gtxn 3 CloseRemainderTo
+load 0
+==
+&&
+gtxn 3 Amount
+int 0
 ==
 &&
 &&

@@ -10,7 +10,7 @@ load 0
 arg 2
 load 1
 load 1
-int 48
+int 74
 +
 substring3
 concat
@@ -18,11 +18,11 @@ store 0
 load 1
 arg 2
 load 1
-int 47
+int 73
 +
 getbyte
 +
-int 48
+int 74
 +
 store 1
 load 0
@@ -74,7 +74,7 @@ store 0
 int 1
 load 0
 sha256
-byte base64(N6/k7PmpO+uaM/4UzYGs99IickGQZW9KavH32OtFsPc=)
+byte base64(ULXCzU+sdkSrgNHhP2X91a8Z4M6j2JTTSRiNhTPhJgI=)
 ==
 &&
 byte "Program"
@@ -159,7 +159,7 @@ global ZeroAddress
 ==
 &&
 gtxn 3 XferAsset
-int 7
+int 4
 ==
 &&
 gtxn 3 AssetReceiver

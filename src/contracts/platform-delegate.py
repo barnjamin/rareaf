@@ -3,16 +3,19 @@ from validator import TemplateContract
 from listing import listing
 from algosdk.logic import parse_uvarint
 from algosdk.v2client import algod
+from config import get_config
 import json
 
+config = get_config()
+
 token   = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-address = "http://localhost:4001"
-client  = algod.AlgodClient(token,address)
+url = "{}:{}".format(config['algod']['server'], config['algod']['port'])
+client  = algod.AlgodClient(config['algod']['token'], url)
 
 
-platform_token = Int(7)
-platform_acct = Addr("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM") 
-seed_amt = Int(int(5e6))
+seed_amt      = Int(int(config['seed']))
+platform_token= Int(config['token']['id'])
+platform_acct = Addr(config['address']) 
 
 def main():
 

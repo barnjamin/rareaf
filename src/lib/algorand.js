@@ -191,14 +191,13 @@ export async function getSuggested(){
 export async function sendWaitGroup(signed) {
     const client = getAlgodClient()
     const {txID}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
-    console.log(txID)
-    await waitForConfirmation(client, txID, 3)
+    return await waitForConfirmation(client, txID, 3)
 }
 
 export async function sendWait(signed){
     const client = getAlgodClient()
     await client.sendRawTransaction([signed.blob]).do()
-    await waitForConfirmation(client, signed.txID, 3)
+    return await waitForConfirmation(client, signed.txID, 3)
 }
 
 export async function waitForConfirmation(algodclient, txId, timeout) {

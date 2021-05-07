@@ -1,51 +1,59 @@
 import { Wallet } from '../wallets/wallet'
+import { getMetaFromIpfs } from './ipfs'
 import { get_asa_create_txn, get_asa_destroy_txn, sendWait } from './algorand'
 
-export default class NFT {
-    asset_id: number
 
-    file_hash: string // IPFS CID of file
-    meta_hash: string // IPFS CID of metadata json
-
-    // File details
-    type: string  // MIME type
-    size: number  // Number of bytes
+interface NFTMetadata {
+    file_name: string
+    file_hash: string
+    file_type: string
+    file_size: number
 
     // Descriptive details
     title:      string 
     artist:     string
     description:string 
-
     tags:       string[]
+}
 
-    constructor(metadata: NFT, asset_id?: number) {
-        this.title       = metadata.title        
-        this.artist      = metadata.artist
-        this.description = metadata.description
-        this.file_hash   = metadata.file_hash
-        this.asset_id    = asset_id
+export default class NFT {
+    asset_id: number // ASA idx in algorand
+    meta_hash: string // IPFS CID of metadata json
+
+    metadata: NFTMetadata
+
+    constructor(metadata: NFTMetadata, asset_id?: number) {
+        this.metadata = metadata
+        this.asset_id = asset_id
     }
 
     async createToken(wallet: Wallet){
         const creator = wallet.getDefaultAccount()
-        const create_txn = await get_asa_create_txn(false, creator, this.getMeta())
+        const create_txn = await get_asa_create_txn(false, creator, this.getMetaHash())
         const s_create_txn = await wallet.sign(create_txn)
-        await sendWait(s_create_txn)
+        return await sendWait(s_create_txn)
     }
 
     async destroyToken(wallet: Wallet){
         const creator = wallet.getDefaultAccount()
         const destroy_txn = await get_asa_destroy_txn(false, creator, this.asset_id)
         const s_destroy_txn = await wallet.sign(destroy_txn)
-        await sendWait(s_destroy_txn)
+        return await sendWait(s_destroy_txn)
     }
 
+    getMetaHash() { return Array.from(this.meta_hash.substring(2)) }
 
-    getMeta() { return Array.from(this.meta_hash.substring(2)) }
     imgSrc (): string {
-        if (this.file_hash !== undefined)
-            return 'http://ipfs.io/ipfs/'+this.file_hash
+        if (this.metadata.file_hash !== undefined)
+            return 'http://ipfs.io/ipfs/'+this.metadata.file_hash
 
         return "https://via.placeholder.com/500"
+    }
+
+    static async fromMetaHash(meta_hash: string): Promise<NFT> {
+        const md = await getMetaFromIpfs(meta_hash);
+        const nft = new NFT(md)
+        nft.meta_hash = meta_hash
+        return nft
     }
 }

@@ -1,1 +1,1 @@
-{"$TMPL_CREATOR_ADDR": {"start": 48, "length": 32, "distance": 48}, "$TMPL_PRICE_MICROALGOS": {"start": 84, "length": 8, "distance": 4}, "$TMPL_ASSET_ID": {"start": 97, "length": 8, "distance": 5}}
+{"TMPL_CREATOR_ADDR": {"start": 74, "length": 32, "distance": 74}, "TMPL_PRICE": {"start": 110, "length": 8, "distance": 4}, "TMPL_ASSET_ID": {"start": 123, "length": 8, "distance": 5}}

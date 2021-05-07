@@ -10,8 +10,7 @@ import {
 } from "react-router-dom";
 import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
 
-import Uploader from './Uploader'
-import AlgorandTokenizer from './AlgorandTokenizer'
+import Minter from './Minter'
 import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
 import RAF from './RAF.js'
@@ -22,12 +21,7 @@ class App extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = { 
-      cid: undefined, 
-      wallet: undefined
-    }
-
-    this.setCID = this.setCID.bind(this)
+    this.state = { wallet: undefined }
 
     this.setWallet = this.setWallet.bind(this)
     this.walletConnected = this.walletConnected.bind(this)
@@ -41,8 +35,6 @@ class App extends React.Component {
     this.setState({wallet:wallet})
   }
 
-  setCID(cid) { this.setState({ cid: cid }) }
-
   render() {
     return (
       <Router>
@@ -51,7 +43,7 @@ class App extends React.Component {
             <Navbar.Heading> Rare AF</Navbar.Heading>
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
-            <AnchorButton className='bp3-minimal' icon='new-object' text='Create' href="/create" />
+            <AnchorButton className='bp3-minimal' icon='new-object' text='Mint' href="/mint" />
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
             <AlgorandWalletConnector 
@@ -65,10 +57,8 @@ class App extends React.Component {
           <Route exact path="/" >
             <Browser wallet={this.state.wallet} />
           </Route>
-          <Route path="/create" >
-            <Uploader onUploaded={this.setCID} cid={this.state.cid} wallet={this.state.wallet}>  </Uploader>
-            <Divider />
-            <AlgorandTokenizer cid={this.state.cid} wallet={this.state.wallet} />
+          <Route path="/mint" >
+            <Minter wallet={this.state.wallet} />
           </Route>
           <Route path="/raf/:id" children={<RAF wallet={this.state.wallet} />}  >
           </Route>

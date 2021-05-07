@@ -22,7 +22,7 @@ export async function populate_contract(template, variables) {
     //Read the program, Swap vars, spit out the filled out tmplate
     let program = await get_teal(template)
     for (let v in variables) {
-        program = program.replace("$" + v, variables[v])
+        program = program.replace(v, variables[v])
     }
     return program
 }

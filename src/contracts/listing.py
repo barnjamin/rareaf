@@ -1,4 +1,8 @@
 from pyteal import *
+from config import *
+
+
+config = get_config()
 
 def listing():
 
@@ -11,15 +15,15 @@ def listing():
     platform_addr  = ScratchVar(TealType.bytes)
 
     setup = Seq([
-        creator.store(Bytes("")),
-        price.store(Int(0)),
-        asset_id.store(Int(0)),
+        creator.store(Tmpl.Bytes("TMPL_CREATOR_ADDR")),
+        price.store(Tmpl.Int("TMPL_PRICE")),
+        asset_id.store(Tmpl.Int("TMPL_ASSET_ID")),
 
-        platform_token.store(Int(4)),
-        platform_fee.store(Int(1000)),
-        platform_addr.store(Bytes("7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM")),
+        platform_token.store(Int(config['token']['id'])),
+        platform_fee.store(Int(int(config['fee']))),
+        platform_addr.store(Bytes(config['address'])),
 
-        Int(0)
+        Int(0) # return 0 so this cond case doesnt get executed
     ])
 
     opt_in_asa = And(
@@ -64,15 +68,27 @@ def listing():
     )
 
     # Send algo balance back to creator
+    delist_cfg = And(
+        # Is safe payment
+        Gtxn[2].type_enum() == TxnType.AssetConfig,
+        Gtxn[2].rekey_to() == Global.zero_address(),
+        Gtxn[2].config_asset()          == asset_id.load(),
+        Gtxn[2].config_asset_manager()  == creator.load(),
+        Gtxn[2].config_asset_reserve()  == creator.load(),
+        Gtxn[2].config_asset_freeze()   == creator.load(),
+        Gtxn[2].config_asset_clawback() == creator.load(),
+    )
+
+    # Send algo balance back to creator
     delist_algo = And(
         # Is safe payment
-        Gtxn[2].type_enum() == TxnType.Payment,
-        Gtxn[2].rekey_to() == Global.zero_address(),
+        Gtxn[3].type_enum() == TxnType.Payment,
+        Gtxn[3].rekey_to() == Global.zero_address(),
         # Is to creator, close  to creator
-        Gtxn[2].receiver() == creator.load(),
-        Gtxn[2].close_remainder_to() == creator.load(),
+        Gtxn[3].receiver() == creator.load(),
+        Gtxn[3].close_remainder_to() == creator.load(),
         # Is for 0 algo
-        Gtxn[2].amount() == Int(0)
+        Gtxn[3].amount() == Int(0)
     )
 
     # Delist 
@@ -84,6 +100,7 @@ def listing():
         Gtxn[1].sender() == Gtxn[2].sender(),
         delist_platform,
         delist_asa,
+        delist_cfg,
         delist_algo,
     )
 
@@ -122,14 +139,22 @@ def listing():
         Gtxn[2].asset_amount() == Int(1)
     )
 
+    purchase_cfg = And(
+        Gtxn[3].type_enum()             == TxnType.AssetConfig,
+        Gtxn[3].rekey_to()              == Global.zero_address(),
+        Gtxn[3].config_asset()          == asset_id.load(),
+        Gtxn[3].config_asset_manager()  == Gtxn[0].sender(),
+        Gtxn[3].config_asset_reserve()  == Gtxn[0].sender(),
+        Gtxn[3].config_asset_freeze()   == Gtxn[0].sender(),
+        Gtxn[3].config_asset_clawback() == Gtxn[0].sender(),
+    )
+
     purchase_fee = And(
-        Gtxn[3].type_enum() == TxnType.Payment,
-        Gtxn[3].rekey_to() == Global.zero_address(),
-        # Is to platform, remainder to creator
-        Gtxn[3].receiver() == platform_addr.load(),
-        Gtxn[3].close_remainder_to() == creator.load(),
-        # is for fee units
-        Gtxn[3].amount() == platform_fee.load()
+        Gtxn[4].type_enum() == TxnType.Payment,
+        Gtxn[4].rekey_to() == Global.zero_address(),
+        Gtxn[4].receiver() == platform_addr.load(),
+        Gtxn[4].close_remainder_to() == creator.load(),
+        Gtxn[4].amount() == platform_fee.load()
     )
 
     purchase = And(
@@ -141,10 +166,10 @@ def listing():
 
     return Cond([setup, Int(0)], #NoOp
                 [Global.group_size() == Int(1), opt_in], 
-                [Global.group_size() == Int(3), delist], 
-                [Global.group_size() == Int(4), purchase])
+                [Global.group_size() == Int(4), delist], 
+                [Global.group_size() == Int(5), purchase])
 
 
 if __name__ == "__main__":
      prog = listing()
-     print(compileTeal(prog, Mode.Signature))
+     print(compileTeal(prog, Mode.Signature, version=3))
