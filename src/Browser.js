@@ -32,6 +32,7 @@ class Browser extends React.Component {
         <div className='container' >
             { 
             this.state.listings.map((l) => {     
+                if (l === undefined){ return (<Card></Card>) }
                 return (
                     <Card className='content-card' key={l.asset_id} >
                         <div className='container'>

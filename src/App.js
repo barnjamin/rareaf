@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 'use strict'
 
-import $ from 'jquery'
 import React from 'react'
 import {
   BrowserRouter as Router,
@@ -55,14 +54,14 @@ class App extends React.Component {
         </Navbar>
         <Switch>
           <Route exact path="/" >
-            <Browser wallet={this.state.wallet} />
+            <Browser history={this.props.history} wallet={this.state.wallet} />
           </Route>
           <Route path="/mint" >
-            <Minter wallet={this.state.wallet} />
+            <Minter history={this.props.history} wallet={this.state.wallet} />
           </Route>
-          <Route path="/raf/:id" children={<RAF wallet={this.state.wallet} />}  >
+          <Route path="/raf/:id" children={<RAF history={this.props.history} wallet={this.state.wallet} />}  >
           </Route>
-          <Route path="/listing/:addr" children={<ListingViewer  wallet={this.state.wallet} />} >
+          <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={this.state.wallet} />} >
           </Route>
         </Switch>
       </Router>

@@ -3,7 +3,7 @@
 
 import React, {useState, useEffect} from 'react'
 import {useParams, useHistory} from 'react-router-dom'
-import {getNFT, destroyToken} from './lib/algorand'
+import { getNFT } from './lib/algorand'
 import {FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput} from '@blueprintjs/core'
 import listing from './lib/listing.ts'
 import NFT from './lib/nft'
@@ -22,8 +22,9 @@ function RAF(props) {
     
     useEffect(()=>{
         if(nft.asset_id === undefined){
-            getNFT(parseInt(id)).then((nft)=>{ setNFT(nft) })
-            .catch((err)=>{ console.log("Error:", err) })
+            getNFT(parseInt(id)).then((nft)=>{ 
+                setNFT(nft) 
+            }).catch((err)=>{ console.log("Error:", err) })
         }
     });
 

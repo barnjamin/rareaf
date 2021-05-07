@@ -36,7 +36,7 @@ export async function getListing(addr) {
     const details = await getDetailsOfListing(addr)
 
     const vars    = extract_vars(details[2])
-    const creator = algosdk.encodeAddress(vars['$TMPL_CREATOR_ADDR'])
+    const creator = algosdk.encodeAddress(vars['TMPL_CREATOR_ADDR'])
     
     const md      = await resolveMetadataFromMetaHash(tokens[0]['params']['metadata-hash'])
 
@@ -107,8 +107,9 @@ export async function getToken(asset_id) {
 
 export async function getNFT(asset_id){
     const token = await getToken(asset_id)
-    const md    = await resolveMetadataFromMetaHash(token['params']['metadata-hash'])
+    const [cid, md]    = await resolveMetadataFromMetaHash(token['params']['metadata-hash'])
     const nft   = new NFT(md, asset_id)
+    nft.meta_cid = cid
     return nft
 }
 
@@ -139,7 +140,6 @@ export async function get_asa_optin_txn(withSuggested, addr, id) {
     return get_asa_xfer_txn(withSuggested, addr, addr, id, 0)
 }
 
-
 export async function get_asa_xfer_txn(withSuggested, from, to, id, amt) {
     return addSuggested(withSuggested, {
         from: from,
@@ -151,6 +151,7 @@ export async function get_asa_xfer_txn(withSuggested, from, to, id, amt) {
 }
 
 export async function get_asa_create_txn(withSuggested, addr, meta) {
+    console.log(meta)
     return addSuggested(withSuggested, {
         from: addr,
         assetManager: addr,
@@ -159,6 +160,8 @@ export async function get_asa_create_txn(withSuggested, addr, meta) {
         assetDecimals: 0,
         assetMetadataHash:meta,
         type: 'acfg',
+        assetName:"RareAF",
+        assetUnitName:"RAF",
         assetURL: ps.domain,
     })
 }
@@ -244,7 +247,6 @@ export async function waitForConfirmation(algodclient, txId, timeout) {
     /* eslint-enable no-await-in-loop */
     throw new Error(`Transaction not confirmed after ${timeout} rounds!`);
 }
-
 
 function download_txns(name, txns) {
     let b = new Uint8Array(0);

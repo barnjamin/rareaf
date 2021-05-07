@@ -1,6 +1,7 @@
 import { Wallet } from '../wallets/wallet'
 import { getMetaFromIpfs } from './ipfs'
 import { get_asa_create_txn, get_asa_destroy_txn, sendWait } from './algorand'
+import CID from 'cids'
 
 
 interface NFTMetadata {
@@ -18,7 +19,7 @@ interface NFTMetadata {
 
 export default class NFT {
     asset_id: number // ASA idx in algorand
-    meta_hash: string // IPFS CID of metadata json
+    meta_cid:  CID// IPFS CID of metadata json
 
     metadata: NFTMetadata
 
@@ -29,7 +30,7 @@ export default class NFT {
 
     async createToken(wallet: Wallet){
         const creator = wallet.getDefaultAccount()
-        const create_txn = await get_asa_create_txn(false, creator, this.getMetaHash())
+        const create_txn = await get_asa_create_txn(false, creator, this.getMetaDataHash())
         const s_create_txn = await wallet.sign(create_txn)
         return await sendWait(s_create_txn)
     }
@@ -41,7 +42,9 @@ export default class NFT {
         return await sendWait(s_destroy_txn)
     }
 
-    getMetaHash() { return Array.from(this.meta_hash.substring(2)) }
+    getMetaDataHash() { 
+        return Array.from(this.meta_cid.cid.multihash.subarray(2))
+    }
 
     imgSrc (): string {
         if (this.metadata.file_hash !== undefined)
@@ -51,9 +54,10 @@ export default class NFT {
     }
 
     static async fromMetaHash(meta_hash: string): Promise<NFT> {
-        const md = await getMetaFromIpfs(meta_hash);
+        const [cid, md] = await getMetaFromIpfs(meta_hash);
+        console.log(cid)
         const nft = new NFT(md)
-        nft.meta_hash = meta_hash
+        nft.meta_cid = cid
         return nft
     }
 }

@@ -23,8 +23,8 @@ export async function uploadMetadata(md) {
 }
 
 export async function resolveMetadataFromMetaHash(meta_hash) {
-    const mhash = getCIDFromMetadataHash(meta_hash).toString()
-    return await getMetaFromIpfs(mhash)
+    const cid = getCIDFromMetadataHash(meta_hash)
+    return [cid, await getMetaFromIpfs(cid.toString())]
 }
 
 export async function getMetaFromIpfs(meta_hash) {
