@@ -15,9 +15,9 @@ def listing():
     platform_addr  = ScratchVar(TealType.bytes)
 
     setup = Seq([
-        creator.store(Tmpl.Bytes("TMPL_CREATOR_ADDR")),
-        price.store(Tmpl.Int("TMPL_PRICE_MICROALGOS")),
-        asset_id.store(Tmpl.Int("TMPL_ASSET_ID")),
+        creator.store(Tmpl.PushBytes("TMPL_CREATOR_ADDR")),
+        price.store(Btoi(Tmpl.PushBytes("TMPL_PRICE_MICROALGOS"))),
+        asset_id.store(Btoi(Tmpl.PushBytes("TMPL_ASSET_ID"))),
 
         platform_token.store(Int(config['token']['id'])),
         platform_fee.store(Int(int(config['fee']))),

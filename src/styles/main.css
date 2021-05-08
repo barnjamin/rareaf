@@ -1,3 +1,8 @@
+
+body {
+    background-color:#394B59;
+}
+
 .container {
     display: flex;
     flex-flow: row wrap;
@@ -13,7 +18,8 @@
     height: 250px;
     padding: 10px;
     margin: 10px;
-    background: whitesmoke;
+    background:#202B33;
+    filter: drop-shadow(0px 0px 12px #182026);
 }
 
 .content-piece img {
@@ -66,7 +72,7 @@
 }
 
 .content-viewer img {
-    width: 50%;
+    width: 65%;
 }
 
 .wallet-option-list {

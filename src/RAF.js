@@ -4,7 +4,7 @@
 import React, {useState, useEffect} from 'react'
 import {useParams, useHistory} from 'react-router-dom'
 import { getNFT } from './lib/algorand'
-import {FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput} from '@blueprintjs/core'
+import {Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation} from '@blueprintjs/core'
 import listing from './lib/listing.ts'
 import NFT from './lib/nft'
 
@@ -69,21 +69,22 @@ function RAF(props) {
     }
 
     return (
-        <div className='container'>
-            <div className='content content-viewer' >
-                <img className='content-img' src={nft.imgSrc()} />
-            </div>
-            <div className='container' >
-                <div className='content'>
-                    <p><b>{nft.metadata.title}</b> - <i>{nft.metadata.artist}</i></p>
+        <div className='container' >
+            <Card elevation={Elevation.THREE} >
+                <div className='content-viewer' >
+                    <img className='content-img' src={nft.imgSrc()} />
                 </div>
-            </div>
 
-            <div className='container'>
-                <div className='content'>
-                    <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
-                    <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
+                <div className='container' >
+                    <div className='content'>
+                        <p><b>{nft.metadata.title}</b> - <i>{nft.metadata.artist}</i></p>
+                    </div>
                 </div>
+            </Card>
+
+            <div className='content'>
+                <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
+                <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
             </div>
 
             <MultistepDialog isOpen={listingVisible} onClose={handleCancelListing} finalButtonProps={{onClick:handleSubmitListing}} >

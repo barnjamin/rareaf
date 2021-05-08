@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react'
 import { uploadContent, uploadMetadata } from './lib/ipfs'
-import { Button, FileInput } from "@blueprintjs/core"
+import { Button, Elevation, FileInput, Card } from "@blueprintjs/core"
 import NFT from './lib/nft'
 
 export default class Minter extends React.Component {
@@ -90,18 +90,20 @@ export default class Minter extends React.Component {
     render() {
         return (
             <div>
-                <Uploader onUploaded={this.setFileHash} setFileDetails={this.setFileDetails} cid={this.state.cid} wallet={this.props.wallet}>  </Uploader>
+                <Card elevation={Elevation.TWO}>
+                    <Uploader onUploaded={this.setFileHash} setFileDetails={this.setFileDetails} cid={this.state.cid} wallet={this.props.wallet}>  </Uploader>
 
-                <div className='container' >
-                    <input name='title' className='details-basic details-title bp3-input bp3-large' onChange={this.handleChange} type='text' name='title' id='title' value={this.state.title}></input>
-                    <input name='artist' className='details-basic details-artist bp3-input bp3-large' onChange={this.handleChange} type='text' name='artist' id='artist' value={this.state.artist}></input>
-                </div>
-                <div className='container'>
-                    <textarea className='details-description bp3-input bp3-large' onChange={this.handleChange} type='text' name='description' id='description' value={this.state.description}></textarea>
-                </div>
-                <div className='container-mint'>
-                    <Button loading={this.state.waiting_for_tx} onClick={this.createMetaAndToken} rightIcon='clean' large={true} intent='success'>Mint</Button>
-                </div>
+                    <div className='container' >
+                        <input name='title' className='details-basic details-title bp3-input bp3-large' onChange={this.handleChange} type='text' name='title' id='title' value={this.state.title}></input>
+                        <input name='artist' className='details-basic details-artist bp3-input bp3-large' onChange={this.handleChange} type='text' name='artist' id='artist' value={this.state.artist}></input>
+                    </div>
+                    <div className='container'>
+                        <textarea className='details-description bp3-input bp3-large' onChange={this.handleChange} type='text' name='description' id='description' value={this.state.description}></textarea>
+                    </div>
+                    <div className='container-mint'>
+                        <Button loading={this.state.waiting_for_tx} onClick={this.createMetaAndToken} rightIcon='clean' large={true} intent='success'>Mint</Button>
+                    </div>
+                </Card>
             </div>
         )
     }
