@@ -80,12 +80,14 @@ function RAF(props) {
                         <p><b>{nft.metadata.title}</b> - <i>{nft.metadata.artist}</i></p>
                     </div>
                 </div>
+                <div className='container-right'>
+                    <div className='content'>
+                        <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
+                        <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
+                    </div>
+                </div>
             </Card>
 
-            <div className='content'>
-                <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
-                <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
-            </div>
 
             <MultistepDialog isOpen={listingVisible} onClose={handleCancelListing} finalButtonProps={{onClick:handleSubmitListing}} >
                 <DialogStep 

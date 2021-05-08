@@ -1,5 +1,5 @@
-import listing_template from '../contracts/listing.teal.tmpl'
-import listing_var_positions from '../contracts/listing.teal.tmpl.json'
+import listing_template from '../contracts/listing.tmpl.teal'
+import listing_var_positions from '../contracts/listing.tmpl.teal.json'
 import platform_delegate_signed from '../contracts/platform.signed'
 import {getAlgodClient} from './algorand'
 

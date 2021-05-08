@@ -19,10 +19,10 @@ platform_acct = Addr(config['address'])
 
 def main():
 
-    tmpl_path = "./listing.teal.tmpl"
+    tmpl_path = "./listing.tmpl.teal"
     tc = TemplateContract(tmpl_path, client)
 
-    with open('./listing.teal.tmpl.json', 'w') as f:
+    with open('./listing.tmpl.teal.json', 'w') as f:
         json.dump(tc.get_positions_obj(), f)
 
     # Get arg values

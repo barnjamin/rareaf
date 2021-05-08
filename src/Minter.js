@@ -89,8 +89,8 @@ export default class Minter extends React.Component {
 
     render() {
         return (
-            <div>
-                <Card elevation={Elevation.TWO}>
+            <div class='container'>
+                <Card elevation={Elevation.TWO} >
                     <Uploader onUploaded={this.setFileHash} setFileDetails={this.setFileDetails} cid={this.state.cid} wallet={this.props.wallet}>  </Uploader>
 
                     <div className='container' >

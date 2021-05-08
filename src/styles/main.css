@@ -8,6 +8,18 @@ body {
     flex-flow: row wrap;
     justify-content: space-around;
     align-items: center;
+    padding:25px;
+}
+.container-right {
+    display:flex;
+    flex-flow: row wrap;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px;
+}
+
+.container-right button {
+    margin: 5px;
 }
 
 .content-piece {
