@@ -1,7 +1,10 @@
 import base64
 import hashlib
-from algosdk.logic import parse_uvarint, check_byte_const_block, check_int_const_block
+from algosdk.logic import check_byte_const_block, check_int_const_block
 from pyteal import *
+
+from algosdk.v2client import algod
+import json
 
 dummy_string = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
 dummy_int = "b64(AAAAAAAAAHs=)"
@@ -16,35 +19,36 @@ class TemplateVar(object):
         self.name = name
 
 class TemplateContract(object):
-    template_source = ""
-    teal_source     = ""
     assembled_bytes = [] 
     template_vars   = []
     client          = None
+    config          = {}
 
-    def __init__(self, tmpl_path, client):
-        self.tmpl_path = tmpl_path
-        self.client = client
+    def __init__(self, config):
 
-        with open(self.tmpl_path, mode='r') as f:
+        self.config = config
+
+        with open(config['listing']['template'], mode='r') as f:
             self.template_bytes = f.read()
 
-        teal_src = self.populate_tmpl_vars()
+        url         = "{}:{}".format(config['algod']['server'], config['algod']['port'])
+        self.client = algod.AlgodClient(config['algod']['token'], url)
 
-        result = client.compile(teal_src)
+        result = self.client.compile(self.populate_tmpl_vars())
+
         self.assembled_bytes = base64.b64decode(result["result"])
 
         self.set_start_positions()
 
+
+    def write_tmpl_positions(self):
+        with open(self.config['listing']['template-positions'], 'w') as f:
+            json.dump(self.get_positions_obj(), f)
+
     def get_positions_obj(self):
         pos = {}
         for tv in self.template_vars:
-            pos[tv.name] = {
-                'start':tv.start,
-                'length': tv.length,
-                'distance':tv.distance
-            }
-
+            pos[tv.name] = {'start':tv.start, 'length': tv.length, 'distance':tv.distance}
         return pos
 
     def get_validate_ops(self, contract_val):

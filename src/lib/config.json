@@ -19,6 +19,14 @@
         "total": 1000,
         "id": 7 
     },
+    "application":{
+        "approval":"platform-approval.teal",
+        "clear":"platform-clear.teal"
+    },
+    "listing":{
+        "template":"listing.tmpl.teal",
+        "template-positions":"listing.tmpl.teal.json"
+    },
     "address": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
     "domain": "rare.af",
     "fee":1e6,
