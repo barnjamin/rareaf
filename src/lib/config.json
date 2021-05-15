@@ -17,9 +17,10 @@
         "name": "RareAF",
         "unit": "RAF",
         "total": 1000,
-        "id": 7 
+        "id": 26 
     },
     "application":{
+        "id":10,
         "approval":"platform-approval.teal",
         "clear":"platform-clear.teal"
     },

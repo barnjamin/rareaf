@@ -1,5 +1,5 @@
 #pragma version 3
-intcblock 1 4 0 7 3
+intcblock 1 4 0 26 3
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
 store 0
@@ -10,21 +10,29 @@ pushbytes TMPL_ASSET_ID // TMPL_ASSET_ID
 btoi
 store 4
 intc_2 // 0
-bnz l8
+bnz l12
 arg 0
 pushbytes 0x637265617465 // "create"
 ==
-bnz l7
+bnz l11
 arg 0
 pushbytes 0x64656c657465 // "delete"
 ==
-bnz l6
+bnz l10
+arg 0
+pushbytes 0x746167 // "tag"
+==
+bnz l9
+arg 0
+pushbytes 0x72657072696365 // "reprice"
+==
+bnz l8
 arg 0
 pushbytes 0x7075726368617365 // "purchase"
 ==
-bnz l5
+bnz l7
 err
-l5:
+l7:
 gtxn 0 Sender
 store 2
 intc_0 // 1
@@ -100,7 +108,7 @@ bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 ==
 &&
 gtxn 2 XferAsset
-intc_3 // 7
+intc_3 // 26
 ==
 &&
 &&
@@ -156,8 +164,14 @@ pushint 1000000 // 1000000
 ==
 &&
 &&
-b l9
-l6:
+b l13
+l8:
+intc_0 // 1
+b l13
+l9:
+intc_0 // 1
+b l13
+l10:
 gtxn 0 Sender
 store 1
 intc_0 // 1
@@ -181,7 +195,7 @@ bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 ==
 &&
 gtxn 0 XferAsset
-intc_3 // 7
+intc_3 // 26
 ==
 &&
 &&
@@ -261,56 +275,32 @@ intc_2 // 0
 ==
 &&
 &&
-b l9
-l7:
-gtxn 0 Receiver
+b l13
+l11:
+gtxn 1 Receiver
 store 1
 intc_0 // 1
-gtxn 0 TypeEnum
-intc_0 // pay
-==
-gtxn 0 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 0 CloseRemainderTo
-global ZeroAddress
-==
-&&
-gtxn 0 Sender
-load 0
-==
-&&
-gtxn 0 Receiver
-load 1
-==
-&&
-gtxn 0 Amount
-pushint 5000000 // 5000000
-==
-&&
-&&
 gtxn 1 TypeEnum
-intc_1 // axfer
+intc_0 // pay
 ==
 gtxn 1 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 1 XferAsset
-load 4
+gtxn 1 CloseRemainderTo
+global ZeroAddress
 ==
 &&
 gtxn 1 Sender
+load 0
+==
+&&
+gtxn 1 Receiver
 load 1
 ==
 &&
-gtxn 1 AssetReceiver
-load 1
-==
-&&
-gtxn 1 AssetAmount
-intc_2 // 0
+gtxn 1 Amount
+pushint 5000000 // 5000000
 ==
 &&
 &&
@@ -322,7 +312,7 @@ global ZeroAddress
 ==
 &&
 gtxn 2 XferAsset
-intc_3 // 7
+load 4
 ==
 &&
 gtxn 2 Sender
@@ -345,12 +335,12 @@ gtxn 3 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 3 AssetCloseTo
-global ZeroAddress
+gtxn 3 XferAsset
+intc_3 // 26
 ==
 &&
 gtxn 3 Sender
-load 0
+load 1
 ==
 &&
 gtxn 3 AssetReceiver
@@ -358,11 +348,7 @@ load 1
 ==
 &&
 gtxn 3 AssetAmount
-intc_0 // 1
-==
-&&
-gtxn 3 XferAsset
-load 4
+intc_2 // 0
 ==
 &&
 &&
@@ -378,7 +364,7 @@ global ZeroAddress
 ==
 &&
 gtxn 4 Sender
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+load 0
 ==
 &&
 gtxn 4 AssetReceiver
@@ -386,43 +372,71 @@ load 1
 ==
 &&
 gtxn 4 AssetAmount
-load 3
+intc_0 // 1
 ==
 &&
 gtxn 4 XferAsset
-intc_3 // 7
+load 4
 ==
 &&
 &&
 gtxn 5 TypeEnum
-intc 4 // acfg
+intc_1 // axfer
 ==
 gtxn 5 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 5 ConfigAsset
+gtxn 5 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 5 Sender
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 5 AssetReceiver
+load 1
+==
+&&
+gtxn 5 AssetAmount
+load 3
+==
+&&
+gtxn 5 XferAsset
+intc_3 // 26
+==
+&&
+&&
+gtxn 6 TypeEnum
+intc 4 // acfg
+==
+gtxn 6 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 6 ConfigAsset
 load 4
 ==
 &&
-gtxn 5 ConfigAssetManager
+gtxn 6 ConfigAssetManager
 load 1
 ==
 &&
-gtxn 5 ConfigAssetReserve
+gtxn 6 ConfigAssetReserve
 load 1
 ==
 &&
-gtxn 5 ConfigAssetFreeze
+gtxn 6 ConfigAssetFreeze
 load 1
 ==
 &&
-gtxn 5 ConfigAssetClawback
+gtxn 6 ConfigAssetClawback
 load 1
 ==
 &&
 &&
-b l9
-l8:
+b l13
+l12:
 intc_2 // 0
-l9:
+l13:

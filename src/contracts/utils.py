@@ -2,16 +2,15 @@ from pyteal import *
 from config import *
 
 
-def valid_set_tag(txn, tag_var):
-    return Seq([ 
-            Assert(
-                App.globalGet( Concat(tag_key, Itob(txn.xfer_asset()))
-                ) == Bytes("true")
-            ), 
-            tag_var.store(txn.xfer_asset()),
-            Int(1) 
-        ])
+def valid_platform_asset():
+    expr = AssetParam.manager(Int(0))
+    return Seq([expr, expr.value() == platform_addr])
 
+def set_asset_id(txn, asset_var):
+    return Seq([
+        asset_var.store(txn.xfer_asset()),
+        Int(1)
+    ])
 
 def valid_contract(tc, contract_source, contract_addr):
     return And(

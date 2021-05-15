@@ -1,96 +1,15 @@
 from pyteal import *
-from validator import TemplateContract
-from listing import listing
-from algosdk.logic import parse_uvarint
-from algosdk.v2client import algod
-from config import get_config
-import json
+from config import *
+from utils import *
 
-config = get_config()
-
-token   = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-url = "{}:{}".format(config['algod']['server'], config['algod']['port'])
-client  = algod.AlgodClient(config['algod']['token'], url)
-
-
-seed_amt      = Int(int(config['seed']))
-platform_token= Int(config['token']['id'])
-platform_acct = Addr(config['address']) 
-
-def main():
-
-    tmpl_path = "./listing.tmpl.teal"
-    tc = TemplateContract(tmpl_path, client)
-
-    with open('./listing.tmpl.teal.json', 'w') as f:
-        json.dump(tc.get_positions_obj(), f)
-
-    # Get arg values
-    asa_val, contract_val = Btoi(Arg(1)), Arg(2)
-
-    correct_behavior = And(
-        tc.get_validate_ops(contract_val),
-       # Make sure the contract template matches
-        Sha512_256(Concat(Bytes("Program"), contract_val)) ==  Txn.asset_receiver(),
-    )
-
-    # Validate transactions
-    asa_xfer = And(
-        # Is safe asset transfer
-        Gtxn[0].type_enum() == TxnType.AssetTransfer,
-        Gtxn[0].rekey_to() == Global.zero_address(),
-        Gtxn[0].asset_close_to() == Global.zero_address(),
-        # is for asa token
-        Gtxn[0].xfer_asset() == asa_val,
-        # is for 1 tokens
-        Gtxn[0].asset_amount() == Int(1)
-    )
-
-    asa_config = And(
-        # Is safe platform token close out, creator gets 5 and the rest goes back to platform
-        Gtxn[1].type_enum() == TxnType.AssetConfig,
-        Gtxn[1].rekey_to() == Global.zero_address(),
-        Gtxn[1].asset_close_to() == Global.zero_address(),
-        # is for asa token
-        Gtxn[1].config_asset() == asa_val,
-        # Is to creator, rest to platform account
-        Gtxn[1].config_asset_manager() == Txn.asset_receiver(),
-    )
-
-    funding = And(
-        # Is safe payment
-        Gtxn[2].type_enum() == TxnType.Payment,
-        Gtxn[2].rekey_to() == Global.zero_address(),
-        Gtxn[2].close_remainder_to() == Global.zero_address(),
-        # Is To Contract Acct 
-        Gtxn[2].receiver() == Txn.asset_receiver(),
-        # Is for some amt algo
-        Gtxn[2].amount() ==  seed_amt 
-    )
-
-    platform_xfer = And(
-        # Is safe asset transfer
-        Gtxn[3].type_enum() == TxnType.AssetTransfer,
-        Gtxn[3].rekey_to() == Global.zero_address(),
-        Gtxn[3].asset_close_to() == Global.zero_address(),
-        # is for platform token
-        Gtxn[3].xfer_asset() == platform_token,
-        # Is to contract, from  platform 
-        Gtxn[3].asset_receiver() == Txn.asset_receiver(),
-        Gtxn[3].sender() == platform_acct,
-        # is for 1 tokens
-        Gtxn[3].asset_amount() == Int(1)
-    )
-
+def platform_delegate():
+    #Allow any grouped atomic txns that are approved by the application
     return And(
-        Global.group_size() == Int(4),
-        correct_behavior,
-        asa_xfer,
-        asa_config,
-        funding,
-        platform_xfer
+        Global.group_size() > Int(1),
+        Gtxn[0].type_enum() == TxnType.ApplicationCall,
+        Gtxn[0].application_id() == app_id,
     )
 
 if __name__ == "__main__":
-    with open("platform.teal") as f:
-        f.write(compileTeal(main(), Mode.Signature, version=3))
+    with open("platform-delegate.teal", 'w') as f:
+        f.write(compileTeal(platform_delegate(), Mode.Signature, version=3))

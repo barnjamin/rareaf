@@ -22,18 +22,23 @@ def approval():
 
     is_app_creator = Global.creator_address() == Txn.sender()
 
-    on_creation = Seq([ App.globalPut(listing_key, Txn.application_args[0]), Return(Int(1)) ])
+    on_creation = Seq([ Return(Int(1)) ])
     on_delete   = Seq([ Return(is_app_creator) ])
     on_closeout = Seq([ Return(is_app_creator) ])
     register    = Seq([ Return(Int(1)) ])
 
 
     create_listing = And(
-        set_addr_as_rx(Gtxn[0], contract_addr),
-        set_addr_as_tx(Gtxn[0], creator_addr),
-        Seq([price.store(Btoi(Gtxn[0].application_args[1])), Int(1)]),
+        set_addr_as_rx(Gtxn[1], contract_addr),
+        set_addr_as_tx(Gtxn[1], creator_addr),
+
+        Seq([
+            price.store(Btoi(Txn.application_args[1])), 
+            Int(1)
+        ]),
+
         # We're creating a contract account with the right behavior
-        valid_contract(tc, App.globalGet(listing_key), contract_addr.load()),
+        valid_contract(tc, Txn.application_args[2], contract_addr.load()),
 
         # Save it in creators local state
         caller_add_listing_addr(contract_addr.load()),
@@ -43,22 +48,28 @@ def approval():
         asa_xfer_valid(  Gtxn[2], price_token, price.load(), creator_addr.load(), contract_addr.load()),
     )
 
+    #Txn1 is app call, Txn2 is opt in, Txn3 is send
     tag_listing = And( 
-        Global.group_size() == Int(2),
+        Global.group_size() == Int(3),
 
-        valid_set_tag(Gtxn[0], tag_id),
+        valid_platform_asset(), # first and only foreign arg
 
-        set_addr_as_rx(Gtxn[0], contract_addr),
+        set_asset_id(Gtxn[1], tag_id),
+
+        set_addr_as_rx(Gtxn[1], contract_addr),
+
         caller_is_listing_creator(contract_addr.load()),
 
-        asa_optin_valid( Gtxn[0], tag_id.load(), contract_addr.load()),
-        asa_xfer_valid(  Gtxn[1], tag_id.load(), Int(1), platform_addr, contract_addr.load())
+        asa_optin_valid( Gtxn[1], tag_id.load(), contract_addr.load() ),
+        asa_xfer_valid(  Gtxn[2], tag_id.load(), Int(1), platform_addr, contract_addr.load())
     )
 
     reprice_listing = And(
-        Global.group_size() == Int(1),
-        set_addr_as_rx(Gtxn[0], contract_addr),
+        Global.group_size() == Int(2),
+
+        set_addr_as_rx(Gtxn[1], contract_addr),
         caller_is_listing_creator(contract_addr.load()),
+
         asa_xfer_valid(Txn, price_token, Btoi(Txn.application_args[0]), platform_addr, contract_addr.load()), 
     )
 
