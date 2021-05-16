@@ -1,9 +1,9 @@
 #pragma version 3
 intcblock 1 4 0 15 3
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
-pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
+pushbytes 0xf12b9cced463868b93eabf690ed8d01c2eb6f810e9174a40f60bc728cc7cffc8 // TMPL_CREATOR_ADDR
 store 0
-pushbytes TMPL_ASSET_ID // TMPL_ASSET_ID
+pushbytes b64(AAAAAAAAAAU=) // TMPL_ASSET_ID
 btoi
 store 3
 intc_2 // 0

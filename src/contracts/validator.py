@@ -60,22 +60,25 @@ class TemplateContract(object):
 
         concat_ops     = [blank_contract.store(Bytes("")), pos.store(Int(0))]
 
+        p = 0
         for idx in range(len(self.template_vars)):
             tv = self.template_vars[idx]
-
+            print(p)
+            print(tv.distance)
+            print(self.assembled_bytes[p:p+tv.distance].hex())
             concat_ops.append(blank_contract.store(
                 Concat(blank_contract.load(), 
                     Substring(contract_val, pos.load(), pos.load() + Int(tv.distance)))))
             
-            length = GetByte(contract_val, pos.load() + Int(tv.distance-1))
-            concat_ops.append(pos.store(pos.load() + length + Int(tv.distance)))
+            p += tv.length + tv.distance
+            concat_ops.append(pos.store(pos.load() + Int(tv.length) + Int(tv.distance)))
 
+        print(self.assembled_bytes[p:].hex())
         concat_ops.append(blank_contract.store(
             Concat(blank_contract.load(), 
             Substring(contract_val, pos.load(), Len(contract_val)))))
 
         concat_ops.append(Int(1))
-
         return And(
             # prepare the blank contract
             Seq(concat_ops), 
@@ -119,6 +122,8 @@ class TemplateContract(object):
         for v in self.template_vars:
             blanked = blanked[:v.start-removed] + blanked[(v.start+v.length)-removed:]
             removed += v.length 
+
+        print(blanked.hex())
         h = hashlib.sha256(blanked)
 
         return base64.b64encode(h.digest()).decode('ascii')

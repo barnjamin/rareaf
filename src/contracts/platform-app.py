@@ -44,8 +44,8 @@ def approval():
         caller_add_listing_addr(contract_addr.load()),
 
         # Make sure sure the price tokens are going to the right address
-        asa_optin_valid( Gtxn[1], price_token, contract_addr.load()),
-        asa_xfer_valid(  Gtxn[2], price_token, price.load(), creator_addr.load(), contract_addr.load()),
+        asa_optin_valid( Gtxn[3], price_token, contract_addr.load()),
+        asa_xfer_valid(  Gtxn[5], price_token, price.load(), platform_addr, contract_addr.load()),
     )
 
     #Txn1 is app call, Txn2 is opt in, Txn3 is send
@@ -92,11 +92,11 @@ def approval():
         [Txn.on_completion() == OnComplete.CloseOut,            on_closeout],
         [Txn.on_completion() == OnComplete.OptIn,               register],
 
-        [Txn.application_args[0] == Bytes("create"),   Return(create_listing)],  # App approve price tokens && adds listing to local state
-        [Txn.application_args[0] == Bytes("tag"),      Return(tag_listing)],     # App only
-        [Txn.application_args[0] == Bytes("reprice"),  Return(reprice_listing)], # App only
-        [Txn.application_args[0] == Bytes("delete"),   Return(delete_listing)],  # App approves sender owns listing
-        [Txn.application_args[0] == Bytes("purchase"), Return(purchase_listing)] # App removes listing from local state
+        [Txn.application_args[0] == action_create,   Return(create_listing)],  # App approve price tokens && adds listing to local state
+        [Txn.application_args[0] == action_tag,      Return(tag_listing)],     # App only
+        [Txn.application_args[0] == action_reprice,  Return(reprice_listing)], # App only
+        [Txn.application_args[0] == action_delete,   Return(delete_listing)],  # App approves sender owns listing
+        [Txn.application_args[0] == action_purchase, Return(purchase_listing)] # App removes listing from local state
     )
 
 

@@ -13,7 +13,6 @@ def listing():
     setup = Seq([
         creator_addr.store(Tmpl.Bytes("TMPL_CREATOR_ADDR")),
         asset_id.store(Btoi(Tmpl.Bytes("TMPL_ASSET_ID"))),
-
         Int(0) # return 0 so this cond case doesnt get executed
     ])
 
@@ -30,7 +29,7 @@ def listing():
 
         # Receive ASA and price tokens
         asa_xfer_valid( Gtxn[4], asset_id.load(), Int(1), creator_addr.load(), contract_addr.load()),
-        asa_xfer_valid( Gtxn[5], price_token, Btoi(Args(1)), platform_addr, contract_addr.load()),
+        asa_xfer_valid( Gtxn[5], price_token, Btoi(Arg(1)), platform_addr, contract_addr.load()),
 
         # Reconfigure ASA to contract addr
         asa_cfg_valid(  Gtxn[6], asset_id.load(), contract_addr.load()),
@@ -61,11 +60,11 @@ def listing():
 
 
     return Cond([setup, Int(0)], #NoOp
-                [Arg(0) == Bytes("create"), create], 
-                [Arg(0) == Bytes("delete"), delete], 
-                [Arg(0) == Bytes("tag"), tag],
-                [Arg(0) == Bytes("reprice"), reprice],
-                [Arg(0) == Bytes("purchase"), purchase])
+                [Arg(0) == action_create,   create], 
+                [Arg(0) == action_delete,   delete], 
+                [Arg(0) == action_tag,      tag],
+                [Arg(0) == action_reprice,  reprice],
+                [Arg(0) == action_purchase, purchase])
 
 if __name__ == "__main__":
      with open(configuration['listing']['template'], 'w') as f:
