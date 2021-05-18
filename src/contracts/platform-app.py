@@ -32,34 +32,26 @@ def approval():
         set_addr_as_rx(Gtxn[1], contract_addr),
         set_addr_as_tx(Gtxn[1], creator_addr),
 
-        Seq([
-            price.store(Btoi(Txn.application_args[1])), 
-            Int(1)
-        ]),
+        Seq([ price.store(Btoi(Txn.application_args[1])), Int(1) ]),
 
         # We're creating a contract account with the right behavior
         valid_contract(tc, Txn.application_args[2], contract_addr.load()),
 
         # Save it in creators local state
         caller_add_listing_addr(contract_addr.load()),
-
-        # Make sure sure the price tokens are going to the right address
-        asa_optin_valid( Gtxn[3], price_token, contract_addr.load()),
-        asa_xfer_valid(  Gtxn[5], price_token, price.load(), platform_addr, contract_addr.load()),
+        price.load() <= max_price,
     )
 
     tag_listing = And( 
         Global.group_size() == Int(3),
-
         valid_platform_asset(), # first and only foreign arg
         set_foreign_asset(Gtxn[0], 0, tag_id),
-
-        set_addr_as_tx(Gtxn[1], contract_addr),
+        set_addr_as_tx(   Gtxn[1], contract_addr),
 
         caller_is_listing_creator(contract_addr.load()),
 
-        asa_optin_valid(Gtxn[1], tag_id.load(), contract_addr.load() ),
-        asa_xfer_valid(Gtxn[2], tag_id.load(), Int(1), platform_addr, contract_addr.load())
+        asa_optin_valid(  Gtxn[1], tag_id.load(), contract_addr.load() ),
+        asa_xfer_valid(   Gtxn[2], tag_id.load(), Int(1), platform_addr, contract_addr.load())
     )
 
     untag_listing = And(

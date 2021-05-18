@@ -1,5 +1,5 @@
 #pragma version 3
-intcblock 4 1 6 5 0 3 2 1000000
+intcblock 4 1 6 5 0 3 1000000
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
 store 0
@@ -7,33 +7,42 @@ pushbytes TMPL_ASSET_ID // TMPL_ASSET_ID
 btoi
 store 3
 intc 4 // 0
-bnz l14
-arg 0
+bnz l10
+gtxna 0 ApplicationArgs 0
 pushbytes 0x637265617465 // "create"
 ==
-bnz l13
-arg 0
+bnz l9
+gtxna 0 ApplicationArgs 0
 pushbytes 0x64656c657465 // "delete"
 ==
-bnz l12
-arg 0
-pushbytes 0x746167 // "tag"
-==
-bnz l11
-arg 0
-pushbytes 0x756e746167 // "untag"
-==
-bnz l10
-arg 0
-pushbytes 0x70726963655f6465637265617365 // "price_decrease"
-==
-bnz l9
-arg 0
+bnz l8
+gtxna 0 ApplicationArgs 0
 pushbytes 0x7075726368617365 // "purchase"
 ==
-bnz l8
+bnz l7
+gtxna 0 ApplicationArgs 0
+pushbytes 0x746167 // "tag"
+==
+gtxna 0 ApplicationArgs 0
+pushbytes 0x756e746167 // "untag"
+==
+||
+gtxna 0 ApplicationArgs 0
+pushbytes 0x70726963655f6465637265617365 // "price_decrease"
+==
+||
+bnz l6
 err
-l8:
+l6:
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc_0 // 4
+==
+&&
+b l11
+l7:
 global GroupSize
 intc_2 // 6
 ==
@@ -182,176 +191,12 @@ bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 ==
 &&
 gtxn 5 Amount
-intc 7 // 1000000
+intc 6 // 1000000
 ==
 &&
 &&
-b l15
-l9:
-global GroupSize
-intc 6 // 2
-==
-gtxn 0 TypeEnum
-intc_2 // appl
-==
-gtxn 0 ApplicationID
-intc_0 // 4
-==
-&&
-&&
-gtxn 1 Sender
-store 1
-intc_1 // 1
-&&
-gtxn 1 TypeEnum
-intc_0 // axfer
-==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 1 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
-==
-&&
-gtxn 1 AssetAmount
-gtxna 0 ApplicationArgs 1
-btoi
-==
-&&
-gtxn 1 XferAsset
-intc_3 // 5
-==
-&&
-&&
-b l15
-l10:
-global GroupSize
-intc 6 // 2
-==
-gtxn 0 TypeEnum
-intc_2 // appl
-==
-gtxn 0 ApplicationID
-intc_0 // 4
-==
-&&
-&&
-gtxn 1 Sender
-store 1
-intc_1 // 1
-&&
-gtxn 1 TypeEnum
-intc_0 // axfer
-==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 1 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 1 AssetCloseTo
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
-==
-&&
-gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
-==
-&&
-gtxn 1 XferAsset
-gtxna 0 Assets 0
-==
-&&
-&&
-b l15
-l11:
-global GroupSize
-intc 5 // 3
-==
-gtxn 0 TypeEnum
-intc_2 // appl
-==
-gtxn 0 ApplicationID
-intc_0 // 4
-==
-&&
-&&
-gtxn 1 Sender
-store 1
-intc_1 // 1
-&&
-gtxn 1 TypeEnum
-intc_0 // axfer
-==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 1 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 1 XferAsset
-gtxna 0 Assets 0
-==
-&&
-gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
-load 1
-==
-&&
-gtxn 1 AssetAmount
-intc 4 // 0
-==
-&&
-&&
-gtxn 2 TypeEnum
-intc_0 // axfer
-==
-gtxn 2 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 2 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 2 Sender
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
-==
-&&
-gtxn 2 AssetReceiver
-load 1
-==
-&&
-gtxn 2 AssetAmount
-intc_1 // 1
-==
-&&
-gtxn 2 XferAsset
-gtxna 0 Assets 0
-==
-&&
-&&
-b l15
-l12:
+b l11
+l8:
 global GroupSize
 intc_3 // 5
 ==
@@ -471,12 +316,12 @@ load 0
 ==
 &&
 gtxn 4 Amount
-intc 7 // 1000000
+intc 6 // 1000000
 ==
 &&
 &&
-b l15
-l13:
+b l11
+l9:
 global GroupSize
 pushint 7 // 7
 ==
@@ -657,7 +502,7 @@ load 1
 ==
 &&
 &&
-b l15
-l14:
+b l11
+l10:
 intc 4 // 0
-l15:
+l11:

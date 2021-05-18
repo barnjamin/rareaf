@@ -62,7 +62,7 @@ cp $SRCDIR/$DELEGATE_NAME .
 ../sandbox copy $SRCDIR/$CLEAR_NAME
 ../sandbox copy $SRCDIR/$DELEGATE_NAME
 
-#$GCMD app update --app-id $APP_ID --approval-prog $APP_NAME --clear-prog $CLEAR_NAME -f $PLATFORM_ACCT
+$GCMD app update --app-id $APP_ID --approval-prog $APP_NAME --clear-prog $CLEAR_NAME -f $PLATFORM_ACCT
 
 export CONTRACT_ACCT=`../sandbox goal clerk compile -a$CREATOR_ACCT $LISTING_NAME|awk '{print $2}'|tr '\r' ' '`
 

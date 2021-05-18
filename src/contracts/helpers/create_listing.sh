@@ -59,10 +59,8 @@ $GCMD clerk sign -i split-6 -o $ASA_CFG
 
 
 echo "Signing contract acct txns"
-$GCMD clerk sign -i split-2 -p $LISTING_NAME -o $ASA_OPT_IN \
-	--argb64 $b64_create_func --argb64 $b64_price
-$GCMD clerk sign -i split-3 -p $LISTING_NAME -o $PRICE_OPT_IN \
-	--argb64 $b64_create_func --argb64 $b64_price
+$GCMD clerk sign -i split-2 -p $LISTING_NAME -o $ASA_OPT_IN 
+$GCMD clerk sign -i split-3 -p $LISTING_NAME -o $PRICE_OPT_IN 
 echo "Signing tx with delegate sig"
 $GCMD clerk sign -i split-5 -L $SIGNED_DELEGATE -o $PRICE_SEND
 

@@ -1,12 +1,12 @@
 #pragma version 3
-intcblock 1 0 4 5 2 50
+intcblock 1 0 4 2 5 49
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 txn ApplicationID
 intc_1 // 0
 ==
 bnz l24
 txn OnCompletion
-intc_3 // DeleteApplication
+intc 4 // DeleteApplication
 ==
 bnz l23
 txn OnCompletion
@@ -14,7 +14,7 @@ intc_2 // UpdateApplication
 ==
 bnz l22
 txn OnCompletion
-intc 4 // CloseOut
+intc_3 // CloseOut
 ==
 bnz l21
 txn OnCompletion
@@ -78,7 +78,7 @@ intc_0 // 1
 return
 l15:
 global GroupSize
-intc 4 // 2
+intc_3 // 2
 ==
 gtxn 1 AssetReceiver
 store 1
@@ -115,14 +115,14 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc_3 // 5
+intc 4 // 5
 ==
 &&
 &&
 return
 l16:
 global GroupSize
-intc 4 // 2
+intc_3 // 2
 ==
 gtxn 1 Sender
 store 1
@@ -159,14 +159,14 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc_3 // 5
+intc 4 // 5
 ==
 &&
 &&
 return
 l17:
 global GroupSize
-intc 4 // 2
+intc_3 // 2
 ==
 gtxna 0 Assets 0
 store 3
@@ -323,7 +323,7 @@ load 4
 txna ApplicationArgs 2
 load 5
 load 5
-intc 5 // 50
+intc 5 // 49
 +
 substring3
 concat
@@ -331,7 +331,7 @@ store 4
 load 5
 pushint 32 // 32
 +
-intc 5 // 50
+intc 5 // 49
 +
 store 5
 load 4
@@ -360,7 +360,7 @@ store 4
 intc_0 // 1
 load 4
 sha256
-pushbytes 0x758537d05be5ebacb9d387156ce5793da6e9789c6b654ba0edcffa971d84c85a // base64(dYU30Fvl66y504cVbOV5PabpeJxrZUug7c/6lx2EyFo=)
+pushbytes 0x44d8969b7c882754d2512b6aa16f8cab036354085d440a0fe4c158e49b8009b3 // base64(RNiWm3yIJ1TSUStqoW+MqwNjVAhdRAoP5MFY5JuACbM=)
 ==
 &&
 pushbytes 0x50726f6772616d // "Program"
@@ -377,61 +377,9 @@ load 1
 app_local_put
 intc_0 // 1
 &&
-gtxn 3 TypeEnum
-intc_2 // axfer
-==
-gtxn 3 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 3 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 3 XferAsset
-intc_3 // 5
-==
-&&
-gtxn 3 Sender
-load 1
-==
-&&
-gtxn 3 AssetReceiver
-load 1
-==
-&&
-gtxn 3 AssetAmount
-intc_1 // 0
-==
-&&
-&&
-gtxn 5 TypeEnum
-intc_2 // axfer
-==
-gtxn 5 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 5 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 5 Sender
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
-==
-&&
-gtxn 5 AssetReceiver
-load 1
-==
-&&
-gtxn 5 AssetAmount
 load 2
-==
-&&
-gtxn 5 XferAsset
-intc_3 // 5
-==
-&&
+pushint 1000000000 // 1000000000
+<=
 &&
 return
 l20:
