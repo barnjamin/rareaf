@@ -48,33 +48,45 @@ def approval():
         asa_xfer_valid(  Gtxn[5], price_token, price.load(), platform_addr, contract_addr.load()),
     )
 
-    #Txn1 is app call, Txn2 is opt in, Txn3 is send
     tag_listing = And( 
         Global.group_size() == Int(3),
 
         valid_platform_asset(), # first and only foreign arg
+        set_foreign_asset(Gtxn[0], 0, tag_id),
 
-        set_asset_id(Gtxn[1], tag_id),
-
-        set_addr_as_rx(Gtxn[1], contract_addr),
+        set_addr_as_tx(Gtxn[1], contract_addr),
 
         caller_is_listing_creator(contract_addr.load()),
 
-        asa_optin_valid( Gtxn[1], tag_id.load(), contract_addr.load() ),
-        asa_xfer_valid(  Gtxn[2], tag_id.load(), Int(1), platform_addr, contract_addr.load())
+        asa_optin_valid(Gtxn[1], tag_id.load(), contract_addr.load() ),
+        asa_xfer_valid(Gtxn[2], tag_id.load(), Int(1), platform_addr, contract_addr.load())
     )
 
-    reprice_listing = And(
+    untag_listing = And(
         Global.group_size() == Int(2),
-
-        set_addr_as_rx(Gtxn[1], contract_addr),
+        set_foreign_asset(Gtxn[0], 0, tag_id),
+        valid_platform_asset(),
+        set_addr_as_tx(Gtxn[1], contract_addr),
         caller_is_listing_creator(contract_addr.load()),
+        asa_close_xfer_valid(Gtxn[1], tag_id.load(), contract_addr.load(), platform_addr, platform_addr)
+    )
 
-        asa_xfer_valid(Txn, price_token, Btoi(Txn.application_args[0]), platform_addr, contract_addr.load()), 
+    price_increase_listing = And(
+        Global.group_size() == Int(2),
+        set_addr_as_asset_rx(Gtxn[1], contract_addr),
+        caller_is_listing_creator(contract_addr.load()),
+        asa_xfer_valid(Gtxn[1], price_token, Btoi(Txn.application_args[1]), platform_addr, contract_addr.load()), 
+    )
+
+    price_decrease_listing = And(
+        Global.group_size() == Int(2),
+        set_addr_as_tx(Gtxn[1], contract_addr),
+        caller_is_listing_creator(contract_addr.load()),
+        asa_xfer_valid(Gtxn[1], price_token, Btoi(Txn.application_args[1]), contract_addr.load(), platform_addr), 
     )
 
     delete_listing = And(  
-        set_addr_as_tx(Gtxn[0], contract_addr),
+        set_addr_as_tx(Gtxn[1], contract_addr),
         caller_is_listing_creator(contract_addr.load()),
         remove_listing_addr(Int(0), contract_addr.load()),
     )
@@ -87,14 +99,16 @@ def approval():
 
     return Cond(
         [Txn.application_id() == Int(0),                        on_creation],
-        [Txn.on_completion() == OnComplete.DeleteApplication,   on_delete],
-        [Txn.on_completion() == OnComplete.UpdateApplication,   Return(is_app_creator)],
-        [Txn.on_completion() == OnComplete.CloseOut,            on_closeout],
-        [Txn.on_completion() == OnComplete.OptIn,               register],
+        [Txn.on_completion()  == OnComplete.DeleteApplication,  on_delete],
+        [Txn.on_completion()  == OnComplete.UpdateApplication,  Return(is_app_creator)],
+        [Txn.on_completion()  == OnComplete.CloseOut,           on_closeout],
+        [Txn.on_completion()  == OnComplete.OptIn,              register],
 
         [Txn.application_args[0] == action_create,   Return(create_listing)],  # App approve price tokens && adds listing to local state
-        [Txn.application_args[0] == action_tag,      Return(tag_listing)],     # App only
-        [Txn.application_args[0] == action_reprice,  Return(reprice_listing)], # App only
+        [Txn.application_args[0] == action_tag,      Return(tag_listing)],     # App approves manager of token requested
+        [Txn.application_args[0] == action_untag,    Return(untag_listing)],   # App approves untag coming from listing creator
+        [Txn.application_args[0] == action_dprice,   Return(price_decrease_listing)], # App validates caller 
+        [Txn.application_args[0] == action_iprice,   Return(price_increase_listing)], # App validates caller 
         [Txn.application_args[0] == action_delete,   Return(delete_listing)],  # App approves sender owns listing
         [Txn.application_args[0] == action_purchase, Return(purchase_listing)] # App removes listing from local state
     )

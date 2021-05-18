@@ -2,25 +2,64 @@
 
 source ./vars.sh
 
-## Send Platform tokens back to platform acct
-./sandbox goal asset send -a 0 -o delist-platform.txn --assetid $PLATFORM_ID -f $CONTRACT_ACCT -t $PLATFORM_ACCT --close-to $PLATFORM_ACCT
-./sandbox goal clerk sign -i delist-platform.txn -o delist-platform.txn.signed -p $CONTRACT_NAME
-
-## Send nft back to creator
-./sandbox goal asset send -a 0 -o delist-nft.txn --assetid $NFT_ID -f $CONTRACT_ACCT -t $CREATOR_ACCT --close-to $CREATOR_ACCT 
-./sandbox goal clerk sign -i delist-nft.txn -o delist-nft.txn.signed -p $CONTRACT_NAME
-
-## Send algos back go creator
-./sandbox goal clerk send -a 0 -o delist-algo.txn -f $CONTRACT_ACCT -t $CREATOR_ACCT  -F $CONTRACT_NAME  --close-to $CREATOR_ACCT
-./sandbox goal clerk sign -i delist-algo.txn -o delist-algo.txn.signed -p $CONTRACT_NAME
+APP_DELETE_CALL=app_listing_delete.txn
+PRICE_CLOSE=price_close.txn
+ASA_CLOSE=asa_close.txn
+ASA_CFG=asa_close.txn
+ALGO_CLOSE=algo_close.txn
 
 
-#Combine them all
-./sandbox exec "cat delist-platform.txn.signed delist-nft.txn.signed delist-algo.txn.signed > delist.txn"
-./sandbox goal clerk group -i delist.txn -o delist.txn.grouped
+TXN_FILE=delete.txn
 
-#Sign it
-./sandbox goal clerk sign -i delist.txn.grouped -o delist.txn.grouped.signed -p $CONTRACT_NAME
+$GCMD app call --app-id $APP_ID \
+	-f $CREATOR_ACCT \
+       	--approval-prog $APP_NAME \
+	--clear-prog $CLEAR_NAME \
+	--app-arg "b64:$b64_delete_func" \
+	-o $APP_DELETE_CALL
 
-#Send it
-./sandbox goal clerk rawsend -f delist.txn.grouped.signed
+
+$GCMD asset send \
+	--assetid $PRICE_ASA_ID \
+	-f $CONTRACT_ACCT \
+	-t $PLATFORM_ACCT \
+	-c $PLATFORM_ACCT \
+	-a 0 \
+	-o $PRICE_CLOSE
+
+$GCMD asset send \
+	--assetid $ASA_ID \
+	-f $CONTRACT_ACCT \
+	-t $CREATOR_ACCT \
+	-c $CREATOR_ACCT \
+	-a 0 \
+	-o $ASA_CLOSE
+
+$GCMD asset config --assetid $ASA_ID  \
+	--manager $CONTRACT_ACCT \
+	--new-manager  $CREATOR_ACCT \
+	--new-freezer  $CREATOR_ACCT \
+	--new-reserve  $CREATOR_ACCT \
+	--new-clawback $CREATOR_ACCT \
+	-o $ASA_CFG 
+
+$GCMD clerk send -a $PLATFORM_FEE \
+	-f $CONTRACT_ACCT \
+	-t $PLATFORM_ACCT \
+	-c $CREATOR_ACCT \
+	-o $ALGO_CLOSE
+
+../sandbox exec "cat $APP_DELETE_CALL $PRICE_CLOSE $ASA_CLOSE $ASA_CFG $ALGO_CLOSE > $TXN_FILE"
+
+$GCMD clerk group -i $TXN_FILE -o $TXN_FILE
+$GCMD clerk split -i $TXN_FILE  -o delete
+
+$GCMD clerk sign -i delete-0 -o $APP_DELETE_CALL
+$GCMD clerk sign -i delete-1 -p $LISTING_NAME -o $PRICE_CLOSE 
+$GCMD clerk sign -i delete-2 -p $LISTING_NAME -o $ASA_CLOSE
+$GCMD clerk sign -i delete-3 -p $LISTING_NAME -o $ASA_CFG
+$GCMD clerk sign -i delete-4 -p $LISTING_NAME -o $ALGO_CLOSE 
+
+../sandbox exec "cat $APP_DELETE_CALL $PRICE_CLOSE $ASA_CLOSE $ASA_CFG $ALGO_CLOSE > $TXN_FILE"
+
+#$GCMD clerk rawsend -f $TXN_FILE 

@@ -63,9 +63,6 @@ class TemplateContract(object):
         p = 0
         for idx in range(len(self.template_vars)):
             tv = self.template_vars[idx]
-            print(p)
-            print(tv.distance)
-            print(self.assembled_bytes[p:p+tv.distance].hex())
             concat_ops.append(blank_contract.store(
                 Concat(blank_contract.load(), 
                     Substring(contract_val, pos.load(), pos.load() + Int(tv.distance)))))
@@ -73,7 +70,6 @@ class TemplateContract(object):
             p += tv.length + tv.distance
             concat_ops.append(pos.store(pos.load() + Int(tv.length) + Int(tv.distance)))
 
-        print(self.assembled_bytes[p:].hex())
         concat_ops.append(blank_contract.store(
             Concat(blank_contract.load(), 
             Substring(contract_val, pos.load(), Len(contract_val)))))
@@ -123,7 +119,6 @@ class TemplateContract(object):
             blanked = blanked[:v.start-removed] + blanked[(v.start+v.length)-removed:]
             removed += v.length 
 
-        print(blanked.hex())
         h = hashlib.sha256(blanked)
 
         return base64.b64encode(h.digest()).decode('ascii')

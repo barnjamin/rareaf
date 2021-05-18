@@ -1,75 +1,96 @@
 #pragma version 3
-intcblock 1 4 0 15 3
+intcblock 4 1 6 5 0 3 2 1000000
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
 store 0
 pushbytes TMPL_ASSET_ID // TMPL_ASSET_ID
 btoi
 store 3
-intc_2 // 0
-bnz l12
+intc 4 // 0
+bnz l14
 arg 0
 pushbytes 0x637265617465 // "create"
 ==
-bnz l11
+bnz l13
 arg 0
 pushbytes 0x64656c657465 // "delete"
 ==
-bnz l10
+bnz l12
 arg 0
 pushbytes 0x746167 // "tag"
 ==
-bnz l9
+bnz l11
 arg 0
-pushbytes 0x72657072696365 // "reprice"
+pushbytes 0x756e746167 // "untag"
 ==
-bnz l8
+bnz l10
+arg 0
+pushbytes 0x70726963655f6465637265617365 // "price_decrease"
+==
+bnz l9
 arg 0
 pushbytes 0x7075726368617365 // "purchase"
 ==
-bnz l7
+bnz l8
 err
-l7:
-gtxn 0 Sender
-store 2
-intc_0 // 1
+l8:
+global GroupSize
+intc_2 // 6
+==
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc_0 // 4
+==
+&&
+&&
 gtxn 1 Sender
+store 2
+intc_1 // 1
+&&
+gtxn 2 Sender
 store 1
-intc_0 // 1
+intc_1 // 1
 &&
 gtxn 1 TypeEnum
-intc_1 // axfer
+intc_1 // pay
 ==
 gtxn 1 RekeyTo
 global ZeroAddress
 ==
 &&
-gtxn 1 AssetCloseTo
-load 2
+gtxn 1 CloseRemainderTo
+global ZeroAddress
 ==
 &&
 gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
 load 2
 ==
 &&
-gtxn 1 XferAsset
-load 3
+gtxn 1 Receiver
+load 0
+==
+&&
+gtxn 1 Amount
+gtxna 0 ApplicationArgs 1
+btoi
 ==
 &&
 &&
 gtxn 2 TypeEnum
-intc_1 // axfer
+intc_0 // axfer
 ==
 gtxn 2 RekeyTo
 global ZeroAddress
 ==
 &&
 gtxn 2 AssetCloseTo
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+load 2
 ==
 &&
 gtxn 2 Sender
@@ -77,16 +98,333 @@ load 1
 ==
 &&
 gtxn 2 AssetReceiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+load 2
 ==
 &&
 gtxn 2 XferAsset
-intc_3 // 15
+load 3
 ==
 &&
 &&
 gtxn 3 TypeEnum
-intc 4 // acfg
+intc_0 // axfer
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 3 AssetCloseTo
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+gtxn 3 AssetReceiver
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 3 XferAsset
+intc_3 // 5
+==
+&&
+&&
+gtxn 4 TypeEnum
+intc 5 // acfg
+==
+gtxn 4 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 4 ConfigAsset
+load 3
+==
+&&
+gtxn 4 ConfigAssetManager
+load 2
+==
+&&
+gtxn 4 ConfigAssetReserve
+load 2
+==
+&&
+gtxn 4 ConfigAssetFreeze
+load 2
+==
+&&
+gtxn 4 ConfigAssetClawback
+load 2
+==
+&&
+&&
+gtxn 5 TypeEnum
+intc_1 // pay
+==
+gtxn 5 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 5 CloseRemainderTo
+load 0
+==
+&&
+gtxn 5 Sender
+load 1
+==
+&&
+gtxn 5 Receiver
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 5 Amount
+intc 7 // 1000000
+==
+&&
+&&
+b l15
+l9:
+global GroupSize
+intc 6 // 2
+==
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc_0 // 4
+==
+&&
+&&
+gtxn 1 Sender
+store 1
+intc_1 // 1
+&&
+gtxn 1 TypeEnum
+intc_0 // axfer
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 Sender
+load 1
+==
+&&
+gtxn 1 AssetReceiver
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 1 AssetAmount
+gtxna 0 ApplicationArgs 1
+btoi
+==
+&&
+gtxn 1 XferAsset
+intc_3 // 5
+==
+&&
+&&
+b l15
+l10:
+global GroupSize
+intc 6 // 2
+==
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc_0 // 4
+==
+&&
+&&
+gtxn 1 Sender
+store 1
+intc_1 // 1
+&&
+gtxn 1 TypeEnum
+intc_0 // axfer
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 1 Sender
+load 1
+==
+&&
+gtxn 1 AssetReceiver
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 1 XferAsset
+gtxna 0 Assets 0
+==
+&&
+&&
+b l15
+l11:
+global GroupSize
+intc 5 // 3
+==
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc_0 // 4
+==
+&&
+&&
+gtxn 1 Sender
+store 1
+intc_1 // 1
+&&
+gtxn 1 TypeEnum
+intc_0 // axfer
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 XferAsset
+gtxna 0 Assets 0
+==
+&&
+gtxn 1 Sender
+load 1
+==
+&&
+gtxn 1 AssetReceiver
+load 1
+==
+&&
+gtxn 1 AssetAmount
+intc 4 // 0
+==
+&&
+&&
+gtxn 2 TypeEnum
+intc_0 // axfer
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 Sender
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 2 AssetReceiver
+load 1
+==
+&&
+gtxn 2 AssetAmount
+intc_1 // 1
+==
+&&
+gtxn 2 XferAsset
+gtxna 0 Assets 0
+==
+&&
+&&
+b l15
+l12:
+global GroupSize
+intc_3 // 5
+==
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc_0 // 4
+==
+&&
+&&
+gtxn 1 Sender
+store 1
+intc_1 // 1
+&&
+gtxn 1 TypeEnum
+intc_0 // axfer
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 1 Sender
+load 1
+==
+&&
+gtxn 1 AssetReceiver
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 1 XferAsset
+intc_3 // 5
+==
+&&
+&&
+gtxn 2 TypeEnum
+intc_0 // axfer
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+load 0
+==
+&&
+gtxn 2 Sender
+load 1
+==
+&&
+gtxn 2 AssetReceiver
+load 0
+==
+&&
+gtxn 2 XferAsset
+load 3
+==
+&&
+&&
+gtxn 3 TypeEnum
+intc 5 // acfg
 ==
 gtxn 3 RekeyTo
 global ZeroAddress
@@ -97,24 +435,24 @@ load 3
 ==
 &&
 gtxn 3 ConfigAssetManager
-load 2
+load 0
 ==
 &&
 gtxn 3 ConfigAssetReserve
-load 2
+load 0
 ==
 &&
 gtxn 3 ConfigAssetFreeze
-load 2
+load 0
 ==
 &&
 gtxn 3 ConfigAssetClawback
-load 2
+load 0
 ==
 &&
 &&
 gtxn 4 TypeEnum
-intc_0 // pay
+intc_1 // pay
 ==
 gtxn 4 RekeyTo
 global ZeroAddress
@@ -129,132 +467,33 @@ load 1
 ==
 &&
 gtxn 4 Receiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+load 0
 ==
 &&
 gtxn 4 Amount
-pushint 1000000 // 1000000
+intc 7 // 1000000
 ==
 &&
 &&
-b l13
-l8:
-intc_0 // 1
-b l13
-l9:
-intc_0 // 1
-b l13
-l10:
-gtxn 0 Sender
-store 1
-intc_0 // 1
+b l15
+l13:
+global GroupSize
+pushint 7 // 7
+==
 gtxn 0 TypeEnum
-intc_1 // axfer
+intc_2 // appl
 ==
-gtxn 0 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 0 AssetCloseTo
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
-==
-&&
-gtxn 0 Sender
-load 1
-==
-&&
-gtxn 0 AssetReceiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
-==
-&&
-gtxn 0 XferAsset
-intc_3 // 15
+gtxn 0 ApplicationID
+intc_0 // 4
 ==
 &&
 &&
-gtxn 1 TypeEnum
-intc_1 // axfer
-==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 1 AssetCloseTo
-load 0
-==
-&&
-gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
-load 0
-==
-&&
-gtxn 1 XferAsset
-load 3
-==
-&&
-&&
-gtxn 2 TypeEnum
-intc 4 // acfg
-==
-gtxn 2 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 2 ConfigAsset
-load 3
-==
-&&
-gtxn 2 ConfigAssetManager
-load 0
-==
-&&
-gtxn 2 ConfigAssetReserve
-load 0
-==
-&&
-gtxn 2 ConfigAssetFreeze
-load 0
-==
-&&
-gtxn 2 ConfigAssetClawback
-load 0
-==
-&&
-&&
-gtxn 3 TypeEnum
-intc_0 // pay
-==
-gtxn 3 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 3 CloseRemainderTo
-load 0
-==
-&&
-gtxn 3 Sender
-load 1
-==
-&&
-gtxn 3 Receiver
-load 0
-==
-&&
-gtxn 3 Amount
-intc_2 // 0
-==
-&&
-&&
-b l13
-l11:
 gtxn 1 Receiver
 store 1
-intc_0 // 1
+intc_1 // 1
+&&
 gtxn 1 TypeEnum
-intc_0 // pay
+intc_1 // pay
 ==
 gtxn 1 RekeyTo
 global ZeroAddress
@@ -278,9 +517,13 @@ pushint 5000000 // 5000000
 &&
 &&
 gtxn 2 TypeEnum
-intc_1 // axfer
+intc_0 // axfer
 ==
 gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
 global ZeroAddress
 ==
 &&
@@ -297,19 +540,23 @@ load 1
 ==
 &&
 gtxn 2 AssetAmount
-intc_2 // 0
+intc 4 // 0
 ==
 &&
 &&
 gtxn 3 TypeEnum
-intc_1 // axfer
+intc_0 // axfer
 ==
 gtxn 3 RekeyTo
 global ZeroAddress
 ==
 &&
+gtxn 3 AssetCloseTo
+global ZeroAddress
+==
+&&
 gtxn 3 XferAsset
-intc_3 // 15
+intc_3 // 5
 ==
 &&
 gtxn 3 Sender
@@ -321,12 +568,12 @@ load 1
 ==
 &&
 gtxn 3 AssetAmount
-intc_2 // 0
+intc 4 // 0
 ==
 &&
 &&
 gtxn 4 TypeEnum
-intc_1 // axfer
+intc_0 // axfer
 ==
 gtxn 4 RekeyTo
 global ZeroAddress
@@ -345,7 +592,7 @@ load 1
 ==
 &&
 gtxn 4 AssetAmount
-intc_0 // 1
+intc_1 // 1
 ==
 &&
 gtxn 4 XferAsset
@@ -354,7 +601,7 @@ load 3
 &&
 &&
 gtxn 5 TypeEnum
-intc_1 // axfer
+intc_0 // axfer
 ==
 gtxn 5 RekeyTo
 global ZeroAddress
@@ -373,17 +620,17 @@ load 1
 ==
 &&
 gtxn 5 AssetAmount
-arg 1
+gtxna 0 ApplicationArgs 1
 btoi
 ==
 &&
 gtxn 5 XferAsset
-intc_3 // 15
+intc_3 // 5
 ==
 &&
 &&
 gtxn 6 TypeEnum
-intc 4 // acfg
+intc 5 // acfg
 ==
 gtxn 6 RekeyTo
 global ZeroAddress
@@ -410,7 +657,7 @@ load 1
 ==
 &&
 &&
-b l13
-l12:
-intc_2 // 0
-l13:
+b l15
+l14:
+intc 4 // 0
+l15:

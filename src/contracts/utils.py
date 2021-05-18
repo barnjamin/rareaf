@@ -2,13 +2,22 @@ from pyteal import *
 from config import *
 
 
+def valid_app_call(txn):
+    return And(
+        txn.type_enum() == TxnType.ApplicationCall,
+        txn.application_id() == app_id,
+    )
+
 def valid_platform_asset():
     expr = AssetParam.manager(Int(0))
-    return Seq([expr, expr.value() == platform_addr])
-
-def set_asset_id(txn, asset_var):
     return Seq([
-        asset_var.store(txn.xfer_asset()),
+        expr, 
+        expr.value() == platform_addr,
+    ])
+
+def set_foreign_asset(txn, idx, var):
+    return Seq([
+        var.store(txn.assets[idx]),
         Int(1)
     ])
 
@@ -19,23 +28,25 @@ def valid_contract(tc, contract_source, contract_addr):
     )
 
 def caller_is_listing_creator(contract_addr):
-    return App.localGet(Int(0), contract_addr)
+    return Seq([ App.localGet(Int(0), contract_addr) == contract_addr])
 
 def caller_add_listing_addr(contract_addr):
-    App.localPut(Int(0), contract_addr, contract_addr)
-    return Int(1)
+    return Seq([ App.localPut(Int(0), contract_addr, contract_addr), Int(1) ])
 
-# Account of creator passed into accounts arg
 def remove_listing_addr(idx, contract_addr):
-    App.localDel(idx, contract_addr)
-    return Int(1)
-
+    return Seq([ App.localDel(idx, contract_addr), Int(1) ])
 
 def set_addr_as_rx(txn, var):
     return Seq([var.store(txn.receiver()), Int(1)])
 
+def set_addr_as_asset_rx(txn, var):
+    return Seq([var.store(txn.asset_receiver()), Int(1)])
+
 def set_addr_as_tx(txn, var):
     return Seq([ var.store(txn.sender()), Int(1)])
+
+def set_asset_id(txn, var):
+    return Seq([ var.store(txn.xfer_asset()), Int(1) ])
 
 
 def pay_txn_valid(txn, amt, from_addr, to_addr):
@@ -73,6 +84,8 @@ def asa_optin_valid(txn, token_id, addr):
     return And(
         txn.type_enum() == TxnType.AssetTransfer,
         txn.rekey_to() == Global.zero_address(),
+        txn.asset_close_to() == Global.zero_address(),
+
         txn.xfer_asset() == token_id,
         txn.sender() == addr,
         txn.asset_receiver() == addr, 
@@ -83,6 +96,8 @@ def asa_close_xfer_valid(txn, token_id, from_addr, to_addr, close_addr):
     return And(
         txn.type_enum() == TxnType.AssetTransfer,
         txn.rekey_to() == Global.zero_address(),
+        txn.asset_close_to() == Global.zero_address(),
+
         txn.asset_close_to() == close_addr,
         txn.sender() == from_addr,
         txn.asset_receiver() == to_addr,
