@@ -35,7 +35,7 @@ def listing():
         asa_close_xfer_valid(Gtxn[1],  price_token,  contract_addr.load(), platform_addr, platform_addr),
         asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), creator_addr.load(), creator_addr.load()),
         asa_cfg_valid(       Gtxn[3], asset_id.load(), creator_addr.load()),
-        pay_close_txn_valid( Gtxn[4], contract_addr.load(), creator_addr.load(), creator_addr.load(), platform_fee),
+        pay_close_txn_valid( Gtxn[4], contract_addr.load(), creator_addr.load(), creator_addr.load(), Int(0)),
     )
 
     purchase = And(

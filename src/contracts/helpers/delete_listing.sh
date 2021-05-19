@@ -31,6 +31,7 @@ $GCMD asset send \
 echo "asa cfg"
 $GCMD asset config --assetid $ASA_ID  \
 	--manager $CONTRACT_ACCT \
+	--creator $CREATOR_ACCT \
 	--new-manager  $CREATOR_ACCT \
 	--new-freezer  $CREATOR_ACCT \
 	--new-reserve  $CREATOR_ACCT \
@@ -47,9 +48,9 @@ $GCMD asset send \
 	-o $ASA_CLOSE
 
 echo "algo return"
-$GCMD clerk send -a 0 \
+$GCMD clerk send -a 0$PLATFORM_FEE\
 	-f $CONTRACT_ACCT \
-	-t $CREATOR_ACCT \
+	-t $PLATFORM_ACCT \
 	-c $CREATOR_ACCT \
 	-o $ALGO_CLOSE
 
