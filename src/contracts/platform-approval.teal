@@ -1,5 +1,5 @@
 #pragma version 3
-intcblock 1 0 4 2 5
+intcblock 1 0 4 2 5 46
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 txn ApplicationID
 intc_1 // 0
@@ -318,6 +318,36 @@ store 5
 load 4
 txna ApplicationArgs 2
 load 5
+load 5
+intc 5 // 46
++
+substring3
+concat
+store 4
+load 5
+pushint 32 // 32
++
+intc 5 // 46
++
+store 5
+load 4
+txna ApplicationArgs 2
+load 5
+load 5
+intc_2 // 4
++
+substring3
+concat
+store 4
+load 5
+pushint 8 // 8
++
+intc_2 // 4
++
+store 5
+load 4
+txna ApplicationArgs 2
+load 5
 txna ApplicationArgs 2
 len
 substring3
@@ -326,7 +356,7 @@ store 4
 intc_0 // 1
 load 4
 sha256
-pushbytes 0x51672ea45f3539654bf9193f4ff763d90022eee7df5f5b76353d6f11a9eaccec // base64(UWcupF81OWVL+Rk/T/dj2QAi7uffX1t2NT1vEanqzOw=)
+pushbytes 0xc1f622a21387de1f0de8a3c20af8da4f004757f1dd09033d0c2856a93f884d48 // base64(wfYiohOH3h8N6KPCCvjaTwBHV/HdCQM9DChWqT+ITUg=)
 ==
 &&
 pushbytes 0x50726f6772616d // "Program"

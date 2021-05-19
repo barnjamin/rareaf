@@ -1,5 +1,5 @@
 #pragma version 3
-intcblock 4 1 6 5 0 3 1000000
+intcblock 4 1 6 5 0 3
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
 store 0
@@ -183,7 +183,7 @@ bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 ==
 &&
 gtxn 5 Amount
-intc 6 // 1000000
+pushint 1000000 // 1000000
 ==
 &&
 &&
@@ -300,7 +300,7 @@ load 0
 ==
 &&
 gtxn 4 Amount
-intc 6 // 1000000
+intc 4 // 0
 ==
 &&
 &&

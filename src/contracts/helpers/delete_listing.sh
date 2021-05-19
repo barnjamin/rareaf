@@ -48,9 +48,9 @@ $GCMD asset send \
 	-o $ASA_CLOSE
 
 echo "algo return"
-$GCMD clerk send -a 0$PLATFORM_FEE\
+$GCMD clerk send -a 0 \
 	-f $CONTRACT_ACCT \
-	-t $PLATFORM_ACCT \
+	-t $CREATOR_ACCT \
 	-c $CREATOR_ACCT \
 	-o $ALGO_CLOSE
 

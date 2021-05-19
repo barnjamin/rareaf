@@ -18,7 +18,7 @@ export PLATFORM_FEE=1000000
 export SEED_ALGOS=5000000
 
 export LISTING_PRICE=500
-export ASA_ID=18
+export ASA_ID=53
 export PRICE_ASA_ID=5
 export APP_ID=4
 
