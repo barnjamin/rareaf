@@ -96,9 +96,8 @@ def asa_close_xfer_valid(txn, token_id, from_addr, to_addr, close_addr):
     return And(
         txn.type_enum() == TxnType.AssetTransfer,
         txn.rekey_to() == Global.zero_address(),
-        txn.asset_close_to() == Global.zero_address(),
-
         txn.asset_close_to() == close_addr,
+
         txn.sender() == from_addr,
         txn.asset_receiver() == to_addr,
         txn.xfer_asset() == token_id

@@ -95,10 +95,6 @@ global ZeroAddress
 ==
 &&
 gtxn 2 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 2 AssetCloseTo
 load 2
 ==
 &&
@@ -119,10 +115,6 @@ gtxn 3 TypeEnum
 intc_0 // axfer
 ==
 gtxn 3 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 3 AssetCloseTo
 global ZeroAddress
 ==
 &&
@@ -220,10 +212,6 @@ global ZeroAddress
 ==
 &&
 gtxn 1 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 1 AssetCloseTo
 bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 ==
 &&
@@ -244,10 +232,6 @@ gtxn 2 TypeEnum
 intc_0 // axfer
 ==
 gtxn 2 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 2 AssetCloseTo
 global ZeroAddress
 ==
 &&

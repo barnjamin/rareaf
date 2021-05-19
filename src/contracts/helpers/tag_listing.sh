@@ -8,7 +8,7 @@ TAG_XFER=tag_xfer.txn
 
 TAG_TXN=tag.txn
 
-TAG_ID=12
+TAG_ID=11
 
 # Application call to make sure im the owner 
 # Pass tag as ForeignAsset to check that its managed by platform
@@ -41,7 +41,7 @@ $GCMD clerk group -i $TAG_TXN -o $TAG_TXN
 $GCMD clerk split -i $TAG_TXN -o tag
 
 $GCMD clerk sign -i tag-0 -o $APP_TAG_CALL
-$GCMD clerk sign -i tag-1 -o $TAG_OPTIN -p $LISTING_NAME --argb64 $b64_tag_func
+$GCMD clerk sign -i tag-1 -o $TAG_OPTIN -p $LISTING_NAME
 $GCMD clerk sign -i tag-2 -o $TAG_XFER -L $SIGNED_DELEGATE
 
 

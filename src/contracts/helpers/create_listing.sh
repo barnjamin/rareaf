@@ -17,7 +17,6 @@ APP_CALL=app_listing_create.txn
 
 COMBINED=create.txn
 
-$GCMD app optin --from $CREATOR_ACCT --app-id $APP_ID
 
 ASSEMBLY=`../sandbox exec "cat $LISTING_NAME.tok | base64 -w0"`
 
@@ -33,8 +32,9 @@ $GCMD app call --app-id $APP_ID -f $CREATOR_ACCT -o $APP_CALL \
 $GCMD clerk send -a 5000000 -f $CREATOR_ACCT -t $CONTRACT_ACCT -o $SEED_ACCT
 $GCMD asset send -a 0 --assetid $ASA_ID -f $CONTRACT_ACCT -t $CONTRACT_ACCT -o $ASA_OPT_IN
 $GCMD asset send -a 1 --assetid $ASA_ID -f $CREATOR_ACCT  -t $CONTRACT_ACCT -o $ASA_SEND 
+
 $GCMD asset config --assetid $ASA_ID  \
-	--manager $CREATOR_ACCT \
+	--manager     $CREATOR_ACCT \
 	--new-manager $CONTRACT_ACCT \
 	--new-freezer $CONTRACT_ACCT \
 	--new-reserve $CONTRACT_ACCT \

@@ -42,6 +42,7 @@ def approval():
         price.load() <= max_price,
     )
 
+    # TODO, check that contract doesnt already hold 1
     tag_listing = And( 
         Global.group_size() == Int(3),
         valid_platform_asset(), # first and only foreign arg
@@ -63,6 +64,7 @@ def approval():
         asa_close_xfer_valid(Gtxn[1], tag_id.load(), contract_addr.load(), platform_addr, platform_addr)
     )
 
+    # TODO, check that new value wont be > max price 
     price_increase_listing = And(
         Global.group_size() == Int(2),
         set_addr_as_asset_rx(Gtxn[1], contract_addr),
@@ -70,6 +72,7 @@ def approval():
         asa_xfer_valid(Gtxn[1], price_token, Btoi(Txn.application_args[1]), platform_addr, contract_addr.load()), 
     )
 
+    # TODO, check that new price wont be 0 
     price_decrease_listing = And(
         Global.group_size() == Int(2),
         set_addr_as_tx(Gtxn[1], contract_addr),

@@ -1,14 +1,11 @@
 #!/bin/bash
 source ./vars.sh
 
+APP_UNTAG_CALL=app_untag.txn
+UNTAG_XFER=untag_xfer.txn
+UNTAG_TXN=untag.txn
 
-APP_TAG_CALL=app_tag.txn
-TAG_OPTIN=tag_optin.txn
-TAG_XFER=tag_xfer.txn
-
-TAG_TXN=tag.txn
-
-TAG_ID=12
+TAG_ID=11
 
 # Application call to make sure im the owner 
 # Pass tag as ForeignAsset to check that its managed by platform
@@ -16,35 +13,27 @@ $GCMD app call --app-id $APP_ID \
 	-f $CREATOR_ACCT \
        	--approval-prog $APP_NAME \
 	--clear-prog $CLEAR_NAME \
-	--app-arg "b64:$b64_tag_func" \
+	--app-arg "b64:$b64_untag_func" \
 	--foreign-asset $TAG_ID  \
-	-o $APP_TAG_CALL
+	-o $APP_UNTAG_CALL
 
 # Opt contract into asset 
 $GCMD asset send -a 0 \
 	-f $CONTRACT_ACCT \
-	-t $CONTRACT_ACCT \
+	-t $PLATFORM_ACCT \
        	--assetid $TAG_ID \
-	-o $TAG_OPTIN
+	--close-to $PLATFORM_ACCT \
+	-o $UNTAG_XFER
 
-# Asset Xfer from platform addr to contract addr
-$GCMD asset send -a 1 \
-	-f $PLATFORM_ACCT \
-	-t $CONTRACT_ACCT \
-	--assetid $TAG_ID \
-	-o $TAG_XFER
+../sandbox exec "cat $APP_UNTAG_CALL $UNTAG_XFER > $UNTAG_TXN"
 
-../sandbox exec "cat $APP_TAG_CALL $TAG_OPTIN $TAG_XFER > $TAG_TXN"
+$GCMD clerk group -i $UNTAG_TXN -o $UNTAG_TXN
+$GCMD clerk split -i $UNTAG_TXN -o untag
 
-$GCMD clerk group -i $TAG_TXN -o $TAG_TXN
-
-$GCMD clerk split -i $TAG_TXN -o tag
-
-$GCMD clerk sign -i tag-0 -o $APP_TAG_CALL
-$GCMD clerk sign -i tag-1 -o $TAG_OPTIN -p $LISTING_NAME --argb64 $b64_tag_func
-$GCMD clerk sign -i tag-2 -o $TAG_XFER -L $SIGNED_DELEGATE
+$GCMD clerk sign -i untag-0 -o $APP_UNTAG_CALL
+$GCMD clerk sign -i untag-1 -o $UNTAG_XFER -p $LISTING_NAME 
 
 
-../sandbox exec "cat $APP_TAG_CALL $TAG_OPTIN $TAG_XFER > $TAG_TXN"
+../sandbox exec "cat $APP_UNTAG_CALL $UNTAG_XFER > $UNTAG_TXN"
 
-$GCMD clerk rawsend -f $TAG_TXN
+$GCMD clerk rawsend -f $UNTAG_TXN

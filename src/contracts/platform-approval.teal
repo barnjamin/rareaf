@@ -198,10 +198,6 @@ global ZeroAddress
 ==
 &&
 gtxn 1 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 1 AssetCloseTo
 bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 ==
 &&
@@ -360,7 +356,7 @@ store 4
 intc_0 // 1
 load 4
 sha256
-pushbytes 0x44d8969b7c882754d2512b6aa16f8cab036354085d440a0fe4c158e49b8009b3 // base64(RNiWm3yIJ1TSUStqoW+MqwNjVAhdRAoP5MFY5JuACbM=)
+pushbytes 0x92517a0268b15dd7367ac0481a805f414d330a2312f62edf5275925a93e59b94 // base64(klF6AmixXdc2esBIGoBfQU0zCiMS9i7fUnWSWpPlm5Q=)
 ==
 &&
 pushbytes 0x50726f6772616d // "Program"

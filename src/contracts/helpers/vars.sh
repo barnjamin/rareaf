@@ -18,7 +18,7 @@ export PLATFORM_FEE=1000000
 export SEED_ALGOS=5000000
 
 export LISTING_PRICE=500
-export ASA_ID=74
+export ASA_ID=18
 export PRICE_ASA_ID=5
 export APP_ID=4
 
@@ -35,7 +35,8 @@ export b64_create_func=`echo -n "create"|base64 -w0`
 export b64_delete_func=`echo -n "delete"|base64 -w0`
 export b64_tag_func=`echo -n "tag"|base64 -w0`
 export b64_untag_func=`echo -n "untag"|base64 -w0`
-export b64_reprice_func=`echo -n "reprice"|base64 -w0`
+export b64_iprice_func=`echo -n "price_increase"|base64 -w0`
+export b64_dprice_func=`echo -n "price_decrease"|base64 -w0`
 export b64_purchase_func=`echo -n "purchase"|base64 -w0`
 
 cd $SRCDIR
