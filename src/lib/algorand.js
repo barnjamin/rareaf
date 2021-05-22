@@ -213,6 +213,8 @@ export function uintToB64String(x){
 
 export async function sendWaitGroup(signed) {
     const client = getAlgodClient()
+
+    download_txns("grouped.txns", signed.map((t)=>{return t.blob}))
     const {txId}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
     return await waitForConfirmation(client, txId, 3)
 }
@@ -243,10 +245,10 @@ export async function waitForConfirmation(algodclient, txId, timeout) {
 
       if (pending !== undefined) {
         if ( pending['confirmed-round'] !== null && pending['confirmed-round'] > 0) 
-          return pendingInfo;
+          return pending;
   
         if ( pending['pool-error'] != null && pending['pool-error'].length > 0) 
-          throw new Error( `Transaction Rejected pool error${pendingInfo['pool-error']}`);
+          throw new Error( `Transaction Rejected pool error${pending['pool-error']}`);
       }
       await algodclient.statusAfterBlock(currentround).do();
       currentround += 1;

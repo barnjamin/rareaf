@@ -82,12 +82,12 @@ class Listing {
             assetClawback:this.contract_addr
         }))
 
-        const create_group = [app_call_txn, seed_txn, asa_opt_in, price_opt_in, price_send, asa_send, asa_cfg]
+        const create_group = [app_call_txn, seed_txn, asa_opt_in, price_opt_in, asa_send, price_send, asa_cfg]
         algosdk.assignGroupID(create_group)
 
+        console.log(create_group)
 
         const [s_app_call_txn, s_seed_txn, s_asa_send, s_asa_cfg] = await wallet.signTxn([app_call_txn, seed_txn, asa_send, asa_cfg])
-
 
 
         const listing_lsig   = await this.getLsig()
@@ -100,8 +100,8 @@ class Listing {
         const s_price_send          = algosdk.signLogicSigTransactionObject(price_send,  platform_lsig)            
 
         const combined = [
-            s_app_call_txn, s_seed_txn, s_asa_send, s_asa_cfg, 
-            s_asa_opt_in, s_price_opt_in, s_price_send
+            s_app_call_txn, s_seed_txn, s_asa_opt_in, s_price_opt_in, 
+            s_asa_send, s_price_send,  s_asa_cfg 
         ]
 
         console.log(combined)
