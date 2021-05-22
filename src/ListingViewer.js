@@ -13,9 +13,8 @@ function ListingViewer(props) {
     const [loading, setLoading] = useState(false);
 
     useEffect(()=>{
-        if(listing === undefined){
+        if(listing === undefined)
             getListing(addr).then((listing)=>{ setListing(listing) })
-        }
     })
 
     function handleCancelListing(e){
@@ -29,8 +28,7 @@ function ListingViewer(props) {
         setLoading(false)
     }
 
-    if(listing !== undefined){
-        return (
+    if(listing !== undefined) return (
             <div className='container'>
 
                 <div className='content content-viewer' >
@@ -57,7 +55,6 @@ function ListingViewer(props) {
             </div>
 
         )
-    }
     return (
         <div className='container'></div>
     )

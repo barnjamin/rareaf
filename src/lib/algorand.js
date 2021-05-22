@@ -31,23 +31,17 @@ export async function getTags(){
 }
 
 export async function getListing(addr) {
-    const tokens  = await getTokensFromListingAddress(addr)
+    const holdings  = await getHoldingsFromListingAddress(addr)
+    // const nft_token = first token that isnt created by platform
+    // price = number of price tokens held by this address
+    // creator is addr that sent nft token
+    const mhash = holdings['asa']['params']['metadata-hash']
+    const [cid, md] = await resolveMetadataFromMetaHash(mhash)
 
-    if(tokens.length==0){
-        console.error("No nfts in that listing?")
-        return 
-    }
-
-    const details = await getDetailsOfListing(addr)
-
-    const vars    = extract_vars(details[2])
-    const creator = algosdk.encodeAddress(vars['TMPL_CREATOR_ADDR'])
-    
-    const [cid, md] = await resolveMetadataFromMetaHash(tokens[0]['params']['metadata-hash'])
-
-    let l = new Listing(details[0], tokens[0]['index'], creator, addr)
+    let l = new Listing(holdings['price'], holdings['asa']['index'], "", addr)
     l.nft = new NFT(md)
     l.nft.cid = cid
+    l.nft.asset_id = holdings['asa']['index']
     return l
 }
 
@@ -59,49 +53,62 @@ export async function getListings() {
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
-        if (b.address == ps.address || b.amount == 0) continue;
+        //TODO:: take ouV
+        if (b.address == ps.address || b.amount == 0 || b.amount == 500) continue;
 
+        console.log(b)
         listings.push(await getListing(b.address))
     }
 
     return listings
 }
 
-export async function getTokensFromListingAddress(address) {
+export async function getHoldingsFromListingAddress(address) {
     const indexer = getIndexer()
     const acct_resp = await indexer.lookupAccountByID(address).do()
 
-    let listings = []
+    const holdings = { 'price':0, 'tags':[], 'asa':0, }
     for (let aid in acct_resp.account.assets) {
         const asa = acct_resp.account.assets[aid]
-        if (asa['asset-id'] == ps.token.id) continue;
 
         const token = await getToken(asa['asset-id'])
-        listings.push(token)
+
+        if(token.params.creator == ps.address){
+            if(token.params.name.substr(0,3)=="tag") holdings.tags.push(token)
+            else holdings.price = asa['amount']
+        }else{
+            holdings.asa = token
+        }
     }
-    return listings
+    return holdings
 }
 
 export async function getDetailsOfListing(address) {
     const indexer = getIndexer()
+
     const txnsearch = indexer.searchForTransactions()
     txnsearch.address(address)
     txnsearch.assetID(ps.token.id)
+    txnsearch.currencyGreaterThan(0)
 
     const txn_resp = await txnsearch.do()
 
+    console.log(txn_resp)
     for(let idx in txn_resp.transactions) {
         const txn = txn_resp.transactions[idx]
 
         //TODO take out once indexer is fixed
         if (txn['asset-transfer-transaction'].amount==0) continue
 
+        console.log("hi")
         return txn.signature.logicsig.args.map((a)=>{
             const raw_bytes = Buffer.from(a, 'base64')
+            console.log(raw_bytes)
             if(raw_bytes.length==8) return algosdk.decodeUint64(raw_bytes)
             return raw_bytes
         })
     }
+
     return []
 }
 
