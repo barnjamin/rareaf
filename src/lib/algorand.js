@@ -25,6 +25,11 @@ export function getIndexer(){
     return indexer
 }
 
+export async function getTags(){
+    //TODO: Get any tags owned by this platform
+    return []
+}
+
 export async function getListing(addr) {
     const tokens  = await getTokensFromListingAddress(addr)
 
@@ -151,8 +156,8 @@ export async function get_asa_xfer_txn(withSuggested, from, to, id, amt) {
     })
 }
 
+
 export async function get_asa_create_txn(withSuggested, addr, meta) {
-    console.log(meta)
     return addSuggested(withSuggested, {
         from: addr,
         assetManager: addr,
@@ -175,6 +180,15 @@ export async function get_asa_destroy_txn(withSuggested, addr, token_id) {
     })
 }
 
+export async function get_app_call_txn(withSuggested, addr, args) {
+    return addSuggested(withSuggested, {
+        from: addr,
+        appArgs:args.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64'))}),
+        appIndex:ps.application.id,
+        type:"appl"
+    })
+}
+
 export async function addSuggested(named, tmp){
     const suggestedParams = await getSuggested()
 
@@ -190,6 +204,11 @@ export async function getSuggested(){
     const client = getAlgodClient();
     const txParams = await client.getTransactionParams().do();
     return { ...txParams, lastRound: txParams['firstRound'] + 10 }
+}
+
+
+export function uintToB64String(x){
+    return Buffer.from(algosdk.encodeUint64(x)).toString('base64')
 }
 
 export async function sendWaitGroup(signed) {
@@ -218,28 +237,16 @@ export async function waitForConfirmation(algodclient, txId, timeout) {
   
     /* eslint-disable no-await-in-loop */
     while (currentround < startround + timeout) {
-      const pendingInfo = await algodclient
+      const pending = await algodclient
         .pendingTransactionInformation(txId)
         .do();
 
-      if (pendingInfo !== undefined) {
-        if (
-          pendingInfo['confirmed-round'] !== null &&
-          pendingInfo['confirmed-round'] > 0
-        ) {
-          // Got the completed Transaction
+      if (pending !== undefined) {
+        if ( pending['confirmed-round'] !== null && pending['confirmed-round'] > 0) 
           return pendingInfo;
-        }
   
-        if (
-          pendingInfo['pool-error'] != null &&
-          pendingInfo['pool-error'].length > 0
-        ) {
-          // If there was a pool error, then the transaction has been rejected!
-          throw new Error(
-            `Transaction Rejected pool error${pendingInfo['pool-error']}`
-          );
-        }
+        if ( pending['pool-error'] != null && pending['pool-error'].length > 0) 
+          throw new Error( `Transaction Rejected pool error${pendingInfo['pool-error']}`);
       }
       await algodclient.statusAfterBlock(currentround).do();
       currentround += 1;

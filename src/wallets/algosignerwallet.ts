@@ -1,7 +1,9 @@
 
-import { TransactionParams } from 'algosdk'
+import { Transaction, TransactionParams } from 'algosdk'
 import { SignedTxn, Wallet } from './wallet'
 
+
+declare const AlgoSigner: any;
 
 class AlgoSignerWallet implements Wallet {
     accounts: Array<string> 
@@ -40,7 +42,26 @@ class AlgoSignerWallet implements Wallet {
         return this.accounts[this.default_account];
     }
 
+    async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
+        const encoded_txns = txns.map((tx: Transaction) => {
+            return {txn: AlgoSigner.encoding.msgpackToBase64(tx.toByte())};
+        });
+
+        const signed = await AlgoSigner.signTxn(encoded_txns);
+        return signed.map((signedTx)=>{
+            return {
+                txID: signedTx.txID,
+                blob: AlgoSigner.encoding.base64ToMsgpack(signedTx.blob),
+            }
+        })
+    }
+
     async sign(txn: TransactionParams): Promise<SignedTxn> {
+
+        //const t = {...txn};
+        //if('name' in t) delete t['name'];
+        //if('tag' in txn) delete t['tag'];
+
         const stxn = await AlgoSigner.sign(txn)
         const blob = new Uint8Array(Buffer.from(stxn.blob, 'base64'))
         return {txID: stxn.txID, blob: blob}

@@ -56,7 +56,7 @@ function RAF(props) {
         // for price/assetid 
         try{
             const lst = new listing(price, parseInt(id), props.wallet.getDefaultAccount())
-            await lst.createListing(props.wallet)
+            await lst.doCreate(props.wallet)
             // Return addr of created account with contents
             history.push("/listing/"+lst.contract_addr)
         }catch(error){
