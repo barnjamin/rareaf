@@ -56,7 +56,6 @@ export async function getListings() {
         //TODO:: take ouV
         if (b.address == ps.address || b.amount == 0 || b.amount == 500) continue;
 
-        console.log(b)
         listings.push(await getListing(b.address))
     }
 
@@ -131,41 +130,44 @@ export async function getTokenCreatedAt(asset_id) {
     return a['created-at-round']
 }
 
-export async function get_asa_cfg_txn(withSuggested, from, asset, new_config) {
-    return addSuggested(withSuggested, {
+export function get_asa_cfg_txn(suggestedParams, from, asset, new_config) {
+    return  {
         from: from,
         assetIndex: asset,
         type: 'acfg',
-        ...new_config
-    })
+        ...new_config,
+        ...suggestedParams
+    }
 }
 
-export async function get_pay_txn(withSuggested, from, to, amount) {
-    return addSuggested(withSuggested, {
+export function get_pay_txn(suggestedParams, from, to, amount) {
+    return {
         from: from,
         to: to,
         type: 'pay',
         amount: amount,
-    })
+        ...suggestedParams
+    }
 }
 
-export async function get_asa_optin_txn(withSuggested, addr, id) {
-    return get_asa_xfer_txn(withSuggested, addr, addr, id, 0)
+export function get_asa_optin_txn(suggestedParams, addr, id) {
+    return get_asa_xfer_txn(suggestedParams, addr, addr, id, 0)
 }
 
-export async function get_asa_xfer_txn(withSuggested, from, to, id, amt) {
-    return addSuggested(withSuggested, {
+export function get_asa_xfer_txn(suggestedParams, from, to, id, amt) {
+    return {
         from: from,
         to: to,
         assetIndex: id,
         type: 'axfer',
         amount: amt,
-    })
+        ...suggestedParams
+    }
 }
 
 
-export async function get_asa_create_txn(withSuggested, addr, meta) {
-    return addSuggested(withSuggested, {
+export function get_asa_create_txn(suggestedParams, addr, meta) {
+    return  {
         from: addr,
         assetManager: addr,
         assetName: meta.name,
@@ -176,41 +178,33 @@ export async function get_asa_create_txn(withSuggested, addr, meta) {
         assetName:"RareAF",
         assetUnitName:"RAF",
         assetURL: ps.domain,
-    })
+        ...suggestedParams
+    }
 }
 
-export async function get_asa_destroy_txn(withSuggested, addr, token_id) {
-    return addSuggested(withSuggested, {
+export function get_asa_destroy_txn(suggestedParams, addr, token_id) {
+    return {
         from: addr, 
         assetIndex: token_id, 
-        type: 'acfg' 
-    })
+        type: 'acfg' ,
+        ...suggestedParams
+    }
 }
 
-export async function get_app_call_txn(withSuggested, addr, args) {
-    return addSuggested(withSuggested, {
+export function get_app_call_txn(suggestedParams, addr, args) {
+    return {
         from: addr,
         appArgs:args.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64'))}),
         appIndex:ps.application.id,
-        type:"appl"
-    })
-}
-
-export async function addSuggested(named, tmp){
-    const suggestedParams = await getSuggested()
-
-    if (named) {
-        tmp.suggestedParams=suggestedParams
-        return tmp
+        type:"appl",
+        ...suggestedParams
     }
-        
-    return  { ...tmp, ...suggestedParams }
 }
 
-export async function getSuggested(){
+export async function getSuggested(rounds){
     const client = getAlgodClient();
     const txParams = await client.getTransactionParams().do();
-    return { ...txParams, lastRound: txParams['firstRound'] + 10 }
+    return { ...txParams, lastRound: txParams['firstRound'] + rounds }
 }
 
 

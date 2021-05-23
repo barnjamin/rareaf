@@ -19,12 +19,18 @@ function ListingViewer(props) {
 
     function handleCancelListing(e){
         setLoading(true)
-        listing.destroyListing(props.wallet)
+        listing.doDelete(props.wallet)
         setLoading(false)
     }
+
     function handleBuy(e){
         setLoading(true)
-        listing.purchaseListing(props.wallet)
+        listing.doPurchase(props.wallet)
+        setLoading(false)
+    }
+    function handleTag(e){
+        setLoading(true)
+        listing.doTag(props.wallet)
         setLoading(false)
     }
 
