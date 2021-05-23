@@ -6,7 +6,6 @@ import algosdk from 'algosdk'
 import Listing from "./listing";
 import NFT from "./nft";
 
-
 let client = undefined;
 export function getAlgodClient(){
     if(client===undefined){
@@ -30,21 +29,6 @@ export async function getTags(){
     return []
 }
 
-export async function getListing(addr) {
-    const holdings  = await getHoldingsFromListingAddress(addr)
-    // const nft_token = first token that isnt created by platform
-    // price = number of price tokens held by this address
-    // creator is addr that sent nft token
-    const mhash = holdings['asa']['params']['metadata-hash']
-    const [cid, md] = await resolveMetadataFromMetaHash(mhash)
-
-    let l = new Listing(holdings['price'], holdings['asa']['index'], "", addr)
-    l.nft = new NFT(md)
-    l.nft.cid = cid
-    l.nft.asset_id = holdings['asa']['index']
-    return l
-}
-
 export async function getListings() {
     const indexer  = getIndexer()
     const balances = await indexer.lookupAssetBalances(ps.token.id).do()
@@ -53,7 +37,7 @@ export async function getListings() {
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
-        //TODO:: take ouV
+        //TODO:: take out
         if (b.address == ps.address || b.amount == 0 || b.amount == 500) continue;
 
         listings.push(await getListing(b.address))
@@ -62,73 +46,74 @@ export async function getListings() {
     return listings
 }
 
+export async function getListing(addr) {
+    const holdings  = await getHoldingsFromListingAddress(addr)
+
+    // creator is addr that sent nft token
+    // Need to id the creator of this listing
+    const creator = await getCreator(addr, holdings.asa.index)
+
+    const mhash = holdings['asa']['params']['metadata-hash']
+    const [cid, md] = await resolveMetadataFromMetaHash(mhash)
+
+    let l = new Listing(holdings['price'], holdings['asa']['index'], creator, addr)
+    l.nft = new NFT(md)
+    l.nft.cid = cid
+    l.nft.asset_id = holdings['asa']['index']
+    console.log(l)
+    return l
+}
+
+
 export async function getHoldingsFromListingAddress(address) {
     const indexer = getIndexer()
     const acct_resp = await indexer.lookupAccountByID(address).do()
 
     const holdings = { 'price':0, 'tags':[], 'asa':0, }
+
     for (let aid in acct_resp.account.assets) {
         const asa = acct_resp.account.assets[aid]
 
+        if(asa['asset-id'] == ps.token.id){
+            holdings.price = asa['amount']
+            continue
+        }
+
         const token = await getToken(asa['asset-id'])
 
-        if(token.params.creator == ps.address){
-            if(token.params.name.substr(0,3)=="tag") holdings.tags.push(token)
-            else holdings.price = asa['amount']
-        }else{
-            holdings.asa = token
-        }
+        if(token.params.creator == ps.address) holdings.tags.push(token)
+        else holdings.asa = token
+
     }
+
     return holdings
 }
 
-export async function getDetailsOfListing(address) {
-    const indexer = getIndexer()
-
-    const txnsearch = indexer.searchForTransactions()
-    txnsearch.address(address)
-    txnsearch.assetID(ps.token.id)
-    txnsearch.currencyGreaterThan(0)
-
-    const txn_resp = await txnsearch.do()
-
-    console.log(txn_resp)
-    for(let idx in txn_resp.transactions) {
-        const txn = txn_resp.transactions[idx]
-
-        //TODO take out once indexer is fixed
-        if (txn['asset-transfer-transaction'].amount==0) continue
-
-        console.log("hi")
-        return txn.signature.logicsig.args.map((a)=>{
-            const raw_bytes = Buffer.from(a, 'base64')
-            console.log(raw_bytes)
-            if(raw_bytes.length==8) return algosdk.decodeUint64(raw_bytes)
-            return raw_bytes
-        })
-    }
-
-    return []
-}
 
 export async function getToken(asset_id) {
     const indexer = getIndexer()
-    const assets = await indexer.lookupAssetByID(asset_id).do()
+    const assets  = await indexer.lookupAssetByID(asset_id).do()
+
     return assets.asset
 }
 
-export async function getNFT(asset_id){
-    const token = await getToken(asset_id)
-    const [cid, md]    = await resolveMetadataFromMetaHash(token['params']['metadata-hash'])
-    const nft   = new NFT(md, asset_id)
-    nft.meta_cid = cid
-    return nft
+export async function getCreator(addr, asset_id) {
+    // Find the txn that xfered the asa to this addr, sender is creator
+    const indexer = getIndexer()
+    const txns = await indexer.searchForTransactions()
+    .address(addr)
+    .currencyGreaterThan(0)
+    .assetID(asset_id)
+    .do()
+
+    for(idx in txns.transactions){
+        const txn = txns.transactions[idx]
+        if(txn.sender != addr){
+            return txn.sender
+        }
+    }
 }
 
-export async function getTokenCreatedAt(asset_id) {
-    const a = await getToken(asset_id)
-    return a['created-at-round']
-}
 
 export function get_asa_cfg_txn(suggestedParams, from, asset, new_config) {
     return  {
