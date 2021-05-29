@@ -50,7 +50,6 @@ export default class Minter extends React.Component {
 
             const nft = new NFT(metadata);
             nft.meta_cid = meta_cid
-            console.log(nft)
 
             const res = await nft.createToken(this.props.wallet)
 

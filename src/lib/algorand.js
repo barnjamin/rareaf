@@ -37,8 +37,7 @@ export async function getListings() {
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
-        //TODO:: take out
-        if (b.address == ps.address || b.amount == 0 || b.amount == 500) continue;
+        if (b.address == ps.address || b.amount == 0) continue;
 
         listings.push(await getListing(b.address))
     }
@@ -48,28 +47,22 @@ export async function getListings() {
 
 export async function getListing(addr) {
     const holdings  = await getHoldingsFromListingAddress(addr)
-
-    // creator is addr that sent nft token
-    // Need to id the creator of this listing
-    const creator = await getCreator(addr, holdings.asa.index)
-
-    const mhash = holdings['asa']['params']['metadata-hash']
+    const creator   = await getCreator(addr, holdings.asa.index)
+    const mhash     = holdings['asa']['params']['metadata-hash']
     const [cid, md] = await resolveMetadataFromMetaHash(mhash)
 
     let l = new Listing(holdings['price'], holdings['asa']['index'], creator, addr)
     l.nft = new NFT(md)
     l.nft.cid = cid
     l.nft.asset_id = holdings['asa']['index']
-    console.log(l)
     return l
 }
 
 
 export async function getHoldingsFromListingAddress(address) {
-    const indexer = getIndexer()
+    const indexer   = getIndexer()
     const acct_resp = await indexer.lookupAccountByID(address).do()
-
-    const holdings = { 'price':0, 'tags':[], 'asa':0, }
+    const holdings  = { 'price':0, 'tags':[], 'asa':0, }
 
     for (let aid in acct_resp.account.assets) {
         const asa = acct_resp.account.assets[aid]
@@ -89,6 +82,10 @@ export async function getHoldingsFromListingAddress(address) {
     return holdings
 }
 
+export async function getNFT(asset_id){
+    const token = await getToken(asset_id)
+    return await NFT.fromMetaHash(token['params']['metadata-hash'], asset_id)
+}
 
 export async function getToken(asset_id) {
     const indexer = getIndexer()

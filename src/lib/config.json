@@ -14,9 +14,8 @@
         "host": "/ip4/127.0.0.1/tcp/5001"
     },
     "token": {
-        "name": "RareAF",
-        "unit": "RAF",
-        "total": 1000,
+        "name": "RareAF Price",
+        "unit": "rafpx",
         "id":  5 
     },
     "application":{

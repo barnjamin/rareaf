@@ -3,6 +3,7 @@
 
 source ./vars.sh
 
+echo "Creating application"
 # Create application
 $GCMD app create --creator $PLATFORM_ACCT \
 	--approval-prog $APP_NAME \
@@ -14,7 +15,7 @@ $GCMD app create --creator $PLATFORM_ACCT \
 
 $GCMD clerk rawsend -f app-create.txn
 
-echo  "Create price tokens"
+echo  "Creating price token"
 $GCMD asset create --creator $PLATFORM_ACCT \
 	--total	1000000000 \
 	--decimals 0 \
@@ -26,7 +27,7 @@ $GCMD asset create --creator $PLATFORM_ACCT \
 TAGS=("art" "picture" "video" "gif" "meme" "pixel" "landscape" "portrait")
 for i in "${TAGS[@]}"
 do
-	echo "Creating $i"
+	echo "Creating Tag:  $i"
 	$GCMD asset create --creator $PLATFORM_ACCT \
 		--total	10000 \
 		--decimals 0 \

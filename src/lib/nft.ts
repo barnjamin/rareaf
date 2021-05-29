@@ -1,6 +1,6 @@
 import { Wallet } from '../wallets/wallet'
-import { getMetaFromIpfs } from './ipfs'
-import { get_asa_create_txn, get_asa_destroy_txn, sendWait } from './algorand'
+import { getMetaFromIpfs, getCIDFromMetadataHash } from './ipfs'
+import { get_asa_create_txn, get_asa_destroy_txn, sendWait, getSuggested } from './algorand'
 import CID from 'cids'
 
 
@@ -30,14 +30,16 @@ export default class NFT {
 
     async createToken(wallet: Wallet){
         const creator = wallet.getDefaultAccount()
-        const create_txn = await get_asa_create_txn(false, creator, this.getMetaDataHash())
+        const suggested = await getSuggested(10)
+        const create_txn = await get_asa_create_txn(suggested, creator, this.getMetaDataHash())
         const s_create_txn = await wallet.sign(create_txn)
         return await sendWait(s_create_txn)
     }
 
     async destroyToken(wallet: Wallet){
         const creator = wallet.getDefaultAccount()
-        const destroy_txn = await get_asa_destroy_txn(false, creator, this.asset_id)
+        const suggested = await getSuggested(10)
+        const destroy_txn = await get_asa_destroy_txn(suggested, creator, this.asset_id)
         const s_destroy_txn = await wallet.sign(destroy_txn)
         return await sendWait(s_destroy_txn)
     }
@@ -53,10 +55,14 @@ export default class NFT {
         return "https://via.placeholder.com/500"
     }
 
-    static async fromMetaHash(meta_hash: string): Promise<NFT> {
-        const [cid, md] = await getMetaFromIpfs(meta_hash);
+    static async fromMetaHash(meta_hash: string, asset_id?: number): Promise<NFT> {
+        const cid = await getCIDFromMetadataHash(meta_hash)
+        const md = await getMetaFromIpfs(cid.multihash);
         const nft = new NFT(md)
+
         nft.meta_cid = cid
+        nft.asset_id = asset_id
+
         return nft
     }
 }

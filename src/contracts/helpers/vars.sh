@@ -63,10 +63,14 @@ cp $SRCDIR/$DELEGATE_NAME .
 ../sandbox copy $SRCDIR/$CLEAR_NAME
 ../sandbox copy $SRCDIR/$DELEGATE_NAME
 
-$GCMD app update --app-id $APP_ID --approval-prog $APP_NAME --clear-prog $CLEAR_NAME -f $PLATFORM_ACCT
+#TOCO: check if it exists first?
+#$GCMD app update --app-id $APP_ID --approval-prog $APP_NAME --clear-prog $CLEAR_NAME -f $PLATFORM_ACCT
 
 export CONTRACT_ACCT=`../sandbox goal clerk compile -a$CREATOR_ACCT $LISTING_NAME|awk '{print $2}'|tr '\r' ' '`
 
+echo $CONTRACT_ACCT
 echo "Signing delegate sig"
 export DELEGATE=`../sandbox goal clerk compile -a$PLATFORM_ACCT $DELEGATE_NAME|awk '{print $2}'|tr '\r' ' '`
 $GCMD clerk compile $DELEGATE_NAME -a $PLATFORM_ACCT -s -o $SIGNED_DELEGATE 
+../sandbox exec "cat $SIGNED_DELEGATE | base64 -w0" > platform.signed
+cp platform.signed ~/rareaf/src/contracts/
