@@ -196,7 +196,6 @@ export function uintToB64String(x){
 
 export async function sendWaitGroup(signed) {
     const client = getAlgodClient()
-
     download_txns("grouped.txns", signed.map((t)=>{return t.blob}))
     const {txId}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
     return await waitForConfirmation(client, txId, 3)
