@@ -88,7 +88,8 @@ def approval():
 
     purchase_listing = And(  
         set_addr_as_rx(Gtxn[0], contract_addr),
-        remove_listing_addr(Int(1), contract_addr.load()), 
+        remove_listing_addr(Int(0), contract_addr.load()), 
+        # Get balance of price tokens from address, make sure it matches the amount in the pay txn
     )
 
 

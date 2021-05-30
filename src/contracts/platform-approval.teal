@@ -54,7 +54,7 @@ l13:
 gtxn 0 Receiver
 store 1
 intc_0 // 1
-intc_0 // 1
+intc_1 // 0
 load 1
 app_local_del
 intc_0 // 1

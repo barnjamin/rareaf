@@ -43,15 +43,15 @@ def listing():
         valid_app_call(Gtxn[0]),
         set_addr_as_tx(      Gtxn[1], buyer_addr),
         set_addr_as_tx(      Gtxn[2], contract_addr),
-        pay_txn_valid(       Gtxn[1], Btoi(Gtxn[0].application_args[1]), buyer_addr.load(), creator_addr.load()),
+        pay_txn_valid(       Gtxn[1], Gtxn[1].amount(), buyer_addr.load(), creator_addr.load()),
         asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), buyer_addr.load(), buyer_addr.load()),
         asa_close_xfer_valid(Gtxn[3], price_token, contract_addr.load(), platform_addr, platform_addr),
         asa_cfg_valid(       Gtxn[4], asset_id.load(), buyer_addr.load()),
         pay_close_txn_valid( Gtxn[5], contract_addr.load(), platform_addr, creator_addr.load(), platform_fee),
     )
 
-    app_validate = valid_app_call(Gtxn[0])
     app_offload = Or(Gtxn[0].application_args[0] == action_tag, Gtxn[0].application_args[0] == action_untag, Gtxn[0].application_args[0] == action_dprice)
+    app_validate = valid_app_call(Gtxn[0])
 
     return Cond([setup, Int(0)], #NoOp
                 [Gtxn[0].application_args[0] == action_create,   create], 

@@ -196,6 +196,14 @@ class Listing {
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.creator_addr, args))
+        //app_call_txn.appOnComplete = algosdk.OnApplicationComplete.NoOpOC
+
+        console.log(app_call_txn)
+        console.log(app_call_txn.get_obj_for_encoding())
+        const rawTx = algosdk.decodeUnsignedTransaction(app_call_txn.toByte());
+        console.log(rawTx)
+        const processedTx = rawTx._getDictForDisplay();
+        console.log(processedTx)
 
         const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, ps.token.id, 0))
         price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
@@ -217,13 +225,13 @@ class Listing {
 
         algosdk.assignGroupID([app_call_txn, price_xfer_txn,  asa_xfer_txn,  asa_cfg_txn, algo_close_txn])
 
-        const [s_app_call_txn] = await wallet.signTxn([app_call_txn])
+        const [s_app_call_txn]  = await wallet.signTxn([app_call_txn])
 
-        const listing_lsig = await get_listing_sig(this.getVars())
-        const s_price_xfer_txn = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)
-        const s_asa_cfg_txn = algosdk.signLogicSigTransaction(asa_cfg_txn, listing_lsig)
-        const s_asa_xfer_txn = algosdk.signLogicSigTransaction(asa_xfer_txn, listing_lsig)
-        const s_algo_close_txn = algosdk.signLogicSigTransaction(algo_close_txn, listing_lsig)
+        const listing_lsig      = await get_listing_sig(this.getVars())
+        const s_price_xfer_txn  = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)
+        const s_asa_cfg_txn     = algosdk.signLogicSigTransaction(asa_cfg_txn, listing_lsig)
+        const s_asa_xfer_txn    = algosdk.signLogicSigTransaction(asa_xfer_txn, listing_lsig)
+        const s_algo_close_txn  = algosdk.signLogicSigTransaction(algo_close_txn, listing_lsig)
 
         const combined = [s_app_call_txn, s_price_xfer_txn,  s_asa_xfer_txn,  s_asa_cfg_txn, s_algo_close_txn]
         return await sendWaitGroup(combined)
@@ -241,7 +249,7 @@ class Listing {
         const purchase_amt_txn = new Transaction(get_pay_txn(suggestedParams, buyer, this.creator_addr, this.price))
 
         const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, ps.token.id, 0))
-        price_xfer_txn.closeRemainderTo = ps.address
+        price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
 
         const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.creator_addr, this.asset_id, {
             assetManager: buyer,
@@ -256,6 +264,12 @@ class Listing {
         const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, ps.address, ps.fee))
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
+        algosdk.assignGroupID([
+            app_call_txn, purchase_amt_txn, 
+            asa_xfer_txn, price_xfer_txn, 
+            asa_cfg_txn, algo_close_txn
+        ])
+
         const [s_app_call_txn, s_purchase_amt_txn] = await wallet.signTxn([app_call_txn, purchase_amt_txn])
 
         const listing_lsig = await get_listing_sig(this.getVars())
@@ -264,11 +278,14 @@ class Listing {
         const s_asa_xfer_txn = algosdk.signLogicSigTransaction(asa_xfer_txn, listing_lsig)
         const s_algo_close_txn = algosdk.signLogicSigTransaction(algo_close_txn, listing_lsig)
 
-        const combined = [s_app_call_txn, s_purchase_amt_txn, s_price_xfer_txn, s_asa_cfg_txn, s_asa_xfer_txn, s_algo_close_txn]
+        const combined = [
+            s_app_call_txn, s_purchase_amt_txn, 
+            s_asa_xfer_txn, s_price_xfer_txn, 
+            s_asa_cfg_txn, s_algo_close_txn
+        ]
 
         return await sendWaitGroup(combined)
     }
-
 }
 
 export default Listing;

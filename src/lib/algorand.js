@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import { resolveMetadataFromMetaHash } from "./ipfs";
 import { platform_settings as ps } from './platform-conf'
-import {extract_vars} from './contracts'
 import algosdk from 'algosdk'  
 import Listing from "./listing";
 import NFT from "./nft";
@@ -178,6 +177,7 @@ export function get_app_call_txn(suggestedParams, addr, args) {
         from: addr,
         appArgs:args.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64'))}),
         appIndex:ps.application.id,
+        appOnComplete: algosdk.OnApplicationComplete.NoOpOC,
         type:"appl",
         ...suggestedParams
     }
