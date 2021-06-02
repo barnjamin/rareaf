@@ -1,5 +1,5 @@
 
-import { Transaction, TransactionParams } from 'algosdk'
+import algosdk, { Transaction, TransactionParams } from 'algosdk'
 import { SignedTxn, Wallet } from './wallet'
 
 
@@ -43,8 +43,13 @@ class AlgoSignerWallet implements Wallet {
     }
 
     async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
+
         const encoded_txns = txns.map((tx: Transaction) => {
-            return {txn: AlgoSigner.encoding.msgpackToBase64(tx.toByte())};
+            const t = {txn: AlgoSigner.encoding.msgpackToBase64(tx.toByte())};
+            if(tx.from !== algosdk.decodeAddress(this.getDefaultAccount())){
+                t.signers = []
+            }
+            return t
         });
 
         const signed = await AlgoSigner.signTxn(encoded_txns);

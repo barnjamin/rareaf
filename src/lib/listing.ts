@@ -81,12 +81,12 @@ class Listing {
             assetClawback: this.contract_addr
         }))
 
-        const create_group = [app_call_txn, seed_txn, asa_opt_in, price_opt_in, asa_send, price_send, asa_cfg]
-        algosdk.assignGroupID(create_group)
+        const group = [app_call_txn, seed_txn, asa_opt_in, price_opt_in, asa_send, price_send, asa_cfg]
 
+        algosdk.assignGroupID(group)
 
-        const [s_app_call_txn, s_seed_txn, s_asa_send, s_asa_cfg] = await wallet.signTxn([app_call_txn, seed_txn, asa_send, asa_cfg])
-
+        const signer = algosdk.decodeAddress(this.creator_addr)
+        const [s_app_call_txn, s_seed_txn, s_asa_send, s_asa_cfg] = await wallet.signTxn(group)
 
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_asa_opt_in = algosdk.signLogicSigTransactionObject(asa_opt_in, listing_lsig);
@@ -196,18 +196,12 @@ class Listing {
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.creator_addr, args))
-        //app_call_txn.appOnComplete = algosdk.OnApplicationComplete.NoOpOC
 
-        console.log(app_call_txn)
-        console.log(app_call_txn.get_obj_for_encoding())
         const rawTx = algosdk.decodeUnsignedTransaction(app_call_txn.toByte());
-        console.log(rawTx)
         const processedTx = rawTx._getDictForDisplay();
-        console.log(processedTx)
 
         const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, ps.token.id, 0))
         price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
-
 
         const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.contract_addr, this.asset_id, {
             assetManager: this.creator_addr,

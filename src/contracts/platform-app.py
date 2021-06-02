@@ -87,9 +87,14 @@ def approval():
     )
 
     purchase_listing = And(  
-        set_addr_as_rx(Gtxn[0], contract_addr),
-        remove_listing_addr(Int(0), contract_addr.load()), 
-        # Get balance of price tokens from address, make sure it matches the amount in the pay txn
+        # Make sure payment is going to creator
+        Gtxn[1].receiver() == Gtxn[0].accounts[2],
+
+        # Make sure payment amount is right 
+        check_balance_match(Gtxn[1], Int(1), price_token),
+
+        # Remove the contract addr from the creators acct
+        remove_listing_addr(Int(2), Gtxn[0].accounts[1]), 
     )
 
 

@@ -17,8 +17,8 @@ export SIGNED_DELEGATE=platform-delegate.signed
 export PLATFORM_FEE=1000000
 export SEED_ALGOS=5000000
 
-export LISTING_PRICE=500
-export ASA_ID=53
+export LISTING_PRICE=1000
+export ASA_ID=17
 export PRICE_ASA_ID=5
 export APP_ID=4
 
@@ -64,7 +64,7 @@ cp $SRCDIR/$DELEGATE_NAME .
 ../sandbox copy $SRCDIR/$DELEGATE_NAME
 
 #TOCO: check if it exists first?
-#$GCMD app update --app-id $APP_ID --approval-prog $APP_NAME --clear-prog $CLEAR_NAME -f $PLATFORM_ACCT
+$GCMD app update --app-id $APP_ID --approval-prog $APP_NAME --clear-prog $CLEAR_NAME -f $PLATFORM_ACCT
 
 export CONTRACT_ACCT=`../sandbox goal clerk compile -a$CREATOR_ACCT $LISTING_NAME|awk '{print $2}'|tr '\r' ' '`
 

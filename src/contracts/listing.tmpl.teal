@@ -82,8 +82,7 @@ load 0
 ==
 &&
 gtxn 1 Amount
-gtxna 0 ApplicationArgs 1
-btoi
+gtxn 1 Amount
 ==
 &&
 &&

@@ -51,11 +51,20 @@ pushbytes 0x7075726368617365 // "purchase"
 bnz l13
 err
 l13:
-gtxn 0 Receiver
-store 1
+gtxn 1 Receiver
+gtxna 0 Accounts 2
+==
 intc_0 // 1
-intc_1 // 0
-load 1
+intc 4 // 5
+asset_holding_get AssetBalance
+store 10
+store 11
+gtxn 1 Amount
+load 11
+==
+&&
+intc_3 // 2
+gtxna 0 Accounts 1
 app_local_del
 intc_0 // 1
 &&
@@ -356,7 +365,7 @@ store 4
 intc_0 // 1
 load 4
 sha256
-pushbytes 0xc1f622a21387de1f0de8a3c20af8da4f004757f1dd09033d0c2856a93f884d48 // base64(wfYiohOH3h8N6KPCCvjaTwBHV/HdCQM9DChWqT+ITUg=)
+pushbytes 0xee25cf242bd8a998698ede82a7d0c4566e44f5e6ccd925dcaa677a711e027ea4 // base64(7iXPJCvYqZhpjt6Cp9DEVm5E9ebM2SXcqmd6cR4CfqQ=)
 ==
 &&
 pushbytes 0x50726f6772616d // "Program"

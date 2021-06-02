@@ -33,7 +33,7 @@ do
 		--decimals 0 \
 		--unitname raf-tag \
 		--asseturl "https://rare.af/tag/$i" \
-		--name "RAF:$i"
+		--name "RAF:$i" 
 done
 
 $GCMD app optin --from $CREATOR_ACCT --app-id $APP_ID

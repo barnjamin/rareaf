@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TXN_FILE=untag.txn
+TXN_FILE=purchase.txn
 
 ../sandbox goal clerk dryrun -t $TXN_FILE -o $TXN_FILE.json --dryrun-dump
 ../sandbox exec "cat $TXN_FILE.json" > $TXN_FILE.json

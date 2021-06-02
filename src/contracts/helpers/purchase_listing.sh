@@ -14,7 +14,7 @@ TXN_FILE=purchase.txn
 BUYER_ACCT=DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4
 
 
-echo "appcall"
+echo "app call"
 $GCMD app call --app-id $APP_ID \
 	-f $BUYER_ACCT \
        	--approval-prog $APP_NAME \
@@ -59,9 +59,9 @@ $GCMD asset send \
 	-o $ASA_CLOSE
 
 echo "algo return"
-$GCMD clerk send -a 0 \
+$GCMD clerk send -a $PLATFORM_FEE  \
 	-f $CONTRACT_ACCT \
-	-t $CREATOR_ACCT \
+	-t $PLATFORM_ACCT \
 	-c $CREATOR_ACCT \
 	-o $ALGO_CLOSE
 
@@ -79,6 +79,6 @@ $GCMD clerk sign -i purchase-3 -p $LISTING_NAME -o $PRICE_CLOSE
 $GCMD clerk sign -i purchase-4 -p $LISTING_NAME -o $ASA_CFG
 $GCMD clerk sign -i purchase-5 -p $LISTING_NAME -o $ALGO_CLOSE 
 
-../sandbox exec "cat $APP_DELETE_CALL $ALGO_PAY $ASA_CLOSE $PRICE_CLOSE $ASA_CFG $ALGO_CLOSE > $TXN_FILE"
+../sandbox exec "cat $APP_PURCHASE_CALL $ALGO_PAY $ASA_CLOSE $PRICE_CLOSE $ASA_CFG $ALGO_CLOSE > $TXN_FILE"
 
 $GCMD clerk rawsend -f $TXN_FILE 

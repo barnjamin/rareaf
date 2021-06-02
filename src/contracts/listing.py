@@ -41,6 +41,7 @@ def listing():
     purchase = And(
         Global.group_size() == Int(6),
         valid_app_call(Gtxn[0]),
+
         set_addr_as_tx(      Gtxn[1], buyer_addr),
         set_addr_as_tx(      Gtxn[2], contract_addr),
         pay_txn_valid(       Gtxn[1], Gtxn[1].amount(), buyer_addr.load(), creator_addr.load()),

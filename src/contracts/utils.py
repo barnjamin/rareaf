@@ -48,6 +48,13 @@ def set_addr_as_tx(txn, var):
 def set_asset_id(txn, var):
     return Seq([ var.store(txn.xfer_asset()), Int(1) ])
 
+def check_balance_match(txn, addr_idx, asset_id):
+    expr = AssetHolding.balance(addr_idx, asset_id)
+    return Seq([
+        expr,
+        txn.amount() == expr.value()
+    ])
+
 
 def pay_txn_valid(txn, amt, from_addr, to_addr):
     return And(
