@@ -14,6 +14,10 @@ TXN_FILE=purchase.txn
 BUYER_ACCT=DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4
 
 
+echo "Opting buyer into asset"
+$GCMD asset send --assetid $ASA_ID -f $BUYER_ACCT -t $BUYER_ACCT -a 0 
+
+
 echo "app call"
 $GCMD app call --app-id $APP_ID \
 	-f $BUYER_ACCT \

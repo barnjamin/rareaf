@@ -244,6 +244,11 @@ class Listing {
 
         const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, ps.token.id, 0))
         price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
+        price_xfer_txn.amount = 1
+
+        const asa_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, buyer, this.asset_id, 0))
+        asa_xfer_txn.closeRemainderTo = algosdk.decodeAddress(buyer)
+        asa_xfer_txn.amount =  1
 
         const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.creator_addr, this.asset_id, {
             assetManager: buyer,
@@ -252,19 +257,19 @@ class Listing {
             assetClawback: buyer,
         }))
 
-        const asa_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, buyer, this.asset_id, 0))
-        asa_xfer_txn.closeRemainderTo = algosdk.decodeAddress(buyer)
-
         const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, ps.address, ps.fee))
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
-        algosdk.assignGroupID([
+        const group = [
             app_call_txn, purchase_amt_txn, 
             asa_xfer_txn, price_xfer_txn, 
             asa_cfg_txn, algo_close_txn
-        ])
+        ]
+        console.log(group)
 
-        const [s_app_call_txn, s_purchase_amt_txn] = await wallet.signTxn([app_call_txn, purchase_amt_txn])
+        algosdk.assignGroupID(group)
+
+        const [s_app_call_txn, s_purchase_amt_txn] = await wallet.signTxn(group)
 
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_price_xfer_txn = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)

@@ -17,8 +17,10 @@ class AlgoSignerWallet implements Wallet {
     }
 
     async connect(): Promise<boolean> {
-        if (typeof AlgoSigner === 'undefined')
+        if (typeof AlgoSigner === 'undefined'){
             alert('Make Sure AlgoSigner wallet is installed and connected');
+            return
+        }
 
         try {
             await AlgoSigner.connect()
@@ -44,16 +46,20 @@ class AlgoSignerWallet implements Wallet {
 
     async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
 
+        const default_acct = this.getDefaultAccount()
         const encoded_txns = txns.map((tx: Transaction) => {
             const t = {txn: AlgoSigner.encoding.msgpackToBase64(tx.toByte())};
-            if(tx.from !== algosdk.decodeAddress(this.getDefaultAccount())){
+            if(algosdk.encodeAddress(tx.from.publicKey) !== default_acct){
                 t.signers = []
             }
             return t
         });
 
         const signed = await AlgoSigner.signTxn(encoded_txns);
-        return signed.map((signedTx)=>{
+
+        return signed.filter((signedTx)=>{
+            return signedTx !== null
+        }).map((signedTx)=>{
             return {
                 txID: signedTx.txID,
                 blob: AlgoSigner.encoding.base64ToMsgpack(signedTx.blob),
@@ -62,11 +68,6 @@ class AlgoSignerWallet implements Wallet {
     }
 
     async sign(txn: TransactionParams): Promise<SignedTxn> {
-
-        //const t = {...txn};
-        //if('name' in t) delete t['name'];
-        //if('tag' in txn) delete t['tag'];
-
         const stxn = await AlgoSigner.sign(txn)
         const blob = new Uint8Array(Buffer.from(stxn.blob, 'base64'))
         return {txID: stxn.txID, blob: blob}
