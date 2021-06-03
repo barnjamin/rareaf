@@ -17,10 +17,14 @@ class AlgoSignerWallet implements Wallet {
     }
 
     async connect(): Promise<boolean> {
-        if (typeof AlgoSigner === 'undefined'){
-            alert('Make Sure AlgoSigner wallet is installed and connected');
+
+        const loaded = await this.waitForLoaded() 
+
+        if(!loaded){
+            alert("AlgoSigner not loaded, is it installed?")
             return
         }
+
 
         try {
             await AlgoSigner.connect()
@@ -34,6 +38,18 @@ class AlgoSignerWallet implements Wallet {
 
         return true
     }
+
+    async waitForLoaded(): Promise<boolean> {
+        for(let x=0; x<3; x++){
+            if (typeof AlgoSigner !== 'undefined'){
+                return true
+            }
+            await new Promise(r=>{setTimeout(r, 1000)})
+        }
+
+        return false
+    }
+
 
     isConnected(): boolean {
         if (typeof AlgoSigner === 'undefined') return false;

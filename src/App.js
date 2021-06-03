@@ -3,7 +3,7 @@
 
 import React from 'react'
 import {
-  BrowserRouter as Router,
+  Router,
   Route,
   Switch
 } from "react-router-dom";
@@ -36,7 +36,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <Router>
+      <Router history={this.props.history} >
         <Navbar >
           <Navbar.Group align={Alignment.LEFT}>
             <Navbar.Heading> Rare AF</Navbar.Heading>

@@ -44,10 +44,10 @@ class AlgorandWalletConnector extends React.Component {
         this.tryConnectWallet = this.tryConnectWallet.bind(this)
         this.disconnectWallet = this.disconnectWallet.bind(this)
 
-        this.handleChange                  = this.handleChange.bind(this)
-        this.handleDisplayWalletSelection  = this.handleDisplayWalletSelection.bind(this)
-        this.handleSelectedWallet       = this.handleSelectedWallet.bind(this)
-        this.handleDisconnectWallet     = this.handleDisconnectWallet.bind(this)
+        this.handleChange                   = this.handleChange.bind(this)
+        this.handleDisplayWalletSelection   = this.handleDisplayWalletSelection.bind(this)
+        this.handleSelectedWallet           = this.handleSelectedWallet.bind(this)
+        this.handleDisconnectWallet         = this.handleDisconnectWallet.bind(this)
     }
 
     componentDidMount(){
@@ -64,21 +64,19 @@ class AlgorandWalletConnector extends React.Component {
 
     async tryConnectWallet(){
         if(this.state.wallet === undefined){
-
             const wname = sessionStorage.getItem('wallet-preference');
+
             if(!(wname in this.state.allowedWallets)) return
 
             const wallet = new this.state.allowedWallets[wname](platform_settings.algod.network)
 
             if (wname == 'insecure-wallet'){
                 if(!await wallet.connect(pkToMnemonic)){
-                    alert("Couldn't connect to preferred wallet: ", wname)
                     this.disconnectWallet()
                     return
                 }
             }else{
                 if(!await wallet.connect()){
-                    alert("Couldn't connect to preferred wallet: ", wname)
                     this.disconnectWallet()
                     return
                 }

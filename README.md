@@ -38,3 +38,15 @@ Fork it for free, Configure it for the cost of about 0.301A (0.2A temporary chec
 
 donate to this address (charity? Dao?)
 
+```
+#TODO:
+
+   - Delay nav or retry loading when creating a new listing or nft to give indexer time to update
+   - Check if opted into app before trying to create listing
+   - Check if opted into asset before trying to create, give option?
+   - Add tagging ui
+   - Add price modification ui 
+   - Add support for other wallets
+
+```
+
