@@ -2,20 +2,26 @@
 'use strict'
 
 import React, {useState, useEffect} from 'react'
-import { useParams, useHistory} from 'react-router-dom'
-import { getListing } from './lib/algorand'
-import {Button} from '@blueprintjs/core'
+
+import { useParams, useHistory } from 'react-router-dom'
+import { getListing, getTags } from './lib/algorand'
+import { Button } from '@blueprintjs/core'
+import Tagger from './Tagger'
+
 
 function ListingViewer(props) {
 
+    const history = useHistory();
+
     const {addr} = useParams();
+    const [tagOpts, setTagOpts] = useState(undefined);
     const [listing, setListing] = useState(undefined);
     const [loading, setLoading] = useState(false);
 
     useEffect(()=>{
-        if(listing === undefined)
-            getListing(addr).then((listing)=>{ setListing(listing) })
-    })
+        getTags().then((tags)=>{ setTagOpts(tags) })
+        getListing(addr).then((listing)=>{ setListing(listing) })
+    }, [])
 
     function handleCancelListing(e){
         setLoading(true)
@@ -28,9 +34,10 @@ function ListingViewer(props) {
         listing.doPurchase(props.wallet)
         setLoading(false)
     }
-    function handleTag(e){
+
+    function handleTag(tag){
         setLoading(true)
-        listing.doTag(props.wallet)
+        listing.doTag(props.wallet, tag)
         setLoading(false)
     }
 
@@ -55,6 +62,10 @@ function ListingViewer(props) {
                 </div>
 
                 <div>
+                    <Tagger tagOpts={tagOpts} handleTag={handleTag} listing={listing} ></Tagger>
+                </div>
+
+                <div>
                     <Button loading={loading} onClick={handleBuy}>Buy</Button>
                     <Button loading={loading} onClick={handleCancelListing}>Cancel Listing</Button>
                 </div>
@@ -64,6 +75,7 @@ function ListingViewer(props) {
     return (
         <div className='container'></div>
     )
+
 
 }
 

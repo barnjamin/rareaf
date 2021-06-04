@@ -11,23 +11,26 @@ import NFT from './nft'
 import { Method } from './application'
 import LogicSig from 'algosdk/dist/types/src/logicsig';
 
-export interface TagToken {
+export type TagToken = {
     id: number;
     name: string;
 }
 
-class Listing {
+export class Listing {
     asset_id: number
     price: number
 
     creator_addr: string
     contract_addr: string
 
+    tags: TagToken[]
+
     nft: NFT
 
     source: string
 
-    lsig: LogicSig;
+    lsig: LogicSig
+
 
     constructor(price: number, asset_id: number, creator_addr: string, contract_addr?: string) {
         this.price = price

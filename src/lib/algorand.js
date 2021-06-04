@@ -24,8 +24,20 @@ export function getIndexer(){
 }
 
 export async function getTags(){
-    //TODO: Get any tags owned by this platform
-    return []
+    const indexer = getIndexer()
+    const tags = await indexer
+        .searchForAssets()
+        .creator(ps.address)
+        .unit(ps.tags.unit)
+        .do()
+
+    return tags.assets.map((t)=>{
+        return {
+            'name': t.params.name,
+            'id': t.index
+        }
+
+    })
 }
 
 export async function getListings() {
@@ -35,6 +47,7 @@ export async function getListings() {
     let listings = []
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
+    console.log("adsf")
 
         if (b.address == ps.address || b.amount == 0) continue;
 
@@ -51,9 +64,15 @@ export async function getListing(addr) {
     const [cid, md] = await resolveMetadataFromMetaHash(mhash)
 
     let l = new Listing(holdings['price'], holdings['asa']['index'], creator, addr)
+
+    l.tags = holdings.tags.map((t)=>{
+        return {id: t.index, name:t.params.name}
+    })
+
     l.nft = new NFT(md)
     l.nft.cid = cid
     l.nft.asset_id = holdings['asa']['index']
+
     return l
 }
 

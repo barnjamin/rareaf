@@ -18,6 +18,9 @@
         "unit": "rafpx",
         "id":  5 
     },
+    "tags":{
+        "unit":"raf-tag"
+    },
     "application":{
         "id":4,
         "approval":"platform-approval.teal",

@@ -41,12 +41,27 @@ donate to this address (charity? Dao?)
 ```
 #TODO:
 
-   - Delay nav or retry loading when creating a new listing or nft to give indexer time to update
-   - Check if opted into app before trying to create listing
-   - Check if opted into asset before trying to create, give option?
-   - Add tagging ui
-   - Add price modification ui 
-   - Add support for other wallets
+   Usability:
+      - Delay nav or retry loading when creating a new listing or nft to give indexer time to update
+      - Check if opted into app before trying to create listing
+      - Check if opted into asset before trying to create, give option?
+
+   Tagging:
+      - Add tagging "send" button? 
+      - Remove tag handler
+      - Add page for rare.af/tag/blah
+   
+   Price:
+      - Change price UI
+
+   Wallets:
+      - Add support for other wallets
+
+   Minting:
+      - Add more fields for metadata
+      - Write file bytes into json metadata file?
+
+   - Add filters on browse page for tags/price
 
 ```
 
