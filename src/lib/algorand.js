@@ -72,23 +72,40 @@ export async function getListings(tag) {
 export async function getTagToken(name) {
     const indexer  = getIndexer()
     const assets = await indexer.searchForAssets().name(name).do()
-    console.log(assets)
     for(let aidx in assets.assets){
-        console.log(assets.assets[aidx].params.creator)
-
-
-        if(assets.assets[aidx].params.creator == ps.address){
-            console.log("asdf")
-            return {
-                id: assets.assets[aidx].index,
-                name:name
-            }
-        }
+        if(assets.assets[aidx].params.creator == ps.address)
+            return { id: assets.assets[aidx].index, name:name }
     }
 
     return {id:0, name:name}
 }
 
+export async function getPortfolio(addr){
+    const indexer = getIndexer()
+    const balances = await indexer.lookupAccountByID(addr).do()
+    const acct = balances.account
+
+    const listings = []
+    for(let aidx in acct['apps-local-state']){
+        const als = acct['apps-local-state'][aidx]
+        if(als.id !== ps.application.id) continue
+
+        for(let kidx in als['key-value']) {
+            const kv = als['key-value'][kidx]
+            listings.push(await getListing(b64ToAddr(kv.key)))
+        }
+    }
+
+
+    const nfts = []
+    for(let aidx in acct['assets']) {
+        const ass = acct['assets'][aidx]
+        if (ass.amount==1) nfts.push(await getNFT(ass['asset-id']))
+    }
+
+
+    return {'listings':listings, 'nfts':nfts} 
+}
 
 export async function getListing(addr) {
     const holdings  = await getHoldingsFromListingAddress(addr)
@@ -244,6 +261,10 @@ export async function getSuggested(rounds){
 
 export function uintToB64String(x){
     return Buffer.from(algosdk.encodeUint64(x)).toString('base64')
+}
+
+export function b64ToAddr(x){
+    return algosdk.encodeAddress(new Uint8Array(Buffer.from(x, "base64")));
 }
 
 export async function sendWaitGroup(signed) {

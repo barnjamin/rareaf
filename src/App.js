@@ -14,6 +14,7 @@ import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
 import RAF from './RAF'
 import ListingViewer from './ListingViewer'
+import Portfolio from './Portfolio'
 
 
 class App extends React.Component {
@@ -42,6 +43,7 @@ class App extends React.Component {
             <Navbar.Heading> Rare AF</Navbar.Heading>
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
+            <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />
             <AnchorButton className='bp3-minimal' icon='new-object' text='Mint' href="/mint" />
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
@@ -53,17 +55,23 @@ class App extends React.Component {
           </Navbar.Group>
         </Navbar>
         <Switch>
+          <Route path="/portfolio" >
+            <Portfolio history={this.props.history} wallet={this.state.wallet} /> 
+          </Route>
+          <Route path="/portfolio/:addr" >
+            <Portfolio history={this.props.history} wallet={this.state.wallet} /> 
+          </Route>
+
+          <Route path="/mint" children={<Minter history={this.props.history} wallet={this.state.wallet} /> } />
+          <Route path="/raf/:id" children={<RAF history={this.props.history} wallet={this.state.wallet} />}  />
+          <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={this.state.wallet} />} />
+
           <Route exact path="/" >
             <Browser 
               history={this.props.history} 
               wallet={this.state.wallet} 
               />
           </Route>
-          <Route path="/mint" >
-            <Minter history={this.props.history} wallet={this.state.wallet} />
-          </Route>
-          <Route path="/raf/:id" children={<RAF history={this.props.history} wallet={this.state.wallet} />}  />
-          <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={this.state.wallet} />} />
           <Route path="/tag/:tag"  >
             <Browser 
               history={this.props.history} 
