@@ -26,7 +26,7 @@ function RAF(props) {
                 setNFT(nft) 
             }).catch((err)=>{ console.log("Error:", err) })
         }
-    });
+    }, []);
 
 
     function handleCreateListing(){ setListingVisible(true) }

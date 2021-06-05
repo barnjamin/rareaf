@@ -12,8 +12,8 @@ import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
 import Minter from './Minter'
 import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
-import RAF from './RAF.js'
-import ListingViewer from './ListingViewer.js'
+import RAF from './RAF'
+import ListingViewer from './ListingViewer'
 
 
 class App extends React.Component {
@@ -54,14 +54,21 @@ class App extends React.Component {
         </Navbar>
         <Switch>
           <Route exact path="/" >
-            <Browser history={this.props.history} wallet={this.state.wallet} />
+            <Browser 
+              history={this.props.history} 
+              wallet={this.state.wallet} 
+              />
           </Route>
           <Route path="/mint" >
             <Minter history={this.props.history} wallet={this.state.wallet} />
           </Route>
-          <Route path="/raf/:id" children={<RAF history={this.props.history} wallet={this.state.wallet} />}  >
-          </Route>
-          <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={this.state.wallet} />} >
+          <Route path="/raf/:id" children={<RAF history={this.props.history} wallet={this.state.wallet} />}  />
+          <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={this.state.wallet} />} />
+          <Route path="/tag/:tag"  >
+            <Browser 
+              history={this.props.history} 
+              wallet={this.state.wallet} 
+              />
           </Route>
         </Switch>
       </Router>

@@ -40,9 +40,22 @@ export async function getTags(){
     })
 }
 
-export async function getListings() {
+export async function getListings(tag) {
     const indexer  = getIndexer()
-    const balances = await indexer.lookupAssetBalances(ps.token.id).do()
+
+    let token_id = ps.token.id
+    if(tag !== undefined){
+        //TODO:: cache these name=>id so we dont have to hit the net
+        if(tag.substr(0,3) !== "RAF") tag = "RAF:"+tag
+        const tagToken = await getTagToken(tag)
+
+        if (tagToken.id == 0) return []
+
+        token_id = tagToken.id
+    }
+
+
+    const balances =  await indexer.lookupAssetBalances(token_id).currencyGreaterThan(0).do()
 
     let listings = []
     for (let bidx in balances.balances) {
@@ -55,6 +68,27 @@ export async function getListings() {
 
     return listings
 }
+
+export async function getTagToken(name) {
+    const indexer  = getIndexer()
+    const assets = await indexer.searchForAssets().name(name).do()
+    console.log(assets)
+    for(let aidx in assets.assets){
+        console.log(assets.assets[aidx].params.creator)
+
+
+        if(assets.assets[aidx].params.creator == ps.address){
+            console.log("asdf")
+            return {
+                id: assets.assets[aidx].index,
+                name:name
+            }
+        }
+    }
+
+    return {id:0, name:name}
+}
+
 
 export async function getListing(addr) {
     const holdings  = await getHoldingsFromListingAddress(addr)
@@ -214,13 +248,18 @@ export function uintToB64String(x){
 
 export async function sendWaitGroup(signed) {
     const client = getAlgodClient()
-    //download_txns("grouped.txns", signed.map((t)=>{return t.blob}))
+
+    if(ps.dev.debug_txns) download_txns("grouped.txns", signed.map((t)=>{return t.blob}))
+
     const {txId}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
     return await waitForConfirmation(client, txId, 3)
 }
 
 export async function sendWait(signed){
     const client = getAlgodClient()
+
+    if(ps.dev.debug_txns) download_txns("grouped.txns", [signed.blob])
+
     await client.sendRawTransaction([signed.blob]).do()
     return await waitForConfirmation(client, signed.txID, 3)
 }
