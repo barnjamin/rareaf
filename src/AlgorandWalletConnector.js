@@ -44,7 +44,7 @@ class AlgorandWalletConnector extends React.Component {
         this.tryConnectWallet = this.tryConnectWallet.bind(this)
         this.disconnectWallet = this.disconnectWallet.bind(this)
 
-        this.handleChange                   = this.handleChange.bind(this)
+        this.handleChangeAccount            = this.handleChangeAccount.bind(this)
         this.handleDisplayWalletSelection   = this.handleDisplayWalletSelection.bind(this)
         this.handleSelectedWallet           = this.handleSelectedWallet.bind(this)
         this.handleDisconnectWallet         = this.handleDisconnectWallet.bind(this)
@@ -104,8 +104,8 @@ class AlgorandWalletConnector extends React.Component {
         this.setState({walletSelectorOpen:false})
     }
 
-    handleChange(e){
-        this.props.wallet.default_account = e.target.value
+    handleChangeAccount(e){
+        this.props.handleChangeAcct(e.target.value)
     }
 
     render(){
@@ -146,7 +146,7 @@ class AlgorandWalletConnector extends React.Component {
 
         return (
             <div>
-            <HTMLSelect onChange={this.handleChange} minimal={true} iconProps={iconprops} >
+            <HTMLSelect onChange={this.handleChangeAccount} minimal={true} iconProps={iconprops} >
                 {addr_list}
             </HTMLSelect>
             <Button icon='log-out' minimal={true}  onClick={this.handleDisconnectWallet} ></Button>

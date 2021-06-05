@@ -21,10 +21,14 @@ class App extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = { wallet: undefined }
+    this.state = { 
+      wallet: undefined ,
+      acct: undefined
+    }
 
     this.setWallet = this.setWallet.bind(this)
     this.walletConnected = this.walletConnected.bind(this)
+    this.handleChangeAcct = this.handleChangeAcct.bind(this)
   }
 
   walletConnected(){
@@ -32,7 +36,14 @@ class App extends React.Component {
   }
 
   setWallet(wallet) {
-    this.setState({wallet:wallet})
+    this.setState({wallet:wallet, acct: wallet.getDefaultAccount()})
+  }
+
+  handleChangeAcct(addr_idx) {
+    if(!this.walletConnected()) return
+
+    this.state.wallet.default_account = addr_idx
+    this.setWallet(this.state.wallet)
   }
 
   render() {
@@ -48,6 +59,7 @@ class App extends React.Component {
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
             <AlgorandWalletConnector 
+              handleChangeAcct={this.handleChangeAcct}
               walletConnected={this.walletConnected()} 
               wallet={this.state.wallet}
               setWallet={this.setWallet}
@@ -56,14 +68,14 @@ class App extends React.Component {
         </Navbar>
         <Switch>
           <Route path="/portfolio" >
-            <Portfolio history={this.props.history} wallet={this.state.wallet} /> 
+            <Portfolio history={this.props.history} wallet={this.state.wallet} acct={this.state.acct} /> 
           </Route>
           <Route path="/portfolio/:addr" >
-            <Portfolio history={this.props.history} wallet={this.state.wallet} /> 
+            <Portfolio history={this.props.history} wallet={this.state.wallet} acct={this.state.acct} /> 
           </Route>
 
           <Route path="/mint" children={<Minter history={this.props.history} wallet={this.state.wallet} /> } />
-          <Route path="/raf/:id" children={<RAF history={this.props.history} wallet={this.state.wallet} />}  />
+          <Route path="/raf/:id" children={<RAF history={this.props.history} wallet={this.state.wallet} /> } />
           <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={this.state.wallet} />} />
 
           <Route exact path="/" >

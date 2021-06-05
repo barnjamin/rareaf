@@ -9,29 +9,26 @@ import { NFTCard } from './NFTCard'
 import { ListingCard } from './ListingCard'
 import { Wallet } from './wallets/wallet'
 
-type PortfolioProps = { wallet: Wallet; };
+type PortfolioProps = { wallet: Wallet; acct: string};
 type PortfolioState = {};
 
 export function Portfolio(props: PortfolioProps) {
 
-    let {addr} = useParams()
-    let [listings, setListings] = React.useState([])
-    let [nfts, setNFTs] = React.useState([])
+    const {addr} = useParams()
 
-    if (addr === undefined && props.wallet !== undefined) {
-        addr = props.wallet.getDefaultAccount()
-    }
+    const port_acct = (addr !== undefined) ? addr : props.acct
+
+    const [listings, setListings] = React.useState([])
+    const [nfts, setNFTs] = React.useState([])
 
     React.useEffect(()=>{
-        if(addr === undefined) return
+        if(port_acct === undefined) return
 
-        getPortfolio(addr).then(p=>{
+        getPortfolio(port_acct).then(p=>{
             setListings(p['listings'])
             setNFTs(p['nfts'])
         })
-
-
-    }, [addr])
+    }, [port_acct])
 
     return (
         <div className='container'>
