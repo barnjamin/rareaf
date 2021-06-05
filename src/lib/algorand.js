@@ -32,11 +32,7 @@ export async function getTags(){
         .do()
 
     return tags.assets.map((t)=>{
-        return {
-            'name': t.params.name,
-            'id': t.index
-        }
-
+        return { 'name': t.params.name, 'id': t.index }
     })
 }
 
@@ -151,8 +147,7 @@ export async function getHoldingsFromListingAddress(address) {
 }
 
 export async function getNFT(asset_id){
-    const token = await getToken(asset_id)
-    return await NFT.fromMetaHash(token['params']['metadata-hash'], asset_id)
+    return await NFT.fromAsset(await getToken(asset_id))
 }
 
 export async function getToken(asset_id) {

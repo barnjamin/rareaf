@@ -12,7 +12,7 @@ import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
 import Minter from './Minter'
 import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
-import RAF from './RAF'
+import NFTViewer from './NFTViewer'
 import ListingViewer from './ListingViewer'
 import Portfolio from './Portfolio'
 
@@ -74,20 +74,22 @@ class App extends React.Component {
             <Portfolio history={this.props.history} wallet={this.state.wallet} acct={this.state.acct} /> 
           </Route>
 
-          <Route path="/mint" children={<Minter history={this.props.history} wallet={this.state.wallet} /> } />
-          <Route path="/raf/:id" children={<RAF history={this.props.history} wallet={this.state.wallet} /> } />
-          <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={this.state.wallet} />} />
+          <Route path="/mint" children={<Minter history={this.props.history} wallet={this.state.wallet} acct={this.state.acct} /> } />
+          <Route path="/nft/:id" children={<NFTViewer history={this.props.history} wallet={this.state.wallet} acct={this.state.acct} /> } />
+          <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={this.state.wallet} acct={this.state.acct} />} />
 
           <Route exact path="/" >
             <Browser 
               history={this.props.history} 
               wallet={this.state.wallet} 
+              acct={this.state.acct}
               />
           </Route>
           <Route path="/tag/:tag"  >
             <Browser 
               history={this.props.history} 
               wallet={this.state.wallet} 
+              acct={this.state.acct}
               />
           </Route>
         </Switch>

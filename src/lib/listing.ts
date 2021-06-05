@@ -84,12 +84,11 @@ export class Listing {
             assetClawback: this.contract_addr
         }))
 
-        const group = [app_call_txn, seed_txn, asa_opt_in, price_opt_in, asa_send, price_send, asa_cfg]
+        const grouped = [app_call_txn, seed_txn, asa_opt_in, price_opt_in, asa_send, price_send, asa_cfg]
 
-        algosdk.assignGroupID(group)
+        algosdk.assignGroupID(grouped)
 
-        const signer = algosdk.decodeAddress(this.creator_addr)
-        const [s_app_call_txn, s_seed_txn, s_asa_send, s_asa_cfg] = await wallet.signTxn(group)
+        const [s_app_call_txn, s_seed_txn, s_asa_send, s_asa_cfg] = await wallet.signTxn(grouped)
 
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_asa_opt_in = algosdk.signLogicSigTransactionObject(asa_opt_in, listing_lsig);
@@ -118,9 +117,10 @@ export class Listing {
         const tag_optin_txn = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, tag.id))
         const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, ps.address, this.contract_addr, tag.id, 1))
 
-        algosdk.assignGroupID([app_call_txn, tag_optin_txn, tag_xfer_txn])
+        const grouped = [app_call_txn, tag_optin_txn, tag_xfer_txn]
+        algosdk.assignGroupID(grouped)
 
-        const [s_app_call_txn] = await wallet.signTxn([app_call_txn])
+        const [s_app_call_txn] = await wallet.signTxn(grouped)
 
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_tag_optin_txn = algosdk.signLogicSigTransactionObject(tag_optin_txn, listing_lsig)
@@ -143,9 +143,10 @@ export class Listing {
         const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, tag.id, 1))
         tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
 
-        algosdk.assignGroupID([app_call_txn, tag_xfer_txn])
+        const grouped = [app_call_txn, tag_xfer_txn]
+        algosdk.assignGroupID(grouped)
 
-        const [s_app_call_txn] = await wallet.signTxn([app_call_txn, tag_xfer_txn])
+        const [s_app_call_txn] = await wallet.signTxn(grouped)
 
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, listing_lsig)
@@ -220,9 +221,10 @@ export class Listing {
         const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, this.creator_addr, 0))
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
-        algosdk.assignGroupID([app_call_txn, price_xfer_txn,  asa_xfer_txn,  asa_cfg_txn, algo_close_txn])
+        const grouped = [app_call_txn, price_xfer_txn,  asa_xfer_txn,  asa_cfg_txn, algo_close_txn]
+        algosdk.assignGroupID(grouped)
 
-        const [s_app_call_txn]  = await wallet.signTxn([app_call_txn])
+        const [s_app_call_txn]  = await wallet.signTxn(grouped)
 
         const listing_lsig      = await get_listing_sig(this.getVars())
         const s_price_xfer_txn  = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)
@@ -263,16 +265,15 @@ export class Listing {
         const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, ps.address, ps.fee))
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
-        const group = [
+        const grouped = [
             app_call_txn, purchase_amt_txn, 
             asa_xfer_txn, price_xfer_txn, 
             asa_cfg_txn, algo_close_txn
         ]
-        console.log(group)
 
-        algosdk.assignGroupID(group)
+        algosdk.assignGroupID(grouped)
 
-        const [s_app_call_txn, s_purchase_amt_txn] = await wallet.signTxn(group)
+        const [s_app_call_txn, s_purchase_amt_txn] = await wallet.signTxn(grouped)
 
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_price_xfer_txn = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)

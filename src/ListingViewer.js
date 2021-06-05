@@ -23,36 +23,51 @@ function ListingViewer(props) {
         getListing(addr).then((listing)=>{ setListing(listing) })
     }, [])
 
-    function handleCancelListing(e){
+    async function handleCancelListing(e){
         setLoading(true)
-        listing.doDelete(props.wallet)
-        // history.push("/ id of nft")
+        await listing.doDelete(props.wallet)
+        history.push("/"+listing.asset_id)
         setLoading(false)
     }
 
-    function handleBuy(e){
+    async function handleBuy(e){
         setLoading(true)
-        listing.doPurchase(props.wallet)
-
-        //TODO: set history to 
-        // history.push("/ id of nft")
-
+        await listing.doPurchase(props.wallet)
+        history.push("/nft/"+listing.asset_id)
         setLoading(false)
     }
 
-    function handleAddTag(tag){
+    async function handleAddTag(tag){
         setLoading(true)
-        listing.doTag(props.wallet, tag)
+        await listing.doTag(props.wallet, tag)
         setLoading(false)
     }
 
-    function handleRemoveTag(tag){
+    async function handleRemoveTag(tag){
         setLoading(true)
-        listing.doUntag(props.wallet, tag)
+        await listing.doUntag(props.wallet, tag)
         setLoading(false)
     }
 
-    if(listing !== undefined) return (
+
+    if(listing !== undefined) {
+
+        let tagsComponent = <div />
+        let buttons = <Button loading={loading} onClick={handleBuy}>Buy</Button>
+        if (listing.creator_addr == props.acct){
+            tagsComponent = (
+                <Tagger 
+                    tagOpts={tagOpts} 
+                    handleAddTag={handleAddTag} 
+                    handleRemoveTag={handleRemoveTag} 
+                    listing={listing} 
+                    />
+            )
+
+            buttons = <Button loading={loading} onClick={handleCancelListing}>Cancel Listing</Button>
+        }
+
+        return (
             <div className='container'>
 
                 <div className='content content-viewer' >
@@ -73,26 +88,18 @@ function ListingViewer(props) {
                 </div>
 
                 <div>
-                    <Tagger 
-                        tagOpts={tagOpts} 
-                        handleAddTag={handleAddTag} 
-                        handleRemoveTag={handleRemoveTag} 
-                        listing={listing} 
-                        />
+                    { tagsComponent }
                 </div>
 
                 <div>
-                    <Button loading={loading} onClick={handleBuy}>Buy</Button>
-                    <Button loading={loading} onClick={handleCancelListing}>Cancel Listing</Button>
+                    { buttons }
                 </div>
             </div>
 
         )
-    return (
-        <div className='container'></div>
-    )
+    }
 
-
+    return ( <div className='container'></div> )
 }
 
 export default ListingViewer;
