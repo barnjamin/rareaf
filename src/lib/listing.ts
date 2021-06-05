@@ -141,11 +141,11 @@ export class Listing {
         app_call_txn.appForeignAssets = fasset
 
         const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, tag.id, 1))
-        tag_xfer_txn.closeRemainderTo = ps.address
+        tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
 
         algosdk.assignGroupID([app_call_txn, tag_xfer_txn])
 
-        const [s_app_call_txn] = await wallet.signTxn([app_call_txn])
+        const [s_app_call_txn] = await wallet.signTxn([app_call_txn, tag_xfer_txn])
 
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, listing_lsig)

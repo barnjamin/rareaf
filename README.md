@@ -45,6 +45,7 @@ donate to this address (charity? Dao?)
       - Delay nav or retry loading when creating a new listing or nft to give indexer time to update
       - Check if opted into app before trying to create listing
       - Check if opted into asset before trying to create, give option?
+      - Change UI depending on addr viewing page modify/purchase buttons visible 
 
    Tagging:
       - Add tagging "send" button? 
@@ -61,7 +62,12 @@ donate to this address (charity? Dao?)
       - Add more fields for metadata
       - Write file bytes into json metadata file?
 
-   - Add filters on browse page for tags/price
+   Browse:
+      - Add filters on browse page for tags/price
+   
+
+
+
 
 ```
 

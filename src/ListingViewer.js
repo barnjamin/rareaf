@@ -26,18 +26,29 @@ function ListingViewer(props) {
     function handleCancelListing(e){
         setLoading(true)
         listing.doDelete(props.wallet)
+        // history.push("/ id of nft")
         setLoading(false)
     }
 
     function handleBuy(e){
         setLoading(true)
         listing.doPurchase(props.wallet)
+
+        //TODO: set history to 
+        // history.push("/ id of nft")
+
         setLoading(false)
     }
 
-    function handleTag(tag){
+    function handleAddTag(tag){
         setLoading(true)
         listing.doTag(props.wallet, tag)
+        setLoading(false)
+    }
+
+    function handleRemoveTag(tag){
+        setLoading(true)
+        listing.doUntag(props.wallet, tag)
         setLoading(false)
     }
 
@@ -62,7 +73,12 @@ function ListingViewer(props) {
                 </div>
 
                 <div>
-                    <Tagger tagOpts={tagOpts} handleTag={handleTag} listing={listing} ></Tagger>
+                    <Tagger 
+                        tagOpts={tagOpts} 
+                        handleAddTag={handleAddTag} 
+                        handleRemoveTag={handleRemoveTag} 
+                        listing={listing} 
+                        />
                 </div>
 
                 <div>

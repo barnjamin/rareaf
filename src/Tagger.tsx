@@ -10,7 +10,8 @@ const TagMultiSelect = MultiSelect.ofType<TagToken>();
 
 type TaggerProps = {
     listing: Listing;
-    handleTag(tag: TagToken);
+    handleAddTag(tag: TagToken);
+    handleRemoveTag(tag: TagToken);
 };
 
 type TaggerState = {
@@ -20,25 +21,45 @@ export default class Tagger extends React.Component<TaggerProps, TaggerState> {
     props: TaggerProps;
     state: TaggerState = {};
 
-    constructor(){ 
-        super() 
+
+    constructor(props){ 
+        super(props) 
         this.renderTagItem = this.renderTagItem.bind(this)
         this.renderTagTag = this.renderTagTag.bind(this)
-        this.itemSelected = this.itemSelected.bind(this)
+
+        this.handleTag = this.handleTag.bind(this)
+        this.handleUntag = this.handleUntag.bind(this)
     }
 
-    renderTagItem(t: TagToken, {handleClick}){ return ( <MenuItem key={t.id} onClick={handleClick} text={t.name}/>) }
     renderTagTag(t: TagToken) { return t.name }
-    itemSelected(t: TagToken) { this.props.handleTag(t) }
+    renderTagItem(t: TagToken, {handleClick}) { 
+        return ( 
+            <MenuItem key={t.id} onClick={handleClick} text={t.name}/>
+        ) 
+    }
+
+    handleTag(t: TagToken) { this.props.handleAddTag(t) }
+    handleUntag(_tag: React.ReactNode, index: number) {
+        this.props.handleRemoveTag(this.props.listing.tags[index])
+        console.log(_tag, index)
+    }
 
     render() {
+
+
         return (
             <div>
                 <TagMultiSelect 
+                    placeholder="Tag your listing..."
                     itemRenderer={this.renderTagItem}
                     tagRenderer={this.renderTagTag}
-                    onItemSelect={this.itemSelected}
+                    onItemSelect={this.handleTag}
                     selectedItems={this.props.listing.tags}
+                    tagInputProps={{ 
+                        onRemove:this.handleUntag
+                        minimal: true,
+                    }}
+                    itemsEqual="id"
                     items={this.props.tagOpts} 
                 />
             </div>
