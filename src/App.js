@@ -13,8 +13,8 @@ import Minter from './Minter'
 import Browser  from './Browser'
 import AlgorandWalletConnector from './AlgorandWalletConnector'
 import NFTViewer from './NFTViewer'
-import ListingViewer from './ListingViewer'
 import Portfolio from './Portfolio'
+import ListingViewer from './ListingViewer'
 
 
 class App extends React.Component {

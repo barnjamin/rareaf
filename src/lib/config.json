@@ -37,6 +37,6 @@
     "max_price":1000e6,
 
     "dev":{
-        "debug_txns":false,
+        "debug_txns":true
     }
 }

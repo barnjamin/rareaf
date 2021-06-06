@@ -1,24 +1,31 @@
 /* eslint-disable no-console */
 'use strict'
 
-import React, {useState, useEffect} from 'react'
+import * as React from 'react'
 
 import { useParams, useHistory } from 'react-router-dom'
 import { getListing, getTags } from './lib/algorand'
-import { Button } from '@blueprintjs/core'
+import { Button, NumericInput } from '@blueprintjs/core'
 import Tagger from './Tagger'
 
+import Listing from './lib/listing'
+import Wallet from './wallets/wallet'
 
-function ListingViewer(props) {
+type ListingViewerProps = {
+    listing: Listing
+    wallet: Wallet
+};
+
+function ListingViewer(props: ListingViewerProps) {
 
     const history = useHistory();
 
     const {addr} = useParams();
-    const [tagOpts, setTagOpts] = useState(undefined);
-    const [listing, setListing] = useState(undefined);
-    const [loading, setLoading] = useState(false);
+    const [tagOpts, setTagOpts] = React.useState(undefined);
+    const [listing, setListing] = React.useState(undefined);
+    const [loading, setLoading] = React.useState(false);
 
-    useEffect(()=>{
+    React.useEffect(()=>{
         getTags().then((tags)=>{ setTagOpts(tags) })
         getListing(addr).then((listing)=>{ setListing(listing) })
     }, [])
@@ -49,11 +56,19 @@ function ListingViewer(props) {
         setLoading(false)
     }
 
+    async function handlePriceChange(price) {
+        setLoading(true)
+        await listing.doPriceChange(props.wallet, price)
+        setLoading(false)
+    }
+
 
     if(listing !== undefined) {
 
         let tagsComponent = <div />
         let buttons = <Button loading={loading} onClick={handleBuy}>Buy</Button>
+        let priceChange = <div />
+
         if (listing.creator_addr == props.acct){
             tagsComponent = (
                 <Tagger 
@@ -63,6 +78,7 @@ function ListingViewer(props) {
                     listing={listing} 
                     />
             )
+            priceChange = <NumericInput onValueChange={handlePriceChange} defaultValue={listing.price} min={1} max={10000}  ></NumericInput>
 
             buttons = <Button loading={loading} onClick={handleCancelListing}>Cancel Listing</Button>
         }
@@ -91,6 +107,9 @@ function ListingViewer(props) {
                     { tagsComponent }
                 </div>
 
+                <div>
+                    {priceChange}
+                </div>
                 <div>
                     { buttons }
                 </div>

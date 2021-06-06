@@ -45,12 +45,13 @@ donate to this address (charity? Dao?)
       - Delay nav or retry loading when creating a new listing or nft to give indexer time to update
       - Check if opted into app before trying to create listing
       - Check if opted into asset before trying to create, give option?
-      - Change UI depending on addr viewing page modify/purchase buttons visible 
+      - Convert prices to bignum
+
+   Listing:
+      - Add up to N tags as part of listing
 
    Tagging:
-      - Add tagging "send" button? 
-      - Remove tag handler
-      - Add page for rare.af/tag/blah
+      - Add batched tagging 
    
    Price:
       - Change price UI
@@ -60,7 +61,7 @@ donate to this address (charity? Dao?)
 
    Minting:
       - Add more fields for metadata
-      - Write file bytes into json metadata file?
+      - Write raw file bytes into json metadata file?
 
    Browse:
       - Add filters on browse page for tags/price

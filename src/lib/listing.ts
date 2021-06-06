@@ -154,6 +154,15 @@ export class Listing {
         return await sendWaitGroup([s_app_call_txn, s_tag_xfer_txn])
     }
 
+    async doPriceChange(wallet: Wallet, new_price:number ) {
+        const diff = this.price - new_price 
+
+        if (diff<0) return await this.doPriceIncrease(wallet, Math.abs(diff))
+
+        return await this.doPriceDecrease(wallet, diff)
+    }
+
+
     async doPriceIncrease(wallet: Wallet, amt: number) {
 
         const args = [Method.PriceIncrease, uintToB64String(amt)]
