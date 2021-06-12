@@ -11,18 +11,19 @@
         "token":""
     },
     "ipfs":{
-        "host": "/ip4/127.0.0.1/tcp/5001"
+        "host": "/ip4/127.0.0.1/tcp/5001",
+        "display":"http://127.0.0.1:8080/ipfs/"
     },
     "token": {
         "name": "RareAF Price",
         "unit": "rafpx",
-        "id":  5 
+        "id":  6 
     },
     "tags":{
         "unit":"raf-tag"
     },
     "application":{
-        "id":4,
+        "id":5,
         "approval":"platform-approval.teal",
         "clear":"platform-clear.teal"
     },

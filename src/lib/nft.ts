@@ -1,6 +1,7 @@
 import { Wallet } from '../wallets/wallet'
 import { getMetaFromIpfs, getCIDFromMetadataHash } from './ipfs'
 import { get_asa_create_txn, get_asa_destroy_txn, sendWait, getSuggested } from './algorand'
+import {platform_settings as ps } from './platform-conf'
 import CID from 'cids'
 
 export class NFT {
@@ -38,7 +39,7 @@ export class NFT {
 
     imgSrc (): string {
         if (this.metadata.file_hash !== undefined && this.metadata.file_hash != "")
-            return 'http://ipfs.io/ipfs/'+this.metadata.file_hash
+            return ps.ipfs.display + this.metadata.file_hash
 
         return "https://via.placeholder.com/500"
     }

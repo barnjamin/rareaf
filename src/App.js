@@ -22,7 +22,7 @@ class App extends React.Component {
     super(props)
 
     this.state = { 
-      wallet: undefined ,
+      wallet: undefined,
       acct: undefined
     }
 

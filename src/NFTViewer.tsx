@@ -3,11 +3,12 @@
 
 import * as React from 'react'
 import {useParams, useHistory} from 'react-router-dom'
-import { getNFT } from './lib/algorand'
+import { getNFT, getTags } from './lib/algorand'
 import {Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation} from '@blueprintjs/core'
-import listing from './lib/listing'
+import Listing, {TagToken} from './lib/listing'
 import {Wallet} from './wallets/wallet'
-import NFT from './lib/nft'
+import {NFT} from './lib/nft'
+import Tagger from './Tagger'
 
 type NFTViewerProps = {
     wallet: Wallet
@@ -22,11 +23,18 @@ function NFTViewer(props: NFTViewerProps) {
     const [waiting_for_tx, setWaiting]        = React.useState(false)
     const [price, setPrice]                   = React.useState(0)
     const [listingVisible, setListingVisible] = React.useState(false)
+    const [tagOpts, setTagOpts]               = React.useState([])
+    const [tags, setTags]                     = React.useState([])
     
     React.useEffect(()=>{
         getNFT(parseInt(id))
             .then((nft)=>{ setNFT(nft) })
-            .catch((err)=>{ console.log("Error:", err) })
+            .catch((err)=>{ console.error("Error:", err) })
+
+        getTags()
+            .then((tags)=>{ setTagOpts(tags) })
+            .catch((err)=>{ console.error("Error getting tags: ", err)}
+
     }, []);
 
 
@@ -56,8 +64,12 @@ function NFTViewer(props: NFTViewerProps) {
         // call create listing function with arguments 
         // for price/assetid 
         try{
-            const lst = new listing(price, parseInt(id), props.wallet.getDefaultAccount())
+            const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
+            console.log(lst)
             await lst.doCreate(props.wallet)
+            await Promise.all(tags.map((tag)=>{
+                return lst.doTag(props.wallet, tag)
+            }))
             // Return addr of created account with contents
             history.push("/listing/"+lst.contract_addr)
         }catch(error){
@@ -66,8 +78,8 @@ function NFTViewer(props: NFTViewerProps) {
 
         // Wait for it to return
         setWaiting(false);
-
     }
+
     let editButtons = <div />
     if(nft.manager === props.acct){
         editButtons = (
@@ -79,6 +91,7 @@ function NFTViewer(props: NFTViewerProps) {
         </div>
         )
     }
+
 
     return (
         <div className='container' >
@@ -102,12 +115,17 @@ function NFTViewer(props: NFTViewerProps) {
                 <DialogStep 
                     id="price" 
                     title="price" 
-                    panel={<ListingDetails tokenId={nft.asset_id} price={price} onPriceChange={handlePriceChange} ></ListingDetails>}>
+                    panel={<ListingDetails tokenId={nft.asset_id} price={price} onPriceChange={handlePriceChange} />}>
+                </DialogStep>
+                <DialogStep 
+                    id="tags" 
+                    title="tags" 
+                    panel={<div className={Classes.DIALOG_BODY}><Tagger tags={tags} tagOpts={tagOpts} setTags={setTags}/></div>}>
                 </DialogStep>
                 <DialogStep 
                     id="confirm" 
                     title="confirm" 
-                    panel={<ConfirmListingDetails tokenId={nft.asset_id} price={price} ></ConfirmListingDetails>} 
+                    panel={<ConfirmListingDetails tokenId={nft.asset_id} price={price} tags={tags} />} 
                     >
                 </DialogStep>
             </MultistepDialog>
@@ -137,7 +155,11 @@ function ListingDetails(props){
 function ConfirmListingDetails(props){
     return (
         <div className={Classes.DIALOG_BODY}>
-            <h3>Listing token {props.tokenId} for {props.price}</h3>
+            <h3>Listing:</h3>
+
+            <p><b>Token:</b> {props.tokenId} </p>
+            <p><b>Price:</b> {props.price} </p> 
+            <p><b>Tags:</b> {props.tags.map(t=>{return t.name}).join(", ")}</p>
         </div>
     )
 }

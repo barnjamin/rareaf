@@ -16,13 +16,13 @@ export function NFTCard(props: NFTCardProps) {
     return (
         <Card className='content-card'  >
             <div className='container'>
-                <a href={'/RAF/'+props.nft.asset_id}>
+                <a href={'/nft/'+props.nft.asset_id}>
                     <img src={props.nft.imgSrc()}></img>
                 </a>
             </div>
             <div className='container'>
                 <p>
-                    <a href={'/RAF/'+props.nft.asset_id}>
+                    <a href={'/nft/'+props.nft.asset_id}>
                         <b>{props.nft.metadata.title}</b> - <i>{props.nft.metadata.artist}</i>
                     </a>
                 </p>

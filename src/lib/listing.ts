@@ -1,4 +1,4 @@
-import  * as ps from './platform-conf'
+import  {platform_settings as ps} from './platform-conf'
 import { get_listing_compiled, get_listing_sig, get_platform_sig } from './contracts'
 import {
     getSuggested, sendWaitGroup,

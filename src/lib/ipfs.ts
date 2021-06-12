@@ -4,7 +4,7 @@ import  ipfsClient, { CID } from 'ipfs-http-client'
 import { NFTMetadata } from './nft'
 import {platform_settings as ps} from './platform-conf'
 
-const iclient = ipfsClient(ps.ipfs)
+const iclient = ipfsClient(ps.ipfs.host)
 
 export async function uploadContent([file]): Promise<CID> {
     try { return await iclient.add(file) } 
