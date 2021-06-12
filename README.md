@@ -67,8 +67,5 @@ donate to this address (charity? Dao?)
       - Add filters on browse page for tags/price
    
 
-
-
-
 ```
 

@@ -42,7 +42,6 @@ class App extends React.Component {
   handleChangeAcct(addr_idx) {
     if(!this.walletConnected()) return
 
-    this.state.wallet.default_account = addr_idx
     this.setWallet(this.state.wallet)
   }
 

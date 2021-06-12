@@ -8,33 +8,35 @@ import InsecureWallet from './wallets/insecurewallet'
 import { platform_settings } from './lib/platform-conf'
 
 import React from 'react'
-import {Dialog, Button, Classes, HTMLSelect} from '@blueprintjs/core'
+import { Dialog, Button, Classes, HTMLSelect } from '@blueprintjs/core'
 
 const pkToMnemonic = {
     "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
-        "loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below", 
+        "loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below",
         "when", "false", "ripple", "cute", "buffalo", "tissue", "again", "boring", "manual", "excuse", "absent", "injury"
     ],
     "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM": [
-        "genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found", 
+        "genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found",
         "please", "then", "snack", "nice", "arrest", "coin", "seminar", "pyramid", "adult", "flip", "absorb", "apology"
     ],
     "DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4": [
-        "train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox", 
+        "train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox",
         "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"
     ],
 }
 
+const wallet_preference_key = 'wallet-preference'
+const acct_preference_key = 'acct-preference'
 
 class AlgorandWalletConnector extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            walletSelectorOpen:false,
-            allowedWallets:{
-                'algo-signer':AlgoSignerWallet,
-                'my-algo-connect':MyAlgoConnectWallet,
-                'insecure-wallet':InsecureWallet
+            walletSelectorOpen: false,
+            allowedWallets: {
+                'algo-signer': AlgoSignerWallet,
+                'my-algo-connect': MyAlgoConnectWallet,
+                'insecure-wallet': InsecureWallet
             },
             wallet: undefined
         }
@@ -44,91 +46,93 @@ class AlgorandWalletConnector extends React.Component {
         this.tryConnectWallet = this.tryConnectWallet.bind(this)
         this.disconnectWallet = this.disconnectWallet.bind(this)
 
-        this.handleChangeAccount            = this.handleChangeAccount.bind(this)
-        this.handleDisplayWalletSelection   = this.handleDisplayWalletSelection.bind(this)
-        this.handleSelectedWallet           = this.handleSelectedWallet.bind(this)
-        this.handleDisconnectWallet         = this.handleDisconnectWallet.bind(this)
+        this.handleChangeAccount = this.handleChangeAccount.bind(this)
+        this.handleDisplayWalletSelection = this.handleDisplayWalletSelection.bind(this)
+        this.handleSelectedWallet = this.handleSelectedWallet.bind(this)
+        this.handleDisconnectWallet = this.handleDisconnectWallet.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.tryConnectWallet()
     }
 
 
-    disconnectWallet(){
+    disconnectWallet() {
         //Unset state
         this.props.setWallet(undefined)
-        this.setState({wallet:undefined})
-        sessionStorage.setItem('wallet-preference','')
+        this.setState({ wallet: undefined })
+        sessionStorage.setItem(wallet_preference_key, '')
+        sessionStorage.setItem(acct_preference_key, '')
     }
 
-    async tryConnectWallet(){
-        if(this.state.wallet === undefined){
-            const wname = sessionStorage.getItem('wallet-preference');
+    async tryConnectWallet() {
+        if (this.state.wallet !== undefined) return
 
-            if(!(wname in this.state.allowedWallets)) return
+        const wname = sessionStorage.getItem(wallet_preference_key);
+        const acct_idx = sessionStorage.getItem(acct_preference_key)
 
-            const wallet = new this.state.allowedWallets[wname](platform_settings.algod.network)
+        if (!(wname in this.state.allowedWallets)) return
 
-            if (wname == 'insecure-wallet'){
-                if(!await wallet.connect(pkToMnemonic)){
-                    this.disconnectWallet()
-                    return
-                }
-            }else{
-                if(!await wallet.connect()){
-                    this.disconnectWallet()
-                    return
-                }
-            }
+        const wallet = new this.state.allowedWallets[wname](platform_settings.algod.network)
 
-            this.setState({wallet: wallet})
-            this.props.setWallet(wallet)
+        if (wname == 'insecure-wallet') {
+            if (!await wallet.connect(pkToMnemonic)) return this.disconnectWallet()
+        } else {
+            if (!await wallet.connect()) return this.disconnectWallet()
         }
+
+        wallet.default_account = acct_idx
+
+        this.setState({ wallet: wallet })
+        this.props.setWallet(wallet)
     }
 
-    handleDisconnectWallet(){
+    handleDisconnectWallet() {
         this.disconnectWallet()
     }
 
-    handleDisplayWalletSelection(){
-        this.setState({walletSelectorOpen:true})
+    handleDisplayWalletSelection() {
+        this.setState({ walletSelectorOpen: true })
     }
 
-    async handleSelectedWallet(e){
+    async handleSelectedWallet(e) {
         const tgt = e.currentTarget
-        if(tgt.id in this.state.allowedWallets){
-            sessionStorage.setItem('wallet-preference', tgt.id)
+        if (tgt.id in this.state.allowedWallets) {
+            sessionStorage.setItem(wallet_preference_key, tgt.id)
+            sessionStorage.setItem(acct_preference_key, 0)
             await this.tryConnectWallet()
         }
-        this.setState({walletSelectorOpen:false})
+        this.setState({ walletSelectorOpen: false })
     }
 
-    handleChangeAccount(e){
-        this.props.handleChangeAcct(e.target.value)
+    handleChangeAccount(e) {
+        const addr_idx = e.target.value
+        this.state.wallet.default_account = addr_idx
+        sessionStorage.setItem(acct_preference_key, addr_idx)
+        this.props.handleChangeAcct()
     }
 
-    render(){
-        if(!this.props.walletConnected) 
+    render() {
+        if (!this.props.walletConnected)
             return (
                 <div>
-                    <Button 
-                        minimal={true} 
-                        rightIcon='selection' 
-                        intent='warning' 
-                        outlined={true} 
+                    <Button
+                        minimal={true}
+                        rightIcon='selection'
+                        intent='warning'
+                        outlined={true}
                         onClick={this.handleDisplayWalletSelection}>Connect Wallet</Button>
 
                     <Dialog isOpen={this.state.walletSelectorOpen} title='Select Wallet' onClose={this.handleSelectedWallet} >
                         <div className={Classes.DIALOG_BODY}>
                             <ul className='wallet-option-list'>
-                                <li> 
+                                <li>
                                     <Button id={'algo-signer'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>Algo Signer</Button>
                                 </li>
-                                <li> 
+                                <li>
                                     <Button id={'my-algo-connect'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>My Algo Connect</Button>
                                 </li>
-                                <li> 
+                                <li>
                                     <Button id={'insecure-wallet'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>Insecure Wallet</Button>
                                 </li>
                             </ul>
@@ -138,18 +142,18 @@ class AlgorandWalletConnector extends React.Component {
             )
 
 
-        const addr_list = this.props.wallet.accounts.map((addr, idx)=>{                
-            return (<option value={idx} key={idx}>{addr.substr(0,8)}...</option>)
+        const addr_list = this.props.wallet.accounts.map((addr, idx) => {
+            return (<option value={idx} key={idx}> {addr.substr(0, 8)}...  </option>)
         })
 
-        const iconprops = {icon:'symbol-circle', intent:'success'}
+        const iconprops = { icon: 'symbol-circle', intent: 'success' }
 
         return (
             <div>
-            <HTMLSelect onChange={this.handleChangeAccount} minimal={true} iconProps={iconprops} >
-                {addr_list}
-            </HTMLSelect>
-            <Button icon='log-out' minimal={true}  onClick={this.handleDisconnectWallet} ></Button>
+                <HTMLSelect onChange={this.handleChangeAccount} minimal={true} iconProps={iconprops} defaultValue={this.props.wallet.default_account}>
+                    {addr_list}
+                </HTMLSelect>
+                <Button icon='log-out' minimal={true} onClick={this.handleDisconnectWallet} ></Button>
             </div>
         )
     }
