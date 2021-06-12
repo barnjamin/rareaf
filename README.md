@@ -55,6 +55,7 @@ donate to this address (charity? Dao?)
    
    Price:
       - Change price UI
+      - Add additional assets to xfer?
 
    Wallets:
       - Add support for other wallets
@@ -66,6 +67,5 @@ donate to this address (charity? Dao?)
    Browse:
       - Add filters on browse page for tags/price
    
-
 ```
 

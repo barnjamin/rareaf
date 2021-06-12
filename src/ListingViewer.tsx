@@ -9,7 +9,7 @@ import { Button, NumericInput } from '@blueprintjs/core'
 import Tagger from './Tagger'
 
 import Listing from './lib/listing'
-import Wallet from './wallets/wallet'
+import {Wallet} from './wallets/wallet'
 
 type ListingViewerProps = {
     listing: Listing
@@ -24,6 +24,7 @@ function ListingViewer(props: ListingViewerProps) {
     const [tagOpts, setTagOpts] = React.useState(undefined);
     const [listing, setListing] = React.useState(undefined);
     const [loading, setLoading] = React.useState(false);
+    const [tags, setTags]       = React.useState([])
 
     React.useEffect(()=>{
         getTags().then((tags)=>{ setTagOpts(tags) })
@@ -73,9 +74,8 @@ function ListingViewer(props: ListingViewerProps) {
             tagsComponent = (
                 <Tagger 
                     tagOpts={tagOpts} 
-                    handleAddTag={handleAddTag} 
-                    handleRemoveTag={handleRemoveTag} 
-                    listing={listing} 
+                    setTags={setTags}
+                    tags={listing.tags} 
                     />
             )
             priceChange = <NumericInput onValueChange={handlePriceChange} defaultValue={listing.price} min={1} max={10000}  ></NumericInput>

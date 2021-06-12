@@ -1,12 +1,12 @@
 #pragma version 3
-intcblock 1 0 4 2 5 46
+intcblock 1 0 4 2 6 46
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 txn ApplicationID
 intc_1 // 0
 ==
 bnz l24
 txn OnCompletion
-intc 4 // DeleteApplication
+pushint 5 // DeleteApplication
 ==
 bnz l23
 txn OnCompletion
@@ -55,7 +55,7 @@ gtxn 1 Receiver
 gtxna 0 Accounts 2
 ==
 intc_0 // 1
-intc 4 // 5
+intc 4 // 6
 asset_holding_get AssetBalance
 store 10
 store 11
@@ -124,7 +124,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // 5
+intc 4 // 6
 ==
 &&
 &&
@@ -168,7 +168,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // 5
+intc 4 // 6
 ==
 &&
 &&
@@ -365,7 +365,7 @@ store 4
 intc_0 // 1
 load 4
 sha256
-pushbytes 0xee25cf242bd8a998698ede82a7d0c4566e44f5e6ccd925dcaa677a711e027ea4 // base64(7iXPJCvYqZhpjt6Cp9DEVm5E9ebM2SXcqmd6cR4CfqQ=)
+pushbytes 0xd8b3a4d7c612ee65101ae5b0688dc1a85019ca44222dbd7793d0495357f12853 // base64(2LOk18YS7mUQGuWwaI3BqFAZykQiLb13k9BJU1fxKFM=)
 ==
 &&
 pushbytes 0x50726f6772616d // "Program"
