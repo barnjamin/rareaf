@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { resolveMetadataFromMetaHash } from "./ipfs";
-import { platform_settings as ps } from './platform-conf'
+import {platform_settings as ps} from './platform-conf'
 import algosdk from 'algosdk'  
 import Listing from "./listing";
 import NFT from "./nft";

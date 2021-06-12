@@ -1,4 +1,4 @@
-import { platform_settings as ps } from './platform-conf'
+import  * as ps from './platform-conf'
 import { get_listing_compiled, get_listing_sig, get_platform_sig } from './contracts'
 import {
     getSuggested, sendWaitGroup,
@@ -6,7 +6,7 @@ import {
 } from './algorand'
 import algosdk, { assignGroupID, Transaction } from 'algosdk';
 import { Wallet } from '../wallets/wallet';
-import NFT from './nft'
+import { NFT } from './nft'
 
 import { Method } from './application'
 import LogicSig from 'algosdk/dist/types/src/logicsig';

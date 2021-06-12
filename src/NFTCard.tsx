@@ -5,7 +5,7 @@
 import * as React from 'react'
 import {useParams} from 'react-router-dom'
 import {Card} from '@blueprintjs/core'
-import NFT from './lib/nft'
+import {NFT} from './lib/nft'
 
 type NFTCardState = {};
 type NFTCardProps = {

@@ -4,7 +4,7 @@ import listing_var_positions from '../contracts/listing.tmpl.teal.json'
 import platform_delegate_signed from '../contracts/platform.signed'
 import {getAlgodClient} from './algorand'
 import algosdk from 'algosdk'
-import {platform_settings as ps} from './platform-conf'
+import * as ps from './platform-conf'
 
 
 

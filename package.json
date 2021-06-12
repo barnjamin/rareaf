@@ -21,7 +21,7 @@
     "buffer": "^6.0.3",
     "cids": "^1.1.5",
     "framer-motion": "^3.6.2",
-    "ipfs-http-client": "^49.0.2",
+    "ipfs-http-client": "^49.0.4",
     "jquery": "^3.5.1",
     "react-async": "^10.0.1",
     "react-router-dom": "^5.2.0",

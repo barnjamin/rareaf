@@ -5,7 +5,7 @@ import AlgoSignerWallet from './wallets/algosignerwallet'
 import MyAlgoConnectWallet from './wallets/myalgoconnect'
 import InsecureWallet from './wallets/insecurewallet'
 
-import { platform_settings } from './lib/platform-conf'
+import {platform_settings as ps} from './lib/platform-conf'
 
 import React from 'react'
 import { Dialog, Button, Classes, HTMLSelect } from '@blueprintjs/core'
@@ -73,7 +73,7 @@ class AlgorandWalletConnector extends React.Component {
 
         if (!(wname in this.state.allowedWallets)) return
 
-        const wallet = new this.state.allowedWallets[wname](platform_settings.algod.network)
+        const wallet = new this.state.allowedWallets[wname](ps.algod.network)
 
         if (wname == 'insecure-wallet') {
             if (!await wallet.connect(pkToMnemonic)) return this.disconnectWallet()
@@ -127,13 +127,31 @@ class AlgorandWalletConnector extends React.Component {
                         <div className={Classes.DIALOG_BODY}>
                             <ul className='wallet-option-list'>
                                 <li>
-                                    <Button id={'algo-signer'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>Algo Signer</Button>
+                                    <Button id='algo-signer'
+                                        large={true} 
+                                        fill={true} 
+                                        minimal={true} 
+                                        outlined={true} 
+                                        onClick={this.handleSelectedWallet}
+                                        text='Algo Signer' />
                                 </li>
                                 <li>
-                                    <Button id={'my-algo-connect'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>My Algo Connect</Button>
+                                    <Button id='my-algo-connect'
+                                        large={true} 
+                                        fill={true} 
+                                        minimal={true} 
+                                        outlined={true} 
+                                        onClick={this.handleSelectedWallet}
+                                        text='My Algo Connect' />
                                 </li>
                                 <li>
-                                    <Button id={'insecure-wallet'} large={true} fill={true} minimal={true} outlined={true} onClick={this.handleSelectedWallet}>Insecure Wallet</Button>
+                                    <Button id='insecure-wallet' 
+                                        large={true} 
+                                        fill={true} 
+                                        minimal={true} 
+                                        outlined={true} 
+                                        onClick={this.handleSelectedWallet}
+                                        text='Insecure Wallet'/>
                                 </li>
                             </ul>
                         </div>

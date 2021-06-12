@@ -3,9 +3,7 @@ import { getMetaFromIpfs, getCIDFromMetadataHash } from './ipfs'
 import { get_asa_create_txn, get_asa_destroy_txn, sendWait, getSuggested } from './algorand'
 import CID from 'cids'
 
-
-
-export default class NFT {
+export class NFT {
     asset_id: number // ASA idx in algorand
     manager: string // Current manager of the token representing this NFT
     meta_cid:  CID// IPFS CID of metadata json
@@ -63,7 +61,7 @@ export default class NFT {
 }
 
 
-type NFTMetadata {
+export type NFTMetadata = {
     file_name: string
     file_hash: string
     file_type: string
@@ -76,7 +74,7 @@ type NFTMetadata {
     tags:       string[]
 }
 
-function emptyMetadata(): NFTMetadata {
+export function emptyMetadata(): NFTMetadata {
     return {
             file_name: "" , 
             file_hash: "", 
