@@ -21,6 +21,7 @@
     "buffer": "^6.0.3",
     "cids": "^1.1.5",
     "framer-motion": "^3.6.2",
+    "ipfs-core-types": "^0.5.1",
     "ipfs-http-client": "^49.0.4",
     "jquery": "^3.5.1",
     "react-async": "^10.0.1",
@@ -28,6 +29,7 @@
     "rebass": "^4.0.7"
   },
   "devDependencies": {
+    "@types/react": "^17.0.11",
     "ipfs": "^0.54.2",
     "parcel-bundler": "^1.12.4",
     "react": "^17.0.2",

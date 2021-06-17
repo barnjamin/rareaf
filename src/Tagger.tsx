@@ -4,7 +4,6 @@ import { ItemRenderer, MultiSelect } from "@blueprintjs/select";
 import * as React from 'react'
 import { Button, MenuItem } from '@blueprintjs/core'
 import {TagToken } from './lib/listing'
-import { pseudoPropNames } from "@chakra-ui/react";
 
 
 const TagMultiSelect = MultiSelect.ofType<TagToken>();
@@ -65,7 +64,7 @@ export default class Tagger extends React.Component<TaggerProps, TaggerState> {
                 tagRenderer={this.renderTagTag}
                 onItemSelect={this.handleTag}
                 selectedItems={this.state.tags}
-                tagInputProps={{ onRemove:this.handleUntag minimal: true, }}
+                tagInputProps={{ onRemove:this.handleUntag}}
                 itemsEqual="id"
                 items={this.props.tagOpts} 
             />

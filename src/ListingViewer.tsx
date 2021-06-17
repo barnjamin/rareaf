@@ -12,7 +12,8 @@ import Listing from './lib/listing'
 import {Wallet} from './wallets/wallet'
 
 type ListingViewerProps = {
-    listing: Listing
+    history: any
+    acct: string
     wallet: Wallet
 };
 
@@ -70,7 +71,7 @@ function ListingViewer(props: ListingViewerProps) {
         let buttons = <Button loading={loading} onClick={handleBuy}>Buy</Button>
         let priceChange = <div />
 
-        if (listing.creator_addr == props.acct){
+        if (listing.creator_addr == props.wallet.getDefaultAccount()){
             tagsComponent = (
                 <Tagger 
                     tagOpts={tagOpts} 

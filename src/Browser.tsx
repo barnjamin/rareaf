@@ -7,9 +7,16 @@ import {useParams} from 'react-router-dom'
 import { getListings } from './lib/algorand'
 import {ListingCard} from './ListingCard'
 
-type BrowserState = {};
+import {Wallet} from './wallets/wallet'
 
-export function Browser() {
+
+type BrowserProps = {
+    history: any
+    wallet: Wallet 
+    acct: string
+};
+
+export default function Browser(props: BrowserProps) {
     const {tag} = useParams()
     const [listings, setListings] = React.useState([]);
 
@@ -27,5 +34,3 @@ export function Browser() {
         </div>
     )
 }
-
-module.exports = Browser

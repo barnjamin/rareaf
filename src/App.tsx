@@ -15,9 +15,19 @@ import AlgorandWalletConnector from './AlgorandWalletConnector'
 import NFTViewer from './NFTViewer'
 import Portfolio from './Portfolio'
 import ListingViewer from './ListingViewer'
+import {Wallet} from './wallets/wallet'
 
+type AppProps = {
+  history: any
 
-class App extends React.Component {
+};
+
+type AppState = {
+  wallet: Wallet
+  acct: string
+};
+
+class App extends React.Component<AppProps, AppState> {
   constructor(props) {
     super(props)
 
@@ -39,7 +49,7 @@ class App extends React.Component {
     this.setState({wallet:wallet, acct: wallet.getDefaultAccount()})
   }
 
-  handleChangeAcct(addr_idx) {
+  handleChangeAcct() {
     if(!this.walletConnected()) return
 
     this.setWallet(this.state.wallet)
@@ -60,7 +70,6 @@ class App extends React.Component {
             <AlgorandWalletConnector 
               handleChangeAcct={this.handleChangeAcct}
               walletConnected={this.walletConnected()} 
-              wallet={this.state.wallet}
               setWallet={this.setWallet}
               />
           </Navbar.Group>

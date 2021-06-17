@@ -11,10 +11,12 @@ import {NFT} from './lib/nft'
 import Tagger from './Tagger'
 
 type NFTViewerProps = {
+    history: any
     wallet: Wallet
+    acct: string
 }
 
-function NFTViewer(props: NFTViewerProps) {
+export default function NFTViewer(props: NFTViewerProps) {
     let {id} = useParams();
     let history = useHistory();
 
@@ -33,7 +35,7 @@ function NFTViewer(props: NFTViewerProps) {
 
         getTags()
             .then((tags)=>{ setTagOpts(tags) })
-            .catch((err)=>{ console.error("Error getting tags: ", err)}
+            .catch((err)=>{ console.error("Error getting tags: ", err)})
 
     }, []);
 
@@ -81,7 +83,7 @@ function NFTViewer(props: NFTViewerProps) {
     }
 
     let editButtons = <div />
-    if(nft.manager === props.acct){
+    if(nft.manager === props.wallet.getDefaultAccount()){
         editButtons = (
         <div className='container-right'>
             <div className='content'>
@@ -163,5 +165,3 @@ function ConfirmListingDetails(props){
         </div>
     )
 }
-
-module.exports = NFTViewer 

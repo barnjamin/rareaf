@@ -6,9 +6,10 @@ import MyAlgoConnectWallet from './wallets/myalgoconnect'
 import InsecureWallet from './wallets/insecurewallet'
 
 import {platform_settings as ps} from './lib/platform-conf'
-
+import {Wallet} from './wallets/wallet'
 import React from 'react'
-import { Dialog, Button, Classes, HTMLSelect } from '@blueprintjs/core'
+import { Dialog, Button, Classes, HTMLSelect, Intent } from '@blueprintjs/core'
+import { IconName } from '@blueprintjs/icons'
 
 const pkToMnemonic = {
     "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
@@ -28,18 +29,33 @@ const pkToMnemonic = {
 const wallet_preference_key = 'wallet-preference'
 const acct_preference_key = 'acct-preference'
 
-class AlgorandWalletConnector extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            walletSelectorOpen: false,
+
+type AlgorandWalletConnectorProps = {
+    walletConnected: boolean
+    handleChangeAcct()
+    setWallet(wallet: Wallet)
+}
+
+type AlgorandWalletConnectorState = {
+    selectorOpen: boolean
+    allowedWallets: object
+    wallet: Wallet
+}
+
+class AlgorandWalletConnector extends React.Component<AlgorandWalletConnectorProps, AlgorandWalletConnectorState> {
+
+    state: AlgorandWalletConnectorState = {
+            selectorOpen: false,
             allowedWallets: {
                 'algo-signer': AlgoSignerWallet,
                 'my-algo-connect': MyAlgoConnectWallet,
                 'insecure-wallet': InsecureWallet
             },
             wallet: undefined
-        }
+    }
+
+    constructor(props) {
+        super(props);
 
         this.componentDidMount = this.componentDidMount.bind(this)
 
@@ -92,17 +108,17 @@ class AlgorandWalletConnector extends React.Component {
     }
 
     handleDisplayWalletSelection() {
-        this.setState({ walletSelectorOpen: true })
+        this.setState({ selectorOpen: true })
     }
 
     async handleSelectedWallet(e) {
         const tgt = e.currentTarget
         if (tgt.id in this.state.allowedWallets) {
             sessionStorage.setItem(wallet_preference_key, tgt.id)
-            sessionStorage.setItem(acct_preference_key, 0)
+            sessionStorage.setItem(acct_preference_key, "0")
             await this.tryConnectWallet()
         }
-        this.setState({ walletSelectorOpen: false })
+        this.setState({ selectorOpen: false })
     }
 
     handleChangeAccount(e) {
@@ -123,7 +139,7 @@ class AlgorandWalletConnector extends React.Component {
                         outlined={true}
                         onClick={this.handleDisplayWalletSelection}>Connect Wallet</Button>
 
-                    <Dialog isOpen={this.state.walletSelectorOpen} title='Select Wallet' onClose={this.handleSelectedWallet} >
+                    <Dialog isOpen={this.state.selectorOpen} title='Select Wallet' onClose={this.handleSelectedWallet} >
                         <div className={Classes.DIALOG_BODY}>
                             <ul className='wallet-option-list'>
                                 <li>
@@ -160,15 +176,18 @@ class AlgorandWalletConnector extends React.Component {
             )
 
 
-        const addr_list = this.props.wallet.accounts.map((addr, idx) => {
+        const addr_list = this.state.wallet.accounts.map((addr, idx) => {
             return (<option value={idx} key={idx}> {addr.substr(0, 8)}...  </option>)
         })
 
-        const iconprops = { icon: 'symbol-circle', intent: 'success' }
+        const iconprops = { 
+            icon: 'symbol-circle' as IconName, 
+            intent: 'success'  as Intent
+        }
 
         return (
             <div>
-                <HTMLSelect onChange={this.handleChangeAccount} minimal={true} iconProps={iconprops} defaultValue={this.props.wallet.default_account}>
+                <HTMLSelect onChange={this.handleChangeAccount} minimal={true} iconProps={iconprops} defaultValue={this.state.wallet.default_account}>
                     {addr_list}
                 </HTMLSelect>
                 <Button icon='log-out' minimal={true} onClick={this.handleDisconnectWallet} ></Button>

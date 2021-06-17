@@ -10,8 +10,9 @@ import {Wallet} from './wallets/wallet'
 import { isMetaProperty } from 'typescript'
 
 type MinterProps = {
+    history: any 
     wallet: Wallet
-    acct: number
+    acct: string
 };
 
 type MinterState = {
@@ -38,14 +39,14 @@ export default class Minter extends React.Component<MinterProps, MinterState> {
     setFileHash(cid) {
         this.setState((state)=>{
             const m = state.meta
-            return {meta: { ...m, file_cid: cid, file_hash: cid.path } 
+            return {meta: { ...m, file_cid: cid, file_hash: cid.path } }
         })
     }
 
     setFileDetails(file) {
         this.setState((state)=>{
             const m = state.meta
-            return {meta: { ...m, file_name: file.name, file_size: file.size, file_type: file.type } 
+            return {meta: { ...m, file_name: file.name, file_size: file.size, file_type: file.type } }
         })
     }
 
@@ -109,7 +110,7 @@ export default class Minter extends React.Component<MinterProps, MinterState> {
                     <Uploader
                         onUploaded={this.setFileHash}
                         setFileDetails={this.setFileDetails}
-                        cid={this.state.meta.cid}
+                        cid={this.state.meta.file_hash}
                         wallet={this.props.wallet} />
 
                     <div className='container' >
@@ -169,11 +170,10 @@ function Uploader(props) {
         uploadContent(event.target.files).then((cid) => {
             setCID(cid)
             props.onUploaded(cid)
-
         })
     }
 
-    if (cid === undefined) return (
+    if (props.file_hash === undefined) return (
         <div className='container'>
             <div className='content content-piece'>
                 <FileInput large={true} disabled={false} text="Choose file..." onInputChange={captureFile} />
@@ -185,7 +185,7 @@ function Uploader(props) {
     return (
         <div className='container' >
             <div className='content content-piece'>
-                <img id="gateway-link" src={ps.ipfs.display + cid.path} />
+                <img id="gateway-link" src={ps.ipfs.display + props.file_hash} />
             </div>
         </div>
     )

@@ -34,7 +34,7 @@ export class NFT {
     }
 
     getMetaDataHash() { 
-        return Array.from(this.meta_cid.cid.multihash.subarray(2))
+        return Array.from(this.meta_cid.multihash.subarray(2))
     }
 
     imgSrc (): string {

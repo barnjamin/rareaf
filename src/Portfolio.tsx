@@ -9,10 +9,14 @@ import { NFTCard } from './NFTCard'
 import { ListingCard } from './ListingCard'
 import { Wallet } from './wallets/wallet'
 
-type PortfolioProps = { wallet: Wallet; acct: string};
+type PortfolioProps = { 
+    history: any
+    wallet: Wallet
+    acct: string
+};
 type PortfolioState = {};
 
-export function Portfolio(props: PortfolioProps) {
+export default function Portfolio(props: PortfolioProps) {
 
     const {addr} = useParams()
 
@@ -54,4 +58,3 @@ export function Portfolio(props: PortfolioProps) {
     )
 
 }
-module.exports = Portfolio
