@@ -10,6 +10,7 @@
         "port":8980,
         "token":""
     },
+    "explorer":"algoexplorer.io",
     "ipfs":{
         "host": "/ip4/127.0.0.1/tcp/5001",
         "display":"http://127.0.0.1:8080/ipfs/"

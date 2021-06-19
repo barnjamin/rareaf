@@ -74,7 +74,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     let editButtons = <div />
 
-    if(nft.manager === props.wallet.getDefaultAccount()){
+    if(props.wallet !== undefined && nft.manager === props.wallet.getDefaultAccount()){
         editButtons = (
         <div className='container-right'>
             <div className='content'>
@@ -86,18 +86,27 @@ export default function NFTViewer(props: NFTViewerProps) {
     }
 
 
+
     return (
         <div className='container' >
-            <Card elevation={Elevation.THREE} >
-                <div className='content-viewer' >
-                    <img className='content-img' src={nft.imgSrc()} />
+            <Card  elevation={Elevation.TWO} >
+                <div className='content nft-viewer'>
+                    <img src={nft.imgSrc()} />
                 </div>
 
-                <div className='container' >
-                    <div className='content'>
+                <div className='container nft-details' >
+                    <div className='nft-name'>
                         <p><b>{nft.metadata.title}</b> - <i>{nft.metadata.artist}</i></p>
                     </div>
+                    <div className='nft-token-id' >
+                        <p><a href={nft.explorerSrc()}><b>{nft.asset_id}</b></a></p>
+                    </div>
                 </div>
+
+                <div className='container nft-description'>
+                    <p> { nft.metadata.description }</p>
+                </div>
+
                 { editButtons }
             </Card>
 

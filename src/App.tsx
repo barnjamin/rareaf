@@ -60,7 +60,7 @@ class App extends React.Component<AppProps, AppState> {
       <Router history={this.props.history} >
         <Navbar >
           <Navbar.Group align={Alignment.LEFT}>
-            <Navbar.Heading> Rare AF</Navbar.Heading>
+            <Navbar.Heading><img height={"20px"} src={require('./img/default-monochrome-white.svg')}></img></Navbar.Heading>
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
             <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />

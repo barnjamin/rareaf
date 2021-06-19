@@ -43,6 +43,10 @@ export class NFT {
 
         return "https://via.placeholder.com/500"
     }
+    explorerSrc(): string {
+        const net = ps.algod.network == "mainnet"?"":ps.algod.network + "."
+        return "https://"+ net + ps.explorer + "/asset/" + this.asset_id
+    }
 
     static async fromAsset(asset: any): Promise<NFT> {
         const meta_hash = asset['params']['metadata-hash']

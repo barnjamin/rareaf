@@ -41,23 +41,15 @@ donate to this address (charity? Dao?)
 ```
 #TODO:
 
-   Usability:
+   General:
       - Delay nav or retry loading when creating a new listing or nft to give indexer time to update
       - Check if opted into app before trying to create listing
       - Check if opted into asset before trying to create, give option?
       - Convert prices to bignum
-      - Make configuration easier
       - Cache tag names/ids so we dont have to hit the net every time
 
-   Listing:
-      - Add up to N tags as part of listing
-
-   Tagging:
-      - Add batched tagging 
-   
-   Price:
-      - Change price UI
-      - Add additional assets to xfer?
+   Configuration:
+      - Make configuration easier
 
    Wallets:
       - Add support for other wallets

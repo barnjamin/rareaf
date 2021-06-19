@@ -43,10 +43,6 @@ body {
     width: 30%
 }
 
-.content-card img {
-    width: 100%;
-}
-
 .details-basic {
     flex-grow: 1;
     padding: 10px;
@@ -94,13 +90,40 @@ body {
     margin: 10px;
 }
 
-.listing-details {
+.listing-card {
+    width: 30%;
+}
+.listing-card img {
+    width: 100%;
+    filter: drop-shadow(0px 0px 6px #182026);
+}
+
+.listing-card-tags {
+    padding: 8px;
+    border-radius:5px;
+    background-color: rgba(255,255,255,0.3);
+    justify-content: space-evenly;
+}
+
+.listing-page .bp3-card {
+    width: 80%;
+}
+
+
+.nft-viewer img {
+    filter: drop-shadow(0px 0px 8px #182026);
+    width: 100%
+}
+
+.nft-details {
     justify-content: space-between;
 }
-.listing-description {
+
+.nft-description {
     justify-content: left;
     width: 50%
 }
+
 .listing-actions {
     justify-content: space-between;
 }

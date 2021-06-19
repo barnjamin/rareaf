@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import { useParams, useHistory } from 'react-router-dom'
 import { getListing, getTags } from './lib/algorand'
-import { Button, NumericInput, Card } from '@blueprintjs/core'
+import { Button, NumericInput, Card, Elevation } from '@blueprintjs/core'
 import Tagger from './Tagger'
 import {Wallet} from './wallets/wallet'
 
@@ -128,19 +128,18 @@ function ListingViewer(props: ListingViewerProps) {
 
         const deets = listing.nft.metadata
         return (
-            <div className='container'>
-                <Card>
-
-                    <div className='content content-viewer' >
+            <div className='container listing-page'>
+                <Card elevation={Elevation.TWO}>
+                    <div className='content nft-viewer' >
                         <img className='content-img' src={listing.nft.imgSrc()} />
                     </div>
 
-                    <div className='container listing-details' >
-                        <div className='listing-name'>
+                    <div className='container nft-details' >
+                        <div className='nft-name'>
                             <p><b>{deets.title}</b> - <i>{deets.artist}</i></p>
                         </div>
-                        <div className='listing-token-id' >
-                            <p><b>{listing.asset_id}</b></p>
+                        <div className='nft-id' >
+                            <p><a href={listing.nft.explorerSrc()}><b>{listing.asset_id}</b></a></p>
                         </div>
                     </div>
                     <div className='container listing-description'>
