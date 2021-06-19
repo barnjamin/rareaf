@@ -114,3 +114,13 @@ body {
 .listing-buy {
     align-items: baseline;
 }
+
+.portfolio-content {
+    justify-content: left;
+    width: 100%
+}
+
+.portfolio-name {
+    justify-content: left;
+    width: 100%
+}

@@ -64,7 +64,7 @@ class App extends React.Component<AppProps, AppState> {
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
             <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />
-            <AnchorButton className='bp3-minimal' icon='new-object' text='Mint' href="/mint" />
+            <AnchorButton className='bp3-minimal' icon='clean' text='Mint' href="/mint" />
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
             <AlgorandWalletConnector 

@@ -4,17 +4,22 @@
 import * as React from 'react'
 import {useParams} from 'react-router-dom'
 
-import { getPortfolio } from './lib/algorand'
 import { NFTCard } from './NFTCard'
 import { ListingCard } from './ListingCard'
+import {Tab, Tabs} from "@blueprintjs/core"
+
+
 import { Wallet } from './wallets/wallet'
+import { Listing } from './lib/listing'
+import { NFT } from './lib/nft'
+import { getPortfolio } from './lib/algorand'
+
 
 type PortfolioProps = { 
     history: any
     wallet: Wallet
     acct: string
 };
-type PortfolioState = {};
 
 export default function Portfolio(props: PortfolioProps) {
 
@@ -34,27 +39,51 @@ export default function Portfolio(props: PortfolioProps) {
         })
     }, [port_acct])
 
+
     return (
         <div className='container'>
-            <div className='container portfolio-listings'>
-                <h3>Listings</h3>
-                { 
-                    listings.map((l)=>{ 
-                        return (
-                            <ListingCard key={l.asset_id} listing={l} />
-                        ) 
-                    })
-                }
+            <div className='container portfolio-name'>
+                <h3>{port_acct}</h3>
             </div>
-            <hr/>
-            <div className='container portfolio-nfts'>
-                <h3>NFTs</h3>
-                {
-                    nfts.map((n)=>{ return(<NFTCard key={n.asset_id} nft={n} />) })
-                }
+            <div className='container portfolio-content'>
+                <Tabs id='portfolio' vertical={true} large={true}>
+                    <Tab id='nfts' title='Collection' panel={<NFTPanel nfts={nfts} /> } />
+                    <Tab id='listings' title='Listings' panel={<ListingPanel listings={listings} />} />
+                </Tabs>
             </div>
-
         </div>
     )
+}
 
+type NFTPanelProps = {
+    nfts: NFT[]
+};
+function NFTPanel(props: NFTPanelProps) {
+    return (
+        <div className='container nft-panel'>
+            {
+                 props.nfts.map((n)=>{ 
+                    return(<NFTCard key={n.asset_id} nft={n} />) 
+                })
+            }
+        </div>
+    )
+}
+
+type ListingPanelProps = { 
+    listings: Listing[]
+};
+function ListingPanel(props: ListingPanelProps) {
+    console.log(props)
+    return (
+        <div className='container listing-panel' >
+            { 
+                props.listings.map((l)=>{ 
+                    return (
+                        <ListingCard key={l.asset_id} listing={l} />
+                    ) 
+                })
+            }
+        </div>
+    )
 }
