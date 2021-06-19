@@ -21,6 +21,7 @@
     "ipfs-core-types": "^0.5.1",
     "ipfs-http-client": "^49.0.4",
     "jquery": "^3.5.1",
+    "multihashing-async": "^2.1.2",
     "react-async": "^10.0.1",
     "react-router-dom": "^5.2.0"
   },
