@@ -1,10 +1,10 @@
 import LogicSig from 'algosdk/dist/types/src/logicsig'
-import listing_template from '../contracts/listing.tmpl.teal'
-import listing_var_positions from '../contracts/listing.tmpl.teal.json'
-import platform_delegate_signed from '../contracts/platform.signed'
+import listing_template from 'url:../contracts/listing.tmpl.teal'
+import listing_var_positions from 'url:../contracts/listing.tmpl.teal.json'
+import platform_delegate_signed from 'url:../contracts/platform.signed'
 import {getAlgodClient} from './algorand'
 import algosdk from 'algosdk'
-import * as ps from './platform-conf'
+import {platform_settings as ps} from './platform-conf'
 
 
 

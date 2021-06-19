@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "clean": "rimraf ./dist",
-    "build": "parcel build index.html --public-url '.'",
+    "build": "parcel build index.html",
     "start": "parcel index.html"
   },
   "author": "Ben Guidarelli <ben.guidarelli@gmail.com>",
@@ -13,11 +13,8 @@
   "dependencies": {
     "@blueprintjs/core": "^3.39.0",
     "@blueprintjs/select": "^3.15.9",
-    "@chakra-ui/react": "^1.3.3",
-    "@emotion/react": "^11.1.5",
-    "@emotion/styled": "^11.1.5",
     "@randlabs/myalgo-connect": "^1.0.1",
-    "algosdk": "^1.9.1",
+    "algosdk": "1.9.1",
     "buffer": "^6.0.3",
     "cids": "^1.1.5",
     "framer-motion": "^3.6.2",
@@ -25,13 +22,12 @@
     "ipfs-http-client": "^49.0.4",
     "jquery": "^3.5.1",
     "react-async": "^10.0.1",
-    "react-router-dom": "^5.2.0",
-    "rebass": "^4.0.7"
+    "react-router-dom": "^5.2.0"
   },
   "devDependencies": {
     "@types/react": "^17.0.11",
     "ipfs": "^0.54.2",
-    "parcel-bundler": "^1.12.4",
+    "parcel": "^2.0.0-alpha.3.2",
     "react": "^17.0.2",
     "react-dom": "^16.8.6",
     "rimraf": "^3.0.2",
