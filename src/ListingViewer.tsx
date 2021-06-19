@@ -5,10 +5,8 @@ import * as React from 'react'
 
 import { useParams, useHistory } from 'react-router-dom'
 import { getListing, getTags } from './lib/algorand'
-import { Button, NumericInput } from '@blueprintjs/core'
+import { Button, NumericInput, Card } from '@blueprintjs/core'
 import Tagger from './Tagger'
-
-import Listing from './lib/listing'
 import {Wallet} from './wallets/wallet'
 
 type ListingViewerProps = {
@@ -25,7 +23,8 @@ function ListingViewer(props: ListingViewerProps) {
     const [tagOpts, setTagOpts] = React.useState(undefined);
     const [listing, setListing] = React.useState(undefined);
     const [loading, setLoading] = React.useState(false);
-    const [tags, setTags]       = React.useState([])
+    const [price, setPrice]     = React.useState(0);
+    const [updateable, setUpdateable] = React.useState(false)
 
     React.useEffect(()=>{
         getTags().then((tags)=>{ setTagOpts(tags) })
@@ -35,7 +34,7 @@ function ListingViewer(props: ListingViewerProps) {
     async function handleCancelListing(e){
         setLoading(true)
         await listing.doDelete(props.wallet)
-        history.push("/"+listing.asset_id)
+        history.push("/nft/"+listing.asset_id)
         setLoading(false)
     }
 
@@ -58,62 +57,113 @@ function ListingViewer(props: ListingViewerProps) {
         setLoading(false)
     }
 
-    async function handlePriceChange(price) {
+    async function checkSetPrice(price){
+        setPrice(price)
+
+        if(price==listing.price) setUpdateable(false)
+        else setUpdateable(true)
+    }
+    async function handleUpdatePrice(){
         setLoading(true)
+        if (price == 0){ 
+            alert("You didnt change the price g")
+            setLoading(false)
+            return
+        }
         await listing.doPriceChange(props.wallet, price)
         setLoading(false)
     }
 
 
     if(listing !== undefined) {
-
-        let tagsComponent = <div />
+        let tagsComponent =<Tagger 
+                            tagOpts={tagOpts} 
+                            tags={listing.tags} 
+                            handleAddTag={handleAddTag}
+                            handleRemoveTag={handleAddTag}
+                            renderProps={{"fill": false, "disabled":true}}
+                            />
         let buttons = <Button loading={loading} onClick={handleBuy}>Buy</Button>
-        let priceChange = <div />
+        let priceComponent = (
+            <div className='container listing-price' >
+                <p>{listing.price}</p>
+            </div>
+        )
 
         if (listing.creator_addr == props.wallet.getDefaultAccount()){
             tagsComponent = (
                 <Tagger 
                     tagOpts={tagOpts} 
-                    setTags={setTags}
                     tags={listing.tags} 
+                    handleAddTag={handleAddTag}
+                    handleRemoveTag={handleAddTag}
+                    renderProps={{"fill": false, "disabled":false}}
                     />
             )
-            priceChange = <NumericInput onValueChange={handlePriceChange} defaultValue={listing.price} min={1} max={10000}  ></NumericInput>
 
-            buttons = <Button loading={loading} onClick={handleCancelListing}>Cancel Listing</Button>
+            priceComponent = (
+                <div className='container listing-price-edit'>
+                    <NumericInput 
+                        onValueChange={checkSetPrice}
+                        defaultValue={listing.price} 
+                        min={1} 
+                        max={10000} 
+                        buttonPosition={"none"} 
+                    />
+                    <Button 
+                        loading={loading} 
+                        intent="none" 
+                        onClick={handleUpdatePrice} 
+                        disabled={!updateable}
+                        text='Reprice' />
+                </div>
+            )
+
+            buttons = (
+                <div>
+                    <Button loading={loading} intent="warning" onClick={handleCancelListing} text='Cancel Listing' />
+                </div>
+            )
         }
 
+        const deets = listing.nft.metadata
         return (
             <div className='container'>
+                <Card>
 
-                <div className='content content-viewer' >
-                    <img className='content-img' src={listing.nft.imgSrc()} />
-                </div>
-
-                <div className='container' >
-                    <div className='content'>
-                        <p><b>{listing.nft.title}</b> - <i>{listing.nft.artist}</i></p>
+                    <div className='content content-viewer' >
+                        <img className='content-img' src={listing.nft.imgSrc()} />
                     </div>
-                </div>
 
-                <div className='container listing-details'>
-                    <div className='content'>
-                        <p>TokenId: {listing.asset_id}</p>
-                        <p>Price: {listing.price}</p>
+                    <div className='container listing-details' >
+                        <div className='listing-name'>
+                            <p><b>{deets.title}</b> - <i>{deets.artist}</i></p>
+                        </div>
+                        <div className='listing-token-id' >
+                            <p><b>{listing.asset_id}</b></p>
+                        </div>
                     </div>
-                </div>
+                    <div className='container listing-description'>
+                        <p> 
+                            This picture was taken from a GoPro mounted to the front of a longboard.  
+                            It was taken during my first surf session near Diamond Head in Hawaii. Please note
+                            the helicoptor right over my shoulder, which makes this picture just a touch cooler.  
+                        </p>
+                    </div>
 
-                <div>
-                    { tagsComponent }
-                </div>
+                    <div className='container listing-actions' >
+                        <div className='listing-tags'>
+                            { tagsComponent }
+                        </div>
+                        <div className='container listing-buy'>
+                            {priceComponent}
+                            <div className='listing-buttons'>
+                                { buttons }
+                            </div>
+                        </div>
+                    </div>
 
-                <div>
-                    {priceChange}
-                </div>
-                <div>
-                    { buttons }
-                </div>
+                </Card>
             </div>
 
         )

@@ -1,8 +1,10 @@
 'use strict'
 
-import { ItemRenderer, MultiSelect } from "@blueprintjs/select";
 import * as React from 'react'
-import { Button, MenuItem } from '@blueprintjs/core'
+
+import { MultiSelect } from "@blueprintjs/select";
+import { MenuItem } from '@blueprintjs/core'
+
 import {TagToken } from './lib/listing'
 
 
@@ -11,7 +13,12 @@ const TagMultiSelect = MultiSelect.ofType<TagToken>();
 type TaggerProps = {
     tags: TagToken[]
     tagOpts: TagToken[]
-    setTags(tags: TagToken[])
+    renderProps: any
+
+    setTags?(tags: TagToken[])
+
+    handleRemoveTag?(tag: TagToken)
+    handleAddTag?(tag: TagToken)
 };
 
 type TaggerState = {
@@ -42,23 +49,26 @@ export default class Tagger extends React.Component<TaggerProps, TaggerState> {
     }
 
     handleTag(t: TagToken) { 
+        this.props.handleAddTag(t)
+
         this.setState((curstate)=>{
             return {tags: curstate.tags.concat(t)}
         })
-        this.props.setTags(this.state.tags)
     }
 
     handleUntag(_tag: React.ReactNode) {
+
+        this.props.handleRemoveTag(this.state.tags.find((t)=>{t.name == _tag}))
+
         this.setState((curstate)=>{
             return { tags:  curstate.tags.filter((t)=>{ return t.name !== _tag }) }
         })
-        this.props.setTags(this.state.tags)
     }
 
     render() {
         return (
             <TagMultiSelect 
-                fill={true}
+                {...this.props.renderProps}
                 placeholder="Tag your listing..."
                 itemRenderer={this.renderTagItem}
                 tagRenderer={this.renderTagTag}

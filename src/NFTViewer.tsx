@@ -34,7 +34,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             .catch((err)=>{ console.error("Error:", err) })
 
         getTags()
-            .then((tags)=>{ setTagOpts(tags) })
+            .then((tagOpts)=>{ setTagOpts(tagOpts) })
             .catch((err)=>{ console.error("Error getting tags: ", err)})
 
     }, []);
@@ -49,40 +49,31 @@ export default function NFTViewer(props: NFTViewerProps) {
         try {
             await nft.destroyToken(props.wallet)
             history.push("/")
-        } catch (error) {
-            console.error(error) 
-        }
+        } catch (error) { console.error(error) }
 
         setWaiting(false)
     }
 
-    async function handlePriceChange(price){
-        setPrice(price)
-    }
+    async function handlePriceChange(price){ setPrice(price) }
 
     async function handleSubmitListing(){
         setWaiting(true); 
 
-        // call create listing function with arguments 
-        // for price/assetid 
         try{
             const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
-            console.log(lst)
-            await lst.doCreate(props.wallet)
-            await Promise.all(tags.map((tag)=>{
-                return lst.doTag(props.wallet, tag)
-            }))
-            // Return addr of created account with contents
-            history.push("/listing/"+lst.contract_addr)
-        }catch(error){
-            console.log(error)
-        }
 
-        // Wait for it to return
+            await lst.doCreate(props.wallet)
+
+            await Promise.all(tags.map((tag)=>{ return lst.doTags(props.wallet, tag) }))
+
+            history.push("/listing/"+lst.contract_addr)
+        }catch(error){ console.log(error) }
+
         setWaiting(false);
     }
 
     let editButtons = <div />
+
     if(nft.manager === props.wallet.getDefaultAccount()){
         editButtons = (
         <div className='container-right'>
@@ -107,9 +98,7 @@ export default function NFTViewer(props: NFTViewerProps) {
                         <p><b>{nft.metadata.title}</b> - <i>{nft.metadata.artist}</i></p>
                     </div>
                 </div>
-                {
-                    editButtons
-                }
+                { editButtons }
             </Card>
 
 
@@ -122,8 +111,15 @@ export default function NFTViewer(props: NFTViewerProps) {
                 <DialogStep 
                     id="tags" 
                     title="tags" 
-                    panel={<div className={Classes.DIALOG_BODY}><Tagger tags={tags} tagOpts={tagOpts} setTags={setTags}/></div>}>
-                </DialogStep>
+                    panel={
+                        <div className={Classes.DIALOG_BODY}>
+                            <Tagger 
+                                renderProps={{"fill":true}} 
+                                tags={tags} 
+                                tagOpts={tagOpts} 
+                                setTags={setTags}/>
+                        </div>
+                    } />
                 <DialogStep 
                     id="confirm" 
                     title="confirm" 

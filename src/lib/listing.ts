@@ -105,7 +105,23 @@ export class Listing {
         return await sendWaitGroup(combined)
     }
 
-    async doTag(wallet: Wallet, tag: TagToken) {
+    async doTags(wallet: Wallet, tags: TagToken[]){
+        const txns = []
+        for (let x=0; x<tags.length; x++){
+            txns.push(await this.doTag(wallet, tags[x], false))
+        }
+        console.log(txns)
+    }
+
+    async doUntags(wallet: Wallet, tags: TagToken[]){
+        const txns = []
+        for (let x=0; x<tags.length; x++){
+            txns.push(await this.doUntag(wallet, tags[x], false))
+        }
+        console.log(txns)
+    }
+
+    async doTag(wallet: Wallet, tag: TagToken, execute: boolean=true) {
         const args = [Method.Tag]
         const fasset = [tag.id]
 
@@ -128,10 +144,15 @@ export class Listing {
         const platform_lsig = await get_platform_sig()
         const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, platform_lsig)
 
-        return await sendWaitGroup([s_app_call_txn, s_tag_optin_txn, s_tag_xfer_txn])
+        const txngroup =  [s_app_call_txn, s_tag_optin_txn, s_tag_xfer_txn]
+        if(!execute){
+            return txngroup
+        }
+
+        return await sendWaitGroup(txngroup)
     }
 
-    async doUntag(wallet: Wallet, tag: TagToken) {
+    async doUntag(wallet: Wallet, tag: TagToken, execute: boolean=true) {
         const args = [Method.Untag]
         const fasset = [tag.id]
 
@@ -151,7 +172,12 @@ export class Listing {
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, listing_lsig)
 
-        return await sendWaitGroup([s_app_call_txn, s_tag_xfer_txn])
+        const txngroup = [s_app_call_txn, s_tag_xfer_txn]
+        if(!execute){
+            return txngroup
+        }
+
+        return await sendWaitGroup(txngroup)
     }
 
     async doPriceChange(wallet: Wallet, new_price:number ) {

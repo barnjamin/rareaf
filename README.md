@@ -46,6 +46,8 @@ donate to this address (charity? Dao?)
       - Check if opted into app before trying to create listing
       - Check if opted into asset before trying to create, give option?
       - Convert prices to bignum
+      - Make configuration easier
+      - Cache tag names/ids so we dont have to hit the net every time
 
    Listing:
       - Add up to N tags as part of listing

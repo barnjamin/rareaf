@@ -1,15 +1,17 @@
 /* eslint-disable no-console */
 'use strict'
 
+import * as React from 'react'
+
 import AlgoSignerWallet from './wallets/algosignerwallet'
 import MyAlgoConnectWallet from './wallets/myalgoconnect'
 import InsecureWallet from './wallets/insecurewallet'
-
-import {platform_settings as ps} from './lib/platform-conf'
 import {Wallet} from './wallets/wallet'
-import React from 'react'
+
 import { Dialog, Button, Classes, HTMLSelect, Intent } from '@blueprintjs/core'
 import { IconName } from '@blueprintjs/icons'
+
+import {platform_settings as ps} from './lib/platform-conf'
 
 const pkToMnemonic = {
     "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
@@ -72,9 +74,7 @@ class AlgorandWalletConnector extends React.Component<AlgorandWalletConnectorPro
         this.tryConnectWallet()
     }
 
-
     disconnectWallet() {
-        //Unset state
         this.props.setWallet(undefined)
         this.setState({ wallet: undefined })
         sessionStorage.setItem(wallet_preference_key, '')
@@ -103,13 +103,9 @@ class AlgorandWalletConnector extends React.Component<AlgorandWalletConnectorPro
         this.props.setWallet(wallet)
     }
 
-    handleDisconnectWallet() {
-        this.disconnectWallet()
-    }
+    handleDisconnectWallet() { this.disconnectWallet() }
 
-    handleDisplayWalletSelection() {
-        this.setState({ selectorOpen: true })
-    }
+    handleDisplayWalletSelection() { this.setState({ selectorOpen: true }) }
 
     async handleSelectedWallet(e) {
         const tgt = e.currentTarget
@@ -129,6 +125,7 @@ class AlgorandWalletConnector extends React.Component<AlgorandWalletConnectorPro
     }
 
     render() {
+
         if (!this.props.walletConnected)
             return (
                 <div>
