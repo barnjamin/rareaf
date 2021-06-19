@@ -140,6 +140,8 @@ body {
 
 .portfolio-content {
     justify-content: left;
+    border-radius: 10px;
+    border: 1px solid whitesmoke;
     width: 100%
 }
 
