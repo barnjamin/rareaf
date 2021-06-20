@@ -15,15 +15,12 @@
     "@blueprintjs/select": "^3.15.9",
     "@randlabs/myalgo-connect": "^1.0.1",
     "algosdk": "1.9.1",
-    "buffer": "^6.0.3",
     "cids": "^1.1.5",
-    "framer-motion": "^3.6.2",
-    "ipfs-core-types": "^0.5.1",
     "ipfs-http-client": "^49.0.4",
     "jquery": "^3.5.1",
-    "multihashing-async": "^2.1.2",
     "react-async": "^10.0.1",
-    "react-router-dom": "^5.2.0"
+    "react-router-dom": "^5.2.0",
+    "multihashing-async": "https://github.com/barnjamin/js-multihashing-async.git"
   },
   "devDependencies": {
     "@types/react": "^17.0.11",
