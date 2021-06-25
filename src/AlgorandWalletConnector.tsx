@@ -146,7 +146,8 @@ class AlgorandWalletConnector extends React.Component<AlgorandWalletConnectorPro
                                         minimal={true} 
                                         outlined={true} 
                                         onClick={this.handleSelectedWallet}
-                                        text='Algo Signer' />
+                                        > <img className='wallet-branding' src={ AlgoSignerWallet.img(true) } />Algo Signer
+                                        </Button>
                                 </li>
                                 <li>
                                     <Button id='my-algo-connect'
@@ -155,7 +156,7 @@ class AlgorandWalletConnector extends React.Component<AlgorandWalletConnectorPro
                                         minimal={true} 
                                         outlined={true} 
                                         onClick={this.handleSelectedWallet}
-                                        text='My Algo Connect' />
+                                        ><img className='wallet-branding' src={ MyAlgoConnectWallet.img(true) } /> MyAlgo Connect</Button>
                                 </li>
                                 <li>
                                     <Button id='insecure-wallet' 
@@ -164,7 +165,7 @@ class AlgorandWalletConnector extends React.Component<AlgorandWalletConnectorPro
                                         minimal={true} 
                                         outlined={true} 
                                         onClick={this.handleSelectedWallet}
-                                        text='Insecure Wallet'/>
+                                        > Insecure Wallet </Button>
                                 </li>
                             </ul>
                         </div>

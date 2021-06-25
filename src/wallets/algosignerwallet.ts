@@ -1,6 +1,8 @@
 
 import algosdk, { Transaction, TransactionParams } from 'algosdk'
 import { SignedTxn, Wallet } from './wallet'
+import logo_inverted from 'url:./branding/algosigner/Logo-inverted.png'
+import logo from 'url:./branding/algosigner/Logo.png'
 
 
 declare const AlgoSigner: any;
@@ -16,6 +18,10 @@ class AlgoSignerWallet implements Wallet {
         this.default_account = 0
     }
 
+    static img(inverted: boolean): string {
+        return inverted?logo_inverted:logo
+    }
+
     async connect(): Promise<boolean> {
 
         const loaded = await this.waitForLoaded() 
@@ -24,7 +30,6 @@ class AlgoSignerWallet implements Wallet {
             alert("AlgoSigner not loaded, is it installed?")
             return
         }
-
 
         try {
             await AlgoSigner.connect()

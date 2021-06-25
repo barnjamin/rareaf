@@ -11,6 +11,8 @@ export interface Wallet {
     default_account: number;
     network: string;
 
+    img(inverted: boolean): string;
+
     connect(settings?: object): Promise<boolean>;
     isConnected(): boolean;
 

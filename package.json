@@ -23,6 +23,7 @@
     "react-router-dom": "^5.2.0"
   },
   "devDependencies": {
+    "@parcel/transformer-image": "^2.0.0-beta.2",
     "@types/react": "^17.0.11",
     "ipfs": "^0.54.2",
     "parcel": "^2.0.0-alpha.3.2",

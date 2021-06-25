@@ -83,6 +83,12 @@ body {
     width: 100%;
 }
 
+img.wallet-branding {
+    width:25px;
+    margin-right:10px;
+    float:left;
+}
+
 .wallet-option-list {
     list-style:none
 }

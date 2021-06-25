@@ -7,7 +7,7 @@ import { Wallet } from './wallets/wallet'
 import {platform_settings as ps} from './lib/platform-conf'
 import { Application } from './lib/application';
 import { useEffect } from 'react';
-import {Tabs, Tab, InputGroup } from '@blueprintjs/core'
+import {Button, Tabs, Tab, InputGroup } from '@blueprintjs/core'
 import { useState } from 'react';
 
 type AdminProps = { 
@@ -23,17 +23,12 @@ export default function Admin(props: AdminProps) {
     const [algod, setAlgod] = React.useState(ps.algod)
     const [indexer, setIndexer] = React.useState(ps.indexer)
     const [ipfs, setIPFS] = React.useState(ps.ipfs)
-
-    const app = new Application({
+    const [appConf, setApp] = React.useState({
         owner: props.acct,
         name:"RareAF",
         unit: "raf",
         fee: 1000
-    });
-
-    useEffect(()=>{
-        app.create().then((z)=>{ console.log(z) })
-    }, [])
+    })
 
     function setAlgodValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
@@ -49,9 +44,18 @@ export default function Admin(props: AdminProps) {
         setIPFS(ipfs =>({ ...ipfs, [k]: v }))
     }
 
+    function setAppConf(k: string, v: string) {
+        setApp(appConf =>({ ...appConf, [k]: v }))
+    }
 
-    let appComponent = <ApplicationCreator />
-    if (app.id != 0){
+    function createApp(){
+        const app  = new Application(appConf)
+        app.create()
+    }
+
+
+    let appComponent = <ApplicationCreator   set={setAppConf} create={createApp} {...appConf} />
+    if (appConf.id != 0){
         // Resolve app stuff
     }
 
@@ -62,6 +66,7 @@ export default function Admin(props: AdminProps) {
                 <Tab title='Indexer' id='index' panel={ <Indexer setProp={setIndexerValue} {...indexer} /> } />
                 <Tab title='Ipfs' id='ipfs' panel={ <IPFSConfig setProp={setIpfsValue} {...ipfs} /> } />
                 <Tab title='App' id='app' panel={ appComponent} />
+
             </Tabs>
         </div>
     )
@@ -171,27 +176,36 @@ function IPFSConfig(props: IPFSConfigProps)  {
 }
 
 type ApplicationCreatorProps = {
-
+    name: string
+    unit: string
+    fee: string
+    set(key: string, value: string)
+    create()
 };
 
 function ApplicationCreator(props: ApplicationCreatorProps) {
+
     return (
         <div>
             <InputGroup
-                onChange={e=>{console.log(e)}}
+                onChange={e=>{props.set('name', e.target.value)}}
                 placeholder="Application Name"
                 large={true}
+                value={props.name}
             />
             <InputGroup
-                onChange={e=>{console.log(e)}}
+                onChange={e=>{props.set('unit', e.target.value)}}
                 placeholder="Unit Name"
                 large={true}
+                value={props.unit}
             />
             <InputGroup
-                onChange={e=>{console.log(e)}}
+                onChange={e=>{props.set('fee', e.target.value)}}
                 placeholder="Fee"
                 large={true}
+                value={props.fee}
             />
+            <Button onClick={props.create} text='Create'/>
         </div>
     )
 }
