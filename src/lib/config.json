@@ -1,9 +1,13 @@
 {
     "algod":{
         "server":"http://localhost",
-        "port":"4001",
+        "port":4001,
         "token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "network": "sandnet"
+    },
+    "ipfs":{
+        "host": "/ip4/127.0.0.1/tcp/5001",
+        "display":"http://127.0.0.1:8080/ipfs/"
     },
     "indexer": {
         "server":"http://localhost",
@@ -11,17 +15,24 @@
         "token":""
     },
     "explorer":"algoexplorer.io",
-    "ipfs":{
-        "host": "/ip4/127.0.0.1/tcp/5001",
-        "display":"http://127.0.0.1:8080/ipfs/"
-    },
     "token": {
         "name": "RareAF Price",
         "unit": "rafpx",
         "id":  6 
     },
     "tags":{
-        "unit":"raf-tag"
+        "unit":"raf-tag",
+        "tags":[ "art", "picture", "video", "gif", "meme", "pixel", "landsacpe", "portrait"],
+        "ids":{
+            "art":7,
+            "picture":8,
+            "video":9,
+            "gif":10,
+            "meme":11,
+            "pixel":12,
+            "landsacpe":13,
+            "portrait":14
+        }
     },
     "application":{
         "id":5,

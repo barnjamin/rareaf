@@ -41,15 +41,16 @@ donate to this address (charity? Dao?)
 ```
 #TODO:
 
+   Initialization:
+      - Build init processes to create app/tokens/contracts
+
    General:
-      - Delay nav or retry loading when creating a new listing or nft to give indexer time to update
+      - Delay nav or retry loading when creating a new listing or nft to give indexer time to update, use bp3-skeleton class
       - Check if opted into app before trying to create listing
       - Check if opted into asset before trying to create, give option?
       - Convert prices to bignum
       - Cache tag names/ids so we dont have to hit the net every time
 
-   Configuration:
-      - Make configuration easier
 
    Wallets:
       - Add support for other wallets

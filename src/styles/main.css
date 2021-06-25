@@ -149,3 +149,11 @@ body {
     justify-content: left;
     width: 100%
 }
+
+.config-container {
+    justify-content: left;
+    margin: 10px;
+}
+.config-container .bp3-input-group {
+    padding:5px;
+}

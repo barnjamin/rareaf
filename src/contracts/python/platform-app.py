@@ -120,8 +120,8 @@ def clear():
 
 
 if __name__ == "__main__":
-    with open(configuration['application']['approval'], "w") as pa_file:
+    with open("../"+configuration['application']['approval'], "w") as pa_file:
         pa_file.write(compileTeal(approval(), Mode.Application, version=3, assembleConstants=True))
 
-    with open(configuration['application']['clear'], "w") as pc_file:
+    with open("../"+configuration['application']['clear'], "w") as pc_file:
         pc_file.write(compileTeal(clear(), Mode.Application, version=3, assembleConstants=True))

@@ -1,15 +1,23 @@
 import LogicSig from 'algosdk/dist/types/src/logicsig'
-import listing_template from 'url:../contracts/listing.tmpl.teal'
-import listing_var_positions from 'url:../contracts/listing.tmpl.teal.json'
-import platform_delegate_signed from 'url:../contracts/platform.signed'
 import {getAlgodClient} from './algorand'
 import algosdk from 'algosdk'
 import {platform_settings as ps} from './platform-conf'
+import {concatTypedArrays} from './algorand'
 
+import {sha256} from 'js-sha256'
+
+import listing_var_positions from 'url:../contracts/listing.tmpl.teal.json'
+import listing_template from 'url:../contracts/listing.tmpl.teal'
+
+import platform_approval from 'url:../contracts/platform-approval.teal'
+import platform_clear from 'url:../contracts/platform-clear.teal'
+
+import platform_delegate from 'url:../contract/platform-delegate.teal'
+//import platform_delegate_signed from 'url:../contracts/platform.signed'
 
 
 export async function get_listing_sig(vars: any): Promise<LogicSig> {
-    const compiled_program = await get_listing_compiled(vars)
+    const compiled_program = await get_contract_compiled(listing_template, vars)
     const program_bytes = new Uint8Array(Buffer.from(compiled_program.result, "base64"));
     return algosdk.makeLogicSig(program_bytes);
 }
@@ -24,31 +32,51 @@ export async function get_listing_source(vars: any) {
     return populate_contract(listing_template, vars)
 }
 
-export async function get_listing_compiled(vars: any) {
+export async function get_contract_compiled(template: string, vars: any) {
     const client = getAlgodClient()
-    const populated = await populate_contract(listing_template, vars)
+    const populated = await populate_contract(template, vars)
     return  client.compile(populated).do()
 }
 
-export async function get_approval_program(){
-    return await get_file(ps.application.approval)
+export async function get_approval_program(vars: any){
+    return await populate_contract(platform_approval, vars)
 }
 
-export async function get_clear_program(){
-    return await get_file(ps.application.clear)
+export async function get_clear_program(vars: any){
+    return await populate_contract(platform_clear, vars)
 }
 
 export async function get_signed_platform_bytes(){
     return await get_file(platform_delegate_signed)
 }
 
-export async function populate_contract(template, variables) {
+export async function populate_contract(template: string, vars: any) {
     //Read the program, Swap vars, spit out the filled out tmplate
     let program = await get_file(template)
-    for (let v in variables) {
-        program = program.replace(v, variables[v])
+    for (let v in vars) {
+        program = program.replace(v, vars[v])
     }
     return program
+}
+export async function get_listing_hash(vars: any): Promise<Buffer> {
+    return get_hash(listing_template, vars)
+}
+
+export async function get_hash(template: string, vars: any): Promise<Buffer> {
+    const compiled_program = await get_contract_compiled(template, vars)
+    const program_bytes = new Uint8Array(Buffer.from(compiled_program.result, "base64"));
+
+    let removed = 0 
+    let blanked = program_bytes
+    for(let i in listing_var_positions){
+        const v = listing_var_positions[i]
+        blanked = concatTypedArrays(blanked.slice(0, v.start - removed) , blanked.slice((v.start+v.length)-removed))
+        removed += v.length
+    }
+
+    const hash = sha256.create();
+    hash.update(blanked);
+    return Buffer.from(hash.hex(), 'hex');
 }
 
 export async function get_file(program) {

@@ -62,5 +62,5 @@ def listing():
 
 
 if __name__ == "__main__":
-     with open(configuration['listing']['template'], 'w') as f:
+     with open("../"+configuration['listing']['template'], 'w') as f:
         f.write(compileTeal(listing(), Mode.Signature, version=3, assembleConstants=True))

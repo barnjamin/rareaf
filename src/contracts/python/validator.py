@@ -28,7 +28,7 @@ class TemplateContract(object):
 
         self.config = config
 
-        with open(config['listing']['template'], mode='r') as f:
+        with open("../"+config['listing']['template'], mode='r') as f:
             self.template_bytes = f.read()
 
         url         = "{}:{}".format(config['algod']['server'], config['algod']['port'])
@@ -42,7 +42,7 @@ class TemplateContract(object):
 
 
     def write_tmpl_positions(self):
-        with open(self.config['listing']['template-positions'], 'w') as f:
+        with open("../"+self.config['listing']['template-positions'], 'w') as f:
             json.dump(self.get_positions_obj(), f)
 
     def get_positions_obj(self):
@@ -53,7 +53,7 @@ class TemplateContract(object):
 
     def get_validate_ops(self, contract_val):
 
-        blank_hash = self.get_blank_hash()
+        #blank_hash = self.get_blank_hash()
 
         blank_contract = ScratchVar(TealType.bytes)
         pos            = ScratchVar(TealType.uint64)
@@ -79,14 +79,23 @@ class TemplateContract(object):
             # prepare the blank contract
             Seq(concat_ops), 
             # Make sure this is the contract being distributed to
-            Sha256(blank_contract.load()) == Bytes("base64",blank_hash),
+            #Sha256(blank_contract.load()) == Bytes("base64",blank_hash),
+            Sha256(blank_contract.load()) == Tmpl.Bytes("TMPL_BLANK_HASH"),
         )
 
     def populate_tmpl_vars(self):
         teal_source = self.template_bytes
         lines = self.template_bytes.split("\n")
+
+        intc_line = lines[1]
+        for intc in intc_line.split(" "):
+            if "TMPL_" in intc:
+                teal_source = teal_source.replace(intc, "0")
+
+        #TODO bytec?
+
         # Iterate over lines 
-        for l in range(len(lines)):
+        for l in range(3, len(lines)):
             line = lines[l]
             # Find strings starting with TMPL_
             if "TMPL_" in line:

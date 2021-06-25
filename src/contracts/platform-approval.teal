@@ -1,5 +1,5 @@
 #pragma version 3
-intcblock 1 0 4 2 6 46
+intcblock 1 0 4 2 TMPL_PRICE_ID 47
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 txn ApplicationID
 intc_1 // 0
@@ -55,7 +55,7 @@ gtxn 1 Receiver
 gtxna 0 Accounts 2
 ==
 intc_0 // 1
-intc 4 // 6
+intc 4 // TMPL_PRICE_ID
 asset_holding_get AssetBalance
 store 10
 store 11
@@ -124,7 +124,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // 6
+intc 4 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -168,7 +168,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // 6
+intc 4 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -328,7 +328,7 @@ load 4
 txna ApplicationArgs 2
 load 5
 load 5
-intc 5 // 46
+intc 5 // 47
 +
 substring3
 concat
@@ -336,7 +336,7 @@ store 4
 load 5
 pushint 32 // 32
 +
-intc 5 // 46
+intc 5 // 47
 +
 store 5
 load 4
@@ -365,7 +365,7 @@ store 4
 intc_0 // 1
 load 4
 sha256
-pushbytes 0xd8b3a4d7c612ee65101ae5b0688dc1a85019ca44222dbd7793d0495357f12853 // base64(2LOk18YS7mUQGuWwaI3BqFAZykQiLb13k9BJU1fxKFM=)
+pushbytes 0x7e134315de8cc687956e6aaccff90cb3b7d9c4aedd6f460eacf5e2367c5c6be3 // base64(fhNDFd6MxoeVbmqsz/kMs7fZxK7db0YOrPXiNnxca+M=)
 ==
 &&
 pushbytes 0x50726f6772616d // "Program"

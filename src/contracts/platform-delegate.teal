@@ -1,0 +1,12 @@
+#pragma version 3
+global GroupSize
+int 1
+>
+gtxn 0 TypeEnum
+int appl
+==
+gtxn 0 ApplicationID
+int TMPL_APP_ID
+==
+&&
+&&

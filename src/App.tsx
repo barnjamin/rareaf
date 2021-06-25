@@ -15,11 +15,12 @@ import AlgorandWalletConnector from './AlgorandWalletConnector'
 import NFTViewer from './NFTViewer'
 import Portfolio from './Portfolio'
 import ListingViewer from './ListingViewer'
+import Admin from './Admin'
 import {Wallet} from './wallets/wallet'
+import {platform_settings as ps} from './lib/platform-conf'
 
 type AppProps = {
   history: any
-
 };
 
 type AppState = {
@@ -56,6 +57,12 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   render() {
+
+    let adminNav = <div/>
+    if(this.walletConnected() && this.state.wallet.getDefaultAccount() == ps.address){
+      adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
+    }
+
     return (
       <Router history={this.props.history} >
         <Navbar >
@@ -67,6 +74,7 @@ class App extends React.Component<AppProps, AppState> {
             <AnchorButton className='bp3-minimal' icon='clean' text='Mint' href="/mint" />
           </Navbar.Group >
           <Navbar.Group align={Alignment.RIGHT}>
+            {adminNav}
             <AlgorandWalletConnector 
               handleChangeAcct={this.handleChangeAcct}
               walletConnected={this.walletConnected()} 
@@ -95,6 +103,13 @@ class App extends React.Component<AppProps, AppState> {
           </Route>
           <Route path="/tag/:tag"  >
             <Browser 
+              history={this.props.history} 
+              wallet={this.state.wallet} 
+              acct={this.state.acct}
+              />
+          </Route>
+          <Route path="/admin"  >
+            <Admin 
               history={this.props.history} 
               wallet={this.state.wallet} 
               acct={this.state.acct}
