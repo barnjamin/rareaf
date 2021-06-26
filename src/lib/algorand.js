@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { resolveMetadataFromMetaHash } from "./ipfs";
+import {  resolveMetadataFromMetaHash } from "./ipfs";
 import {platform_settings as ps} from './platform-conf'
 import algosdk from 'algosdk'  
 import Listing from "./listing";
@@ -151,9 +151,8 @@ export async function getNFT(asset_id){
 }
 
 export async function getToken(asset_id) {
-    const indexer = getIndexer()
-    const assets  = await indexer.lookupAssetByID(asset_id).do()
-    return assets.asset
+    const client = getAlgodClient()
+    return await client.getAssetByID(asset_id).do()
 }
 
 export async function getCreator(addr, asset_id) {

@@ -57,7 +57,6 @@ export class NFT {
         const chunks: string[] = url.split("/")
         const mhash = chunks[chunks.length-1]
         const [cid, md] = await getMetaFromIpfs(mhash);
-        console.log(cid, md)
 
         const nft = new NFT(md, asset['index'], asset['params']['manager'])
 

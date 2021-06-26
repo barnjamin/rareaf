@@ -30,7 +30,7 @@ export default function NFTViewer(props: NFTViewerProps) {
     
     React.useEffect(()=>{
         getNFT(parseInt(id))
-            .then((nft)=>{ console.log(nft); setNFT(nft) })
+            .then((nft)=>{ setNFT(nft) })
             .catch((err)=>{ console.error("Error:", err) })
 
         getTags()
@@ -84,8 +84,6 @@ export default function NFTViewer(props: NFTViewerProps) {
         </div>
         )
     }
-
-
 
     return (
         <div className='container' >
@@ -142,7 +140,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
 
 function ListingDetails(props){
-    function handlePriceChange(vnum, vstring) {
+    function handlePriceChange(vnum) {
         props.onPriceChange(vnum)
     }
 
