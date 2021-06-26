@@ -40,6 +40,7 @@
         "clear":"platform-clear.teal"
     },
     "listing":{
+        "teal":"listing.teal",
         "template":"listing.tmpl.teal",
         "template-positions":"listing.tmpl.teal.json"
     },
@@ -49,6 +50,6 @@
     "seed":5e6,
     "max_price":1000e6,
     "dev":{
-        "debug_txns":true
+        "debug_txns":false
     }
 }

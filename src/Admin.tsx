@@ -23,11 +23,12 @@ export default function Admin(props: AdminProps) {
     const [algod, setAlgod] = React.useState(ps.algod)
     const [indexer, setIndexer] = React.useState(ps.indexer)
     const [ipfs, setIPFS] = React.useState(ps.ipfs)
+    const [loading, setLoading] = React.useState(false)
     const [appConf, setApp] = React.useState({
         owner: props.acct,
         name:"RareAF",
         unit: "raf",
-        fee: 1000
+        fee: "1000"
     })
 
     function setAlgodValue (k: string, v: string){
@@ -49,12 +50,17 @@ export default function Admin(props: AdminProps) {
     }
 
     function createApp(){
+
+        setLoading(true)
         const app  = new Application(appConf)
-        app.create()
+        app.create(props.wallet).then(success=>{ 
+            console.log(success)  
+            setLoading(false)
+        })
     }
 
 
-    let appComponent = <ApplicationCreator   set={setAppConf} create={createApp} {...appConf} />
+    let appComponent = <ApplicationCreator   set={setAppConf} create={createApp} {...appConf} loading={loading} />
     if (appConf.id != 0){
         // Resolve app stuff
     }
@@ -65,8 +71,7 @@ export default function Admin(props: AdminProps) {
                 <Tab title='Algod' id='algod' panel={<Algod setProp={setAlgodValue} {...algod} />} />
                 <Tab title='Indexer' id='index' panel={ <Indexer setProp={setIndexerValue} {...indexer} /> } />
                 <Tab title='Ipfs' id='ipfs' panel={ <IPFSConfig setProp={setIpfsValue} {...ipfs} /> } />
-                <Tab title='App' id='app' panel={ appComponent} />
-
+                <Tab title='App' id='app' panel={ appComponent } />
             </Tabs>
         </div>
     )
@@ -179,6 +184,7 @@ type ApplicationCreatorProps = {
     name: string
     unit: string
     fee: string
+    loading: boolean
     set(key: string, value: string)
     create()
 };
@@ -205,7 +211,7 @@ function ApplicationCreator(props: ApplicationCreatorProps) {
                 large={true}
                 value={props.fee}
             />
-            <Button onClick={props.create} text='Create'/>
+            <Button loading={props.loading} onClick={props.create} text='Create'/>
         </div>
     )
 }

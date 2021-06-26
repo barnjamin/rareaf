@@ -1,6 +1,8 @@
 from pyteal import *
 from config import *
 
+def tealpath(name):
+    return "../" + name.replace("teal", "tmpl.teal")
 
 def valid_app_call(txn):
     return And(

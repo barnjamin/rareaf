@@ -214,13 +214,12 @@ export function get_asa_create_txn(suggestedParams, addr, meta) {
     return  {
         from: addr,
         assetManager: addr,
-        assetName: meta.name,
+        assetReserve: addr,
+        assetClawback: addr,
+        assetFreeze: addr,
         assetTotal: 1,
         assetDecimals: 0,
-        assetMetadataHash:meta,
         type: 'acfg',
-        assetName:"RareAF",
-        assetUnitName:"RAF",
         assetURL: ps.domain,
         ...suggestedParams
     }
@@ -233,6 +232,31 @@ export function get_asa_destroy_txn(suggestedParams, addr, token_id) {
         type: 'acfg' ,
         ...suggestedParams
     }
+}
+
+
+export function get_app_create_txn(suggestedParams, addr, approval, clear) {
+   return {
+        from:addr,
+        type:'appl',
+        numLocalByteSlices: 16,
+        appApprovalProgram: approval,
+        appClearProgram: clear,
+        ...suggestedParams
+   } 
+}
+
+export function get_app_update_txn(suggestedParams, addr, approval, clear, id) {
+   return {
+        from:addr,
+        appIndex: id,
+        type:'appl',
+        numLocalByteSlices: 16,
+        appOnComplete: algosdk.OnApplicationComplete.UpdateApplicationOC,
+        appApprovalProgram: approval,
+        appClearProgram: clear,
+        ...suggestedParams
+   } 
 }
 
 export function get_app_call_txn(suggestedParams, addr, args) {

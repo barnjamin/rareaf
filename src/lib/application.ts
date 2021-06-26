@@ -1,4 +1,8 @@
+import { get_app_update_txn, download_txns, getSuggested, get_app_create_txn, sendWait, sendWaitGroup, get_asa_create_txn } from "./algorand"
 import { get_approval_program, get_clear_program, get_listing_hash } from "./contracts"
+import {Wallet} from '../wallets/wallet'
+import algosdk, { assignGroupID, Transaction } from 'algosdk';
+
 
 const dummy_addr = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
 const dummy_id = "b64(AAAAAAAAAHs=)"
@@ -30,11 +34,12 @@ export class Application {
         this.conf = settings
     }
 
-    async create(): Promise<boolean> {
-        // Create price token with app name 
-        await this.createPriceToken() 
+    async create(wallet: Wallet): Promise<boolean> {
         // Create blank app to reserve ID
-        await this.updateApplication()
+        await this.updateApplication(wallet)
+
+        // Create price token with app name 
+        await this.createPriceToken(wallet) 
 
         // Populate Contracts with ids to get the blank hash 
         const lc = await get_listing_hash({
@@ -43,14 +48,13 @@ export class Application {
             "TMPL_CREATOR_ADDR": dummy_addr, // Dummy addr
             "TMPL_ASSET_ID": dummy_id //Dummy int
         }) 
-
         this.conf.listingHash = lc.toString('base64')
 
         // Update Application with hash of contract && price token id
-        this.updateApplication()
+        await this.updateApplication(wallet)
 
         // Sign delegate to xfer tokens
-        this.signDelegate()
+        //this.signDelegate()
 
         return false
     }
@@ -60,24 +64,50 @@ export class Application {
         return undefined
     }
 
-    async updateApplication() {
+    async updateApplication(wallet: Wallet) {
+        const suggestedParams = await getSuggested(10)
+
         const app = await get_approval_program({
             "TMPL_PRICE_ID":this.conf.priceToken, 
             "TMPL_BLANK_HASH": this.conf.listingHash ||= dummy_addr
         }) 
+
         const clear = await get_clear_program({})
 
-        if (this.conf.id == 0){
-            //Its a create
-            this.conf.id = 0 
+        if (!this.conf.id){
+            const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.owner, app, clear))
+            const signed = await wallet.signTxn([create_txn])
+            const result = await sendWaitGroup(signed)
+            if(result['pool-error'] != "") {
+                console.error("Failed to create the application")
+            }
+            this.conf.id = result['application-index']
         }else{
-            
-            // Its an update
+            const create_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.owner, app, clear, this.conf.id))
+            console.log(create_txn)
+            const signed = await wallet.signTxn([create_txn])
+            const result = await sendWaitGroup(signed)
+            if(result['pool-error'] != "") {
+                console.error("Failed to create the application")
+            }
+            console.log(result)
         }
     }
 
-    async createPriceToken()  {
-        this.conf.priceToken = 0
+    async createPriceToken(wallet: Wallet)  { 
+        const suggestedParams = await getSuggested(10)
+        const create_px = new Transaction(get_asa_create_txn(suggestedParams, this.conf.owner, {}))
+        create_px.assetName = this.conf.name
+        create_px.assetUnitName = this.conf.unit + "-px"
+        create_px.assetTotal = 1e10
+        create_px.assetDecimals = 1 //TODO: remove
+        const signed = await wallet.signTxn([create_px])
+        const result = await sendWaitGroup(signed)
+        if(result['pool-error'] != "") {
+            console.error("Failed to create the application")
+        }
+
+        this.conf.priceToken = result['asset-index']
     } 
 
     async createTagToken(name: string) { }

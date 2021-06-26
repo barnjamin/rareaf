@@ -39,11 +39,13 @@ export async function get_contract_compiled(template: string, vars: any) {
 }
 
 export async function get_approval_program(vars: any){
-    return await populate_contract(platform_approval, vars)
+    const compiled =  await get_contract_compiled(platform_approval, vars)
+    return new Uint8Array(Buffer.from(compiled.result, "base64"))
 }
 
 export async function get_clear_program(vars: any){
-    return await populate_contract(platform_clear, vars)
+    const compiled =  await get_contract_compiled(platform_clear, vars)
+    return new Uint8Array(Buffer.from(compiled.result, "base64"))
 }
 
 export async function get_signed_platform_bytes(){

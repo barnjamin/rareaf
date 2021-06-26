@@ -1,5 +1,5 @@
 #pragma version 3
-intcblock 1 0 4 2 6 47
+intcblock 1 0 4 2 TMPL_PRICE_ID 47
 bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
 txn ApplicationID
 intc_1 // 0
@@ -55,7 +55,7 @@ gtxn 1 Receiver
 gtxna 0 Accounts 2
 ==
 intc_0 // 1
-intc 4 // 6
+intc 4 // TMPL_PRICE_ID
 asset_holding_get AssetBalance
 store 10
 store 11
@@ -124,7 +124,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // 6
+intc 4 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -168,7 +168,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // 6
+intc 4 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -365,7 +365,7 @@ store 4
 intc_0 // 1
 load 4
 sha256
-pushbytes b64(Y3JlYXRl) // TMPL_BLANK_HASH
+pushbytes TMPL_BLANK_HASH // TMPL_BLANK_HASH
 ==
 &&
 pushbytes 0x50726f6772616d // "Program"

@@ -7,5 +7,5 @@ def platform_delegate():
     return And( Global.group_size() > Int(1), valid_app_call(Gtxn[0]))
 
 if __name__ == "__main__":
-    with open("../platform-delegate.teal", 'w') as f:
+    with open(tealpath("platform-delegate.teal"), 'w') as f:
         f.write(compileTeal(platform_delegate(), Mode.Signature, version=3))

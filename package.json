@@ -14,7 +14,7 @@
     "@blueprintjs/core": "^3.39.0",
     "@blueprintjs/select": "^3.15.9",
     "@randlabs/myalgo-connect": "^1.0.1",
-    "algosdk": "1.9.1",
+    "algosdk": "^1.9.1",
     "cids": "^1.1.5",
     "ipfs-http-client": "^49.0.4",
     "jquery": "^3.5.1",

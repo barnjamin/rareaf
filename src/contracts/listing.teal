@@ -1,0 +1,491 @@
+#pragma version 3
+intcblock 1 4 6 0 6 5 3
+bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
+pushbytes 0xf12b9cced463868b93eabf690ed8d01c2eb6f810e9174a40f60bc728cc7cffc8 // TMPL_CREATOR_ADDR
+store 0
+pushbytes b64(AAAAAAAAAAQ=) // TMPL_ASSET_ID
+btoi
+store 3
+intc_3 // 0
+bnz l10
+gtxna 0 ApplicationArgs 0
+pushbytes 0x637265617465 // "create"
+==
+bnz l9
+gtxna 0 ApplicationArgs 0
+pushbytes 0x64656c657465 // "delete"
+==
+bnz l8
+gtxna 0 ApplicationArgs 0
+pushbytes 0x7075726368617365 // "purchase"
+==
+bnz l7
+gtxna 0 ApplicationArgs 0
+pushbytes 0x746167 // "tag"
+==
+gtxna 0 ApplicationArgs 0
+pushbytes 0x756e746167 // "untag"
+==
+||
+gtxna 0 ApplicationArgs 0
+pushbytes 0x70726963655f6465637265617365 // "price_decrease"
+==
+||
+bnz l6
+err
+l6:
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc 5 // 5
+==
+&&
+b l11
+l7:
+global GroupSize
+intc_2 // 6
+==
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc 5 // 5
+==
+&&
+&&
+gtxn 1 Sender
+store 2
+intc_0 // 1
+&&
+gtxn 2 Sender
+store 1
+intc_0 // 1
+&&
+gtxn 1 TypeEnum
+intc_0 // pay
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 Sender
+load 2
+==
+&&
+gtxn 1 Receiver
+load 0
+==
+&&
+gtxn 1 Amount
+gtxn 1 Amount
+==
+&&
+&&
+gtxn 2 TypeEnum
+intc_1 // axfer
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+load 2
+==
+&&
+gtxn 2 Sender
+load 1
+==
+&&
+gtxn 2 AssetReceiver
+load 2
+==
+&&
+gtxn 2 XferAsset
+load 3
+==
+&&
+&&
+gtxn 3 TypeEnum
+intc_1 // axfer
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 AssetCloseTo
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+gtxn 3 AssetReceiver
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 3 XferAsset
+intc 4 // 6
+==
+&&
+&&
+gtxn 4 TypeEnum
+intc 6 // acfg
+==
+gtxn 4 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 4 ConfigAsset
+load 3
+==
+&&
+gtxn 4 ConfigAssetManager
+load 2
+==
+&&
+gtxn 4 ConfigAssetReserve
+load 2
+==
+&&
+gtxn 4 ConfigAssetFreeze
+load 2
+==
+&&
+gtxn 4 ConfigAssetClawback
+load 2
+==
+&&
+&&
+gtxn 5 TypeEnum
+intc_0 // pay
+==
+gtxn 5 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 5 CloseRemainderTo
+load 0
+==
+&&
+gtxn 5 Sender
+load 1
+==
+&&
+gtxn 5 Receiver
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 5 Amount
+pushint 1000000 // 1000000
+==
+&&
+&&
+b l11
+l8:
+global GroupSize
+pushint 5 // 5
+==
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc 5 // 5
+==
+&&
+&&
+gtxn 1 Sender
+store 1
+intc_0 // 1
+&&
+gtxn 1 TypeEnum
+intc_1 // axfer
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 1 Sender
+load 1
+==
+&&
+gtxn 1 AssetReceiver
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 1 XferAsset
+intc 4 // 6
+==
+&&
+&&
+gtxn 2 TypeEnum
+intc_1 // axfer
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+load 0
+==
+&&
+gtxn 2 Sender
+load 1
+==
+&&
+gtxn 2 AssetReceiver
+load 0
+==
+&&
+gtxn 2 XferAsset
+load 3
+==
+&&
+&&
+gtxn 3 TypeEnum
+intc 6 // acfg
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 ConfigAsset
+load 3
+==
+&&
+gtxn 3 ConfigAssetManager
+load 0
+==
+&&
+gtxn 3 ConfigAssetReserve
+load 0
+==
+&&
+gtxn 3 ConfigAssetFreeze
+load 0
+==
+&&
+gtxn 3 ConfigAssetClawback
+load 0
+==
+&&
+&&
+gtxn 4 TypeEnum
+intc_0 // pay
+==
+gtxn 4 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 4 CloseRemainderTo
+load 0
+==
+&&
+gtxn 4 Sender
+load 1
+==
+&&
+gtxn 4 Receiver
+load 0
+==
+&&
+gtxn 4 Amount
+intc_3 // 0
+==
+&&
+&&
+b l11
+l9:
+global GroupSize
+pushint 7 // 7
+==
+gtxn 0 TypeEnum
+intc_2 // appl
+==
+gtxn 0 ApplicationID
+intc 5 // 5
+==
+&&
+&&
+gtxn 1 Receiver
+store 1
+intc_0 // 1
+&&
+gtxn 1 TypeEnum
+intc_0 // pay
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 Sender
+load 0
+==
+&&
+gtxn 1 Receiver
+load 1
+==
+&&
+gtxn 1 Amount
+pushint 5000000 // 5000000
+==
+&&
+&&
+gtxn 2 TypeEnum
+intc_1 // axfer
+==
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 XferAsset
+load 3
+==
+&&
+gtxn 2 Sender
+load 1
+==
+&&
+gtxn 2 AssetReceiver
+load 1
+==
+&&
+gtxn 2 AssetAmount
+intc_3 // 0
+==
+&&
+&&
+gtxn 3 TypeEnum
+intc_1 // axfer
+==
+gtxn 3 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 3 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 3 XferAsset
+intc 4 // 6
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+gtxn 3 AssetReceiver
+load 1
+==
+&&
+gtxn 3 AssetAmount
+intc_3 // 0
+==
+&&
+&&
+gtxn 4 TypeEnum
+intc_1 // axfer
+==
+gtxn 4 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 4 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 4 Sender
+load 0
+==
+&&
+gtxn 4 AssetReceiver
+load 1
+==
+&&
+gtxn 4 AssetAmount
+intc_0 // 1
+==
+&&
+gtxn 4 XferAsset
+load 3
+==
+&&
+&&
+gtxn 5 TypeEnum
+intc_1 // axfer
+==
+gtxn 5 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 5 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 5 Sender
+bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+==
+&&
+gtxn 5 AssetReceiver
+load 1
+==
+&&
+gtxn 5 AssetAmount
+gtxna 0 ApplicationArgs 1
+btoi
+==
+&&
+gtxn 5 XferAsset
+intc 4 // 6
+==
+&&
+&&
+gtxn 6 TypeEnum
+intc 6 // acfg
+==
+gtxn 6 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 6 ConfigAsset
+load 3
+==
+&&
+gtxn 6 ConfigAssetManager
+load 1
+==
+&&
+gtxn 6 ConfigAssetReserve
+load 1
+==
+&&
+gtxn 6 ConfigAssetFreeze
+load 1
+==
+&&
+gtxn 6 ConfigAssetClawback
+load 1
+==
+&&
+&&
+b l11
+l10:
+intc_3 // 0
+l11:
