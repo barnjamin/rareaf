@@ -77,6 +77,7 @@ class AlgoSignerWallet implements Wallet {
         const encoded_txns = txns.map((tx: Transaction) => {
             const t = {txn: AlgoSigner.encoding.msgpackToBase64(tx.toByte())};
             if(algosdk.encodeAddress(tx.from.publicKey) !== default_acct){
+                //@ts-ignore
                 t.signers = []
             }
             return t

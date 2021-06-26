@@ -165,8 +165,8 @@ function Uploader(props: UploaderProps) {
         props.setFileDetails(event.target.files.item(0))
 
         uploadContent(event.target.files).then((cid) => {
-            setCID(cid)
-            props.onUploaded(cid)
+            setCID(cid.cid)
+            props.onUploaded(cid.cid)
         })
     }
 
