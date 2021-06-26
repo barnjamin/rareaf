@@ -1,19 +1,24 @@
 import LogicSig from 'algosdk/dist/types/src/logicsig'
 import {getAlgodClient} from './algorand'
 import algosdk from 'algosdk'
-import {platform_settings as ps} from './platform-conf'
 import {concatTypedArrays} from './algorand'
 
 import {sha256} from 'js-sha256'
 
+//@ts-ignore
 import listing_var_positions from 'url:../contracts/listing.tmpl.teal.json'
+//@ts-ignore
 import listing_template from 'url:../contracts/listing.tmpl.teal'
 
+//@ts-ignore
 import platform_approval from 'url:../contracts/platform-approval.teal'
+//@ts-ignore
 import platform_clear from 'url:../contracts/platform-clear.teal'
 
-import platform_delegate from 'url:../contract/platform-delegate.teal'
-//import platform_delegate_signed from 'url:../contracts/platform.signed'
+//@ts-ignore
+//import platform_delegate from 'url:../contract/platform-delegate.teal'
+//@ts-ignore
+import platform_delegate_signed from 'url:../contracts/platform.signed'
 
 
 export async function get_listing_sig(vars: any): Promise<LogicSig> {
@@ -28,8 +33,8 @@ export async function get_platform_sig(): Promise<LogicSig> {
     return algosdk.logicSigFromByte(delegate_program_bytes)
 }
 
-export async function get_listing_source(vars: any) {
-    return populate_contract(listing_template, vars)
+export async function get_listing_compiled(vars: any) {
+    return get_contract_compiled(listing_template, vars)
 }
 
 export async function get_contract_compiled(template: string, vars: any) {

@@ -22,12 +22,23 @@ class InsecureWallet implements Wallet {
         return true
     }
 
+    static img(inverted: boolean): string {
+        return ""
+    }
+    img(inverted: boolean): string {
+        return InsecureWallet.img(inverted)
+    }
+
     isConnected(): boolean {
         return this.accounts.length>0;
     }
 
     getDefaultAccount(): string {
         return this.accounts[0];
+    }
+
+    async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
+        return undefined 
     }
 
     async sign(txn: TransactionParams): Promise<SignedTxn> {

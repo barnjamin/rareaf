@@ -1,5 +1,5 @@
 {
-  "name": "RareAF-DApp",
+  "name": "rareaf-dapp",
   "version": "0.0.1",
   "description": "Upload files to ipfs and allow token creation against them",
   "private": true,
@@ -20,7 +20,8 @@
     "jquery": "^3.5.1",
     "js-sha256": "^0.9.0",
     "react-async": "^10.0.1",
-    "react-router-dom": "^5.2.0"
+    "react-router-dom": "^5.2.0",
+    "react-syntax-highlighter": "^15.4.3"
   },
   "devDependencies": {
     "@parcel/transformer-image": "^2.0.0-beta.2",

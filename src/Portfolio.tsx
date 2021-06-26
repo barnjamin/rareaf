@@ -30,6 +30,7 @@ export default function Portfolio(props: PortfolioProps) {
     const [listings, setListings] = React.useState([])
     const [nfts, setNFTs] = React.useState([])
 
+
     React.useEffect(()=>{
         if(port_acct === undefined) return
 
@@ -37,7 +38,7 @@ export default function Portfolio(props: PortfolioProps) {
             setListings(p['listings'])
             setNFTs(p['nfts'])
         })
-    }, [port_acct])
+    }, [])
 
 
     return (

@@ -1,4 +1,4 @@
-from pyteal import *
+from pyteal import * 
 
 from config import *
 from utils  import *

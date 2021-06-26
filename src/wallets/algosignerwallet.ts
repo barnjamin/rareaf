@@ -1,7 +1,10 @@
 
 import algosdk, { Transaction, TransactionParams } from 'algosdk'
 import { SignedTxn, Wallet } from './wallet'
+
+//@ts-ignore
 import logo_inverted from 'url:./branding/algosigner/Logo-inverted.png'
+//@ts-ignore
 import logo from 'url:./branding/algosigner/Logo.png'
 
 
@@ -20,6 +23,9 @@ class AlgoSignerWallet implements Wallet {
 
     static img(inverted: boolean): string {
         return inverted?logo_inverted:logo
+    }
+    img(inverted: boolean): string {
+        return AlgoSignerWallet.img(inverted)
     }
 
     async connect(): Promise<boolean> {

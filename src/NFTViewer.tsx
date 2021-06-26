@@ -30,7 +30,7 @@ export default function NFTViewer(props: NFTViewerProps) {
     
     React.useEffect(()=>{
         getNFT(parseInt(id))
-            .then((nft)=>{ setNFT(nft) })
+            .then((nft)=>{ console.log(nft); setNFT(nft) })
             .catch((err)=>{ console.error("Error:", err) })
 
         getTags()

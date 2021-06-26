@@ -59,7 +59,7 @@ class App extends React.Component<AppProps, AppState> {
   render() {
 
     let adminNav = <div/>
-    if(this.walletConnected() && this.state.wallet.getDefaultAccount() == ps.address){
+    if(this.walletConnected() && (ps.application.owner == "" || this.state.wallet.getDefaultAccount() == ps.application.owner)){
       adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
     }
 

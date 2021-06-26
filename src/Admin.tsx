@@ -6,9 +6,9 @@ import * as React from 'react'
 import { Wallet } from './wallets/wallet'
 import {platform_settings as ps} from './lib/platform-conf'
 import { Application } from './lib/application';
-import { useEffect } from 'react';
 import {Button, Tabs, Tab, InputGroup } from '@blueprintjs/core'
-import { useState } from 'react';
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
 
 type AdminProps = { 
     history: any
@@ -17,52 +17,66 @@ type AdminProps = {
 };
 
 export default function Admin(props: AdminProps) {
-    if (props.acct != ps.address) return (<div className='container'><p>no</p></div>)
-
+    if (props.acct != ps.application.owner && ps.application.owner != "")  return (<div className='container'><p>no</p></div>)
 
     const [algod, setAlgod] = React.useState(ps.algod)
     const [indexer, setIndexer] = React.useState(ps.indexer)
     const [ipfs, setIPFS] = React.useState(ps.ipfs)
     const [loading, setLoading] = React.useState(false)
-    const [appConf, setApp] = React.useState({
-        owner: props.acct,
-        name:"RareAF",
-        unit: "raf",
-        fee: "1000"
-    })
+    const [appConf, setApp] = React.useState(ps.application)
+    const [hasChanges, setHasChanges] = React.useState(false)
 
     function setAlgodValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
         setAlgod(algod =>({ ...algod, [k]: val }))
+        setHasChanges(true)
     }
 
     function setIndexerValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
         setIndexer(indexer =>({ ...indexer, [k]: val }))
+        setHasChanges(true)
     }
 
     function setIpfsValue (k: string, v: string){
         setIPFS(ipfs =>({ ...ipfs, [k]: v }))
+        setHasChanges(true)
     }
 
     function setAppConf(k: string, v: string) {
-        setApp(appConf =>({ ...appConf, [k]: v }))
+        const val = k=="fee"? parseInt(v) :v
+        setApp(appConf =>({ ...appConf, [k]: val }))
+        setHasChanges(true)
     }
 
     function createApp(){
-
         setLoading(true)
+
         const app  = new Application(appConf)
-        app.create(props.wallet).then(success=>{ 
-            console.log(success)  
-            setLoading(false)
-        })
+
+        app.create(props.wallet)
+        .then((result)=>{ })
+        .finally(()=>{ setLoading(false) })
+    }
+
+    function updateApp(){
+        setLoading(true)
+
+        const app  = new Application(appConf)
+
+        app.updateApplication(props.wallet)
+        .then((result)=>{ })
+        .finally(()=>{ setLoading(false) })
+    }
+
+    function updateConf(e){
+        setHasChanges(false)
     }
 
 
-    let appComponent = <ApplicationCreator   set={setAppConf} create={createApp} {...appConf} loading={loading} />
-    if (appConf.id != 0){
-        // Resolve app stuff
+    let appComponent = <ApplicationCreator set={setAppConf} create={createApp} {...appConf} loading={loading} />
+    if (appConf.id>0){
+        appComponent = <ApplicationUpdater set={setAppConf} update={updateApp} {...appConf} loading={loading} />
     }
 
     return (
@@ -73,6 +87,18 @@ export default function Admin(props: AdminProps) {
                 <Tab title='Ipfs' id='ipfs' panel={ <IPFSConfig setProp={setIpfsValue} {...ipfs} /> } />
                 <Tab title='App' id='app' panel={ appComponent } />
             </Tabs>
+            <div className='container config-text-container'>
+                <SyntaxHighlighter language='json' style={docco}>
+                    {JSON.stringify({
+                        ...ps,
+                        ["algod"]: algod,
+                        ["indexer"]: indexer,
+                        ["ipfs"]: ipfs,
+                        ["application"]:appConf
+                    }, undefined, 4)}
+                </SyntaxHighlighter>
+                <Button text='update' outlined={true} disabled={!hasChanges} onClick={updateConf}></Button>
+            </div>
         </div>
     )
 }
@@ -183,7 +209,7 @@ function IPFSConfig(props: IPFSConfigProps)  {
 type ApplicationCreatorProps = {
     name: string
     unit: string
-    fee: string
+    fee: number 
     loading: boolean
     set(key: string, value: string)
     create()
@@ -209,9 +235,45 @@ function ApplicationCreator(props: ApplicationCreatorProps) {
                 onChange={e=>{props.set('fee', e.target.value)}}
                 placeholder="Fee"
                 large={true}
-                value={props.fee}
+                value={props.fee.toString()}
             />
             <Button loading={props.loading} onClick={props.create} text='Create'/>
+        </div>
+    )
+}
+
+type ApplicationUpdaterProps = {
+    name: string
+    unit: string
+    fee: number 
+    loading: boolean
+    set(key: string, value: string)
+    update()
+};
+
+function ApplicationUpdater(props: ApplicationUpdaterProps) {
+
+    return (
+        <div className='container application-conf' >
+            <InputGroup
+                onChange={e=>{props.set('name', e.target.value)}}
+                placeholder="Application Name"
+                large={true}
+                value={props.name}
+            />
+            <InputGroup
+                onChange={e=>{props.set('unit', e.target.value)}}
+                placeholder="Unit Name"
+                large={true}
+                value={props.unit}
+            />
+            <InputGroup
+                onChange={e=>{props.set('fee', e.target.value)}}
+                placeholder="Fee"
+                large={true}
+                value={props.fee.toString()}
+            />
+            <Button loading={props.loading} onClick={props.update} text='Update Application'/>
         </div>
     )
 }

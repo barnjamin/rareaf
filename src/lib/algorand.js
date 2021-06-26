@@ -27,8 +27,8 @@ export async function getTags(){
     const indexer = getIndexer()
     const tags = await indexer
         .searchForAssets()
-        .creator(ps.address)
-        .unit(ps.tags.unit)
+        .creator(ps.application.owner)
+        .unit(ps.application.unit + "-tag")
         .do()
 
     return tags.assets.map((t)=>{
@@ -39,10 +39,10 @@ export async function getTags(){
 export async function getListings(tag) {
     const indexer  = getIndexer()
 
-    let token_id = ps.token.id
+    let token_id = ps.application.price_token
     if(tag !== undefined){
-        //TODO:: cache these name=>id so we dont have to hit the net
-        if(tag.substr(0,3) !== "RAF") tag = "RAF:"+tag
+        if(tag.substr(0,3) !== ps.application.unit) tag = ps.application.unit+":"+tag
+
         const tagToken = await getTagToken(tag)
 
         if (tagToken.id == 0) return []
@@ -57,7 +57,7 @@ export async function getListings(tag) {
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
-        if (b.address == ps.address || b.amount == 0) continue;
+        if (b.address == ps.application.owner || b.amount == 0) continue;
 
         listings.push(await getListing(b.address))
     }
@@ -69,7 +69,7 @@ export async function getTagToken(name) {
     const indexer  = getIndexer()
     const assets = await indexer.searchForAssets().name(name).do()
     for(let aidx in assets.assets){
-        if(assets.assets[aidx].params.creator == ps.address)
+        if(assets.assets[aidx].params.creator == ps.application.owner)
             return { id: assets.assets[aidx].index, name:name }
     }
 
@@ -131,14 +131,14 @@ export async function getHoldingsFromListingAddress(address) {
     for (let aid in acct_resp.account.assets) {
         const asa = acct_resp.account.assets[aid]
 
-        if(asa['asset-id'] == ps.token.id){
+        if(asa['asset-id'] == ps.application.price_token){
             holdings.price = asa['amount']
             continue
         }
 
         const token = await getToken(asa['asset-id'])
 
-        if(token.params.creator == ps.address) holdings.tags.push(token)
+        if(token.params.creator == ps.application.owner) holdings.tags.push(token)
         else holdings.asa = token
 
     }
@@ -209,10 +209,10 @@ export function get_asa_xfer_txn(suggestedParams, from, to, id, amt) {
     }
 }
 
-
-export function get_asa_create_txn(suggestedParams, addr, meta) {
+export function get_asa_create_txn(suggestedParams, addr, url) {
     return  {
         from: addr,
+        assetURL: url,
         assetManager: addr,
         assetReserve: addr,
         assetClawback: addr,
@@ -220,7 +220,6 @@ export function get_asa_create_txn(suggestedParams, addr, meta) {
         assetTotal: 1,
         assetDecimals: 0,
         type: 'acfg',
-        assetURL: ps.domain,
         ...suggestedParams
     }
 }

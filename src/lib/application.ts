@@ -16,25 +16,28 @@ export enum Method {
     PriceDecrease = "cHJpY2VfZGVjcmVhc2U=",
     Purchase = "cHVyY2hhc2U=",
 }
+export type AppConf = {
+    owner: string // Address of applictation owner
+    name: string  // Full name of 
+    unit: string  // Unit name for price/tag tokens
+    fee: string   // Amount to be sent to app onwer on sales
+
+    id?: number          // ID of application 
+    price_token?: number  // ID of token representing price 
+    listing_hash?: string // Sha256 of blanked out listing contract  
+}
 
 export class Application {
-
-    conf: {
-        owner: string // Address of applictation owner
-        name: string  // Full name of 
-        unit: string  // Unit name for price/tag tokens
-        fee: number   // Amount to be sent to app onwer on sales
-
-        id?: number          // ID of application 
-        priceToken?: number  // ID of token representing price 
-        listingHash?: string // Sha256 of blanked out listing contract  
-    }
+    conf: AppConf;
 
     constructor(settings: any){
         this.conf = settings
     }
 
     async create(wallet: Wallet): Promise<boolean> {
+        this.conf.owner = wallet.getDefaultAccount()
+        console.log(this.conf)
+        
         // Create blank app to reserve ID
         await this.updateApplication(wallet)
 
@@ -43,20 +46,20 @@ export class Application {
 
         // Populate Contracts with ids to get the blank hash 
         const lc = await get_listing_hash({
-            "TMPL_PRICE_ID": this.conf.priceToken, 
+            "TMPL_PRICE_ID": this.conf.price_token, 
             "TMPL_APP_ID":this.conf.id,
             "TMPL_CREATOR_ADDR": dummy_addr, // Dummy addr
             "TMPL_ASSET_ID": dummy_id //Dummy int
         }) 
-        this.conf.listingHash = lc.toString('base64')
+        this.conf.listing_hash = lc.toString('base64')
 
         // Update Application with hash of contract && price token id
         await this.updateApplication(wallet)
 
         // Sign delegate to xfer tokens
-        //this.signDelegate()
+        // this.signDelegate()
 
-        return false
+        return true
     }
 
 
@@ -68,8 +71,8 @@ export class Application {
         const suggestedParams = await getSuggested(10)
 
         const app = await get_approval_program({
-            "TMPL_PRICE_ID":this.conf.priceToken, 
-            "TMPL_BLANK_HASH": this.conf.listingHash ||= dummy_addr
+            "TMPL_PRICE_ID":this.conf.price_token, 
+            "TMPL_BLANK_HASH": this.conf.listing_hash ||= dummy_addr
         }) 
 
         const clear = await get_clear_program({})
@@ -107,7 +110,7 @@ export class Application {
             console.error("Failed to create the application")
         }
 
-        this.conf.priceToken = result['asset-index']
+        this.conf.price_token = result['asset-index']
     } 
 
     async createTagToken(name: string) { }

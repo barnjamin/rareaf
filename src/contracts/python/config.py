@@ -15,12 +15,13 @@ tag_key       = Bytes("tag:")
 
 #app_id        = Int(int(configuration['application']['id']))
 #price_token   = Int(int(configuration['token']['id']))
+#platform_addr = Addr(configuration['address']) 
+#platform_fee  = Int(int(configuration['fee']))
 
 app_id        = Tmpl.Int("TMPL_APP_ID")
 price_token   = Tmpl.Int("TMPL_PRICE_ID")
-
-platform_addr = Addr(configuration['address']) 
-platform_fee  = Int(int(configuration['fee']))
+platform_addr = Tmpl.Bytes("TMPL_OWNER_ADDR")
+platform_fee  = Tmpl.Int("TMPL_FEE_AMT")
 
 seed_amt      = Int(int(configuration['seed']))
 max_price     = Int(int(configuration['max_price']))

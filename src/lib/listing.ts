@@ -51,9 +51,9 @@ export class Listing {
         const [var_id, var_addr] = this.getEncodedVars()
 
         return {
-            TMPL_PLATFORM_ID: ps.token.id,
-            TMPL_PLATFORM_FEE: ps.fee,
-            TMPL_PLATFORM_ADDR: ps.address,
+            TMPL_PLATFORM_ID: ps.application.price_token,
+            TMPL_PLATFORM_FEE: ps.application.fee,
+            TMPL_PLATFORM_ADDR: ps.application.owner,
 
             TMPL_ASSET_ID: `base64(${var_id})`,
             TMPL_CREATOR_ADDR: `base64(${var_addr})`
@@ -72,10 +72,10 @@ export class Listing {
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.creator_addr, args))
-        const seed_txn = new Transaction(get_pay_txn(suggestedParams, this.creator_addr, this.contract_addr, ps.seed))
+        const seed_txn = new Transaction(get_pay_txn(suggestedParams, this.creator_addr, this.contract_addr, ps.application.seed))
         const asa_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.asset_id))
-        const price_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, ps.token.id))
-        const price_send = new Transaction(get_asa_xfer_txn(suggestedParams, ps.address, this.contract_addr, ps.token.id, this.price))
+        const price_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, ps.application.price_token))
+        const price_send = new Transaction(get_asa_xfer_txn(suggestedParams, ps.application.owner, this.contract_addr, ps.application.price_token, this.price))
         const asa_send = new Transaction(get_asa_xfer_txn(suggestedParams, this.creator_addr, this.contract_addr, this.asset_id, 1))
         const asa_cfg = new Transaction(get_asa_cfg_txn(suggestedParams, this.creator_addr, this.asset_id, {
             assetManager: this.contract_addr,
@@ -131,7 +131,7 @@ export class Listing {
         app_call_txn.appForeignAssets = fasset
 
         const tag_optin_txn = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, tag.id))
-        const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, ps.address, this.contract_addr, tag.id, 1))
+        const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, ps.application.owner, this.contract_addr, tag.id, 1))
 
         const grouped = [app_call_txn, tag_optin_txn, tag_xfer_txn]
         algosdk.assignGroupID(grouped)
@@ -161,8 +161,8 @@ export class Listing {
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.creator_addr, args))
         app_call_txn.appForeignAssets = fasset
 
-        const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, tag.id, 1))
-        tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
+        const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner, tag.id, 1))
+        tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.application.owner)
 
         const grouped = [app_call_txn, tag_xfer_txn]
         algosdk.assignGroupID(grouped)
@@ -192,13 +192,13 @@ export class Listing {
     async doPriceIncrease(wallet: Wallet, amt: number) {
 
         const args = [Method.PriceIncrease, uintToB64String(amt)]
-        const fasset = [ps.token.id]
+        const fasset = [ps.application.price_token]
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.creator_addr, args))
         app_call_txn.appForeignAssets = fasset
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, ps.address, this.contract_addr, ps.token.id, amt))
+        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, ps.application.owner, this.contract_addr, ps.application.price_token, amt))
 
         algosdk.assignGroupID([app_call_txn, price_xfer_txn])
 
@@ -212,13 +212,13 @@ export class Listing {
 
     async doPriceDecrease(wallet: Wallet, amt: number) {
         const args = [Method.PriceDecrease, uintToB64String(amt)]
-        const fasset = [ps.token.id]
+        const fasset = [ps.application.price_token]
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.creator_addr, args))
         app_call_txn.appForeignAssets = fasset
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, ps.token.id, amt))
+        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner, ps.application.price_token, amt))
 
         algosdk.assignGroupID([app_call_txn, price_xfer_txn])
 
@@ -239,8 +239,8 @@ export class Listing {
         const rawTx = algosdk.decodeUnsignedTransaction(app_call_txn.toByte());
         const processedTx = rawTx._getDictForDisplay();
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, ps.token.id, 0))
-        price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
+        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner, ps.application.price_token, 0))
+        price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.application.owner)
 
         const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.contract_addr, this.asset_id, {
             assetManager: this.creator_addr,
@@ -282,8 +282,8 @@ export class Listing {
 
         const purchase_amt_txn = new Transaction(get_pay_txn(suggestedParams, buyer, this.creator_addr, this.price))
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.address, ps.token.id, 0))
-        price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.address)
+        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner, ps.application.price_token, 0))
+        price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.application.owner)
         price_xfer_txn.amount = 1
 
         const asa_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, buyer, this.asset_id, 0))
@@ -297,7 +297,7 @@ export class Listing {
             assetClawback: buyer,
         }))
 
-        const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, ps.address, ps.fee))
+        const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, ps.application.owner, ps.application.fee))
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
         const grouped = [

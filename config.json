@@ -1,0 +1,35 @@
+{
+    "domain": "rare.af",
+    "algod":{
+        "server":"http://localhost",
+        "port":4001,
+        "token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "network": "sandnet"
+    },
+    "ipfs":{
+        "host": "/ip4/127.0.0.1/tcp/5001",
+        "display":"http://127.0.0.1:8080/ipfs/"
+    },
+    "indexer": {
+        "server":"http://localhost",
+        "port":8980,
+        "token":""
+    },
+    "explorer":"algoexplorer.io",
+    "application":{
+        "id": 9,
+        "price_token": 10,
+        "owner": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
+        "name":"RareAF",
+        "unit":"raf",
+        "contracts":{
+            "approval":"platform-approval.teal",
+            "clear":"platform-clear.teal",
+            "listing":"listing.teal"
+        },
+        "fee":100000,
+        "seed":5e6,
+        "max_price":1e10
+    },
+    "dev":{ "debug_txns":true }
+}

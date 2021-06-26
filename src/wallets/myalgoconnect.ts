@@ -1,9 +1,11 @@
-import { TransactionParams } from 'algosdk'
+import { TransactionParams, Transaction } from 'algosdk'
 import {SignedTxn, Wallet} from './wallet'
 import MyAlgo from '@randlabs/myalgo-connect';
 
+//@ts-ignore
 import logo_inverted from 'url:./branding/myalgo-connect/Logo-inverted.png'
-import  logo from 'url:./branding/myalgo-connect/Logo.png'
+//@ts-ignore
+import logo from 'url:./branding/myalgo-connect/Logo.png'
 
 
 class MyAlgoConnectWallet implements Wallet {
@@ -23,6 +25,10 @@ class MyAlgoConnectWallet implements Wallet {
 
     static img(inverted: boolean): string {
         return inverted?  logo_inverted : logo 
+    }
+
+    img(inverted: boolean): string {
+        return MyAlgoConnectWallet.img(inverted)
     }
 
     async connect(): Promise<boolean> {
@@ -45,11 +51,13 @@ class MyAlgoConnectWallet implements Wallet {
         return this.accounts[this.default_account];
     }
 
-    async sign(txn: TransactionParams): Promise<SignedTxn> {
-        return await this.walletConn.signTransaction(txn);
+    async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
+        throw new Error("Not implemented")
     }
-    async signTxn(txns: SignedTxn[]): Promise<SignedTxn[]> {
-        return undefined
+
+    async sign(txn: TransactionParams): Promise<SignedTxn> {
+        throw new Error("Not implemented")
+        //return await this.walletConn.signTransaction(txn);
     }
 
     signBytes(b: Uint8Array): Promise<Uint8Array> {

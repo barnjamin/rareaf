@@ -3,11 +3,11 @@
 
 import * as React from 'react'
 import { uploadContent, uploadMetadata } from './lib/ipfs'
+import IPFS from 'ipfs-core'
 import { Button, Elevation, FileInput, Card } from "@blueprintjs/core"
 import { NFT, NFTMetadata, emptyMetadata } from './lib/nft'
 import { platform_settings as ps } from './lib/platform-conf'
 import {Wallet} from './wallets/wallet'
-import { isMetaProperty } from 'typescript'
 
 type MinterProps = {
     history: any 
@@ -20,145 +20,142 @@ type MinterState = {
     loading: boolean
 };
 
-export default class Minter extends React.Component<MinterProps, MinterState> {
+export default function Minter(props: MinterProps){
+    const [meta, setMeta] = React.useState(emptyMetadata())
+    const [loading, setLoading] = React.useState(false)
 
-    props: MinterProps;
-    state: MinterState = {
-        meta: emptyMetadata(),
-        loading: false
-    };
-
-    constructor(props) {
-        super(props)
-        this.handleChangeMeta   = this.handleChangeMeta.bind(this)
-        this.createMetaAndToken = this.createMetaAndToken.bind(this)
-        this.setFileHash        = this.setFileHash.bind(this)
-        this.setFileDetails     = this.setFileDetails.bind(this)
+    function setFileHash(cid) {
+        console.log(cid)
+        setMeta(meta=>({
+            ...meta, 
+            "file_cid": cid, 
+            "file_hash": cid.path
+        }))
     }
 
-    setFileHash(cid) {
-        this.setState((state)=>{
-            const m = state.meta
-            return {meta: { ...m, file_cid: cid, file_hash: cid.path } }
-        })
+    function setFileDetails(file) {
+        setMeta(meta=>({
+            ...meta,
+            "file_name": file.name,
+            "file_size": file.size, 
+            "file_type": file.type 
+        }))
     }
 
-    setFileDetails(file) {
-        this.setState((state)=>{
-            const m = state.meta
-            return {meta: { ...m, file_name: file.name, file_size: file.size, file_type: file.type } }
-        })
-    }
-
-    createMetaAndToken(event) {
+    function createMetaAndToken(event) {
         event.stopPropagation()
         event.preventDefault()
 
-        this.setState({ loading: true })
+        setLoading(true) 
 
-        const metadata = this.captureMetadata()
+        const metadata = captureMetadata()
 
-        uploadMetadata(metadata).then((meta_cid) => {
+        uploadMetadata(metadata).then((meta_details) => {
             const nft = new NFT(metadata);
-            nft.meta_cid = meta_cid
+            nft.meta_cid = meta_details.cid
 
-            nft.createToken(this.props.wallet).then((res) => {
-                if ('asset-index' in res) this.props.history.push("/nft/" + res['asset-index'])
+            console.log(nft)
+
+            nft.createToken(props.wallet).then((res) => {
+                if ('asset-index' in res) 
+                    props.history.push("/nft/" + res['asset-index'])
             }).catch((err)=>{ 
                 alert("Failed to create token")
                 console.error("Failed to create token: ", err)
-                this.setState({ loading: false })
+                setLoading(false)
             })
 
         }).catch((err) => { 
             console.error("Failed to upload metadata", err) 
             alert("Failed to upload metadata")
-            this.setState({ loading: false })
+            setLoading(false)
         })
 
     }
 
-    handleChangeMeta(event) {
+    function handleChangeMeta(event) {
         const target = event.target
         const value = target.type == 'checkbox' ? target.checked : target.value
         const name = target.name
-        this.setState((state)=>{
-            const m = state.meta
-            return { meta: { ...m,  [name]: value } }
-        })
+        setMeta(meta=>({
+            ...meta,
+            [name]: value 
+        }))
     }
 
-    captureMetadata() {
-        const m = this.state.meta
+    function captureMetadata() {
         return {
-            file_name: m.file_name,
-            file_size: m.file_size,
-            file_type: m.file_type,
-            file_hash: m.file_hash,
+            file_name: meta.file_name,
+            file_size: meta.file_size,
+            file_type: meta.file_type,
+            file_hash: meta.file_hash,
 
-            title: m.title,
-            artist: m.artist,
-            description: m.description,
-            tags: m.tags,
+            title:       meta.title,
+            artist:      meta.artist,
+            description: meta.description,
+            tags:        meta.tags,
         }
     }
 
-    render() {
-        return (
-            <div className='container'>
-                <Card elevation={Elevation.TWO} >
-                    <Uploader
-                        onUploaded={this.setFileHash}
-                        setFileDetails={this.setFileDetails}
-                        cid={this.state.meta.file_hash}
-                        wallet={this.props.wallet} />
+    return (
+        <div className='container'>
+            <Card elevation={Elevation.TWO} >
+                <Uploader
+                    onUploaded={setFileHash}
+                    setFileDetails={setFileDetails}
+                    file_hash={meta.file_hash} />
 
-                    <div className='container' >
-                        <input
-                            name='title'
-                            placeholder='Title...'
-                            className='details-basic details-title bp3-input bp3-large'
-                            onChange={this.handleChangeMeta}
-                            type='text'
-                            id='title'
-                            value={this.state.meta.title} />
-                        <input
-                            name='artist'
-                            placeholder='Artist...'
-                            className='details-basic details-artist bp3-input bp3-large'
-                            onChange={this.handleChangeMeta}
-                            type='text'
-                            id='artist'
-                            value={this.state.meta.artist} />
-                    </div>
+                <div className='container' >
+                    <input
+                        name='title'
+                        placeholder='Title...'
+                        className='details-basic details-title bp3-input bp3-large'
+                        onChange={handleChangeMeta}
+                        type='text'
+                        id='title'
+                        value={meta.title} />
+                    <input
+                        name='artist'
+                        placeholder='Artist...'
+                        className='details-basic details-artist bp3-input bp3-large'
+                        onChange={handleChangeMeta}
+                        type='text'
+                        id='artist'
+                        value={meta.artist} />
+                </div>
 
-                    <div className='container'>
-                        <textarea
-                            placeholder='Description...'
-                            className='details-description bp3-input bp3-large'
-                            onChange={this.handleChangeMeta}
-                            name='description'
-                            id='description'
-                            value={this.state.meta.description} />
-                    </div>
+                <div className='container'>
+                    <textarea
+                        placeholder='Description...'
+                        className='details-description bp3-input bp3-large'
+                        onChange={handleChangeMeta}
+                        name='description'
+                        id='description'
+                        value={meta.description} />
+                </div>
 
-                    <div className='container-mint'>
-                        <Button
-                            loading={this.state.loading}
-                            onClick={this.createMetaAndToken}
-                            rightIcon='clean'
-                            large={true}
-                            intent='success'
-                            text='Mint' />
-                    </div>
-                </Card>
-            </div>
-        )
-    }
+                <div className='container-mint'>
+                    <Button
+                        loading={loading}
+                        onClick={createMetaAndToken}
+                        rightIcon='clean'
+                        large={true}
+                        intent='success'
+                        text='Mint' />
+                </div>
+            </Card>
+        </div>
+    )
 
 }
 
-function Uploader(props) {
+type UploaderProps = {
+    file_hash: string
+    setFileDetails(e: any)
+    onUploaded(cid: IPFS.CID)
+};
+
+function Uploader(props: UploaderProps) {
     const [cid, setCID] = React.useState(undefined)
 
     function captureFile(event) {
@@ -173,7 +170,7 @@ function Uploader(props) {
         })
     }
 
-    if (props.file_hash === undefined) return (
+    if (props.file_hash === undefined || props.file_hash == "" ) return (
         <div className='container'>
             <div className='content content-piece'>
                 <FileInput large={true} disabled={false} text="Choose file..." onInputChange={captureFile} />
