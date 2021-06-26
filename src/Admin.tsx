@@ -56,7 +56,7 @@ export default function Admin(props: AdminProps) {
         const app  = new Application(appConf)
 
         app.create(props.wallet)
-        .then((result)=>{ })
+        .then((ac)=>{ setApp(appConf=>({...appConf, ...ac})) })
         .finally(()=>{ setLoading(false) })
     }
 

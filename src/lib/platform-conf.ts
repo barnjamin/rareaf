@@ -1,8 +1,3 @@
-const { Octokit } = require("@octokit/core");
-const {
-  createOAuthUserClientAuth,
-} = require("@octokit/auth-oauth-user-client");
-
 
 type AlgodConf = {
     server: string

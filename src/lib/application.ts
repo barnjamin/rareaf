@@ -20,7 +20,7 @@ export type AppConf = {
     owner: string // Address of applictation owner
     name: string  // Full name of 
     unit: string  // Unit name for price/tag tokens
-    fee: string   // Amount to be sent to app onwer on sales
+    fee:  number   // Amount to be sent to app onwer on sales
 
     id?: number          // ID of application 
     price_token?: number  // ID of token representing price 
@@ -34,7 +34,7 @@ export class Application {
         this.conf = settings
     }
 
-    async create(wallet: Wallet): Promise<boolean> {
+    async create(wallet: Wallet): Promise<AppConf> {
         this.conf.owner = wallet.getDefaultAccount()
         console.log(this.conf)
         
@@ -59,7 +59,7 @@ export class Application {
         // Sign delegate to xfer tokens
         // this.signDelegate()
 
-        return true
+        return this.conf 
     }
 
 
@@ -87,13 +87,11 @@ export class Application {
             this.conf.id = result['application-index']
         }else{
             const create_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.owner, app, clear, this.conf.id))
-            console.log(create_txn)
             const signed = await wallet.signTxn([create_txn])
             const result = await sendWaitGroup(signed)
             if(result['pool-error'] != "") {
                 console.error("Failed to create the application")
             }
-            console.log(result)
         }
     }
 
