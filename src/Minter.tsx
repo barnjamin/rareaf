@@ -15,11 +15,6 @@ type MinterProps = {
     acct: string
 };
 
-type MinterState = {
-    meta: NFTMetadata 
-    loading: boolean
-};
-
 export default function Minter(props: MinterProps){
     const [meta, setMeta] = React.useState(emptyMetadata())
     const [loading, setLoading] = React.useState(false)
@@ -28,7 +23,7 @@ export default function Minter(props: MinterProps){
         console.log(cid)
         setMeta(meta=>({
             ...meta, 
-            "file_cid": cid, 
+            "file_cid":  cid, 
             "file_hash": cid.path
         }))
     }
@@ -54,20 +49,17 @@ export default function Minter(props: MinterProps){
             const nft = new NFT(metadata);
             nft.meta_cid = meta_details.cid
 
-            console.log(nft)
-
             nft.createToken(props.wallet).then((res) => {
                 if ('asset-index' in res) 
                     props.history.push("/nft/" + res['asset-index'])
             }).catch((err)=>{ 
                 alert("Failed to create token")
                 console.error("Failed to create token: ", err)
-                setLoading(false)
             })
-
         }).catch((err) => { 
             console.error("Failed to upload metadata", err) 
             alert("Failed to upload metadata")
+        }).finally(()=>{
             setLoading(false)
         })
 

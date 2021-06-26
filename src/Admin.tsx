@@ -71,6 +71,7 @@ export default function Admin(props: AdminProps) {
     }
 
     function updateConf(e){
+        alert("Ok but this doesnt do anything, so just copy-paste it into your github repo")
         setHasChanges(false)
     }
 
@@ -98,7 +99,7 @@ export default function Admin(props: AdminProps) {
                         ["application"]:appConf
                     }, undefined, 4)}
                 </SyntaxHighlighter>
-                <Button text='update' outlined={true} disabled={!hasChanges} onClick={updateConf}></Button>
+                 <Button text='update' outlined={true} disabled={!hasChanges} onClick={updateConf} />
             </div>
         </div>
     )

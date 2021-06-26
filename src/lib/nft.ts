@@ -59,8 +59,7 @@ export class NFT {
         const [cid, md] = await getMetaFromIpfs(mhash);
 
         const nft = new NFT(md, asset['index'], asset['params']['manager'])
-
-        //nft.meta_cid = cid
+        nft.meta_cid = cid
 
         return nft
     }
