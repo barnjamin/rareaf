@@ -1,5 +1,8 @@
 #!/bin/bash
 
-mv /mnt/c/Users/Ben/Downloads/grouped.txns .
-../sandbox copy grouped.txns 
-../sandbox goal clerk dryrun -t grouped.txns
+txn_file=grouped.txns
+
+mv /mnt/c/Users/Ben/Downloads/$txn_file .
+../sandbox copy $txn_file
+../sandbox goal clerk inspect $txn_file
+../sandbox goal clerk dryrun -t $txn_file

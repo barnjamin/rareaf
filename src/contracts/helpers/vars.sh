@@ -4,13 +4,17 @@ echo "Sourcing vars"
 
 export GCMD="../sandbox goal"
 
-export SRCDIR=~/rareaf/src/contracts
+export PYSRCDIR=~/rareaf/src/contracts/python
+export SRCDIR=~/rareaf/src/contracts/
 
 export LISTING_NAME=listing.teal
 export LISTING_TEMPLATE=listing.tmpl.teal
+
+export APP_TMPL_NAME=platform-approval.tmpl.teal
 export APP_NAME=platform-approval.teal
 export CLEAR_NAME=platform-clear.teal
 
+export DELEGATE_TMPL_NAME=platform-delegate.tmpl.teal
 export DELEGATE_NAME=platform-delegate.teal
 export SIGNED_DELEGATE=platform-delegate.signed
 
@@ -18,9 +22,9 @@ export PLATFORM_FEE=1000000
 export SEED_ALGOS=5000000
 
 export LISTING_PRICE=1000
-export ASA_ID=15
-export PRICE_ASA_ID=5
-export APP_ID=4
+export ASA_ID=4
+export PRICE_ASA_ID=6
+export APP_ID=5
 
 
 export PLATFORM_ACCT=7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
@@ -39,19 +43,31 @@ export b64_iprice_func=`echo -n "price_increase"|base64 -w0`
 export b64_dprice_func=`echo -n "price_decrease"|base64 -w0`
 export b64_purchase_func=`echo -n "purchase"|base64 -w0`
 
-cd $SRCDIR
+
+sbdir=`pwd`
+
+cd $PYSRCDIR
 
 python3 platform-app.py
 python3 platform-delegate.py
 python3 listing.py
 
+cd $SRCDIR
+
+cp $APP_TMPL_NAME $APP_NAME
+sed -i "s/TMPL_PRICE_ID/$PRICE_ASA_ID/" $APP_NAME
+sed -i "s/TMPL_BLANK_HASH/b64($b64_create_func)/" $APP_NAME
+
 cp $LISTING_TEMPLATE $LISTING_NAME
-
-
+sed -i "s/TMPL_APP_ID/$APP_ID/" $LISTING_NAME
+sed -i "s/TMPL_PRICE_ID/$PRICE_ASA_ID/" $LISTING_NAME
 sed -i "s/TMPL_CREATOR_ADDR/$CREATOR_BYTES/" $LISTING_NAME
 sed -i "s/TMPL_ASSET_ID/b64($b64_asa_id)/" $LISTING_NAME
 
-cd -
+cp $DELEGATE_TMPL_NAME $DELEGATE_NAME
+sed -i "s/TMPL_APP_ID/$APP_ID/" $DELEGATE_NAME
+
+cd $sbdir
 
 cp $SRCDIR/$LISTING_NAME .
 cp $SRCDIR/$APP_NAME .
@@ -64,13 +80,18 @@ cp $SRCDIR/$DELEGATE_NAME .
 ../sandbox copy $SRCDIR/$DELEGATE_NAME
 
 #TOCO: check if it exists first?
-#$GCMD app update --app-id $APP_ID --approval-prog $APP_NAME --clear-prog $CLEAR_NAME -f $PLATFORM_ACCT
+$GCMD app update --app-id $APP_ID --approval-prog $APP_NAME --clear-prog $CLEAR_NAME -f $PLATFORM_ACCT
 
 export CONTRACT_ACCT=`../sandbox goal clerk compile -a$CREATOR_ACCT $LISTING_NAME|awk '{print $2}'|tr '\r' ' '`
-
 echo $CONTRACT_ACCT
+
 echo "Signing delegate sig"
-export DELEGATE=`../sandbox goal clerk compile -a$PLATFORM_ACCT $DELEGATE_NAME|awk '{print $2}'|tr '\r' ' '`
+DELEGATE=`../sandbox goal clerk compile -a$PLATFORM_ACCT $DELEGATE_NAME|awk '{print $2}'|tr '\r' ' '`
+echo $DELEGATE
+
 $GCMD clerk compile $DELEGATE_NAME -a $PLATFORM_ACCT -s -o $SIGNED_DELEGATE 
+
 ../sandbox exec "cat $SIGNED_DELEGATE | base64 -w0" > platform.signed
+
 cp platform.signed ~/rareaf/src/contracts/
+
