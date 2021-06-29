@@ -2,7 +2,7 @@
 
 import IPFS from 'ipfs-core'
 import ipfsClient from 'ipfs-http-client'
-import { NFTMetadata } from './nft'
+import { emptyMetadata, NFTMetadata } from './nft'
 import {platform_settings as ps} from './platform-conf'
 
 let iclient: any;
@@ -17,6 +17,10 @@ type AddType = {
     path: string
     cid: IPFS.CID
     size: number
+}
+
+export function getCID(meta_hash: string): IPFS.CID {
+    return new IPFS.CID(meta_hash)
 }
 
 export async function uploadContent([file]): Promise<AddType> {
@@ -40,12 +44,9 @@ export async function resolveMetadataFromMetaHash(meta_hash) {
     return [cid, await getMetaFromIpfs(cid.toString())]
 }
 
-export async function getMetaFromIpfs(meta_hash) {
+export async function getMetaFromIpfs(cid): Promise<NFTMetadata>{
     try {
-
         const iclient = await getClient()
-
-        const cid = new IPFS.CID(meta_hash)
 
         const decoder = new TextDecoder();
         let data = "";
@@ -53,10 +54,10 @@ export async function getMetaFromIpfs(meta_hash) {
             data += decoder.decode(chunk);
         }
 
-        return [cid, JSON.parse(data)]
+        return JSON.parse(data) as NFTMetadata
     } catch (err) { console.error("Failed to get Metadata from IPFS:", err) }
 
-    return []
+    return emptyMetadata()
 }
 
 export function getCIDFromTruncatedMetadataHash(b64_string) {

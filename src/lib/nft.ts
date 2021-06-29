@@ -1,5 +1,5 @@
 import { Wallet } from '../wallets/wallet'
-import { getMetaFromIpfs } from './ipfs'
+import { getCID, getMetaFromIpfs } from './ipfs'
 import { Transaction } from 'algosdk'
 import { get_asa_create_txn, get_asa_destroy_txn, sendWait, getSuggested } from './algorand'
 import {platform_settings as ps } from './platform-conf'
@@ -23,7 +23,6 @@ export class NFT {
         const suggested = await getSuggested(10)
         const create_txn = new Transaction(await get_asa_create_txn(suggested, creator, this.metaSrc()))
         create_txn.assetDecimals = 1 //TODO: take out
-        console.log(create_txn)
         const [s_create_txn] = await wallet.signTxn([create_txn])
         return await sendWait(s_create_txn)
     }
@@ -57,7 +56,10 @@ export class NFT {
         const chunks: string[] = url.split("/")
         const mhash = chunks[chunks.length-1]
 
-        const [cid, md] = await getMetaFromIpfs(mhash);
+        const cid = getCID(mhash)
+
+        // TODO: check this
+        const md = await getMetaFromIpfs(cid);
 
         const nft = new NFT(md, asset['index'], asset['params']['manager'])
         nft.meta_cid = cid

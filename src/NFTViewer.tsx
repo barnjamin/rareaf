@@ -3,9 +3,9 @@
 
 import * as React from 'react'
 import {useParams, useHistory} from 'react-router-dom'
-import { getNFT, getTags } from './lib/algorand'
+import { tryGetNFT, getTags } from './lib/algorand'
 import {Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation} from '@blueprintjs/core'
-import Listing, {TagToken} from './lib/listing'
+import Listing from './lib/listing'
 import {Wallet} from './wallets/wallet'
 import {NFT} from './lib/nft'
 import Tagger from './Tagger'
@@ -29,7 +29,7 @@ export default function NFTViewer(props: NFTViewerProps) {
     const [tags, setTags]                     = React.useState([])
     
     React.useEffect(()=>{
-        getNFT(parseInt(id))
+        tryGetNFT(parseInt(id))
             .then((nft)=>{ setNFT(nft) })
             .catch((err)=>{ console.error("Error:", err) })
 
@@ -67,7 +67,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             await Promise.all(tags.map((tag)=>{ return lst.doTags(props.wallet, tag) }))
 
             history.push("/listing/"+lst.contract_addr)
-        }catch(error){ console.log(error) }
+        }catch(error){ console.error(error) }
 
         setWaiting(false);
     }

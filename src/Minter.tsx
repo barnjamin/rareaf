@@ -160,8 +160,6 @@ function Uploader(props: UploaderProps) {
         })
     }
 
-    console.log(props)
-
     if (props.file_hash === undefined || props.file_hash == "" ) return (
         <div className='container'>
             <div className='content content-piece'>

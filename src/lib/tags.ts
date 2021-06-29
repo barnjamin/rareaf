@@ -33,6 +33,7 @@ export class TagToken {
     async create(wallet: Wallet): Promise<number> {
         const suggestedParams = await getSuggested(10)
         const create_txn = new Transaction(get_asa_create_txn(suggestedParams, wallet.getDefaultAccount(), this.getUrl()))
+
         create_txn.assetName = this.getTokenName() 
         create_txn.assetUnitName = TagToken.getUnitName()
 

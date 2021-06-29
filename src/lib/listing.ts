@@ -106,7 +106,7 @@ export class Listing {
         for (let x=0; x<tags.length; x++){
             txns.push(await this.doTag(wallet, tags[x], false))
         }
-        console.log(txns)
+        return await Promise.all(txns)
     }
 
     async doUntags(wallet: Wallet, tags: TagToken[]){
@@ -114,7 +114,7 @@ export class Listing {
         for (let x=0; x<tags.length; x++){
             txns.push(await this.doUntag(wallet, tags[x], false))
         }
-        console.log(txns)
+        return await Promise.all(txns)
     }
 
     async doTag(wallet: Wallet, tag: TagToken, execute: boolean=true) {

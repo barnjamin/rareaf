@@ -32,7 +32,6 @@ export default function Portfolio(props: PortfolioProps) {
 
 
     React.useEffect(()=>{
-        console.log(port_acct)
         if(port_acct === undefined) return
 
         getPortfolio(port_acct).then(p=>{
@@ -63,11 +62,7 @@ type NFTPanelProps = {
 function NFTPanel(props: NFTPanelProps) {
     return (
         <div className='container nft-panel'>
-            {
-                 props.nfts.map((n)=>{ 
-                    return(<NFTCard key={n.asset_id} nft={n} />) 
-                })
-            }
+            { props.nfts.map((n)=>{ return(<NFTCard key={n.asset_id} nft={n} />) }) }
         </div>
     )
 }
@@ -76,14 +71,11 @@ type ListingPanelProps = {
     listings: Listing[]
 };
 function ListingPanel(props: ListingPanelProps) {
-    console.log(props)
     return (
         <div className='container listing-panel' >
             { 
                 props.listings.map((l)=>{ 
-                    return (
-                        <ListingCard key={l.asset_id} listing={l} />
-                    ) 
+                    return ( <ListingCard key={l.asset_id} listing={l} /> ) 
                 })
             }
         </div>

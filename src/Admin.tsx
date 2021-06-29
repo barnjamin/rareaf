@@ -82,7 +82,7 @@ export default function Admin(props: AdminProps) {
         try {
 
             tag.delete(props.wallet)
-            .then(success=>{ if(success) return setTags(tags.filter(t=>{t.id==tid})) })
+            .then(success=>{ if(success) return setTags(tags.filter(t=>{return t.id!==tid})) })
             .finally(()=>{ setLoading(false) })
 
         }catch(error){

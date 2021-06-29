@@ -100,11 +100,10 @@ export async function getPortfolio(addr){
     const nfts = []
     for(let aidx in acct['assets']) {
         const ass = acct['assets'][aidx]
-        try {
-            if (ass.amount==1) nfts.push(await getNFT(ass['asset-id']))
-        } catch (error) {
-            console.error("invalid nft: ", ass['asset-id']) 
-        }
+        if (ass.amount > 1) continue
+
+        const [nft, ok] = tryGetNft(asst_id)
+        if (ok)  nfts.push(nft)
     }
 
 
@@ -154,8 +153,15 @@ export async function getHoldingsFromListingAddress(address) {
     return holdings
 }
 
-export async function getNFT(asset_id){
-    return await NFT.fromAsset(await getToken(asset_id))
+export async function tryGetNFT(asset_id) {
+    try {
+        const token = await getToken(asset_id)
+        // Make sure its a real nft
+        const nft = await NFT.fromAsset(token)
+        return nft
+    } catch (error) { console.error("invalid nft: ", ass['asset-id']) }
+
+    return undefined 
 }
 
 export async function getToken(asset_id) {
