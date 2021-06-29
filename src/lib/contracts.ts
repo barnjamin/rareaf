@@ -16,9 +16,9 @@ import platform_approval from 'url:../contracts/platform-approval.teal'
 import platform_clear from 'url:../contracts/platform-clear.teal'
 
 //@ts-ignore
-//import platform_delegate from 'url:../contract/platform-delegate.teal'
-//@ts-ignore
 import platform_delegate_signed from 'url:../contracts/platform.signed'
+//@ts-ignore
+//import platform_delegate from 'url:../contract/platform-delegate.teal'
 
 
 export async function get_listing_sig(vars: any): Promise<LogicSig> {
@@ -34,6 +34,7 @@ export async function get_platform_sig(): Promise<LogicSig> {
 }
 
 export async function get_listing_compiled(vars: any) {
+    console.log(listing_template)
     return get_contract_compiled(listing_template, vars)
 }
 

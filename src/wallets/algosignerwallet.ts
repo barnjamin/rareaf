@@ -73,17 +73,19 @@ class AlgoSignerWallet implements Wallet {
 
     async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
 
+        console.log("Got: ", txns)
         const default_acct = this.getDefaultAccount()
         const encoded_txns = txns.map((tx: Transaction) => {
             const t = {txn: AlgoSigner.encoding.msgpackToBase64(tx.toByte())};
-            if(algosdk.encodeAddress(tx.from.publicKey) !== default_acct){
-                //@ts-ignore
-                t.signers = []
-            }
+            //@ts-ignore
+            if(algosdk.encodeAddress(tx.from.publicKey) !== default_acct) t.signers = []
             return t
         });
 
+        console.log("Encoded: ", encoded_txns)
         const signed = await AlgoSigner.signTxn(encoded_txns);
+
+        console.log("Never gets here", signed)
 
         return signed.filter((signedTx)=>{
             return signedTx !== null

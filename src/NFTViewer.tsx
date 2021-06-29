@@ -61,8 +61,10 @@ export default function NFTViewer(props: NFTViewerProps) {
 
         try{
             const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
+            console.log(lst)
 
             await lst.doCreate(props.wallet)
+            
 
             await Promise.all(tags.map((tag)=>{ return lst.doTags(props.wallet, tag) }))
 
