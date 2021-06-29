@@ -4,6 +4,8 @@ import {platform_settings as ps} from './platform-conf'
 import algosdk from 'algosdk'  
 import Listing from "./listing";
 import {NFT} from "./nft";
+import {TagToken} from './tags'
+import { Tag } from "@blueprintjs/core";
 
 let client = undefined;
 export function getAlgodClient(){
@@ -28,26 +30,27 @@ export async function getTags(){
     const tags = await indexer
         .searchForAssets()
         .creator(ps.application.owner)
-        .unit(ps.application.unit + "-tag")
+        .unit(TagToken.getUnitName())
         .do()
 
     return tags.assets.map((t)=>{
-        return { 'name': t.params.name, 'id': t.index }
+        return new TagToken(t.params.name, t.index)
     })
 }
 
-export async function getListings(tag) {
+export async function getListings(tagName) {
     const indexer  = getIndexer()
 
     let token_id = ps.application.price_token
-    if(tag !== undefined){
-        if(tag.substr(0,3) !== ps.application.unit) tag = ps.application.unit+":"+tag
 
-        const tagToken = await getTagToken(tag)
+    if(tagName !== undefined){
+        const tag = new TagToken(tag)
 
-        if (tagToken.id == 0) return []
+        const tt = await getTagToken(tag.getName())
 
-        token_id = tagToken.id
+        if (tt.id == 0) return []
+
+        token_id = tt.id
     }
 
 
@@ -68,12 +71,13 @@ export async function getListings(tag) {
 export async function getTagToken(name) {
     const indexer  = getIndexer()
     const assets = await indexer.searchForAssets().name(name).do()
+
     for(let aidx in assets.assets){
         if(assets.assets[aidx].params.creator == ps.application.owner)
-            return { id: assets.assets[aidx].index, name:name }
+            return new TagToken(name, assets.assets[aidx].index)
     }
 
-    return {id:0, name:name}
+    return new TagToken(name)
 }
 
 export async function getPortfolio(addr){
@@ -96,7 +100,11 @@ export async function getPortfolio(addr){
     const nfts = []
     for(let aidx in acct['assets']) {
         const ass = acct['assets'][aidx]
-        if (ass.amount==1) nfts.push(await getNFT(ass['asset-id']))
+        try {
+            if (ass.amount==1) nfts.push(await getNFT(ass['asset-id']))
+        } catch (error) {
+            console.error("invalid nft: ", ass['asset-id']) 
+        }
     }
 
 

@@ -56,6 +56,7 @@ export class NFT {
         const url: string = asset['params']['url']
         const chunks: string[] = url.split("/")
         const mhash = chunks[chunks.length-1]
+
         const [cid, md] = await getMetaFromIpfs(mhash);
 
         const nft = new NFT(md, asset['index'], asset['params']['manager'])
@@ -80,7 +81,6 @@ export type NFTMetadata = {
     title:      string 
     artist:     string
     description:string 
-    tags:       string[]
 }
 
 export function emptyMetadata(): NFTMetadata {
@@ -92,6 +92,5 @@ export function emptyMetadata(): NFTMetadata {
             title:     "" , 
             artist:    "", 
             description: "", 
-            tags:      [] ,
     };
 }

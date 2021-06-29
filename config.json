@@ -31,5 +31,6 @@
         "seed":5e6,
         "max_price":1e10
     },
-    "dev":{ "debug_txns":true }
+    "tags":[],
+    "dev":{ "debug_txns":false }
 }

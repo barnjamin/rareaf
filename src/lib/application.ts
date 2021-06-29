@@ -36,7 +36,6 @@ export class Application {
 
     async create(wallet: Wallet): Promise<AppConf> {
         this.conf.owner = wallet.getDefaultAccount()
-        console.log(this.conf)
         
         // Create blank app to reserve ID
         await this.updateApplication(wallet)

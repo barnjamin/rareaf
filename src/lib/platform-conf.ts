@@ -1,3 +1,4 @@
+import {TagToken} from './tags'
 
 type AlgodConf = {
     server: string
@@ -41,12 +42,11 @@ type PlatformConf = {
     indexer: IndexerConf,
     explorer: string,
     application: AppConf,
-    def: DevConf
-
+    def: DevConf,
+    tags: TagToken[]
 };
 
 
 const platform_settings = require("../../config.json") as PlatformConf;
-
 
 export { platform_settings }

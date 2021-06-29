@@ -5,7 +5,7 @@ import * as React from 'react'
 import { MultiSelect } from "@blueprintjs/select";
 import { MenuItem } from '@blueprintjs/core'
 
-import {TagToken } from './lib/listing'
+import {TagToken } from './lib/tags'
 
 
 const TagMultiSelect = MultiSelect.ofType<TagToken>();
@@ -50,16 +50,13 @@ export default class Tagger extends React.Component<TaggerProps, TaggerState> {
 
     handleTag(t: TagToken) { 
         this.props.handleAddTag(t)
-
         this.setState((curstate)=>{
             return {tags: curstate.tags.concat(t)}
         })
     }
 
     handleUntag(_tag: React.ReactNode) {
-
         this.props.handleRemoveTag(this.state.tags.find((t)=>{t.name == _tag}))
-
         this.setState((curstate)=>{
             return { tags:  curstate.tags.filter((t)=>{ return t.name !== _tag }) }
         })

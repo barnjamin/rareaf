@@ -7,14 +7,10 @@ import {
 import algosdk, { assignGroupID, Transaction } from 'algosdk';
 import { Wallet } from '../wallets/wallet';
 import { NFT } from './nft'
-
+import {TagToken} from './tags'
 import { Method } from './application'
 import LogicSig from 'algosdk/dist/types/src/logicsig';
 
-export type TagToken = {
-    id: number;
-    name: string;
-}
 
 export class Listing {
     asset_id: number

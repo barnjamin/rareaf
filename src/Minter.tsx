@@ -20,11 +20,10 @@ export default function Minter(props: MinterProps){
     const [loading, setLoading] = React.useState(false)
 
     function setFileHash(cid) {
-        console.log(cid)
         setMeta(meta=>({
             ...meta, 
             "file_cid":  cid, 
-            "file_hash": cid.path
+            "file_hash": cid.string
         }))
     }
 
@@ -85,7 +84,6 @@ export default function Minter(props: MinterProps){
             title:       meta.title,
             artist:      meta.artist,
             description: meta.description,
-            tags:        meta.tags,
         }
     }
 
@@ -95,7 +93,7 @@ export default function Minter(props: MinterProps){
                 <Uploader
                     onUploaded={setFileHash}
                     setFileDetails={setFileDetails}
-                    file_hash={meta.file_hash} />
+                    {...meta} />
 
                 <div className='container' >
                     <input
@@ -161,6 +159,8 @@ function Uploader(props: UploaderProps) {
             props.onUploaded(cid.cid)
         })
     }
+
+    console.log(props)
 
     if (props.file_hash === undefined || props.file_hash == "" ) return (
         <div className='container'>

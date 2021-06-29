@@ -5,11 +5,12 @@ import * as React from 'react'
 
 import { Wallet } from './wallets/wallet'
 import {platform_settings as ps} from './lib/platform-conf'
+import {TagToken} from './lib/tags'
 import { Application } from './lib/application';
-import {Button, Tabs, Tab, InputGroup } from '@blueprintjs/core'
+import {Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes } from '@blueprintjs/core'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
-
+import { getTags } from './lib/algorand'
 
 type AdminProps = { 
     history: any
@@ -26,6 +27,7 @@ export default function Admin(props: AdminProps) {
     const [loading, setLoading] = React.useState(false)
     const [appConf, setApp] = React.useState(ps.application)
     const [hasChanges, setHasChanges] = React.useState(false)
+    const [tags, setTags] = React.useState(ps.tags)
 
     function setAlgodValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
@@ -50,6 +52,47 @@ export default function Admin(props: AdminProps) {
         setHasChanges(true)
     }
 
+    function handleTagAdd(e){
+
+        const tag = new TagToken(e[0])
+
+        //Make sure tag isnt already in array
+        if(tags.some((t)=>{return t.name == tag.name})) 
+            return alert("This tag name already exists")
+
+        setLoading(true)
+        try{
+            tag.create(props.wallet)
+            .then((id)=>{ setTags(old=>[...old, tag]) })
+            .finally(()=>{ setLoading(false) })
+        }catch(error){
+            console.error("Fail: ", error)
+            setLoading(false) 
+        }
+        setHasChanges(true)
+    }
+
+    function handleTagRemove(e){
+        // Create Txn to remove  
+        setLoading(true)
+
+        const tid = parseInt(e.key)
+        const tag = tags.find(t=>{return t.id==tid})
+
+        try {
+
+            tag.delete(props.wallet)
+            .then(success=>{ if(success) return setTags(tags.filter(t=>{t.id==tid})) })
+            .finally(()=>{ setLoading(false) })
+
+        }catch(error){
+            console.error("error: ", error)
+            setLoading(false)
+        }
+
+        setHasChanges(true)
+    }
+
     function createApp(){
         setLoading(true)
 
@@ -71,8 +114,15 @@ export default function Admin(props: AdminProps) {
     }
 
     function updateConf(e){
-        alert("Ok but this doesnt do anything, so just copy-paste it into your github repo")
+        alert("Ok but this doesnt do anything yet, so just copy-paste it into your github repo")
         setHasChanges(false)
+    }
+
+    function searchForTags(){
+        setLoading(true)
+        getTags()
+        .then((foundTags)=>{ setTags([...foundTags]) })
+        .finally(()=>{setLoading(false)})
     }
 
 
@@ -88,6 +138,7 @@ export default function Admin(props: AdminProps) {
                 <Tab title='Indexer' id='index' panel={ <Indexer setProp={setIndexerValue} {...indexer} /> } />
                 <Tab title='Ipfs' id='ipfs' panel={ <IPFSConfig setProp={setIpfsValue} {...ipfs} /> } />
                 <Tab title='App' id='app' panel={ appComponent } />
+                <Tab title='Tags' id='tags' panel={ <TagCreator loading={loading} searchForTags={searchForTags} handleAdd={handleTagAdd} handleRemove={handleTagRemove} tags={tags} />} />
             </Tabs>
             <div className='container config-text-container'>
                 <SyntaxHighlighter language='json' style={docco}>
@@ -96,7 +147,8 @@ export default function Admin(props: AdminProps) {
                         ["algod"]: algod,
                         ["indexer"]: indexer,
                         ["ipfs"]: ipfs,
-                        ["application"]:appConf
+                        ["application"]:appConf,
+                        ["tags"]:tags
                     }, undefined, 4)}
                 </SyntaxHighlighter>
                  <Button text='update' outlined={true} disabled={!hasChanges} onClick={updateConf} />
@@ -276,6 +328,30 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
                 value={props.fee.toString()}
             />
             <Button loading={props.loading} onClick={props.update} text='Update Application'/>
+        </div>
+    )
+}
+
+type TagCreatorProps ={
+    tags: TagToken[]
+    loading: boolean
+    handleAdd(e)
+    handleRemove(e)
+    searchForTags(e)
+};
+
+function TagCreator(props: TagCreatorProps) {
+
+    return (
+        <div>
+            <TagInput 
+                className={Classes.FILL}
+                onAdd={props.handleAdd}
+                onRemove={props.handleRemove}
+                placeholder='Add listing tags...'
+                values={props.tags.map(t=>{ return <Tag key={t.id}>{t.name}</Tag> })}
+            />
+            <Button loading={props.loading} onClick={props.searchForTags} text='Search for tags'></Button>
         </div>
     )
 }

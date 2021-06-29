@@ -32,13 +32,14 @@ export default function Portfolio(props: PortfolioProps) {
 
 
     React.useEffect(()=>{
+        console.log(port_acct)
         if(port_acct === undefined) return
 
         getPortfolio(port_acct).then(p=>{
             setListings(p['listings'])
             setNFTs(p['nfts'])
         })
-    }, [])
+    }, [port_acct])
 
 
     return (

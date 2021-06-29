@@ -14,7 +14,7 @@ type NFTCardProps = {
 
 export function NFTCard(props: NFTCardProps) {
     return (
-        <Card className='content-card'  >
+        <Card className='nft-card'  >
             <div className='container'>
                 <a href={'/nft/'+props.nft.asset_id}>
                     <img src={props.nft.imgSrc()}></img>
