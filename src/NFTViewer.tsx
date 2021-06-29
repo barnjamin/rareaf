@@ -64,9 +64,9 @@ export default function NFTViewer(props: NFTViewerProps) {
             console.log(lst)
 
             await lst.doCreate(props.wallet)
-            
-
-            await Promise.all(tags.map((tag)=>{ return lst.doTags(props.wallet, tag) }))
+            if(tags.length > 0 ){
+                await Promise.all(tags.map((tag)=>{ return lst.doTags(props.wallet, tag) }))
+            }
 
             history.push("/listing/"+lst.contract_addr)
         }catch(error){ console.error(error) }

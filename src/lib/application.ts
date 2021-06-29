@@ -1,5 +1,5 @@
 import { get_app_update_txn, download_txns, getSuggested, get_app_create_txn, sendWait, sendWaitGroup, get_asa_create_txn } from "./algorand"
-import { get_approval_program, get_clear_program, get_listing_hash } from "./contracts"
+import { get_approval_program_template, get_clear_program, get_listing_hash } from "./contracts"
 import {Wallet} from '../wallets/wallet'
 import { Transaction } from 'algosdk';
 import { platform_settings as ps } from "./platform-conf";
@@ -44,14 +44,7 @@ export class Application {
         // Create price token with app name 
         await this.createPriceToken(wallet) 
 
-        // Populate Contracts with ids to get the blank hash 
-        const lc = await get_listing_hash({
-            "TMPL_PRICE_ID": this.conf.price_token, 
-            "TMPL_APP_ID":this.conf.id,
-            "TMPL_CREATOR_ADDR": dummy_addr, // Dummy addr
-            "TMPL_ASSET_ID": dummy_id //Dummy int
-        }) 
-        this.conf.listing_hash = lc.toString('base64')
+        await this.setListingHash()
 
         // Update Application with hash of contract && price token id
         await this.updateApplication(wallet)
@@ -63,6 +56,17 @@ export class Application {
     }
 
 
+    async setListingHash() {
+        // Populate Contracts with ids to get the blank hash 
+        const lc = await get_listing_hash({
+            "TMPL_PRICE_ID": this.conf.price_token, 
+            "TMPL_APP_ID":this.conf.id,
+            "TMPL_CREATOR_ADDR": dummy_addr, // Dummy addr
+            "TMPL_ASSET_ID": dummy_id //Dummy int
+        }) 
+        this.conf.listing_hash = "b64("+lc.toString('base64')+")"
+    }
+
     async signDelegate(): Promise<Buffer> {
         return undefined
     }
@@ -70,7 +74,10 @@ export class Application {
     async updateApplication(wallet: Wallet) {
         const suggestedParams = await getSuggested(10)
 
-        const app = await get_approval_program({
+        await this.setListingHash()
+
+        console.log(this.conf)
+        const app = await get_approval_program_template({
             "TMPL_PRICE_ID":this.conf.price_token, 
             "TMPL_BLANK_HASH": this.conf.listing_hash ||= dummy_addr
         }) 
@@ -79,7 +86,9 @@ export class Application {
 
         if (!this.conf.id){
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.owner, app, clear))
+            console.log(create_txn)
             const signed = await wallet.signTxn([create_txn])
+            console.log(signed)
             const result = await sendWaitGroup(signed)
             if(result['pool-error'] != "") {
                 console.error("Failed to create the application")

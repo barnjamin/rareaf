@@ -144,11 +144,7 @@ function ListingViewer(props: ListingViewerProps) {
                         </div>
                     </div>
                     <div className='container listing-description'>
-                        <p> 
-                            This picture was taken from a GoPro mounted to the front of a longboard.  
-                            It was taken during my first surf session near Diamond Head in Hawaii. Please note
-                            the helicoptor right over my shoulder, which makes this picture just a touch cooler.  
-                        </p>
+                        <p>{deets.description}</p>
                     </div>
 
                     <div className='container listing-actions' >

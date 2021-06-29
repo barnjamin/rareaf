@@ -111,19 +111,13 @@ export async function getPortfolio(addr){
 
 export async function getListing(addr) {
     const holdings  = await getHoldingsFromListingAddress(addr)
-    const creator   = await getCreator(addr, holdings.asa.index)
-    const mhash     = holdings['asa']['params']['metadata-hash']
-    const [cid, md] = await resolveMetadataFromMetaHash(mhash)
+    const creator   = await getCreator(addr, holdings.nft.asset_id)
 
-    let l = new Listing(holdings['price'], holdings['asa']['index'], creator, addr)
+    let l = new Listing(holdings.price, holdings.nft.asset_id, creator, addr)
 
-    l.tags = holdings.tags.map((t)=>{
-        return {id: t.index, name:t.params.name}
-    })
+    l.tags = holdings.tags.map((t)=>{ return new TagToken(t.params.name, t.index) } )
 
-    l.nft = new NFT(md)
-    l.nft.cid = cid
-    l.nft.asset_id = holdings['asa']['index']
+    l.nft = holdings['nft']
 
     return l
 }
@@ -132,7 +126,7 @@ export async function getListing(addr) {
 export async function getHoldingsFromListingAddress(address) {
     const indexer   = getIndexer()
     const acct_resp = await indexer.lookupAccountByID(address).do()
-    const holdings  = { 'price':0, 'tags':[], 'asa':0, }
+    const holdings  = { 'price':0, 'tags':[], 'nft':0, }
 
     for (let aid in acct_resp.account.assets) {
         const asa = acct_resp.account.assets[aid]
@@ -145,7 +139,7 @@ export async function getHoldingsFromListingAddress(address) {
         const token = await getToken(asa['asset-id'])
 
         if(token.params.creator == ps.application.owner) holdings.tags.push(token)
-        else holdings.asa = token
+        else holdings.nft = await NFT.fromAsset(token)
 
     }
 
@@ -250,7 +244,7 @@ export function get_app_create_txn(suggestedParams, addr, approval, clear) {
    return {
         from:addr,
         type:'appl',
-        numLocalByteSlices: 16,
+        appLocalByteSlices: 16,
         appApprovalProgram: approval,
         appClearProgram: clear,
         ...suggestedParams

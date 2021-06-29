@@ -10,6 +10,10 @@ import listing_var_positions from 'url:../contracts/listing.tmpl.teal.json'
 //@ts-ignore
 import listing_template from 'url:../contracts/listing.tmpl.teal'
 
+
+//@ts-ignore
+import platform_approval_template from 'url:../contracts/platform-approval.tmpl.teal'
+
 //@ts-ignore
 import platform_approval from 'url:../contracts/platform-approval.teal'
 //@ts-ignore
@@ -34,7 +38,6 @@ export async function get_platform_sig(): Promise<LogicSig> {
 }
 
 export async function get_listing_compiled(vars: any) {
-    console.log(listing_template)
     return get_contract_compiled(listing_template, vars)
 }
 
@@ -42,6 +45,11 @@ export async function get_contract_compiled(template: string, vars: any) {
     const client = getAlgodClient()
     const populated = await populate_contract(template, vars)
     return  client.compile(populated).do()
+}
+
+export async function get_approval_program_template(vars: any){
+    const compiled =  await get_contract_compiled(platform_approval_template, vars)
+    return new Uint8Array(Buffer.from(compiled.result, "base64"))
 }
 
 export async function get_approval_program(vars: any){
@@ -71,13 +79,16 @@ export async function get_listing_hash(vars: any): Promise<Buffer> {
 }
 
 export async function get_hash(template: string, vars: any): Promise<Buffer> {
+    const listing_vars = JSON.parse(await get_file(listing_var_positions))
     const compiled_program = await get_contract_compiled(template, vars)
     const program_bytes = new Uint8Array(Buffer.from(compiled_program.result, "base64"));
 
     let removed = 0 
     let blanked = program_bytes
-    for(let i in listing_var_positions){
-        const v = listing_var_positions[i]
+    for(let i in listing_vars){
+        const v = listing_vars[i]
+        console.log(v)
+
         blanked = concatTypedArrays(blanked.slice(0, v.start - removed) , blanked.slice((v.start+v.length)-removed))
         removed += v.length
     }

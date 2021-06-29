@@ -88,17 +88,22 @@ export class Listing {
 
         const [s_app_call_txn, s_seed_txn, s_asa_send, s_asa_cfg] = await wallet.signTxn(grouped)
 
+        console.log("here")
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_asa_opt_in = algosdk.signLogicSigTransactionObject(asa_opt_in, listing_lsig);
         const s_price_opt_in = algosdk.signLogicSigTransactionObject(price_opt_in, listing_lsig);
+        console.log("here too")
 
         const platform_lsig = await get_platform_sig()
+        console.log(platform_lsig)
         const s_price_send = algosdk.signLogicSigTransactionObject(price_send, platform_lsig)
 
+        console.log("here three")
         const combined = [
             s_app_call_txn, s_seed_txn, s_asa_opt_in,
             s_price_opt_in, s_asa_send, s_price_send, s_asa_cfg
         ]
+        console.log(combined)
 
         return await sendWaitGroup(combined)
     }

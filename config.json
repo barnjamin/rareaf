@@ -17,8 +17,8 @@
     },
     "explorer":"algoexplorer.io",
     "application":{
-        "id": 4,
-        "price_token": 5,
+        "id": 13,
+        "price_token": 14,
         "owner": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
         "name":"RareAF",
         "unit":"raf",
@@ -34,16 +34,20 @@
     "tags":[ 
         {
             "name": "picture",
-            "id": 7
+            "id": 24
+        },
+        {
+            "name": "action",
+            "id": 25
         },
         {
             "name": "art",
-            "id": 8
+            "id": 26
         },
         {
-            "name": "gif",
-            "id": 9
+            "name": "animated",
+            "id": 27
         }
     ],
-    "dev":{ "debug_txns":true }
+    "dev":{ "debug_txns":false }
 }

@@ -341,7 +341,6 @@ type TagCreatorProps ={
 };
 
 function TagCreator(props: TagCreatorProps) {
-
     return (
         <div>
             <TagInput 
@@ -351,7 +350,7 @@ function TagCreator(props: TagCreatorProps) {
                 placeholder='Add listing tags...'
                 values={props.tags.map(t=>{ return <Tag key={t.id}>{t.name}</Tag> })}
             />
-            <Button loading={props.loading} onClick={props.searchForTags} text='Search for tags'></Button>
+            <Button loading={props.loading} onClick={props.searchForTags} text='Recover tags'></Button>
         </div>
     )
 }
