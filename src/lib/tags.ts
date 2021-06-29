@@ -36,6 +36,7 @@ export class TagToken {
         create_txn.assetName = this.getTokenName() 
         create_txn.assetUnitName = TagToken.getUnitName()
 
+        create_txn.assetTotal = 1e6
         create_txn.assetDecimals = 1 // TODO:: take out
 
         const [ signed ] = await wallet.signTxn([create_txn])
