@@ -96,14 +96,13 @@ export async function getPortfolio(addr){
         }
     }
 
-
     const nfts = []
     for(let aidx in acct['assets']) {
         const ass = acct['assets'][aidx]
-        if (ass.amount > 1) continue
+        if (ass.amount !== 1) continue
 
-        const [nft, ok] = tryGetNft(asst_id)
-        if (ok)  nfts.push(nft)
+        const nft = await tryGetNFT(ass['asset-id'])
+        if (nft  !== undefined) nfts.push(nft)
     }
 
 

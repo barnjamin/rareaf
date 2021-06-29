@@ -124,7 +124,8 @@ export default function NFTViewer(props: NFTViewerProps) {
                                 renderProps={{"fill":true}} 
                                 tags={tags} 
                                 tagOpts={tagOpts} 
-                                setTags={setTags}/>
+                                setTags={setTags}
+                                />
                         </div>
                     } />
                 <DialogStep 

@@ -7,6 +7,7 @@ import { useParams, useHistory } from 'react-router-dom'
 import { getListing, getTags } from './lib/algorand'
 import { Button, NumericInput, Card, Elevation } from '@blueprintjs/core'
 import Tagger from './Tagger'
+import {TagToken} from './lib/tags'
 import {Wallet} from './wallets/wallet'
 
 type ListingViewerProps = {
@@ -31,33 +32,33 @@ function ListingViewer(props: ListingViewerProps) {
         getListing(addr).then((listing)=>{ setListing(listing) })
     }, [])
 
-    async function handleCancelListing(e){
+    async function handleCancelListing(){
         setLoading(true)
         await listing.doDelete(props.wallet)
         history.push("/nft/"+listing.asset_id)
         setLoading(false)
     }
 
-    async function handleBuy(e){
+    async function handleBuy(){
         setLoading(true)
         await listing.doPurchase(props.wallet)
         history.push("/nft/"+listing.asset_id)
         setLoading(false)
     }
 
-    async function handleAddTag(tag){
+    async function handleAddTag(tag: TagToken){
         setLoading(true)
         await listing.doTag(props.wallet, tag)
         setLoading(false)
     }
 
-    async function handleRemoveTag(tag){
+    async function handleRemoveTag(tag: TagToken){
         setLoading(true)
         await listing.doUntag(props.wallet, tag)
         setLoading(false)
     }
 
-    async function checkSetPrice(price){
+    async function checkSetPrice(price: number){
         setPrice(price)
 
         if(price==listing.price) setUpdateable(false)
@@ -80,7 +81,7 @@ function ListingViewer(props: ListingViewerProps) {
                             tagOpts={tagOpts} 
                             tags={listing.tags} 
                             handleAddTag={handleAddTag}
-                            handleRemoveTag={handleAddTag}
+                            handleRemoveTag={handleRemoveTag}
                             renderProps={{"fill": false, "disabled":true}}
                             />
         let buttons = <Button loading={loading} onClick={handleBuy}>Buy</Button>
@@ -96,7 +97,7 @@ function ListingViewer(props: ListingViewerProps) {
                     tagOpts={tagOpts} 
                     tags={listing.tags} 
                     handleAddTag={handleAddTag}
-                    handleRemoveTag={handleAddTag}
+                    handleRemoveTag={handleRemoveTag}
                     renderProps={{"fill": false, "disabled":false}}
                     />
             )
