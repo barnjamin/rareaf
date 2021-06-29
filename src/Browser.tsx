@@ -24,13 +24,13 @@ export default function Browser(props: BrowserProps) {
         getListings(tag).then((l)=>{ setListings(l) })
     }, [])
 
+    let l = listings.map((l) => {     return (<ListingCard key={l.contract_addr} listing={l} />) }) 
+    if(listings.length==0){
+        l = <h3>No Listings... <a href='/mint'>mint</a> one?</h3>
+    }
     return (
         <div className='container' >
-            { 
-                listings.map((l) => {     
-                    return (<ListingCard key={l.contract_addr} listing={l} />)
-                }) 
-            }
+            { l }
         </div>
     )
 }

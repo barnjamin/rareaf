@@ -73,7 +73,6 @@ class AlgoSignerWallet implements Wallet {
 
     async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
 
-        console.log("Got: ", txns)
         const default_acct = this.getDefaultAccount()
         const encoded_txns = txns.map((tx: Transaction) => {
             const t = {txn: AlgoSigner.encoding.msgpackToBase64(tx.toByte())};
@@ -82,10 +81,7 @@ class AlgoSignerWallet implements Wallet {
             return t
         });
 
-        console.log("Encoded: ", encoded_txns)
         const signed = await AlgoSigner.signTxn(encoded_txns);
-
-        console.log("Never gets here", signed)
 
         return signed.filter((signedTx)=>{
             return signedTx !== null

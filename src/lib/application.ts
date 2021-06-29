@@ -1,7 +1,8 @@
 import { get_app_update_txn, download_txns, getSuggested, get_app_create_txn, sendWait, sendWaitGroup, get_asa_create_txn } from "./algorand"
 import { get_approval_program, get_clear_program, get_listing_hash } from "./contracts"
 import {Wallet} from '../wallets/wallet'
-import algosdk, { assignGroupID, Transaction } from 'algosdk';
+import { Transaction } from 'algosdk';
+import { platform_settings as ps } from "./platform-conf";
 
 
 const dummy_addr = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
@@ -96,19 +97,21 @@ export class Application {
 
     async createPriceToken(wallet: Wallet)  { 
         const suggestedParams = await getSuggested(10)
-        const create_px = new Transaction(get_asa_create_txn(suggestedParams, this.conf.owner, {}))
-        create_px.assetName = this.conf.name
+        const create_px = new Transaction(get_asa_create_txn(suggestedParams, this.conf.owner, ps.domain))
+
+        create_px.assetName     = this.conf.name
         create_px.assetUnitName = this.conf.unit + "-px"
-        create_px.assetTotal = 1e10
+        create_px.assetTotal    = 1e10
         create_px.assetDecimals = 1 //TODO: remove
-        const signed = await wallet.signTxn([create_px])
-        const result = await sendWaitGroup(signed)
+
+        const [signed] = await wallet.signTxn([create_px])
+
+        const result = await sendWait(signed)
+
         if(result['pool-error'] != "") {
             console.error("Failed to create the application")
         }
 
         this.conf.price_token = result['asset-index']
     } 
-
-    async createTagToken(name: string) { }
 }

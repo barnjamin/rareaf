@@ -86,9 +86,7 @@ export class Listing {
 
         algosdk.assignGroupID(grouped)
 
-        console.log(grouped)
         const [s_app_call_txn, s_seed_txn, s_asa_send, s_asa_cfg] = await wallet.signTxn(grouped)
-        console.log(grouped)
 
         const listing_lsig = await get_listing_sig(this.getVars())
         const s_asa_opt_in = algosdk.signLogicSigTransactionObject(asa_opt_in, listing_lsig);
