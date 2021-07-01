@@ -2,6 +2,7 @@
 'use strict'
 
 import * as React from 'react'
+import {Prompt} from 'react-router-dom'
 
 import { Wallet } from './wallets/wallet'
 import {platform_settings as ps} from './lib/platform-conf'
@@ -114,7 +115,6 @@ export default function Admin(props: AdminProps) {
     }
 
     function updateConf(e){
-        alert("Ok but this doesnt do anything yet, so just copy-paste it into your github repo")
         setHasChanges(false)
     }
 
@@ -132,27 +132,30 @@ export default function Admin(props: AdminProps) {
     }
 
     return (
-        <div className='container config-container'>
-            <Tabs id='configuration' vertical={true}>
-                <Tab title='Algod' id='algod' panel={<Algod setProp={setAlgodValue} {...algod} />} />
-                <Tab title='Indexer' id='index' panel={ <Indexer setProp={setIndexerValue} {...indexer} /> } />
-                <Tab title='Ipfs' id='ipfs' panel={ <IPFSConfig setProp={setIpfsValue} {...ipfs} /> } />
-                <Tab title='App' id='app' panel={ appComponent } />
-                <Tab title='Tags' id='tags' panel={ <TagCreator loading={loading} searchForTags={searchForTags} handleAdd={handleTagAdd} handleRemove={handleTagRemove} tags={tags} />} />
-            </Tabs>
-            <div className='container config-text-container'>
-                <SyntaxHighlighter language='json' style={docco}>
-                    {JSON.stringify({
-                        ...ps,
-                        ["algod"]: algod,
-                        ["indexer"]: indexer,
-                        ["ipfs"]: ipfs,
-                        ["application"]:appConf,
-                        ["tags"]:tags
-                    }, undefined, 4)}
-                </SyntaxHighlighter>
-                 <Button text='update' outlined={true} disabled={!hasChanges} onClick={updateConf} />
+        <div>
+            <div className='container config-container'>
+                <Tabs id='configuration' vertical={true}>
+                    <Tab title='Algod' id='algod' panel={<Algod setProp={setAlgodValue} {...algod} />} />
+                    <Tab title='Indexer' id='index' panel={ <Indexer setProp={setIndexerValue} {...indexer} /> } />
+                    <Tab title='Ipfs' id='ipfs' panel={ <IPFSConfig setProp={setIpfsValue} {...ipfs} /> } />
+                    <Tab title='App' id='app' panel={ appComponent } />
+                    <Tab title='Tags' id='tags' panel={ <TagCreator loading={loading} searchForTags={searchForTags} handleAdd={handleTagAdd} handleRemove={handleTagRemove} tags={tags} />} />
+                </Tabs>
+                <div className='container config-text-container'>
+                    <SyntaxHighlighter language='json' style={docco}>
+                        {JSON.stringify({
+                            ...ps,
+                            ["algod"]: algod,
+                            ["indexer"]: indexer,
+                            ["ipfs"]: ipfs,
+                            ["application"]:appConf,
+                            ["tags"]:tags
+                        }, undefined, 4)}
+                    </SyntaxHighlighter>
+                    <Button text='update' outlined={true} disabled={!hasChanges} onClick={updateConf} />
+                </div>
             </div>
+            <Prompt when={true} message="Changes made to config, have you saved them?" />
         </div>
     )
 }

@@ -25,9 +25,10 @@
         "contracts":{
             "approval":"platform-approval.teal",
             "clear":"platform-clear.teal",
-            "listing":"listing.teal"
+            "listing":"listing.teal",
+            "listing-positions":"listing.tmpl.teal.json"
         },
-        "fee":100000,
+        "fee":1000000,
         "seed":5e6,
         "max_price":1e10
     },
@@ -49,5 +50,5 @@
             "id": 27
         }
     ],
-    "dev":{ "debug_txns":false }
+    "dev":{ "debug_txns":true }
 }

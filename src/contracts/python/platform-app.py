@@ -88,13 +88,13 @@ def approval():
 
     purchase_listing = And(  
         # Make sure payment is going to creator
-        Gtxn[1].receiver() == Gtxn[0].accounts[2],
+        Gtxn[1].receiver() == Gtxn[0].accounts[1],
 
         # Make sure payment amount is right 
-        check_balance_match(Gtxn[1], Int(1), price_token),
+        check_balance_match(Gtxn[1], Int(2), price_token),
 
         # Remove the contract addr from the creators acct
-        remove_listing_addr(Int(2), Gtxn[0].accounts[1]), 
+        remove_listing_addr(Int(1), Gtxn[0].accounts[2]), 
     )
 
 
@@ -123,8 +123,8 @@ def clear():
 if __name__ == "__main__":
 
 
-    with open(tealpath(configuration['application']['approval']), "w") as pa_file:
+    with open(tealpath(configuration['application']['contracts']['approval']), "w") as pa_file:
         pa_file.write(compileTeal(approval(), Mode.Application, version=3, assembleConstants=True))
 
-    with open("../"+configuration['application']['clear'], "w") as pc_file:
+    with open(tealpath(configuration['application']['contracts']['clear']), "w") as pc_file:
         pc_file.write(compileTeal(clear(), Mode.Application, version=3, assembleConstants=True))

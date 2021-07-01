@@ -1,6 +1,6 @@
 #pragma version 3
 intcblock 1 4 6 0 TMPL_PRICE_ID TMPL_APP_ID 3
-bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
+bytecblock TMPL_OWNER_ADDR
 pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
 store 0
 pushbytes TMPL_ASSET_ID // TMPL_ASSET_ID
@@ -118,7 +118,7 @@ global ZeroAddress
 ==
 &&
 gtxn 3 AssetCloseTo
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 3 Sender
@@ -126,7 +126,7 @@ load 1
 ==
 &&
 gtxn 3 AssetReceiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 3 XferAsset
@@ -178,11 +178,11 @@ load 1
 ==
 &&
 gtxn 5 Receiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 5 Amount
-pushint 1000000 // 1000000
+pushint TMPL_FEE_AMT // TMPL_FEE_AMT
 ==
 &&
 &&
@@ -211,7 +211,7 @@ global ZeroAddress
 ==
 &&
 gtxn 1 AssetCloseTo
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 Sender
@@ -219,7 +219,7 @@ load 1
 ==
 &&
 gtxn 1 AssetReceiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 XferAsset
@@ -440,7 +440,7 @@ global ZeroAddress
 ==
 &&
 gtxn 5 Sender
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 5 AssetReceiver

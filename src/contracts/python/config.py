@@ -2,7 +2,7 @@ from pyteal import *
 import json
 
 def get_config():
-    with open('../../lib/config.json', 'r') as f:
+    with open('../../../config.json', 'r') as f:
         return json.load(f)
 
 
@@ -23,8 +23,8 @@ price_token   = Tmpl.Int("TMPL_PRICE_ID")
 platform_addr = Tmpl.Bytes("TMPL_OWNER_ADDR")
 platform_fee  = Tmpl.Int("TMPL_FEE_AMT")
 
-seed_amt      = Int(int(configuration['seed']))
-max_price     = Int(int(configuration['max_price']))
+seed_amt      = Int(int(configuration['application']['seed']))
+max_price     = Int(int(configuration['application']['max_price']))
 
 action_create   = Bytes("create")
 action_tag      = Bytes("tag")  

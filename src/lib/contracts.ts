@@ -1,8 +1,8 @@
 import LogicSig from 'algosdk/dist/types/src/logicsig'
 import {getAlgodClient} from './algorand'
 import algosdk from 'algosdk'
-import {concatTypedArrays} from './algorand'
-
+import {addrToB64, concatTypedArrays} from './algorand'
+import { platform_settings as ps } from './platform-conf'
 import {sha256} from 'js-sha256'
 
 //@ts-ignore
@@ -13,11 +13,8 @@ import listing_template from 'url:../contracts/listing.tmpl.teal'
 
 //@ts-ignore
 import platform_approval_template from 'url:../contracts/platform-approval.tmpl.teal'
-
 //@ts-ignore
-import platform_approval from 'url:../contracts/platform-approval.teal'
-//@ts-ignore
-import platform_clear from 'url:../contracts/platform-clear.teal'
+import platform_clear_template from 'url:../contracts/platform-clear.tmpl.teal'
 
 //@ts-ignore
 import platform_delegate_signed from 'url:../contracts/platform.signed'
@@ -26,7 +23,7 @@ import platform_delegate_signed from 'url:../contracts/platform.signed'
 
 
 export async function get_listing_sig(vars: any): Promise<LogicSig> {
-    const compiled_program = await get_contract_compiled(listing_template, vars)
+    const compiled_program = await get_listing_compiled(vars)
     const program_bytes = new Uint8Array(Buffer.from(compiled_program.result, "base64"));
     return algosdk.makeLogicSig(program_bytes);
 }
@@ -37,28 +34,43 @@ export async function get_platform_sig(): Promise<LogicSig> {
     return algosdk.logicSigFromByte(delegate_program_bytes)
 }
 
+export async function get_listing_hash(vars: any): Promise<Buffer> {
+    const listing_vars = JSON.parse(await get_file(listing_var_positions))
+    const compiled = await get_listing_compiled(vars)
+    return get_hash(new Uint8Array(Buffer.from(compiled.result, "base64")), listing_vars)
+}
+
 export async function get_listing_compiled(vars: any) {
-    return get_contract_compiled(listing_template, vars)
+    const v = {
+            "TMPL_OWNER_ADDR": "b64("+addrToB64(ps.application.owner)+")",
+            "TMPL_PRICE_ID": ps.application.price_token, 
+            "TMPL_APP_ID":ps.application.id,
+            "TMPL_FEE_AMT":ps.application.fee,
+            ...vars
+    }
+    return get_contract_compiled(listing_template, v)
 }
 
 export async function get_contract_compiled(template: string, vars: any) {
     const client = getAlgodClient()
     const populated = await populate_contract(template, vars)
-    return  client.compile(populated).do()
-}
-
-export async function get_approval_program_template(vars: any){
-    const compiled =  await get_contract_compiled(platform_approval_template, vars)
-    return new Uint8Array(Buffer.from(compiled.result, "base64"))
+    return client.compile(populated).do()
 }
 
 export async function get_approval_program(vars: any){
-    const compiled =  await get_contract_compiled(platform_approval, vars)
+
+    const v = {
+        "TMPL_PRICE_ID":ps.application.price_token, 
+        "TMPL_OWNER_ADDR": "b64("+addrToB64(ps.application.owner)+")",
+        ...vars
+    }
+
+    const compiled =  await get_contract_compiled(platform_approval_template, v)
     return new Uint8Array(Buffer.from(compiled.result, "base64"))
 }
 
 export async function get_clear_program(vars: any){
-    const compiled =  await get_contract_compiled(platform_clear, vars)
+    const compiled =  await get_contract_compiled(platform_clear_template, vars)
     return new Uint8Array(Buffer.from(compiled.result, "base64"))
 }
 
@@ -74,14 +86,8 @@ export async function populate_contract(template: string, vars: any) {
     }
     return program
 }
-export async function get_listing_hash(vars: any): Promise<Buffer> {
-    return get_hash(listing_template, vars)
-}
 
-export async function get_hash(template: string, vars: any): Promise<Buffer> {
-    const listing_vars = JSON.parse(await get_file(listing_var_positions))
-    const compiled_program = await get_contract_compiled(template, vars)
-    const program_bytes = new Uint8Array(Buffer.from(compiled_program.result, "base64"));
+export async function get_hash(program_bytes: Uint8Array, listing_vars: any): Promise<Buffer> {
 
     let removed = 0 
     let blanked = program_bytes

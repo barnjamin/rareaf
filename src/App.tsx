@@ -59,7 +59,7 @@ class App extends React.Component<AppProps, AppState> {
   render() {
 
     let adminNav = <div/>
-    if(this.walletConnected() && (ps.application.owner == "" || this.state.wallet.getDefaultAccount() == ps.application.owner)){
+    if(this.walletConnected()  && (ps.application.owner == "" || this.state.wallet.getDefaultAccount() == ps.application.owner)) {
       adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
     }
 
@@ -73,6 +73,7 @@ class App extends React.Component<AppProps, AppState> {
             <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />
             <AnchorButton className='bp3-minimal' icon='clean' text='Mint' href="/mint" />
           </Navbar.Group >
+
           <Navbar.Group align={Alignment.RIGHT}>
             {adminNav}
             <AlgorandWalletConnector 

@@ -1,8 +1,15 @@
 import  {platform_settings as ps} from './platform-conf'
 import { get_listing_compiled, get_listing_sig, get_platform_sig } from './contracts'
 import {
-    getSuggested, sendWaitGroup,
-    get_asa_cfg_txn, get_asa_xfer_txn, get_asa_optin_txn, get_pay_txn, get_app_call_txn, uintToB64String
+    uintToB64, 
+    addrToB64, 
+    getSuggested, 
+    sendWaitGroup,
+    get_asa_cfg_txn, 
+    get_asa_xfer_txn, 
+    get_asa_optin_txn, 
+    get_pay_txn, 
+    get_app_call_txn
 } from './algorand'
 import algosdk, { assignGroupID, Transaction } from 'algosdk';
 import { Wallet } from '../wallets/wallet';
@@ -37,8 +44,8 @@ export class Listing {
 
     getEncodedVars() {
         // Encode vars for inclusion in contract
-        const var_id = uintToB64String(this.asset_id)
-        const var_addr = Buffer.from(algosdk.decodeAddress(this.creator_addr).publicKey).toString('base64')
+        const var_id = uintToB64(this.asset_id)
+        const var_addr = addrToB64(this.creator_addr)
 
         return [var_id, var_addr]
     }
@@ -65,7 +72,7 @@ export class Listing {
         const compiled = await get_listing_compiled(this.getVars())
         this.contract_addr = compiled.hash;
 
-        const args = [Method.Create, uintToB64String(this.price), compiled.result]
+        const args = [Method.Create, uintToB64(this.price), compiled.result]
 
         const suggestedParams = await getSuggested(10)
 
@@ -152,6 +159,8 @@ export class Listing {
             return txngroup
         }
 
+        this.tags.push(tag)
+
         return await sendWaitGroup(txngroup)
     }
 
@@ -180,6 +189,8 @@ export class Listing {
             return txngroup
         }
 
+        this.tags = this.tags.filter((t)=>{ return t.id==tag.id })
+
         return await sendWaitGroup(txngroup)
     }
 
@@ -194,7 +205,7 @@ export class Listing {
 
     async doPriceIncrease(wallet: Wallet, amt: number) {
 
-        const args = [Method.PriceIncrease, uintToB64String(amt)]
+        const args = [Method.PriceIncrease, uintToB64(amt)]
         const fasset = [ps.application.price_token]
         const suggestedParams = await getSuggested(10)
 
@@ -214,7 +225,7 @@ export class Listing {
     }
 
     async doPriceDecrease(wallet: Wallet, amt: number) {
-        const args = [Method.PriceDecrease, uintToB64String(amt)]
+        const args = [Method.PriceDecrease, uintToB64(amt)]
         const fasset = [ps.application.price_token]
         const suggestedParams = await getSuggested(10)
 
@@ -281,7 +292,7 @@ export class Listing {
         const buyer = wallet.getDefaultAccount()
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, buyer, args))
-        app_call_txn.appAccounts = [algosdk.decodeAddress(this.creator_addr)]
+        app_call_txn.appAccounts = [algosdk.decodeAddress(this.creator_addr), algosdk.decodeAddress(this.contract_addr)]
 
         const purchase_amt_txn = new Transaction(get_pay_txn(suggestedParams, buyer, this.creator_addr, this.price))
 
@@ -293,7 +304,7 @@ export class Listing {
         asa_xfer_txn.closeRemainderTo = algosdk.decodeAddress(buyer)
         asa_xfer_txn.amount =  1
 
-        const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.creator_addr, this.asset_id, {
+        const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.contract_addr, this.asset_id, {
             assetManager: buyer,
             assetReserve: buyer,
             assetFreeze: buyer,

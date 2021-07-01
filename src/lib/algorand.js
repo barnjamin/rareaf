@@ -38,15 +38,26 @@ export async function getTags(){
     })
 }
 
+export async function isOptedIntoApp(address) {
+    const client = getAlgodClient()
+    const result = await client.accountInformation(address).do()
+
+    const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ps.application.id })
+    const created = result['created-apps'].find((r)=>{ return r.id == ps.application.id })
+
+
+    return optedIn !== undefined || created !== undefined
+}
+
 export async function getListings(tagName) {
     const indexer  = getIndexer()
 
     let token_id = ps.application.price_token
 
     if(tagName !== undefined){
-        const tag = new TagToken(tag)
+        const tag = new TagToken(tagName)
 
-        const tt = await getTagToken(tag.getName())
+        const tt = await getTagToken(tag.getTokenName())
 
         if (tt.id == 0) return []
 
@@ -282,10 +293,14 @@ export async function getSuggested(rounds){
 }
 
 
-export function uintToB64String(x){
+export function uintToB64(x){
     return Buffer.from(algosdk.encodeUint64(x)).toString('base64')
 }
 
+export function addrToB64(addr) {
+    const dec = algosdk.decodeAddress(addr)
+    return Buffer.from(dec.publicKey).toString('base64')
+}
 export function b64ToAddr(x){
     return algosdk.encodeAddress(new Uint8Array(Buffer.from(x, "base64")));
 }

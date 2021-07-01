@@ -35,14 +35,16 @@ export default function Tagger(props: TaggerProps) {
         if(props.handleAddTag !== undefined) 
            props.handleAddTag(t)
 
-        props.setTags([...props.tags, t])
+        if(props.setTags !== undefined)
+            props.setTags([...props.tags, t])
     }
 
     function handleUntag(_tag: React.ReactNode) {
         if(props.handleRemoveTag !== undefined) 
-            props.handleRemoveTag(props.tags.find((t)=>{t.name == _tag}))
+            props.handleRemoveTag(props.tags.find((t)=>{return t.name == _tag}))
 
-        props.setTags(props.tags.filter((t)=>{ return t.name !== _tag }))
+        if(props.setTags !== undefined)
+            props.setTags(props.tags.filter((t)=>{ return t.name !== _tag }))
     }
 
 

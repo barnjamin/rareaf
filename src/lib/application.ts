@@ -1,5 +1,13 @@
-import { get_app_update_txn, download_txns, getSuggested, get_app_create_txn, sendWait, sendWaitGroup, get_asa_create_txn } from "./algorand"
-import { get_approval_program_template, get_clear_program, get_listing_hash } from "./contracts"
+import { 
+    addrToB64, 
+    sendWait, 
+    sendWaitGroup,
+    getSuggested, 
+    get_app_update_txn, 
+    get_app_create_txn,  
+    get_asa_create_txn 
+} from "./algorand"
+import { get_approval_program, get_clear_program, get_listing_hash } from "./contracts"
 import {Wallet} from '../wallets/wallet'
 import { Transaction } from 'algosdk';
 import { platform_settings as ps } from "./platform-conf";
@@ -59,8 +67,6 @@ export class Application {
     async setListingHash() {
         // Populate Contracts with ids to get the blank hash 
         const lc = await get_listing_hash({
-            "TMPL_PRICE_ID": this.conf.price_token, 
-            "TMPL_APP_ID":this.conf.id,
             "TMPL_CREATOR_ADDR": dummy_addr, // Dummy addr
             "TMPL_ASSET_ID": dummy_id //Dummy int
         }) 
@@ -76,13 +82,12 @@ export class Application {
 
         await this.setListingHash()
 
-        console.log(this.conf)
-        const app = await get_approval_program_template({
-            "TMPL_PRICE_ID":this.conf.price_token, 
-            "TMPL_BLANK_HASH": this.conf.listing_hash ||= dummy_addr
+        const app = await get_approval_program({
+            "TMPL_BLANK_HASH": this.conf.listing_hash ||= dummy_addr,
         }) 
 
         const clear = await get_clear_program({})
+
 
         if (!this.conf.id){
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.owner, app, clear))
@@ -117,9 +122,8 @@ export class Application {
 
         const result = await sendWait(signed)
 
-        if(result['pool-error'] != "") {
+        if(result['pool-error'] != "") 
             console.error("Failed to create the application")
-        }
 
         this.conf.price_token = result['asset-index']
     } 

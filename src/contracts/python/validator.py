@@ -2,12 +2,14 @@ import base64
 import hashlib
 from algosdk.logic import check_byte_const_block, check_int_const_block
 from pyteal import *
+from utils import *
 
 from algosdk.v2client import algod
 import json
 
-dummy_string = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
-dummy_int = "b64(AAAAAAAAAHs=)"
+dummy_string_bytes = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
+dummy_int_bytes = "b64(AAAAAAAAAHs=)"
+dummy_int = "0"
 
 class TemplateVar(object):
     start, length = 0, 0
@@ -28,7 +30,7 @@ class TemplateContract(object):
 
         self.config = config
 
-        with open("../"+config['listing']['template'], mode='r') as f:
+        with open(tealpath(config['application']['contracts']['listing']), mode='r') as f:
             self.template_bytes = f.read()
 
         url         = "{}:{}".format(config['algod']['server'], config['algod']['port'])
@@ -42,7 +44,7 @@ class TemplateContract(object):
 
 
     def write_tmpl_positions(self):
-        with open("../"+self.config['listing']['template-positions'], 'w') as f:
+        with open("../"+self.config['application']['contracts']['listing-positions'], 'w') as f:
             json.dump(self.get_positions_obj(), f)
 
     def get_positions_obj(self):
@@ -90,9 +92,12 @@ class TemplateContract(object):
         intc_line = lines[1]
         for intc in intc_line.split(" "):
             if "TMPL_" in intc:
-                teal_source = teal_source.replace(intc, "0")
+                teal_source = teal_source.replace(intc, dummy_int)
 
-        #TODO bytec?
+        bytec_line = lines[2]
+        for bytec in bytec_line.split(" "):
+            if "TMPL_" in bytec:
+                teal_source = teal_source.replace(bytec, dummy_string_bytes)
 
         # Iterate over lines 
         for l in range(3, len(lines)):
@@ -104,11 +109,15 @@ class TemplateContract(object):
                 if chunks[0] not in ("pushbytes", "pushint"):
                     continue
 
-                tv = TemplateVar(lines[l+1] == "btoi", chunks[1])
+                tv = TemplateVar(lines[l+1] == "btoi" or chunks[0] == "pushint", chunks[1])
+
                 if tv.is_integer:
-                    teal_source = teal_source.replace(chunks[1], dummy_int)
+                    if chunks[0] == "pushbytes":
+                        teal_source = teal_source.replace(chunks[1], dummy_int_bytes)
+                    else:
+                        teal_source = teal_source.replace(chunks[1], dummy_int)
                 else:
-                    teal_source = teal_source.replace(chunks[1], dummy_string)
+                    teal_source = teal_source.replace(chunks[1], dummy_string_bytes)
 
                 self.template_vars.append(tv)
         return teal_source

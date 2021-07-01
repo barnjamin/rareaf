@@ -1,12 +1,12 @@
 #pragma version 3
-intcblock 1 0 4 2 TMPL_PRICE_ID 47
-bytecblock 0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799
+intcblock 1 0 4 2 TMPL_PRICE_ID 5 47
+bytecblock TMPL_OWNER_ADDR
 txn ApplicationID
 intc_1 // 0
 ==
 bnz l24
 txn OnCompletion
-pushint 5 // DeleteApplication
+intc 5 // DeleteApplication
 ==
 bnz l23
 txn OnCompletion
@@ -52,9 +52,9 @@ bnz l13
 err
 l13:
 gtxn 1 Receiver
-gtxna 0 Accounts 2
+gtxna 0 Accounts 1
 ==
-intc_0 // 1
+intc_3 // 2
 intc 4 // TMPL_PRICE_ID
 asset_holding_get AssetBalance
 store 10
@@ -63,8 +63,8 @@ gtxn 1 Amount
 load 11
 ==
 &&
-intc_3 // 2
-gtxna 0 Accounts 1
+intc_0 // 1
+gtxna 0 Accounts 2
 app_local_del
 intc_0 // 1
 &&
@@ -111,7 +111,7 @@ global ZeroAddress
 ==
 &&
 gtxn 1 Sender
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 AssetReceiver
@@ -159,7 +159,7 @@ load 1
 ==
 &&
 gtxn 1 AssetReceiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 AssetAmount
@@ -186,7 +186,7 @@ asset_params_get AssetManager
 store 8
 store 9
 load 9
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 Sender
@@ -207,7 +207,7 @@ global ZeroAddress
 ==
 &&
 gtxn 1 AssetCloseTo
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 Sender
@@ -215,7 +215,7 @@ load 1
 ==
 &&
 gtxn 1 AssetReceiver
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 XferAsset
@@ -233,7 +233,7 @@ asset_params_get AssetManager
 store 6
 store 7
 load 7
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxna 0 Assets 0
@@ -290,7 +290,7 @@ global ZeroAddress
 ==
 &&
 gtxn 2 Sender
-bytec_0 // 7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
+bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 2 AssetReceiver
@@ -328,7 +328,7 @@ load 4
 txna ApplicationArgs 2
 load 5
 load 5
-intc 5 // 47
+intc 6 // 47
 +
 substring3
 concat
@@ -336,7 +336,7 @@ store 4
 load 5
 pushint 32 // 32
 +
-intc 5 // 47
+intc 6 // 47
 +
 store 5
 load 4
@@ -352,6 +352,21 @@ load 5
 pushint 8 // 8
 +
 intc_2 // 4
++
+store 5
+load 4
+txna ApplicationArgs 2
+load 5
+load 5
+intc 5 // 5
++
+substring3
+concat
+store 4
+load 5
+pushint 64 // 64
++
+intc 5 // 5
 +
 store 5
 load 4
@@ -383,7 +398,7 @@ app_local_put
 intc_0 // 1
 &&
 load 2
-pushint 1000000000 // 1000000000
+pushint 10000000000 // 10000000000
 <=
 &&
 return

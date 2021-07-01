@@ -44,6 +44,7 @@ def listing():
 
         set_addr_as_tx(      Gtxn[1], buyer_addr),
         set_addr_as_tx(      Gtxn[2], contract_addr),
+
         pay_txn_valid(       Gtxn[1], Gtxn[1].amount(), buyer_addr.load(), creator_addr.load()),
         asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), buyer_addr.load(), buyer_addr.load()),
         asa_close_xfer_valid(Gtxn[3], price_token, contract_addr.load(), platform_addr, platform_addr),
@@ -62,5 +63,5 @@ def listing():
 
 
 if __name__ == "__main__":
-     with open(tealpath(configuration['listing']['teal']), 'w') as f:
+     with open(tealpath(configuration['application']['contracts']['listing']), 'w') as f:
         f.write(compileTeal(listing(), Mode.Signature, version=3, assembleConstants=True))

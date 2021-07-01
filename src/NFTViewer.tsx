@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import {useParams, useHistory} from 'react-router-dom'
-import { tryGetNFT, getTags } from './lib/algorand'
+import { tryGetNFT, getTags, isOptedIntoApp } from './lib/algorand'
 import {Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation} from '@blueprintjs/core'
 import Listing from './lib/listing'
 import {Wallet} from './wallets/wallet'
@@ -27,6 +27,7 @@ export default function NFTViewer(props: NFTViewerProps) {
     const [listingVisible, setListingVisible] = React.useState(false)
     const [tagOpts, setTagOpts]               = React.useState([])
     const [tags, setTags]                     = React.useState([])
+    const [optedIn, setOptedIn]               = React.useState(false)
     
     React.useEffect(()=>{
         tryGetNFT(parseInt(id))
@@ -38,6 +39,12 @@ export default function NFTViewer(props: NFTViewerProps) {
             .catch((err)=>{ console.error("Error getting tags: ", err)})
 
     }, []);
+
+    React.useEffect(()=>{
+        if(props.wallet === undefined) return
+        isOptedIntoApp(props.wallet.getDefaultAccount())
+            .then((oi)=>{ setOptedIn(oi) })
+    }, [props.wallet, props.acct])
 
 
     function handleCreateListing(){ setListingVisible(true) }
@@ -60,8 +67,12 @@ export default function NFTViewer(props: NFTViewerProps) {
         setWaiting(true); 
 
         try{
+            if(!optedIn) {
+                //TODO: Opt the user in
+                alert("You're not opted in yet g, and i  havent built that yet")
+            }
+
             const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
-            console.log(lst)
 
             await lst.doCreate(props.wallet)
             if(tags.length > 0 ){

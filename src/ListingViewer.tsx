@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import { useParams, useHistory } from 'react-router-dom'
 import { getListing, getTags } from './lib/algorand'
-import { Button, NumericInput, Card, Elevation } from '@blueprintjs/core'
+import { AnchorButton, Button, NumericInput, Card, Elevation } from '@blueprintjs/core'
 import Tagger from './Tagger'
 import {TagToken} from './lib/tags'
 import {Wallet} from './wallets/wallet'
@@ -49,12 +49,14 @@ function ListingViewer(props: ListingViewerProps) {
     async function handleAddTag(tag: TagToken){
         setLoading(true)
         await listing.doTag(props.wallet, tag)
+        setListing(listing)
         setLoading(false)
     }
 
     async function handleRemoveTag(tag: TagToken){
         setLoading(true)
         await listing.doUntag(props.wallet, tag)
+        setListing(listing)
         setLoading(false)
     }
 
@@ -64,6 +66,7 @@ function ListingViewer(props: ListingViewerProps) {
         if(price==listing.price) setUpdateable(false)
         else setUpdateable(true)
     }
+
     async function handleUpdatePrice(){
         setLoading(true)
         if (price == 0){ 
@@ -72,26 +75,36 @@ function ListingViewer(props: ListingViewerProps) {
             return
         }
         await listing.doPriceChange(props.wallet, price)
+        setListing(listing)
         setLoading(false)
     }
 
 
     if(listing !== undefined) {
-        let tagsComponent =<Tagger 
-                            tagOpts={tagOpts} 
-                            tags={listing.tags} 
-                            handleAddTag={handleAddTag}
-                            handleRemoveTag={handleRemoveTag}
-                            renderProps={{"fill": false, "disabled":true}}
-                            />
-        let buttons = <Button loading={loading} onClick={handleBuy}>Buy</Button>
+        let tagsComponent = <div className='container listing-card-tags'>
+            {
+                listing.tags.map((t)=>{
+                    return <AnchorButton 
+                        key={t.id} 
+                        large={true}
+                        minimal={true}
+                        outlined={true}
+                        href={'/tag/'+ t.name} 
+                        text={t.name} 
+                    />
+                })
+            } 
+        </div>
+
+        let buttons = <Button loading={loading} disabled={props.wallet===undefined} onClick={handleBuy}>Buy</Button>
+
         let priceComponent = (
             <div className='container listing-price' >
                 <p>{listing.price}</p>
             </div>
         )
 
-        if (listing.creator_addr == props.wallet.getDefaultAccount()){
+        if (props.wallet !== undefined && listing.creator_addr == props.wallet.getDefaultAccount()){
             tagsComponent = (
                 <Tagger 
                     tagOpts={tagOpts} 
