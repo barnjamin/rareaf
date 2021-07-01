@@ -5,6 +5,7 @@ import {
     getSuggested, 
     get_app_update_txn, 
     get_app_create_txn,  
+    get_app_optin_txn,
     get_asa_create_txn 
 } from "./algorand"
 import { get_approval_program, get_clear_program, get_listing_hash } from "./contracts"
@@ -25,6 +26,7 @@ export enum Method {
     PriceDecrease = "cHJpY2VfZGVjcmVhc2U=",
     Purchase = "cHVyY2hhc2U=",
 }
+
 export type AppConf = {
     owner: string // Address of applictation owner
     name: string  // Full name of 
@@ -41,6 +43,18 @@ export class Application {
 
     constructor(settings: any){
         this.conf = settings
+    }
+
+    async optIn(wallet: Wallet): Promise<boolean> {
+        const suggested = await getSuggested(10)
+        const addr = wallet.getDefaultAccount()
+
+        const optin = new Transaction(get_app_optin_txn(suggested, addr, this.conf.id))
+        const [signed] = await wallet.signTxn([optin])
+        const result = await sendWait(signed)
+        console.log(result)
+
+        return result['pool-error'] == ""
     }
 
     async create(wallet: Wallet): Promise<AppConf> {
@@ -91,21 +105,18 @@ export class Application {
 
         if (!this.conf.id){
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.owner, app, clear))
-            console.log(create_txn)
-            const signed = await wallet.signTxn([create_txn])
-            console.log(signed)
-            const result = await sendWaitGroup(signed)
+            const [signed] = await wallet.signTxn([create_txn])
+            const result = await sendWait(signed)
             if(result['pool-error'] != "") {
                 console.error("Failed to create the application")
             }
+
             this.conf.id = result['application-index']
         }else{
-            const create_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.owner, app, clear, this.conf.id))
-            const signed = await wallet.signTxn([create_txn])
-            const result = await sendWaitGroup(signed)
-            if(result['pool-error'] != "") {
-                console.error("Failed to create the application")
-            }
+            const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.owner, app, clear, this.conf.id))
+            const [signed] = await wallet.signTxn([update_txn])
+            const result = await sendWait(signed)
+            if(result['pool-error'] != "") console.error("Failed to create the application")
         }
     }
 

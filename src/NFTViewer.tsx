@@ -9,6 +9,8 @@ import Listing from './lib/listing'
 import {Wallet} from './wallets/wallet'
 import {NFT} from './lib/nft'
 import Tagger from './Tagger'
+import {Application} from './lib/application'
+import {platform_settings as ps} from './lib/platform-conf'
 
 type NFTViewerProps = {
     history: any
@@ -42,8 +44,10 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     React.useEffect(()=>{
         if(props.wallet === undefined) return
+
         isOptedIntoApp(props.wallet.getDefaultAccount())
             .then((oi)=>{ setOptedIn(oi) })
+
     }, [props.wallet, props.acct])
 
 
@@ -63,14 +67,23 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     async function handlePriceChange(price){ setPrice(price) }
 
+
+    async function handleOptIn() {
+        if(props.wallet === undefined || optedIn) return
+
+        const app = new Application(ps.application)
+        console.log(app)
+
+        const result = await app.optIn(props.wallet)
+        console.log(result)
+
+    }
+
     async function handleSubmitListing(){
         setWaiting(true); 
 
         try{
-            if(!optedIn) {
-                //TODO: Opt the user in
-                alert("You're not opted in yet g, and i  havent built that yet")
-            }
+            await handleOptIn()
 
             const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
 
@@ -117,7 +130,6 @@ export default function NFTViewer(props: NFTViewerProps) {
                 <div className='container nft-description'>
                     <p> { nft.metadata.description }</p>
                 </div>
-
                 { editButtons }
             </Card>
 

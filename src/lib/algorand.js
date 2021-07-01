@@ -43,10 +43,18 @@ export async function isOptedIntoApp(address) {
     const result = await client.accountInformation(address).do()
 
     const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ps.application.id })
-    const created = result['created-apps'].find((r)=>{ return r.id == ps.application.id })
 
+    return optedIn !== undefined 
+}
 
-    return optedIn !== undefined || created !== undefined
+export async function isOptedIntoAsset(address, idx) {
+    const client = getAlgodClient()
+    const result = await client.accountInformation(address).do()
+
+    console.log(result)
+    const optedIn = result['assets'].find((r)=>{ return r['asset-id'] == idx })
+
+    return optedIn !== undefined 
 }
 
 export async function getListings(tagName) {
@@ -251,6 +259,15 @@ export function get_asa_destroy_txn(suggestedParams, addr, token_id) {
 }
 
 
+export function get_app_optin_txn(suggestedParams, addr, id) {
+    return {
+        from: addr,
+        appIndex:id,
+        type: 'appl',
+        appOnComplete: algosdk.OnApplicationComplete.OptInOC,
+        ...suggestedParams
+    }
+}
 export function get_app_create_txn(suggestedParams, addr, approval, clear) {
    return {
         from:addr,

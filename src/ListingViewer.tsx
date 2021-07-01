@@ -3,12 +3,14 @@
 
 import * as React from 'react'
 
+import {Transaction} from 'algosdk'
 import { useParams, useHistory } from 'react-router-dom'
-import { getListing, getTags } from './lib/algorand'
+import { getListing, getSuggested, getTags, get_asa_optin_txn, isOptedIntoAsset, sendWait } from './lib/algorand'
 import { AnchorButton, Button, NumericInput, Card, Elevation } from '@blueprintjs/core'
 import Tagger from './Tagger'
 import {TagToken} from './lib/tags'
 import {Wallet} from './wallets/wallet'
+import { Suggest } from '@blueprintjs/select'
 
 type ListingViewerProps = {
     history: any
@@ -39,8 +41,29 @@ function ListingViewer(props: ListingViewerProps) {
         setLoading(false)
     }
 
+
+    async function handleOptIntoAsset(){
+
+        if(props.wallet === undefined) return 
+
+        const addr = props.wallet.getDefaultAccount()
+
+        console.log(addr)
+        if(await isOptedIntoAsset(addr, listing.asset_id)) return
+        console.log("opting in")
+
+        const suggested = await getSuggested(10)
+        const optin = new Transaction(get_asa_optin_txn(suggested, addr, listing.asset_id))
+
+        const [signed] = await props.wallet.signTxn([optin])
+
+        const result = await sendWait(signed)
+        console.log(result)
+    }
+
     async function handleBuy(){
         setLoading(true)
+        await handleOptIntoAsset()
         await listing.doPurchase(props.wallet)
         history.push("/nft/"+listing.asset_id)
         setLoading(false)
