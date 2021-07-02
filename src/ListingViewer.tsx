@@ -48,9 +48,7 @@ function ListingViewer(props: ListingViewerProps) {
 
         const addr = props.wallet.getDefaultAccount()
 
-        console.log(addr)
         if(await isOptedIntoAsset(addr, listing.asset_id)) return
-        console.log("opting in")
 
         const suggested = await getSuggested(10)
         const optin = new Transaction(get_asa_optin_txn(suggested, addr, listing.asset_id))
@@ -58,7 +56,6 @@ function ListingViewer(props: ListingViewerProps) {
         const [signed] = await props.wallet.signTxn([optin])
 
         const result = await sendWait(signed)
-        console.log(result)
     }
 
     async function handleBuy(){

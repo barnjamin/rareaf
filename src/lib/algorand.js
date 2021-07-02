@@ -132,6 +132,7 @@ export async function getListing(addr) {
     const holdings  = await getHoldingsFromListingAddress(addr)
     const creator   = await getCreator(addr, holdings.nft.asset_id)
 
+
     let l = new Listing(holdings.price, holdings.nft.asset_id, creator, addr)
 
     l.tags = holdings.tags.map((t)=>{ return new TagToken(t.params.name, t.index) } )
@@ -143,12 +144,12 @@ export async function getListing(addr) {
 
 
 export async function getHoldingsFromListingAddress(address) {
-    const indexer   = getIndexer()
-    const acct_resp = await indexer.lookupAccountByID(address).do()
+    const client   = getAlgodClient()
+    const account = await client.accountInformation(address).do()
     const holdings  = { 'price':0, 'tags':[], 'nft':0, }
 
-    for (let aid in acct_resp.account.assets) {
-        const asa = acct_resp.account.assets[aid]
+    for (let aid in account.assets) {
+        const asa = account.assets[aid]
 
         if(asa['asset-id'] == ps.application.price_token){
             holdings.price = asa['amount']

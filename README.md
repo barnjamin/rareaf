@@ -33,7 +33,7 @@ Rare AF showrooms let you display your digital assets.  Showrooms can be persona
 
 *how much tho?*
 
-Fork it for free, configure it, publish it on a static hosting site. Then you set fees on the works that sell.
+Fork it for free, configure it, publish it on a static hosting site. Then you set commision fees on the works that sell.
 
 
 donate to this address (charity? Dao?)
@@ -42,19 +42,16 @@ donate to this address (charity? Dao?)
 #TODO:
 
    Initialization:
-      - Create Tokens/App 
+      - Add contract account for ownership
       - Update Config on Github
 
    General:
-      - Delay nav or retry loading when creating a new listing or nft to give indexer time to update, use bp3-skeleton class
-      - Check if opted into app before trying to create listing
-      - Check if opted into asset before trying to create, give option?
       - Convert numbers to bignum
-      - Cache tag names/ids so we dont have to hit the net every time
-
-
-   Wallets:
-      - Add support for other wallets
+      - Add toast for network send waits 
+      - Add descriptive messages for the txns being signed
+      - Add support for more wallets
+      - Add more currencies 
+      - Add other contract type hashes
 
    Minting:
       - Add more fields for metadata
@@ -62,6 +59,9 @@ donate to this address (charity? Dao?)
 
    Browse:
       - Add filters on browse page for tags/price
+
+   Purchase
+      - Remove tags prior during purchase txn 
    
 ```
 
