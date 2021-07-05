@@ -17,9 +17,10 @@
     },
     "explorer":"algoexplorer.io",
     "application":{
-        "id": 13,
-        "price_token": 14,
-        "owner": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
+        "app_id": 13,
+        "price_id": 14,
+        "admin_addr":"0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799", 
+        "owner_addr":"0xf26abbd3bf55d51852464dd9fb50820f1e68ae7a195d45b031168a06a45075a0", 
         "name":"RareAF",
         "unit":"raf",
         "contracts":{
@@ -28,8 +29,8 @@
             "listing":"listing.teal",
             "listing-positions":"listing.tmpl.teal.json"
         },
-        "fee":1000000,
-        "seed":5e6,
+        "fee_amt":1000000,
+        "seed_amt":5000000,
         "max_price":1e10
     },
     "tags":[ 

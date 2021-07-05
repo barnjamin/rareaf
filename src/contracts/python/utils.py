@@ -10,6 +10,9 @@ def valid_app_call(txn):
         txn.application_id() == app_id,
     )
 
+def valid_admin_fee_pay(txn):
+    return pay_txn_valid(txn, Int(0), platform_admin, platform_admin)
+
 def valid_platform_asset():
     expr = AssetParam.manager(Int(0))
     return Seq([

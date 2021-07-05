@@ -55,8 +55,6 @@ class TemplateContract(object):
 
     def get_validate_ops(self, contract_val):
 
-        #blank_hash = self.get_blank_hash()
-
         blank_contract = ScratchVar(TealType.bytes)
         pos            = ScratchVar(TealType.uint64)
 
@@ -81,7 +79,6 @@ class TemplateContract(object):
             # prepare the blank contract
             Seq(concat_ops), 
             # Make sure this is the contract being distributed to
-            #Sha256(blank_contract.load()) == Bytes("base64",blank_hash),
             Sha256(blank_contract.load()) == Tmpl.Bytes("TMPL_BLANK_HASH"),
         )
 
@@ -92,19 +89,33 @@ class TemplateContract(object):
         intc_line = lines[1]
         for intc in intc_line.split(" "):
             if "TMPL_" in intc:
-                teal_source = teal_source.replace(intc, dummy_int)
+                vname = intc[5:].lower()
+                if vname in self.config['application']:
+                    teal_source = teal_source.replace(intc, str(self.config['application'][vname]))
+                else:
+                    teal_source = teal_source.replace(intc, dummy_int)
 
         bytec_line = lines[2]
         for bytec in bytec_line.split(" "):
             if "TMPL_" in bytec:
-                teal_source = teal_source.replace(bytec, dummy_string_bytes)
+                vname = bytec[5:].lower()
+                if vname in self.config['application']:
+                    teal_source = teal_source.replace(bytec, self.config['application'][vname])
+                else:
+                    teal_source = teal_source.replace(bytec, dummy_string_bytes)
 
-        # Iterate over lines 
+        # Iterate over lines skipping consts
         for l in range(3, len(lines)):
             line = lines[l]
+
             # Find strings starting with TMPL_
             if "TMPL_" in line:
                 chunks = line.split(" ")
+
+                vname = chunks[1][5:].lower()
+                if vname in self.config['application']:
+                    teal_source= teal_source.replace(chunks[1], str(self.config['application'][vname]))
+                    continue
 
                 if chunks[0] not in ("pushbytes", "pushint"):
                     continue
@@ -120,6 +131,7 @@ class TemplateContract(object):
                     teal_source = teal_source.replace(chunks[1], dummy_string_bytes)
 
                 self.template_vars.append(tv)
+
         return teal_source
 
     def get_populated_hash(self, vals):

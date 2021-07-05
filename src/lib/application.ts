@@ -71,9 +71,6 @@ export class Application {
         // Update Application with hash of contract && price token id
         await this.updateApplication(wallet)
 
-        // Sign delegate to xfer tokens
-        // this.signDelegate()
-
         return this.conf 
     }
 

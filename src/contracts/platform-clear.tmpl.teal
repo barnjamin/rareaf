@@ -1,2 +1,2 @@
-#pragma version 3
+#pragma version 4
 pushint 1 // 1

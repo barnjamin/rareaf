@@ -64,4 +64,4 @@ def listing():
 
 if __name__ == "__main__":
      with open(tealpath(configuration['application']['contracts']['listing']), 'w') as f:
-        f.write(compileTeal(listing(), Mode.Signature, version=3, assembleConstants=True))
+        f.write(compileTeal(listing(), Mode.Signature, version=4, assembleConstants=True))

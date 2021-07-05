@@ -42,10 +42,11 @@ export async function get_listing_hash(vars: any): Promise<Buffer> {
 
 export async function get_listing_compiled(vars: any) {
     const v = {
-            "TMPL_OWNER_ADDR": "b64("+addrToB64(ps.application.owner)+")",
-            "TMPL_PRICE_ID": ps.application.price_token, 
-            "TMPL_APP_ID":ps.application.id,
-            "TMPL_FEE_AMT":ps.application.fee,
+            "TMPL_OWNER_ADDR": "b64("+addrToB64(ps.application.owner_addr)+")",
+            "TMPL_ADMIN_ADDR": "b64("+addrToB64(ps.application.owner_addr)+")",
+            "TMPL_PRICE_ID": ps.application.price_id, 
+            "TMPL_APP_ID":ps.application.app_id,
+            "TMPL_FEE_AMT":ps.application.fee_amt,
             ...vars
     }
     return get_contract_compiled(listing_template, v)
@@ -60,8 +61,8 @@ export async function get_contract_compiled(template: string, vars: any) {
 export async function get_approval_program(vars: any){
 
     const v = {
-        "TMPL_PRICE_ID":ps.application.price_token, 
-        "TMPL_OWNER_ADDR": "b64("+addrToB64(ps.application.owner)+")",
+        "TMPL_PRICE_ID":ps.application.price_id, 
+        "TMPL_OWNER_ADDR": "b64("+addrToB64(ps.application.owner_addr)+")",
         ...vars
     }
 

@@ -1,0 +1,36 @@
+#pragma version 4
+global GroupSize
+int 1
+>
+gtxn 0 TypeEnum
+int appl
+==
+gtxn 0 ApplicationID
+int TMPL_APP_ID
+==
+&&
+gtxn 0 TypeEnum
+int pay
+==
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 Sender
+byte TMPL_ADMIN_ADDR
+==
+&&
+gtxn 0 Receiver
+byte TMPL_ADMIN_ADDR
+==
+&&
+gtxn 0 Amount
+int 0
+==
+&&
+||
+&&

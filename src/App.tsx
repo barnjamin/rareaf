@@ -18,6 +18,7 @@ import ListingViewer from './ListingViewer'
 import Admin from './Admin'
 import {Wallet} from './wallets/wallet'
 import {platform_settings as ps} from './lib/platform-conf'
+import algosdk from 'algosdk' 
 
 type AppProps = {
   history: any
@@ -59,7 +60,7 @@ class App extends React.Component<AppProps, AppState> {
   render() {
 
     let adminNav = <div/>
-    if(this.walletConnected()  && (ps.application.owner == "" || this.state.wallet.getDefaultAccount() == ps.application.owner)) {
+    if(this.walletConnected()  && (ps.application.owner_addr == "" || this.state.wallet.getDefaultAccount() == ps.application.owner_addr)) {
       adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
     }
 

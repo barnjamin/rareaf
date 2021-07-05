@@ -1,12 +1,12 @@
-#pragma version 3
-intcblock 1 4 6 0 TMPL_PRICE_ID TMPL_APP_ID 3
+#pragma version 4
+intcblock 1 4 0 6 TMPL_APP_ID TMPL_PRICE_ID 3
 bytecblock TMPL_OWNER_ADDR
 pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
 store 0
 pushbytes TMPL_ASSET_ID // TMPL_ASSET_ID
 btoi
 store 3
-intc_3 // 0
+intc_2 // 0
 bnz l10
 gtxna 0 ApplicationArgs 0
 pushbytes 0x637265617465 // "create"
@@ -35,22 +35,22 @@ bnz l6
 err
 l6:
 gtxn 0 TypeEnum
-intc_2 // appl
+intc_3 // appl
 ==
 gtxn 0 ApplicationID
-intc 5 // TMPL_APP_ID
+intc 4 // TMPL_APP_ID
 ==
 &&
 b l11
 l7:
 global GroupSize
-intc_2 // 6
+intc_3 // 6
 ==
 gtxn 0 TypeEnum
-intc_2 // appl
+intc_3 // appl
 ==
 gtxn 0 ApplicationID
-intc 5 // TMPL_APP_ID
+intc 4 // TMPL_APP_ID
 ==
 &&
 &&
@@ -130,7 +130,7 @@ bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 3 XferAsset
-intc 4 // TMPL_PRICE_ID
+intc 5 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -192,10 +192,10 @@ global GroupSize
 pushint 5 // 5
 ==
 gtxn 0 TypeEnum
-intc_2 // appl
+intc_3 // appl
 ==
 gtxn 0 ApplicationID
-intc 5 // TMPL_APP_ID
+intc 4 // TMPL_APP_ID
 ==
 &&
 &&
@@ -223,7 +223,7 @@ bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // TMPL_PRICE_ID
+intc 5 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -299,7 +299,7 @@ load 0
 ==
 &&
 gtxn 4 Amount
-intc_3 // 0
+intc_2 // 0
 ==
 &&
 &&
@@ -309,10 +309,10 @@ global GroupSize
 pushint 7 // 7
 ==
 gtxn 0 TypeEnum
-intc_2 // appl
+intc_3 // appl
 ==
 gtxn 0 ApplicationID
-intc 5 // TMPL_APP_ID
+intc 4 // TMPL_APP_ID
 ==
 &&
 &&
@@ -368,7 +368,7 @@ load 1
 ==
 &&
 gtxn 2 AssetAmount
-intc_3 // 0
+intc_2 // 0
 ==
 &&
 &&
@@ -384,7 +384,7 @@ global ZeroAddress
 ==
 &&
 gtxn 3 XferAsset
-intc 4 // TMPL_PRICE_ID
+intc 5 // TMPL_PRICE_ID
 ==
 &&
 gtxn 3 Sender
@@ -396,7 +396,7 @@ load 1
 ==
 &&
 gtxn 3 AssetAmount
-intc_3 // 0
+intc_2 // 0
 ==
 &&
 &&
@@ -453,7 +453,7 @@ btoi
 ==
 &&
 gtxn 5 XferAsset
-intc 4 // TMPL_PRICE_ID
+intc 5 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -487,5 +487,5 @@ load 1
 &&
 b l11
 l10:
-intc_3 // 0
+intc_2 // 0
 l11:

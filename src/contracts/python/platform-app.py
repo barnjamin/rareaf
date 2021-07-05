@@ -4,7 +4,6 @@ from validator import *
 from utils import *
 from config import *
 
-
 tc = TemplateContract(configuration)
 tc.write_tmpl_positions()
 
@@ -124,7 +123,7 @@ if __name__ == "__main__":
 
 
     with open(tealpath(configuration['application']['contracts']['approval']), "w") as pa_file:
-        pa_file.write(compileTeal(approval(), Mode.Application, version=3, assembleConstants=True))
+        pa_file.write(compileTeal(approval(), Mode.Application, version=4, assembleConstants=True))
 
     with open(tealpath(configuration['application']['contracts']['clear']), "w") as pc_file:
-        pc_file.write(compileTeal(clear(), Mode.Application, version=3, assembleConstants=True))
+        pc_file.write(compileTeal(clear(), Mode.Application, version=4, assembleConstants=True))

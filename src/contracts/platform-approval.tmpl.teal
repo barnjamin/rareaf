@@ -1,12 +1,12 @@
-#pragma version 3
-intcblock 1 0 4 2 TMPL_PRICE_ID 5 47
+#pragma version 4
+intcblock 1 0 4 2 TMPL_PRICE_ID 47
 bytecblock TMPL_OWNER_ADDR
 txn ApplicationID
 intc_1 // 0
 ==
 bnz l24
 txn OnCompletion
-intc 5 // DeleteApplication
+pushint 5 // DeleteApplication
 ==
 bnz l23
 txn OnCompletion
@@ -328,7 +328,7 @@ load 4
 txna ApplicationArgs 2
 load 5
 load 5
-intc 6 // 47
+intc 5 // 47
 +
 substring3
 concat
@@ -336,7 +336,7 @@ store 4
 load 5
 pushint 32 // 32
 +
-intc 6 // 47
+intc 5 // 47
 +
 store 5
 load 4
@@ -352,21 +352,6 @@ load 5
 pushint 8 // 8
 +
 intc_2 // 4
-+
-store 5
-load 4
-txna ApplicationArgs 2
-load 5
-load 5
-intc 5 // 5
-+
-substring3
-concat
-store 4
-load 5
-pushint 64 // 64
-+
-intc 5 // 5
 +
 store 5
 load 4

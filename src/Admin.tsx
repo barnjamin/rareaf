@@ -20,7 +20,7 @@ type AdminProps = {
 };
 
 export default function Admin(props: AdminProps) {
-    if (props.acct != ps.application.owner && ps.application.owner != "")  return (<div className='container'><p>no</p></div>)
+    if (props.acct != ps.application.owner_addr && ps.application.owner_addr != "")  return (<div className='container'><p>no</p></div>)
 
     const [algod, setAlgod] = React.useState(ps.algod)
     const [indexer, setIndexer] = React.useState(ps.indexer)
@@ -126,9 +126,21 @@ export default function Admin(props: AdminProps) {
     }
 
 
-    let appComponent = <ApplicationCreator set={setAppConf} create={createApp} {...appConf} loading={loading} />
-    if (appConf.id>0){
-        appComponent = <ApplicationUpdater set={setAppConf} update={updateApp} {...appConf} loading={loading} />
+    let appComponent = 
+    <ApplicationCreator 
+        set={setAppConf} 
+        create={createApp} 
+        {...appConf} 
+        loading={loading} 
+        />
+    if (appConf.app_id>0){
+        appComponent = 
+        <ApplicationUpdater 
+            set={setAppConf} 
+            update={updateApp} 
+            {...appConf} 
+            loading={loading} 
+        />
     }
 
     return (
@@ -266,7 +278,7 @@ function IPFSConfig(props: IPFSConfigProps)  {
 type ApplicationCreatorProps = {
     name: string
     unit: string
-    fee: number 
+    fee_amt: number 
     loading: boolean
     set(key: string, value: string)
     create()
@@ -289,10 +301,10 @@ function ApplicationCreator(props: ApplicationCreatorProps) {
                 value={props.unit}
             />
             <InputGroup
-                onChange={e=>{props.set('fee', e.target.value)}}
+                onChange={e=>{props.set('fee_amt', e.target.value)}}
                 placeholder="Fee"
                 large={true}
-                value={props.fee.toString()}
+                value={props.fee_amt.toString()}
             />
             <Button loading={props.loading} onClick={props.create} text='Create'/>
         </div>
@@ -302,7 +314,7 @@ function ApplicationCreator(props: ApplicationCreatorProps) {
 type ApplicationUpdaterProps = {
     name: string
     unit: string
-    fee: number 
+    fee_amt: number 
     loading: boolean
     set(key: string, value: string)
     update()
@@ -325,10 +337,10 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
                 value={props.unit}
             />
             <InputGroup
-                onChange={e=>{props.set('fee', e.target.value)}}
+                onChange={e=>{props.set('fee_amt', e.target.value)}}
                 placeholder="Fee"
                 large={true}
-                value={props.fee.toString()}
+                value={props.fee_amt.toString()}
             />
             <Button loading={props.loading} onClick={props.update} text='Update Application'/>
         </div>

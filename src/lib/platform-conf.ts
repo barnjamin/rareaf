@@ -16,24 +16,27 @@ type IndexerConf = {
     token: string
 };
 type AppConf = {
-    id: number
-    price_token: number
-    owner: string
+    app_id: number
+    price_id: number
+    owner_addr: string
+    admin_addr: string
+    fee_amt: number
+    seed_amt: number
     name: string
     unit: string
+
     contracts: {
         approval: string
         clear: string
         listing: string
     }
-    fee: number
-    seed: number
     max_price: number
 
 };
+
 type DevConf = {
     debug_txns: boolean
-}
+};
 
 type PlatformConf = {
     domain: string

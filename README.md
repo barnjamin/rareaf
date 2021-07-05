@@ -35,7 +35,6 @@ Rare AF showrooms let you display your digital assets.  Showrooms can be persona
 
 Fork it for free, configure it, publish it on a static hosting site. Then you set commision fees on the works that sell.
 
-
 donate to this address (charity? Dao?)
 
 ```
