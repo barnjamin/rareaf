@@ -1,4 +1,5 @@
 import {TagToken} from './tags'
+import {addrToB64} from './algorand'
 
 type AlgodConf = {
     server: string
@@ -18,20 +19,21 @@ type IndexerConf = {
 type AppConf = {
     app_id: number
     price_id: number
-    owner_addr: string
-    admin_addr: string
-    fee_amt: number
-    seed_amt: number
-    name: string
-    unit: string
-
-    contracts: {
-        approval: string
-        clear: string
-        listing: string
-    }
+    owner_addr: string  // Address of applictation owner
+    admin_addr: string  
+    fee_amt: number     // Amount to be sent to app onwer on sales
+    seed_amt: number     
+    name: string        // Full name of App 
+    unit: string        // Unit name for price/tag tokens
+    tags: TagToken[]
     max_price: number
+    listing_hash: string
+};
 
+type Contracts= {
+    approval: string
+    clear: string
+    listing: string
 };
 
 type DevConf = {
@@ -45,11 +47,24 @@ type PlatformConf = {
     indexer: IndexerConf,
     explorer: string,
     application: AppConf,
-    def: DevConf,
-    tags: TagToken[]
+    contracts: Contracts
+    dev: DevConf,
 };
-
 
 const platform_settings = require("../../config.json") as PlatformConf;
 
-export { platform_settings }
+function get_template_vars(override: any): any {
+    return {
+        "TMPL_APP_ID"        : platform_settings.application.app_id,
+        "TMPL_ADMIN_ADDR"    : addrToB64(platform_settings.application.admin_addr),
+        "TMPL_OWNER_ADDR"    : addrToB64(platform_settings.application.owner_addr),
+        "TMPL_FEE_AMT"       : platform_settings.application.fee_amt,
+        "TMPL_PRICE_ID"      : platform_settings.application.price_id,
+        "TMPL_BLANK_HASH"    : platform_settings.application.listing_hash,
+        ...override
+    } 
+}
+
+
+
+export { platform_settings, AppConf, get_template_vars }

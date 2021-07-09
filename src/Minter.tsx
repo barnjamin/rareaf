@@ -55,13 +55,12 @@ export default function Minter(props: MinterProps){
                 alert("Failed to create token")
                 console.error("Failed to create token: ", err)
             })
+
         }).catch((err) => { 
             console.error("Failed to upload metadata", err) 
             alert("Failed to upload metadata")
-        }).finally(()=>{
             setLoading(false)
         })
-
     }
 
     function handleChangeMeta(event) {

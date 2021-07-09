@@ -1,21 +1,24 @@
 import { 
     addrToB64, 
     sendWait, 
-    sendWaitGroup,
     getSuggested, 
     get_app_update_txn, 
     get_app_create_txn,  
     get_app_optin_txn,
-    get_asa_create_txn 
+    get_asa_create_txn, 
+    get_cosign_txn,
+    get_pay_txn
 } from "./algorand"
-import { get_approval_program, get_clear_program, get_listing_hash } from "./contracts"
+import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash, get_platform_owner } from "./contracts"
 import {Wallet} from '../wallets/wallet'
-import { Transaction } from 'algosdk';
-import { platform_settings as ps } from "./platform-conf";
+import algosdk, { Transaction } from 'algosdk';
+import { 
+    AppConf,
+    platform_settings as ps ,
+    get_template_vars
+} from "./platform-conf";
 
 
-const dummy_addr = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
-const dummy_id = "b64(AAAAAAAAAHs=)"
 
 export enum Method {
     Create = "Y3JlYXRl",
@@ -27,16 +30,6 @@ export enum Method {
     Purchase = "cHVyY2hhc2U=",
 }
 
-export type AppConf = {
-    owner: string // Address of applictation owner
-    name: string  // Full name of 
-    unit: string  // Unit name for price/tag tokens
-    fee:  number   // Amount to be sent to app onwer on sales
-
-    id?: number          // ID of application 
-    price_token?: number  // ID of token representing price 
-    listing_hash?: string // Sha256 of blanked out listing contract  
-}
 
 export class Application {
     conf: AppConf;
@@ -49,25 +42,33 @@ export class Application {
         const suggested = await getSuggested(10)
         const addr = wallet.getDefaultAccount()
 
-        const optin = new Transaction(get_app_optin_txn(suggested, addr, this.conf.id))
+        const optin = new Transaction(get_app_optin_txn(suggested, addr, this.conf.app_id))
         const [signed] = await wallet.signTxn([optin])
-        const result = await sendWait(signed)
-        console.log(result)
+        const result = await sendWait([signed])
 
-        return result['pool-error'] == ""
+        return result  
     }
 
     async create(wallet: Wallet): Promise<AppConf> {
-        this.conf.owner = wallet.getDefaultAccount()
-        
+        this.conf.admin_addr = wallet.getDefaultAccount()
+
+        console.log("Creating application")
         // Create blank app to reserve ID
         await this.updateApplication(wallet)
 
+        console.log("Creating Owner")
+        // Create Owner contract account for token creation/sending 
+        await this.createOwnerAcct(wallet)
+
+        console.log("Creating Price Token")
         // Create price token with app name 
         await this.createPriceToken(wallet) 
 
+        console.log("Updating listing hash")
+        // Create listing and compute hash for app update
         await this.setListingHash()
 
+        console.log("Updating application")
         // Update Application with hash of contract && price token id
         await this.updateApplication(wallet)
 
@@ -77,15 +78,30 @@ export class Application {
 
     async setListingHash() {
         // Populate Contracts with ids to get the blank hash 
-        const lc = await get_listing_hash({
+        const lc = await get_listing_hash(this.getVars({
             "TMPL_CREATOR_ADDR": dummy_addr, // Dummy addr
             "TMPL_ASSET_ID": dummy_id //Dummy int
-        }) 
+        })) 
+
         this.conf.listing_hash = "b64("+lc.toString('base64')+")"
     }
 
-    async signDelegate(): Promise<Buffer> {
-        return undefined
+    async createOwnerAcct(wallet: Wallet): Promise<string> {
+        // Read in platform-owner.tmpl.teal
+        // Set App id && admin addr
+        const ls = await get_platform_owner(this.getVars({}))
+        
+        // Save it
+        this.conf.owner_addr = ls.address()
+
+        // Seed it
+        const suggestedParams = await getSuggested(10)
+        const seed_txn        = new Transaction(get_pay_txn(suggestedParams, this.conf.admin_addr, this.conf.owner_addr, this.conf.seed_amt))
+        const [signed_seed]   = await wallet.signTxn([seed_txn])
+        const result          = await sendWait([signed_seed])
+        if(result['pool-error'] != "") console.error("Failed to seed the owner")
+
+        return ls.address() 
     }
 
     async updateApplication(wallet: Wallet) {
@@ -93,46 +109,54 @@ export class Application {
 
         await this.setListingHash()
 
-        const app = await get_approval_program({
-            "TMPL_BLANK_HASH": this.conf.listing_hash ||= dummy_addr,
-        }) 
+        const app = await get_approval_program(this.getVars({})) 
 
         const clear = await get_clear_program({})
 
 
-        if (!this.conf.id){
-            const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.owner, app, clear))
-            const [signed] = await wallet.signTxn([create_txn])
-            const result = await sendWait(signed)
-            if(result['pool-error'] != "") {
-                console.error("Failed to create the application")
-            }
+        if (!this.conf.app_id){
+            const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.admin_addr, app, clear))
+            const [signed]   = await wallet.signTxn([create_txn])
+            const result     = await sendWait([signed])
 
-            this.conf.id = result['application-index']
+            if(result['pool-error'] != "") console.error("Failed to create the application")
+            this.conf.app_id = result['application-index']
         }else{
-            const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.owner, app, clear, this.conf.id))
-            const [signed] = await wallet.signTxn([update_txn])
-            const result = await sendWait(signed)
+            const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.app_id))
+            const [signed]   = await wallet.signTxn([update_txn])
+            const result     = await sendWait([signed])
+
             if(result['pool-error'] != "") console.error("Failed to create the application")
         }
     }
 
     async createPriceToken(wallet: Wallet)  { 
         const suggestedParams = await getSuggested(10)
-        const create_px = new Transaction(get_asa_create_txn(suggestedParams, this.conf.owner, ps.domain))
+        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
 
+        const create_px = new Transaction(get_asa_create_txn(suggestedParams, this.conf.owner_addr, ps.domain))
         create_px.assetName     = this.conf.name
         create_px.assetUnitName = this.conf.unit + "-px"
         create_px.assetTotal    = 1e10
         create_px.assetDecimals = 1 //TODO: remove
+        
+        const grouped = [cosign_txn, create_px]
+        algosdk.assignGroupID(grouped)
+        const [s_cosign_txn, /* create_px */] = await wallet.signTxn(grouped)
 
-        const [signed] = await wallet.signTxn([create_px])
+        const ls = await get_platform_owner(this.getVars({}))
 
-        const result = await sendWait(signed)
+        const s_create_px = algosdk.signLogicSigTransaction(create_px, ls)
 
-        if(result['pool-error'] != "") 
-            console.error("Failed to create the application")
+        console.log(s_cosign_txn, s_create_px)
 
-        this.conf.price_token = result['asset-index']
+        const result = await sendWait([s_cosign_txn, s_create_px])
+
+        console.log(result)
+        this.conf.price_id = result['asset-index']
     } 
+
+    getVars(overwrite: any): any {
+        return get_template_vars(overwrite)
+    }
 }

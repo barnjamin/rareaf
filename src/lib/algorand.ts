@@ -6,6 +6,8 @@ import Listing from "./listing";
 import {NFT} from "./nft";
 import {TagToken} from './tags'
 import { Tag } from "@blueprintjs/core";
+import {dummy_addr, dummy_id} from './contracts'
+import { NetworkToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
 
 let client = undefined;
 export function getAlgodClient(){
@@ -17,7 +19,7 @@ export function getAlgodClient(){
 }
 
 let indexer = undefined;
-export function getIndexer(){
+export function getIndexer() {
     if(indexer===undefined){
         const {token, server, port} = ps.indexer
         indexer = new algosdk.Indexer(token, server, port)
@@ -25,11 +27,11 @@ export function getIndexer(){
     return indexer
 }
 
-export async function getTags(){
+export async function getTags(): Promise<TagToken[]> {
     const indexer = getIndexer()
     const tags = await indexer
         .searchForAssets()
-        .creator(ps.application.owner)
+        .creator(ps.application.owner_addr)
         .unit(TagToken.getUnitName())
         .do()
 
@@ -38,16 +40,16 @@ export async function getTags(){
     })
 }
 
-export async function isOptedIntoApp(address) {
+export async function isOptedIntoApp(address: string): Promise<boolean> {
     const client = getAlgodClient()
     const result = await client.accountInformation(address).do()
 
-    const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ps.application.id })
+    const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ps.application.app_id })
 
     return optedIn !== undefined 
 }
 
-export async function isOptedIntoAsset(address, idx) {
+export async function isOptedIntoAsset(address: string, idx: number): Promise<boolean> {
     const client = getAlgodClient()
     const result = await client.accountInformation(address).do()
 
@@ -57,21 +59,17 @@ export async function isOptedIntoAsset(address, idx) {
     return optedIn !== undefined 
 }
 
-export async function getListings(tagName) {
+export async function getListings(tagName: string): Promise<Listing[]> {
     const indexer  = getIndexer()
 
-    let token_id = ps.application.price_token
+    let token_id = ps.application.price_id
 
     if(tagName !== undefined){
         const tag = new TagToken(tagName)
-
         const tt = await getTagToken(tag.getTokenName())
-
         if (tt.id == 0) return []
-
         token_id = tt.id
     }
-
 
     const balances =  await indexer.lookupAssetBalances(token_id).currencyGreaterThan(0).do()
 
@@ -79,7 +77,7 @@ export async function getListings(tagName) {
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
-        if (b.address == ps.application.owner || b.amount == 0) continue;
+        if (b.address == ps.application.owner_addr || b.amount == 0) continue;
 
         listings.push(await getListing(b.address))
     }
@@ -87,19 +85,24 @@ export async function getListings(tagName) {
     return listings
 }
 
-export async function getTagToken(name) {
+export async function getTagToken(name: string): Promise<TagToken> {
     const indexer  = getIndexer()
     const assets = await indexer.searchForAssets().name(name).do()
 
     for(let aidx in assets.assets){
-        if(assets.assets[aidx].params.creator == ps.application.owner)
+        if(assets.assets[aidx].params.creator == ps.application.owner_addr)
             return new TagToken(name, assets.assets[aidx].index)
     }
 
     return new TagToken(name)
 }
 
-export async function getPortfolio(addr){
+type Portfolio = {
+    listings: Listing[]
+    nfts: NFT[]
+}
+
+export async function getPortfolio(addr: string): Promise<Portfolio> {
     const indexer = getIndexer()
     const balances = await indexer.lookupAccountByID(addr).do()
     const acct = balances.account
@@ -107,7 +110,7 @@ export async function getPortfolio(addr){
     const listings = []
     for(let aidx in acct['apps-local-state']){
         const als = acct['apps-local-state'][aidx]
-        if(als.id !== ps.application.id) continue
+        if(als.id !== ps.application.app_id) continue
 
         for(let kidx in als['key-value']) {
             const kv = als['key-value'][kidx]
@@ -124,41 +127,44 @@ export async function getPortfolio(addr){
         if (nft  !== undefined) nfts.push(nft)
     }
 
-
-    return {'listings':listings, 'nfts':nfts} 
+    return { listings:listings, nfts:nfts } 
 }
 
-export async function getListing(addr) {
+export async function getListing(addr: string): Promise<Listing> {
     const holdings  = await getHoldingsFromListingAddress(addr)
     const creator   = await getCreator(addr, holdings.nft.asset_id)
 
 
     let l = new Listing(holdings.price, holdings.nft.asset_id, creator, addr)
-
-    l.tags = holdings.tags.map((t)=>{ return new TagToken(t.params.name, t.index) } )
-
+    l.tags = holdings.tags
     l.nft = holdings['nft']
 
     return l
 }
 
+type Holdings= {
+    price: number
+    tags: TagToken[]
+    nft: NFT
+};
 
-export async function getHoldingsFromListingAddress(address) {
+
+export async function getHoldingsFromListingAddress(address: string): Promise<Holdings> {
     const client   = getAlgodClient()
     const account = await client.accountInformation(address).do()
-    const holdings  = { 'price':0, 'tags':[], 'nft':0, }
+    const holdings  = { 'price':0, 'tags':[], 'nft':undefined, }
 
     for (let aid in account.assets) {
         const asa = account.assets[aid]
 
-        if(asa['asset-id'] == ps.application.price_token){
+        if(asa['asset-id'] == ps.application.price_id){
             holdings.price = asa['amount']
             continue
         }
 
         const token = await getToken(asa['asset-id'])
 
-        if(token.params.creator == ps.application.owner) holdings.tags.push(token)
+        if(token.params.creator == ps.application.owner_addr) holdings.tags.push(TagToken.fromAsset(token))
         else holdings.nft = await NFT.fromAsset(token)
 
     }
@@ -166,32 +172,33 @@ export async function getHoldingsFromListingAddress(address) {
     return holdings
 }
 
-export async function tryGetNFT(asset_id) {
+export async function tryGetNFT(asset_id: number): Promise<NFT> {
     try {
         const token = await getToken(asset_id)
         // Make sure its a real nft
         const nft = await NFT.fromAsset(token)
         return nft
-    } catch (error) { console.error("invalid nft: ", ass['asset-id']) }
+    } catch (error) { console.error("invalid nft: ", asset_id) }
 
     return undefined 
 }
 
-export async function getToken(asset_id) {
+export async function getToken(asset_id: number): Promise<any> {
     const client = getAlgodClient()
     return await client.getAssetByID(asset_id).do()
 }
 
-export async function getCreator(addr, asset_id) {
+export async function getCreator(addr: string, asset_id: number): Promise<string> {
     // Find the txn that xfered the asa to this addr, sender is creator
     const indexer = getIndexer()
-    const txns = await indexer.searchForTransactions()
-    .address(addr)
-    .currencyGreaterThan(0)
-    .assetID(asset_id)
-    .do()
+    const txns = await indexer
+        .searchForTransactions()
+        .address(addr)
+        .currencyGreaterThan(0)
+        .assetID(asset_id)
+        .do()
 
-    for(idx in txns.transactions){
+    for(let idx in txns.transactions){
         const txn = txns.transactions[idx]
         if(txn.sender != addr){
             return txn.sender
@@ -207,6 +214,17 @@ export function get_asa_cfg_txn(suggestedParams, from, asset, new_config) {
         type: 'acfg',
         ...new_config,
         ...suggestedParams
+    }
+}
+
+export function get_cosign_txn(suggestedParams, from) {
+    return {
+        from: from,
+        to: from,
+        type: 'pay',
+        amount: 0,
+        ...suggestedParams,
+        fee:suggestedParams.fee * 2
     }
 }
 
@@ -297,7 +315,7 @@ export function get_app_call_txn(suggestedParams, addr, args) {
     return {
         from: addr,
         appArgs:args.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64'))}),
-        appIndex:ps.application.id,
+        appIndex:ps.application.app_id,
         appOnComplete: algosdk.OnApplicationComplete.NoOpOC,
         type:"appl",
         ...suggestedParams
@@ -311,35 +329,41 @@ export async function getSuggested(rounds){
 }
 
 
-export function uintToB64(x){
+export function uintToB64(x: number): string {
     return Buffer.from(algosdk.encodeUint64(x)).toString('base64')
 }
 
-export function addrToB64(addr) {
-    const dec = algosdk.decodeAddress(addr)
-    return Buffer.from(dec.publicKey).toString('base64')
+export function addrToB64(addr: string): string {
+    if (addr == "" ){
+        return dummy_addr
+    }
+    try {
+        const dec = algosdk.decodeAddress(addr)
+        return "b64("+Buffer.from(dec.publicKey).toString('base64')+")"
+    }catch(err){
+        return dummy_addr
+    }
 }
 export function b64ToAddr(x){
     return algosdk.encodeAddress(new Uint8Array(Buffer.from(x, "base64")));
 }
 
-export async function sendWaitGroup(signed) {
+export async function sendWait(signed: any[]) {
     const client = getAlgodClient()
 
     if(ps.dev.debug_txns) download_txns("grouped.txns", signed.map((t)=>{return t.blob}))
 
     const {txId}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
-    return await waitForConfirmation(client, txId, 3)
+    showNetworkWaiting(txId)
+
+    try {
+        const result = await waitForConfirmation(client, txId, 3)
+        showNetworkSuccess(txId)
+        return result 
+    } catch (error) { showNetworkError(txId, error) }
+    return false
 }
 
-export async function sendWait(signed){
-    const client = getAlgodClient()
-
-    if(ps.dev.debug_txns) download_txns("grouped.txns", [signed.blob])
-
-    await client.sendRawTransaction([signed.blob]).do()
-    return await waitForConfirmation(client, signed.txID, 3)
-}
 
 export async function waitForConfirmation(algodclient, txId, timeout) {
     if (algodclient == null || txId == null || timeout < 0) {
@@ -366,6 +390,7 @@ export async function waitForConfirmation(algodclient, txId, timeout) {
         if ( pending['pool-error'] != null && pending['pool-error'].length > 0) 
           throw new Error( `Transaction Rejected pool error${pending['pool-error']}`);
       }
+
       await algodclient.statusAfterBlock(currentround).do();
       currentround += 1;
     }

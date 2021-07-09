@@ -26,7 +26,7 @@ export default function Browser(props: BrowserProps) {
 
     let l = listings.map((l) => {     return (<ListingCard key={l.contract_addr} listing={l} />) }) 
     if(listings.length==0){
-        l = [<h3>No Listings... <a href='/mint'>mint</a> one?</h3>]
+        l = [<h3 key='none' >No Listings... <a href='/mint'>mint</a> one?</h3>]
     }
     return (
         <div className='container' >

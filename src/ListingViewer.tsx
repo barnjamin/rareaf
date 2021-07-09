@@ -55,7 +55,7 @@ function ListingViewer(props: ListingViewerProps) {
 
         const [signed] = await props.wallet.signTxn([optin])
 
-        const result = await sendWait(signed)
+        const result = await sendWait([signed])
     }
 
     async function handleBuy(){
@@ -124,6 +124,7 @@ function ListingViewer(props: ListingViewerProps) {
             </div>
         )
 
+        console.log(listing)
         if (props.wallet !== undefined && listing.creator_addr == props.wallet.getDefaultAccount()){
             tagsComponent = (
                 <Tagger 

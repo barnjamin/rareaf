@@ -24,7 +24,7 @@ export class NFT {
         const create_txn = new Transaction(await get_asa_create_txn(suggested, creator, this.metaSrc()))
         create_txn.assetDecimals = 1 //TODO: take out
         const [s_create_txn] = await wallet.signTxn([create_txn])
-        return await sendWait(s_create_txn)
+        return await sendWait([s_create_txn])
     }
 
     async destroyToken(wallet: Wallet){
@@ -32,7 +32,7 @@ export class NFT {
         const suggested = await getSuggested(10)
         const destroy_txn = new Transaction(await get_asa_destroy_txn(suggested, creator, this.asset_id))
         const [s_destroy_txn] = await wallet.signTxn([destroy_txn])
-        return await sendWait(s_destroy_txn)
+        return await sendWait([s_destroy_txn])
     }
 
 

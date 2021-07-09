@@ -11,6 +11,7 @@ import {NFT} from './lib/nft'
 import Tagger from './Tagger'
 import {Application} from './lib/application'
 import {platform_settings as ps} from './lib/platform-conf'
+import { ErrorToaster } from './Toaster'
 
 type NFTViewerProps = {
     history: any
@@ -70,13 +71,9 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     async function handleOptIn() {
         if(props.wallet === undefined || optedIn) return
-
         const app = new Application(ps.application)
-        console.log(app)
-
-        const result = await app.optIn(props.wallet)
-        console.log(result)
-
+        const success = await app.optIn(props.wallet)
+        ErrorToaster.show({intent:"danger", message: "Failed to opt into event"}) 
     }
 
     async function handleSubmitListing(){
@@ -86,14 +83,19 @@ export default function NFTViewer(props: NFTViewerProps) {
             await handleOptIn()
 
             const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
+            const res = await lst.doCreate(props.wallet)
+            console.log(res)
 
-            await lst.doCreate(props.wallet)
             if(tags.length > 0 ){
                 await Promise.all(tags.map((tag)=>{ return lst.doTags(props.wallet, tag) }))
             }
 
             history.push("/listing/"+lst.contract_addr)
-        }catch(error){ console.error(error) }
+
+        }catch(error){ 
+            ErrorToaster.show({intent:"danger", message:"Failed to create listing"})
+            console.error(error) 
+        }
 
         setWaiting(false);
     }

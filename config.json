@@ -6,50 +6,34 @@
         "token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "network": "sandnet"
     },
-    "ipfs":{
-        "host": "/ip4/127.0.0.1/tcp/5001",
-        "display":"http://127.0.0.1:8080/ipfs/"
-    },
     "indexer": {
         "server":"http://localhost",
         "port":8980,
         "token":""
     },
-    "explorer":"algoexplorer.io",
-    "application":{
-        "app_id": 13,
-        "price_id": 14,
-        "admin_addr":"0xfae1fa7244c12b0fbf8a4d4477a41d6c9054ccc825d3caf9859724be9583b799", 
-        "owner_addr":"0xf26abbd3bf55d51852464dd9fb50820f1e68ae7a195d45b031168a06a45075a0", 
-        "name":"RareAF",
-        "unit":"raf",
-        "contracts":{
-            "approval":"platform-approval.teal",
-            "clear":"platform-clear.teal",
-            "listing":"listing.teal",
-            "listing-positions":"listing.tmpl.teal.json"
-        },
-        "fee_amt":1000000,
-        "seed_amt":5000000,
-        "max_price":1e10
+    "ipfs":{
+        "host": "/ip4/127.0.0.1/tcp/5001",
+        "display":"http://127.0.0.1:8080/ipfs/"
     },
-    "tags":[ 
-        {
-            "name": "picture",
-            "id": 24
-        },
-        {
-            "name": "action",
-            "id": 25
-        },
-        {
-            "name": "art",
-            "id": 26
-        },
-        {
-            "name": "animated",
-            "id": 27
-        }
-    ],
+    "explorer":"algoexplorer.io",
+    "application": {
+        "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
+        "app_id": 4,
+        "price_id": 7,
+        "owner_addr": "6JVLXU57KXKRQUSGJXM7WUECB4PGRLT2DFOULMBRC2FANJCQOWQLYAUPHM",
+        "name": "RareAF",
+        "unit": "raf",
+        "fee_amt": 100000,
+        "tags": [],
+        "seed_amt": 5000000,
+        "max_price": 10000000000,
+        "listing_hash": "b64(OhSYs8j/szLhB7CgSm5pJUZtuqTHKvIUyhFXpjHwTAs=)"
+    },
+    "contracts":{
+        "approval":"platform-approval.teal",
+        "clear":"platform-clear.teal",
+        "listing":"listing.teal",
+        "listing-positions":"listing.tmpl.teal.json"
+    },
     "dev":{ "debug_txns":true }
 }

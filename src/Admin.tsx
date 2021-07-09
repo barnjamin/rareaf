@@ -20,7 +20,7 @@ type AdminProps = {
 };
 
 export default function Admin(props: AdminProps) {
-    if (props.acct != ps.application.owner_addr && ps.application.owner_addr != "")  return (<div className='container'><p>no</p></div>)
+    if (props.acct != ps.application.admin_addr && ps.application.admin_addr != "")  return (<div className='container'><p>no</p></div>)
 
     const [algod, setAlgod] = React.useState(ps.algod)
     const [indexer, setIndexer] = React.useState(ps.indexer)
@@ -28,7 +28,7 @@ export default function Admin(props: AdminProps) {
     const [loading, setLoading] = React.useState(false)
     const [appConf, setApp] = React.useState(ps.application)
     const [hasChanges, setHasChanges] = React.useState(false)
-    const [tags, setTags] = React.useState(ps.tags)
+    const [tags, setTags] = React.useState(ps.application.tags)
 
     function setAlgodValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
