@@ -3,9 +3,9 @@ import {SignedTxn, Wallet} from './wallet'
 import MyAlgo from '@randlabs/myalgo-connect';
 
 //@ts-ignore
-import logo_inverted from 'url:./branding/myalgo-connect/Logo-inverted.png'
+import logo_inverted from './branding/myalgo-connect/Logo-inverted.png'
 //@ts-ignore
-import logo from 'url:./branding/myalgo-connect/Logo.png'
+import logo from './branding/myalgo-connect/Logo.png'
 
 
 class MyAlgoConnectWallet implements Wallet {

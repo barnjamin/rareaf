@@ -6,18 +6,18 @@ import { platform_settings as ps, get_template_vars } from './platform-conf'
 import {sha256} from 'js-sha256'
 
 //@ts-ignore
-import listing_var_positions from 'url:../contracts/listing.tmpl.teal.json'
+import listing_var_positions from '../contracts/listing.tmpl.teal.json'
 //@ts-ignore
-import listing_template from 'url:../contracts/listing.tmpl.teal'
+import listing_template from '../contracts/listing.tmpl.teal'
 
 
 //@ts-ignore
-import platform_approval_template from 'url:../contracts/platform-approval.tmpl.teal'
+import platform_approval_template from '../contracts/platform-approval.tmpl.teal'
 //@ts-ignore
-import platform_clear_template from 'url:../contracts/platform-clear.tmpl.teal'
+import platform_clear_template from '../contracts/platform-clear.tmpl.teal'
 
 //@ts-ignore
-import platform_owner_template from 'url:../contracts/platform-owner.tmpl.teal'
+import platform_owner_template from '../contracts/platform-owner.tmpl.teal'
 
 
 export const dummy_addr = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"

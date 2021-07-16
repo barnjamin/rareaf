@@ -5,6 +5,9 @@ import ipfsClient from 'ipfs-http-client'
 import { emptyMetadata, NFTMetadata } from './nft'
 import {platform_settings as ps} from './platform-conf'
 
+import { NFTStorage } from 'nft.storage'
+const client = new NFTStorage({ token: ps.ipfs.token })
+
 let iclient: any;
 export async function getClient() {
     if(iclient === undefined){
@@ -13,25 +16,14 @@ export async function getClient() {
     return iclient
 }
 
-type AddType = {
-    path: string
-    cid: IPFS.CID
-    size: number
-}
-
-export function getCID(meta_hash: string): IPFS.CID {
-    return new IPFS.CID(meta_hash)
-}
-
-export async function uploadContent([file]): Promise<AddType> {
+export async function uploadContent(file: File[]): Promise<any> {
     try { 
-        const client = await getClient()
-        return client.add(file) 
+        return client.storeBlob(file[0])
     } catch (err) { console.error(err) }
     return null
 }
 
-export async function uploadMetadata(md: NFTMetadata): Promise<AddType> {
+export async function uploadMetadata(md: NFTMetadata): Promise<any> {
     try { 
         const client = await getClient()
         return client.add(JSON.stringify(md)) 
@@ -42,6 +34,9 @@ export async function uploadMetadata(md: NFTMetadata): Promise<AddType> {
 export async function resolveMetadataFromMetaHash(meta_hash) {
     const cid = getCIDFromTruncatedMetadataHash(meta_hash)
     return [cid, await getMetaFromIpfs(cid.toString())]
+}
+export function getCID(mh: string): IPFS.CID {
+    return new IPFS.CID(mh)
 }
 
 export async function getMetaFromIpfs(cid): Promise<NFTMetadata>{

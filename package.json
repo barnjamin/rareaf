@@ -1,12 +1,15 @@
 {
-  "name": "rareaf-dapp",
-  "version": "0.0.1",
-  "description": "Upload files to ipfs and allow token creation against them",
+  "name": "my-webpack-project",
+  "version": "1.0.0",
+  "description": "My webpack project",
   "private": true,
   "scripts": {
     "clean": "rimraf ./dist",
-    "build": "parcel build index.html --no-scope-hoist",
-    "start": "parcel index.html"
+    "build": "webpack --mode=production --node-env=production",
+    "build:dev": "webpack --mode=development",
+    "build:prod": "webpack --mode=production --node-env=production",
+    "watch": "webpack --watch",
+    "serve": "webpack serve"
   },
   "author": "Ben Guidarelli <ben.guidarelli@gmail.com>",
   "license": "MIT",
@@ -15,23 +18,35 @@
     "@blueprintjs/select": "^3.15.9",
     "@randlabs/myalgo-connect": "^1.0.1",
     "algosdk": "^1.10.0",
+    "assert": "^2.0.0",
     "cids": "^1.1.5",
+    "crypto-browserify": "^3.12.0",
     "ipfs-http-client": "^49.0.4",
     "jquery": "^3.5.1",
     "js-sha256": "^0.9.0",
+    "nft.storage": "^3.0.1",
     "react-async": "^10.0.1",
     "react-router-dom": "^5.2.0",
-    "react-syntax-highlighter": "^15.4.3"
+    "react-syntax-highlighter": "^15.4.3",
+    "stream-browserify": "^3.0.0"
   },
   "devDependencies": {
-    "@parcel/transformer-image": "^2.0.0-beta.2",
     "@types/react": "^17.0.11",
+    "@webpack-cli/generators": "^2.2.0",
+    "css-loader": "^6.0.0",
+    "html-webpack-plugin": "^5.3.2",
     "ipfs": "^0.54.2",
-    "parcel": "^2.0.0-alpha.3.2",
+    "prettier": "^2.3.2",
     "react": "^17.0.2",
     "react-dom": "^16.8.6",
     "rimraf": "^3.0.2",
-    "typescript": "^4.2.4"
+    "style-loader": "^3.1.0",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.5",
+    "webpack": "^5.44.0",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^3.11.2",
+    "workbox-webpack-plugin": "^6.1.5"
   },
   "browserslist": [
     "> 2%"

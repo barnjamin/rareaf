@@ -18,6 +18,7 @@ type MinterProps = {
 export default function Minter(props: MinterProps){
     const [meta, setMeta] = React.useState(emptyMetadata())
     const [loading, setLoading] = React.useState(false)
+    const [imgSrc, setImgSrc] = React.useState(undefined);
 
     function setFileHash(cid) {
         setMeta(meta=>({
@@ -27,7 +28,12 @@ export default function Minter(props: MinterProps){
         }))
     }
 
-    function setFileDetails(file) {
+    function setFile(file) {
+
+        const reader = new FileReader();
+        reader.onload = (e) => { setImgSrc(e.target.result) }
+        reader.readAsDataURL(file);
+
         setMeta(meta=>({
             ...meta,
             "file_name": file.name,
@@ -90,8 +96,9 @@ export default function Minter(props: MinterProps){
         <div className='container'>
             <Card elevation={Elevation.TWO} >
                 <Uploader
+                    imgSrc={imgSrc}
                     onUploaded={setFileHash}
-                    setFileDetails={setFileDetails}
+                    setFile={setFile}
                     {...meta} />
 
                 <div className='container' >
@@ -139,8 +146,8 @@ export default function Minter(props: MinterProps){
 }
 
 type UploaderProps = {
-    file_hash: string
-    setFileDetails(e: any)
+    imgSrc: string
+    setFile(f: File)
     onUploaded(cid: IPFS.CID)
 };
 
@@ -151,15 +158,11 @@ function Uploader(props: UploaderProps) {
         event.stopPropagation()
         event.preventDefault()
 
-        props.setFileDetails(event.target.files.item(0))
 
-        uploadContent(event.target.files).then((cid) => {
-            setCID(cid.cid)
-            props.onUploaded(cid.cid)
-        })
+        props.setFile(event.target.files.item(0))
     }
 
-    if (props.file_hash === undefined || props.file_hash == "" ) return (
+    if (props.imgSrc === undefined || props.imgSrc == "" ) return (
         <div className='container'>
             <div className='content content-piece'>
                 <FileInput large={true} disabled={false} text="Choose file..." onInputChange={captureFile} />
@@ -171,9 +174,8 @@ function Uploader(props: UploaderProps) {
     return (
         <div className='container' >
             <div className='content content-piece'>
-                <img id="gateway-link" src={ps.ipfs.display + props.file_hash} />
+                <img id="gateway-link" src={props.imgSrc} />
             </div>
         </div>
     )
-
 }

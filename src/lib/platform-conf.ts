@@ -10,6 +10,7 @@ type AlgodConf = {
 type IpfsConf = {
     host: string
     display: string
+    token: string
 };
 type IndexerConf = {
     server: string

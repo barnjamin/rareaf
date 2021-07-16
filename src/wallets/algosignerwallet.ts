@@ -3,9 +3,9 @@ import algosdk, { Transaction, TransactionParams } from 'algosdk'
 import { SignedTxn, Wallet } from './wallet'
 
 //@ts-ignore
-import logo_inverted from 'url:./branding/algosigner/Logo-inverted.png'
+import logo_inverted from './branding/algosigner/Logo-inverted.png'
 //@ts-ignore
-import logo from 'url:./branding/algosigner/Logo.png'
+import logo from './branding/algosigner/Logo.png'
 
 
 declare const AlgoSigner: any;
