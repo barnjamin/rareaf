@@ -122,7 +122,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
                 <div className='container nft-details' >
                     <div className='nft-name'>
-                        <p><b>{nft.metadata.title}</b> - <i>{nft.metadata.artist}</i></p>
+                        <p><b>{nft.metadata.name}</b> - <i>{nft.metadata.properties.artist}</i></p>
                     </div>
                     <div className='nft-token-id' >
                         <p><a href={nft.explorerSrc()}><b>{nft.asset_id}</b></a></p>

@@ -1,11 +1,9 @@
 /* eslint-disable no-console */
-import {  resolveMetadataFromMetaHash } from "./ipfs";
 import {platform_settings as ps} from './platform-conf'
 import algosdk from 'algosdk'  
 import Listing from "./listing";
 import {NFT} from "./nft";
 import {TagToken} from './tags'
-import { Tag } from "@blueprintjs/core";
 import {dummy_addr, dummy_id} from './contracts'
 import { NetworkToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
 

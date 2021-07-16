@@ -23,7 +23,7 @@ export function NFTCard(props: NFTCardProps) {
             <div className='container'>
                 <p>
                     <a href={'/nft/'+props.nft.asset_id}>
-                        <b>{props.nft.metadata.title}</b> - <i>{props.nft.metadata.artist}</i>
+                        <b>{props.nft.metadata.name}</b> - <i>{props.nft.metadata.properties.artist}</i>
                     </a>
                 </p>
             </div>

@@ -36,3 +36,11 @@ export const ErrorToaster = Toaster.create({
     position: Position.TOP,
     maxToasts: 5,
 });
+
+export function showErrorToaster(message: string) {
+    ErrorToaster.show({
+        intent:"danger", 
+        message: message,
+        icon:"error"       
+    })
+}

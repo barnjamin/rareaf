@@ -2,11 +2,12 @@
 'use strict'
 
 import * as React from 'react'
-import { uploadContent, uploadMetadata } from './lib/ipfs'
+import { storeNFT  } from './lib/ipfs'
 import IPFS from 'ipfs-core'
 import { Button, Elevation, FileInput, Card } from "@blueprintjs/core"
 import { NFT, NFTMetadata, emptyMetadata } from './lib/nft'
 import { platform_settings as ps } from './lib/platform-conf'
+import { showErrorToaster } from './Toaster'
 import {Wallet} from './wallets/wallet'
 
 type MinterProps = {
@@ -19,30 +20,31 @@ export default function Minter(props: MinterProps){
     const [meta, setMeta] = React.useState(emptyMetadata())
     const [loading, setLoading] = React.useState(false)
     const [imgSrc, setImgSrc] = React.useState(undefined);
+    const [fileObj, setFileObj] = React.useState(undefined)
 
-    function setFileHash(cid) {
-        setMeta(meta=>({
-            ...meta, 
-            "file_cid":  cid, 
-            "file_hash": cid.string
-        }))
-    }
+    function setFile(file: File) {
 
-    function setFile(file) {
+        setFileObj(file)
 
         const reader = new FileReader();
         reader.onload = (e) => { setImgSrc(e.target.result) }
         reader.readAsDataURL(file);
 
+        console.log(file)
         setMeta(meta=>({
             ...meta,
-            "file_name": file.name,
-            "file_size": file.size, 
-            "file_type": file.type 
+            ["properties"]:{
+                ...meta.properties, 
+                "file":{
+                    "name": file.name,
+                    "size": file.size, 
+                    "type": file.type 
+                }
+            }
         }))
     }
 
-    function createMetaAndToken(event) {
+    function mintNFT(event) {
         event.stopPropagation()
         event.preventDefault()
 
@@ -50,46 +52,60 @@ export default function Minter(props: MinterProps){
 
         const metadata = captureMetadata()
 
-        uploadMetadata(metadata).then((meta_details) => {
+        console.log(meta)
+
+        storeNFT(fileObj, metadata).then((result) => {
+
             const nft = new NFT(metadata);
-            nft.meta_cid = meta_details.cid
+            nft.url = result.ipnft
 
             nft.createToken(props.wallet).then((res) => {
                 if ('asset-index' in res) 
                     props.history.push("/nft/" + res['asset-index'])
             }).catch((err)=>{ 
-                alert("Failed to create token")
-                console.error("Failed to create token: ", err)
+                showErrorToaster("Failed to create token: "+ err)
+                setLoading(false)
             })
 
         }).catch((err) => { 
-            console.error("Failed to upload metadata", err) 
-            alert("Failed to upload metadata")
+            showErrorToaster("Failed to Create NFT: " + err)
             setLoading(false)
         })
+
     }
 
     function handleChangeMeta(event) {
         const target = event.target
+
         const value = target.type == 'checkbox' ? target.checked : target.value
+
         const name = target.name
-        setMeta(meta=>({
-            ...meta,
-            [name]: value 
-        }))
+        if (name == "artist"){ //TODO: lol 
+            setMeta(meta=>({
+                ...meta,
+                ["properties"]:{...meta.properties, "artist":value}
+            }))
+        }else{
+            setMeta(meta=>({
+                ...meta,
+                [name]: value 
+            }))
+        }
     }
 
-    function captureMetadata() {
+    function captureMetadata(): NFTMetadata {
         return {
-            file_name: meta.file_name,
-            file_size: meta.file_size,
-            file_type: meta.file_type,
-            file_hash: meta.file_hash,
-
-            title:       meta.title,
-            artist:      meta.artist,
+            name:       meta.name,
             description: meta.description,
-        }
+            properties:{
+                file:{
+                    name: meta.properties.file.name,
+                    size: meta.properties.file.size,
+                    type: meta.properties.file.type,
+                },
+                artist: meta.properties.artist,
+            }
+        } as NFTMetadata
     }
 
     return (
@@ -97,19 +113,18 @@ export default function Minter(props: MinterProps){
             <Card elevation={Elevation.TWO} >
                 <Uploader
                     imgSrc={imgSrc}
-                    onUploaded={setFileHash}
                     setFile={setFile}
                     {...meta} />
 
                 <div className='container' >
                     <input
-                        name='title'
+                        name='name'
                         placeholder='Title...'
                         className='details-basic details-title bp3-input bp3-large'
                         onChange={handleChangeMeta}
                         type='text'
-                        id='title'
-                        value={meta.title} />
+                        id='name'
+                        value={meta.name} />
                     <input
                         name='artist'
                         placeholder='Artist...'
@@ -117,7 +132,7 @@ export default function Minter(props: MinterProps){
                         onChange={handleChangeMeta}
                         type='text'
                         id='artist'
-                        value={meta.artist} />
+                        value={meta.properties.artist} />
                 </div>
 
                 <div className='container'>
@@ -133,7 +148,7 @@ export default function Minter(props: MinterProps){
                 <div className='container-mint'>
                     <Button
                         loading={loading}
-                        onClick={createMetaAndToken}
+                        onClick={mintNFT}
                         rightIcon='clean'
                         large={true}
                         intent='success'
@@ -148,7 +163,6 @@ export default function Minter(props: MinterProps){
 type UploaderProps = {
     imgSrc: string
     setFile(f: File)
-    onUploaded(cid: IPFS.CID)
 };
 
 function Uploader(props: UploaderProps) {
