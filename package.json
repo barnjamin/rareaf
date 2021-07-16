@@ -24,7 +24,7 @@
     "ipfs-http-client": "^49.0.4",
     "jquery": "^3.5.1",
     "js-sha256": "^0.9.0",
-    "nft.storage": "^3.0.1",
+    "nft.storage": "^2.1.1",
     "react-async": "^10.0.1",
     "react-router-dom": "^5.2.0",
     "react-syntax-highlighter": "^15.4.3",
