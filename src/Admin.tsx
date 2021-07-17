@@ -8,12 +8,13 @@ import { Wallet } from './wallets/wallet'
 import {get_template_vars, platform_settings as ps} from './lib/platform-conf'
 import {TagToken} from './lib/tags'
 import { Application } from './lib/application';
-import {Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes } from '@blueprintjs/core'
+import {Card, Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes, Elevation } from '@blueprintjs/core'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
 import { getTags } from './lib/algorand'
 import { showErrorToaster } from './Toaster'
 import { get_platform_owner } from './lib/contracts'
+import { ELEVATION_2 } from '@blueprintjs/core/lib/esm/common/classes'
 
 type AdminProps = { 
     history: any
@@ -155,19 +156,21 @@ export default function Admin(props: AdminProps) {
     return (
         <div>
             <div className='container config-container'>
-                <Tabs id='configuration' vertical={true}>
-                    <Tab title='Algod' id='algod' panel={<Algod setProp={setAlgodValue} {...algod} />} />
-                    <Tab title='Indexer' id='index' panel={ <Indexer setProp={setIndexerValue} {...indexer} /> } />
-                    <Tab title='Ipfs' id='ipfs' panel={ <IPFSConfig setProp={setIpfsValue} {...ipfs} /> } />
-                    <Tab title='App' id='app' panel={ appComponent } />
-                    <Tab title='Tags' id='tags' panel={ <TagCreator loading={loading} searchForTags={searchForTags} handleAdd={handleTagAdd} handleRemove={handleTagRemove} tags={tags} />} />
-                </Tabs>
-                <div className='container config-text-container'>
-                    <SyntaxHighlighter language='json' style={docco} wrapLongLines={true}>
-                        {getConfText()}
-                    </SyntaxHighlighter>
-                    <Button text='Download' outlined={true}  onClick={updateConf} />
-                </div>
+                <Card elevation={Elevation.THREE} >
+                    <Tabs id='configuration' vertical={true}>
+                        <Tab title='App' id='app' panel={ appComponent } />
+                        <Tab title='Algod' id='algod' panel={<Algod setProp={setAlgodValue} {...algod} />} />
+                        <Tab title='Indexer' id='index' panel={ <Indexer setProp={setIndexerValue} {...indexer} /> } />
+                        <Tab title='Ipfs' id='ipfs' panel={ <IPFSConfig setProp={setIpfsValue} {...ipfs} /> } />
+                        <Tab title='Tags' id='tags' panel={ <TagCreator loading={loading} searchForTags={searchForTags} handleAdd={handleTagAdd} handleRemove={handleTagRemove} tags={tags} />} />
+                    </Tabs>
+                    <div className='container config-text-container'>
+                        <SyntaxHighlighter language='json' style={docco} wrapLongLines={true}>
+                            {getConfText()}
+                        </SyntaxHighlighter>
+                        <Button text='Download' outlined={true}  onClick={updateConf} />
+                    </div>
+                </Card>
             </div>
             <Prompt when={true} message="Changes made to config, have you saved them?" />
         </div>
@@ -189,25 +192,25 @@ function Algod(props: AlgodConfigProps)  {
 
     return (
         <div className='content algod-config'>
-            <InputGroup 
+            <InputGroup fill={true} 
                 onChange={setter("server")}
                 placeholder="API Server"
                 large={true}
                 value={props.server} 
             />
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={setter("port")}
                 placeholder="API Port" 
                 large={true}
                 value={props.port.toString()} 
             />
-            <InputGroup 
+            <InputGroup  fill={true}
                 onChange={setter("token")}
                 placeholder="API Token"
                 large={true}
                 value={props.token} 
             />
-            <InputGroup 
+            <InputGroup  fill={true}
                 onChange={setter("network")}
                 placeholder="Network" //Make this a dropdown?
                 large={true}
@@ -230,19 +233,19 @@ function Indexer(props: IndexerConfigProps)  {
 
     return (
         <div className='content indexer-config'>
-            <InputGroup 
+            <InputGroup  fill={true} 
                 onChange={setter("server")}
                 placeholder="Indexer Server"
                 large={true}
                 value={props.server} 
             />
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={setter("port")}
                 placeholder="Indexer Port" 
                 large={true}
                 value={props.port.toString()} 
             />
-            <InputGroup 
+            <InputGroup  fill={true}
                 onChange={setter("token")}
                 placeholder="Indexer Token"
                 large={true}
@@ -263,13 +266,13 @@ function IPFSConfig(props: IPFSConfigProps)  {
 
     return (
         <div className='content indexer-config'>
-            <InputGroup 
+            <InputGroup  fill={true}
                 onChange={setter("host")}
                 placeholder="IPFS Host"
                 large={true}
                 value={props.host} 
             />
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={setter("display")}
                 placeholder="IPFS Display URL" 
                 large={true}
@@ -292,25 +295,25 @@ function ApplicationCreator(props: ApplicationCreatorProps) {
 
     return (
         <div className='content application-conf' >
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={e=>{props.set('name', e.target.value)}}
                 placeholder="Application Name"
                 large={true}
                 value={props.name}
             />
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={e=>{props.set('unit', e.target.value)}}
                 placeholder="Unit Name"
                 large={true}
                 value={props.unit}
             />
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={e=>{props.set('fee_amt', e.target.value)}}
                 placeholder="Fee"
                 large={true}
                 value={props.fee_amt.toString()}
             />
-            <Button loading={props.loading} onClick={props.create} text='Create'/>
+            <Button loading={props.loading} onClick={props.create} intent='success' text='Create'/>
         </div>
     )
 }
@@ -328,25 +331,25 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
 
     return (
         <div className='content application-conf' >
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={e=>{props.set('name', e.target.value)}}
                 placeholder="Application Name"
                 large={true}
                 value={props.name}
             />
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={e=>{props.set('unit', e.target.value)}}
                 placeholder="Unit Name"
                 large={true}
                 value={props.unit}
             />
-            <InputGroup
+            <InputGroup fill={true}
                 onChange={e=>{props.set('fee_amt', e.target.value)}}
                 placeholder="Fee"
                 large={true}
                 value={props.fee_amt.toString()}
             />
-            <Button loading={props.loading} onClick={props.update} text='Update Application'/>
+            <Button loading={props.loading} onClick={props.update} intent='warning' text='Update Application'/>
         </div>
     )
 }
@@ -363,6 +366,7 @@ function TagCreator(props: TagCreatorProps) {
     return (
         <div>
             <TagInput 
+                fill={true}
                 className={Classes.FILL}
                 onAdd={props.handleAdd}
                 onRemove={props.handleRemove}

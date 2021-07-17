@@ -163,24 +163,25 @@ img.wallet-branding {
     width: 100%
 }
 
-.config-container {
-    justify-content: space-between;
-    align-items: flex-start;
-    margin: 20px;
+
+.config-container .bp3-tab-panel {
+    width:60em;
 }
 
-.config-text-container {
-    justify-content: flex-end;
-    width: 66%;
-    padding: 5px;
+.config-container {
+    align-items:flex-end;
 }
 
 .config-container .bp3-input-group, button {
     margin:5px;
 }
 
-.application-conf {
-    flex-direction: column;
-    align-items: flex-end;
-    padding: 0px;
+.config-text-container pre {
+    display:block;
+    height: 42em; 
+}
+
+.config-text-container {
+    display:block;
+    width: 69em;
 }
