@@ -34,9 +34,6 @@ const config = {
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
     })
-
-    // Add your plugins here
-    // Learn more about plugins from https://webpack.js.org/configuration/plugins/
   ],
   module: {
     rules: [
@@ -46,8 +43,11 @@ const config = {
         exclude: ["/node_modules/"],
       },
       {
-        test: /\.css$/i,
-        use: [stylesHandler, "css-loader"],
+        test: /\.link\.css$/i,
+        use: [
+          { loader: "style-loader" , options: {injectType:"linkTag"}},
+          { loader: "file-loader-loader" },
+        ]
       },
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
