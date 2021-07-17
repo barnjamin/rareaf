@@ -30,7 +30,7 @@ class TemplateContract(object):
 
         self.config = config
 
-        with open(tealpath(config['application']['contracts']['listing']), mode='r') as f:
+        with open(tealpath(config['contracts']['listing']), mode='r') as f:
             self.template_bytes = f.read()
 
         url         = "{}:{}".format(config['algod']['server'], config['algod']['port'])
@@ -38,13 +38,14 @@ class TemplateContract(object):
 
         result = self.client.compile(self.populate_tmpl_vars())
 
+
         self.assembled_bytes = base64.b64decode(result["result"])
 
         self.set_start_positions()
 
 
     def write_tmpl_positions(self):
-        with open("../"+self.config['application']['contracts']['listing-positions'], 'w') as f:
+        with open("../"+self.config['contracts']['listing-positions'], 'w') as f:
             json.dump(self.get_positions_obj(), f)
 
     def get_positions_obj(self):
@@ -99,10 +100,10 @@ class TemplateContract(object):
         for bytec in bytec_line.split(" "):
             if "TMPL_" in bytec:
                 vname = bytec[5:].lower()
-                if vname in self.config['application']:
-                    teal_source = teal_source.replace(bytec, self.config['application'][vname])
-                else:
-                    teal_source = teal_source.replace(bytec, dummy_string_bytes)
+                #if vname in self.config['application']:
+                #    teal_source = teal_source.replace(bytec, self.config['application'][vname])
+                #else:
+                teal_source = teal_source.replace(bytec, dummy_string_bytes)
 
         # Iterate over lines skipping consts
         for l in range(3, len(lines)):
@@ -132,6 +133,7 @@ class TemplateContract(object):
 
                 self.template_vars.append(tv)
 
+        print(teal_source)
         return teal_source
 
     def get_populated_hash(self, vals):

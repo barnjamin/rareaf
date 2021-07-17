@@ -29,17 +29,21 @@ def listing():
 
 
     delete = And(
-        Global.group_size() == Int(5),
+        Global.group_size() >= Int(5),
         valid_app_call(Gtxn[0]),
         set_addr_as_tx(      Gtxn[1], contract_addr),
         asa_close_xfer_valid(Gtxn[1],  price_token,  contract_addr.load(), platform_addr, platform_addr),
         asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), creator_addr.load(), creator_addr.load()),
         asa_cfg_valid(       Gtxn[3], asset_id.load(), creator_addr.load()),
-        pay_close_txn_valid( Gtxn[4], contract_addr.load(), creator_addr.load(), creator_addr.load(), Int(0)),
+        
+        ## Add logic to check intermediate transactions 
+        valid_tag_closes(5, 8, platform_addr, contract_addr.load()),
+
+        pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), creator_addr.load(), creator_addr.load(), Int(0)),
     )
 
     purchase = And(
-        Global.group_size() == Int(6),
+        Global.group_size() >= Int(6),
         valid_app_call(Gtxn[0]),
 
         set_addr_as_tx(      Gtxn[1], buyer_addr),
@@ -49,7 +53,11 @@ def listing():
         asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), buyer_addr.load(), buyer_addr.load()),
         asa_close_xfer_valid(Gtxn[3], price_token, contract_addr.load(), platform_addr, platform_addr),
         asa_cfg_valid(       Gtxn[4], asset_id.load(), buyer_addr.load()),
-        pay_close_txn_valid( Gtxn[5], contract_addr.load(), platform_addr, creator_addr.load(), platform_fee),
+
+        ## Add logic to check intermediate transactions 
+        valid_tag_closes(5, 8, platform_addr, contract_addr.load()),
+
+        pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), platform_addr, creator_addr.load(), platform_fee),
     )
 
     app_offload = Or(Gtxn[0].application_args[0] == action_tag, Gtxn[0].application_args[0] == action_untag, Gtxn[0].application_args[0] == action_dprice)
@@ -63,5 +71,5 @@ def listing():
 
 
 if __name__ == "__main__":
-     with open(tealpath(configuration['application']['contracts']['listing']), 'w') as f:
+     with open(tealpath(configuration['contracts']['listing']), 'w') as f:
         f.write(compileTeal(listing(), Mode.Signature, version=4, assembleConstants=True))

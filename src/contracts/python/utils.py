@@ -152,7 +152,7 @@ def valid_tag_closes(start_idx, max_tags, platform_addr, contract_addr):
     for x in range(max_tags):
         idx = x + start_idx
         valid_ops.append(
-            If(Global.group_size()-Int(1) > Int(idx),  tag_close_valid(Gtxn[idx], platform_addr, contract_addr), Int(1))
+            If(Global.group_size() - Int(1) > Int(idx),  tag_close_valid(Gtxn[idx], platform_addr, contract_addr), Int(1))
         )
 
     return And(*valid_ops)
