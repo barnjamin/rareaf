@@ -19,6 +19,10 @@ const config = {
     open: true,
     host: "localhost",
     historyApiFallback: true,
+    contentBase : './',
+    watchOptions : {
+        poll: true
+    }
   },
   plugins: [
     new HtmlWebpackPlugin({

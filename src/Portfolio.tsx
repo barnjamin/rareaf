@@ -6,7 +6,7 @@ import {useParams} from 'react-router-dom'
 
 import { NFTCard } from './NFTCard'
 import { ListingCard } from './ListingCard'
-import {Tab, Tabs} from "@blueprintjs/core"
+import {Card, Elevation, Tab, Tabs} from "@blueprintjs/core"
 
 
 import { Wallet } from './wallets/wallet'
@@ -43,15 +43,17 @@ export default function Portfolio(props: PortfolioProps) {
 
     return (
         <div className='container'>
-            <div className='container portfolio-name'>
-                <h3>{port_acct}</h3>
-            </div>
-            <div className='container portfolio-content'>
-                <Tabs id='portfolio' vertical={true} large={true}>
-                    <Tab id='nfts' title='Collection' panel={<NFTPanel nfts={nfts} /> } />
-                    <Tab id='listings' title='Listings' panel={<ListingPanel listings={listings} />} />
-                </Tabs>
-            </div>
+            <Card elevation={Elevation.THREE}>
+                <div className='container portfolio-name'>
+                    <h3>{port_acct}</h3>
+                </div>
+                <div className='container portfolio-content' >
+                    <Tabs id='portfolio' large={true} >
+                        <Tab id='nfts' title='Collection' panel={<NFTPanel nfts={nfts} /> } />
+                        <Tab id='listings' title='Listings' panel={<ListingPanel listings={listings} />} />
+                    </Tabs>
+                </div>
+            </Card>
         </div>
     )
 }

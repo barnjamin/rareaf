@@ -153,16 +153,15 @@ img.wallet-branding {
 
 .portfolio-content {
     justify-content: left;
-    border-radius: 10px;
-    border: 1px solid whitesmoke;
-    width: 100%
+    width: 66em;
+    background-color: #394B59;
+    box-shadow: 0.3em 0.3em white;
 }
 
 .portfolio-name {
     justify-content: left;
     width: 100%
 }
-
 
 .config-container .bp3-tab-panel {
     width:60em;
