@@ -7,7 +7,9 @@ import {
     get_app_optin_txn,
     get_asa_create_txn, 
     get_cosign_txn,
-    get_pay_txn
+    get_pay_txn,
+    waitForConfirmation,
+    getTransaction
 } from "./algorand"
 import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash, get_platform_owner } from "./contracts"
 import {Wallet} from '../wallets/wallet'
@@ -34,7 +36,7 @@ export enum Method {
 export class Application {
     conf: AppConf;
 
-    constructor(settings: any){
+    constructor(settings: AppConf){
         this.conf = settings
     }
 
@@ -52,26 +54,32 @@ export class Application {
     async create(wallet: Wallet): Promise<AppConf> {
         this.conf.admin_addr = wallet.getDefaultAccount()
 
-        console.log("Creating application")
         // Create blank app to reserve ID
         await this.updateApplication(wallet)
 
-        console.log("Creating Owner")
+        ps.application = this.conf
+        console.log(this.conf)
         // Create Owner contract account for token creation/sending 
         await this.createOwnerAcct(wallet)
+        console.log(this.conf)
 
-        console.log("Creating Price Token")
+        ps.application = this.conf
         // Create price token with app name 
         await this.createPriceToken(wallet) 
 
-        console.log("Updating listing hash")
+        ps.application = this.conf
+        console.log(this.conf)
         // Create listing and compute hash for app update
         await this.setListingHash()
 
-        console.log("Updating application")
+        ps.application = this.conf
+        console.log(this.conf)
+
         // Update Application with hash of contract && price token id
         await this.updateApplication(wallet)
+        ps.application = this.conf
 
+        console.log(this.conf)
         return this.conf 
     }
 
@@ -89,7 +97,9 @@ export class Application {
     async createOwnerAcct(wallet: Wallet): Promise<string> {
         // Read in platform-owner.tmpl.teal
         // Set App id && admin addr
-        const ls = await get_platform_owner(this.getVars({}))
+        const ls = await get_platform_owner(this.getVars({
+            "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr),
+        }))
         
         // Save it
         this.conf.owner_addr = ls.address()
@@ -110,23 +120,18 @@ export class Application {
         await this.setListingHash()
 
         const app = await get_approval_program(this.getVars({})) 
-
         const clear = await get_clear_program({})
-
 
         if (!this.conf.app_id){
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.admin_addr, app, clear))
             const [signed]   = await wallet.signTxn([create_txn])
             const result     = await sendWait([signed])
 
-            if(result['pool-error'] != "") console.error("Failed to create the application")
             this.conf.app_id = result['application-index']
         }else{
             const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.app_id))
             const [signed]   = await wallet.signTxn([update_txn])
-            const result     = await sendWait([signed])
-
-            if(result['pool-error'] != "") console.error("Failed to create the application")
+            await sendWait([signed])
         }
     }
 
@@ -138,20 +143,21 @@ export class Application {
         create_px.assetName     = this.conf.name
         create_px.assetUnitName = this.conf.unit + "-px"
         create_px.assetTotal    = 1e10
-        create_px.assetDecimals = 1 //TODO: remove
+        create_px.assetDecimals = 0 
         
         const grouped = [cosign_txn, create_px]
         algosdk.assignGroupID(grouped)
         const [s_cosign_txn, /* create_px */] = await wallet.signTxn(grouped)
 
-        const ls = await get_platform_owner(this.getVars({}))
+        const ls = await get_platform_owner(this.getVars({
+            "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr),
+        }))
 
         const s_create_px = algosdk.signLogicSigTransaction(create_px, ls)
 
-        console.log(s_cosign_txn, s_create_px)
+        await sendWait([s_cosign_txn, s_create_px])
 
-        const result = await sendWait([s_cosign_txn, s_create_px])
-
+        const result = await getTransaction(s_create_px.txID)
         console.log(result)
         this.conf.price_id = result['asset-index']
     } 

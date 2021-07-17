@@ -56,7 +56,7 @@ export class TagToken {
         create_txn.assetName = this.getTokenName() 
         create_txn.assetUnitName = TagToken.getUnitName()
         create_txn.assetTotal = 1e6
-        create_txn.assetDecimals = 1 // TODO:: take out
+        create_txn.assetDecimals = 0
 
         const grouped = [cosign_txn, create_txn]
 
@@ -69,7 +69,6 @@ export class TagToken {
         const s_create_txn = algosdk.signLogicSigTransaction(create_txn, lsig)
 
         const result = await sendWait([s_cosign_txn, s_create_txn])
-        console.log(result)
 
         this.id = result['asset-index']
 

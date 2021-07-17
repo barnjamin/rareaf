@@ -44,9 +44,11 @@ donate to this address (charity? Dao?)
       - Add contract account for ownership
       - Update Config on Github
 
+   IPFS:
+      - Pin files
+
    General:
       - Convert numbers to bignum
-      - Add toast for network send waits 
       - Add descriptive messages for the txns being signed
       - Add support for more wallets
       - Add more currencies 
@@ -54,10 +56,11 @@ donate to this address (charity? Dao?)
 
    Minting:
       - Add more fields for metadata
-      - Write raw file bytes into json metadata file?
+      - Ensure conformance to ARC3
 
    Browse:
       - Add filters on browse page for tags/price
+      - Check filetype/dimensions for display
 
    Purchase
       - Remove tags prior during purchase txn 

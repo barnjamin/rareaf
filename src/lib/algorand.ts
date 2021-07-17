@@ -5,7 +5,7 @@ import Listing from "./listing";
 import {NFT} from "./nft";
 import {TagToken} from './tags'
 import {dummy_addr, dummy_id} from './contracts'
-import { NetworkToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
+import { NetworkToaster, showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
 
 let client = undefined;
 export function getAlgodClient(){
@@ -50,10 +50,7 @@ export async function isOptedIntoApp(address: string): Promise<boolean> {
 export async function isOptedIntoAsset(address: string, idx: number): Promise<boolean> {
     const client = getAlgodClient()
     const result = await client.accountInformation(address).do()
-
-    console.log(result)
     const optedIn = result['assets'].find((r)=>{ return r['asset-id'] == idx })
-
     return optedIn !== undefined 
 }
 
@@ -163,8 +160,7 @@ export async function getHoldingsFromListingAddress(address: string): Promise<Ho
         const token = await getToken(asa['asset-id'])
 
         if(token.params.creator == ps.application.owner_addr) holdings.tags.push(TagToken.fromAsset(token))
-        else holdings.nft = await NFT.fromAsset(token)
-
+        else holdings.nft = await NFT.fromToken(token)
     }
 
     return holdings
@@ -173,10 +169,10 @@ export async function getHoldingsFromListingAddress(address: string): Promise<Ho
 export async function tryGetNFT(asset_id: number): Promise<NFT> {
     try {
         const token = await getToken(asset_id)
-        // Make sure its a real nft
-        const nft = await NFT.fromAsset(token)
-        return nft
-    } catch (error) { console.error("invalid nft: ", asset_id) }
+        return await NFT.fromToken(token)
+    } catch (error) { 
+        showErrorToaster("Cant find asset_id" + asset_id + ": " + error)
+    }
 
     return undefined 
 }
@@ -362,6 +358,10 @@ export async function sendWait(signed: any[]) {
     return false
 }
 
+
+export async function getTransaction(txid: string) {
+    return await waitForConfirmation(getAlgodClient(), txid, 3)
+}
 
 export async function waitForConfirmation(algodclient, txId, timeout) {
     if (algodclient == null || txId == null || timeout < 0) {

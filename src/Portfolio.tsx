@@ -62,7 +62,7 @@ type NFTPanelProps = {
 function NFTPanel(props: NFTPanelProps) {
     let n = props.nfts.map((n)=>{ return(<NFTCard key={n.asset_id} nft={n} />) }) 
     if (props.nfts.length==0)
-        n = [<h3>No NTFs yet, <a href='/mint'>Mint</a> one?</h3>]
+        n = [<h3 key='none'>No NTFs yet, <a href='/mint'>Mint</a> one?</h3>]
     return (
         <div className='container nft-panel'>
             {n}
@@ -79,7 +79,7 @@ function ListingPanel(props: ListingPanelProps) {
     })
 
     if(props.listings.length == 0)
-        l = [<h3>No listings</h3>]
+        l = [<h3 key='none'>No listings</h3>]
     
     return (
         <div className='container listing-panel' >

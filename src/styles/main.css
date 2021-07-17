@@ -170,9 +170,9 @@ img.wallet-branding {
 }
 
 .config-text-container {
-    flex-direction: column;
-    align-items: flex-end;
-    padding: 0px;
+    justify-content: flex-end;
+    width: 66%;
+    padding: 5px;
 }
 
 .config-container .bp3-input-group, button {

@@ -4,11 +4,12 @@ import { Transaction } from 'algosdk'
 import { get_asa_create_txn, get_asa_destroy_txn, sendWait, getSuggested } from './algorand'
 import { platform_settings as ps } from './platform-conf'
 import CID from 'cids'
+import { showErrorToaster } from '../Toaster'
 
 export class NFT {
     asset_id: number // ASA idx in algorand
-    manager: string // Current manager of the token representing this NFT
-    url: string// IPFS url of metadata json
+    manager: string  // Current manager of the token representing this NFT
+    url: string      // URL of metadata json
 
     metadata: NFTMetadata
 
@@ -21,7 +22,7 @@ export class NFT {
     async createToken(wallet: Wallet) {
         const creator = wallet.getDefaultAccount()
         const suggested = await getSuggested(10)
-        const create_txn = new Transaction(await get_asa_create_txn(suggested, creator, this.fullUrl()))
+        const create_txn = new Transaction(await get_asa_create_txn(suggested, creator, this.url))
         create_txn.assetDecimals = 1 //TODO: take out
         const [s_create_txn] = await wallet.signTxn([create_txn])
         return await sendWait([s_create_txn])
@@ -38,17 +39,9 @@ export class NFT {
 
     imgSrc(): string {
         if (this.metadata.image !== undefined && this.metadata.image != "")
-            return ps.ipfs.display + "/" + this.metadata.image.slice(5)
+            return NFT.resolveUrl(this.metadata.image)
 
         return "https://via.placeholder.com/500"
-    }
-
-    fullUrl(): string {
-        return ps.ipfs.display + this.url
-    }
-
-    metaSrc(): string {
-        return this.fullUrl() + "/metadata.json"
     }
 
     explorerSrc(): string {
@@ -56,9 +49,34 @@ export class NFT {
         return "https://" + net + ps.explorer + "/asset/" + this.asset_id
     }
 
-    static async fromAsset(asset: any): Promise<NFT> {
-        const url: string = asset['params']['url']
-        return await getNFT(url + "/metadata.json")
+    static resolveUrl(url: string): string {
+        const [protocol, uri] = url.split("://")
+
+        switch(protocol){
+            case "ipfs":
+                return ps.ipfs.display + uri
+            case "algorand":
+                //TODO: create url to request note field?
+                showErrorToaster("No url resolver for algorand protocol string yet")
+                return 
+            case "http":
+                return url
+        }
+
+        showErrorToaster("Unknown protocol: " + protocol)
+
+        return  ""
+    }
+
+    static metaUrl(url: string): string {
+        return NFT.resolveUrl(url + "/metadata.json")
+    }
+
+    static async fromToken(token: any): Promise<NFT> {
+        const nft = await getNFT(NFT.metaUrl(token['params']['url']))
+        nft.asset_id = token['index']
+        nft.manager = token['params']['manager']
+        return nft
     }
 
     static emptyNFT(): NFT {

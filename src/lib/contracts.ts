@@ -36,9 +36,8 @@ export async function get_platform_owner(vars: any): Promise<LogicSig> {
 }
 
 export async function get_listing_hash(vars: any): Promise<Buffer> {
-    const listing_vars = JSON.parse(await get_file(listing_var_positions))
     const compiled = await get_listing_compiled(vars)
-    return get_hash(new Uint8Array(Buffer.from(compiled.result, "base64")), listing_vars)
+    return get_hash(new Uint8Array(Buffer.from(compiled.result, "base64")), listing_var_positions)
 }
 
 export async function get_listing_compiled(vars: any) {
@@ -65,7 +64,12 @@ export async function populate_contract(template: string, vars: any) {
     //Read the program, Swap vars, spit out the filled out tmplate
     let program = await get_file(template)
     for (let v in vars) {
-        program = program.replace(new RegExp(v, "g"), vars[v])
+        let val = vars[v]
+        if(val === ""){
+            val = dummy_addr 
+        }
+
+        program = program.replace(new RegExp(v, "g"), val)
     }
     return program
 }

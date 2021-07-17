@@ -5,13 +5,15 @@ import * as React from 'react'
 import {Prompt} from 'react-router-dom'
 
 import { Wallet } from './wallets/wallet'
-import {platform_settings as ps} from './lib/platform-conf'
+import {get_template_vars, platform_settings as ps} from './lib/platform-conf'
 import {TagToken} from './lib/tags'
 import { Application } from './lib/application';
 import {Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes } from '@blueprintjs/core'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
 import { getTags } from './lib/algorand'
+import { showErrorToaster } from './Toaster'
+import { get_platform_owner } from './lib/contracts'
 
 type AdminProps = { 
     history: any
@@ -27,41 +29,36 @@ export default function Admin(props: AdminProps) {
     const [ipfs, setIPFS] = React.useState(ps.ipfs)
     const [loading, setLoading] = React.useState(false)
     const [appConf, setApp] = React.useState(ps.application)
-    const [hasChanges, setHasChanges] = React.useState(false)
     const [tags, setTags] = React.useState(ps.application.tags)
 
     function setAlgodValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
         setAlgod(algod =>({ ...algod, [k]: val }))
-        setHasChanges(true)
     }
 
     function setIndexerValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
         setIndexer(indexer =>({ ...indexer, [k]: val }))
-        setHasChanges(true)
     }
 
     function setIpfsValue (k: string, v: string){
         setIPFS(ipfs =>({ ...ipfs, [k]: v }))
-        setHasChanges(true)
     }
 
     function setAppConf(k: string, v: string) {
-        const val = k=="fee"? parseInt(v) :v
+        const val = k=="fee_amt"? parseInt(v) :v
         setApp(appConf =>({ ...appConf, [k]: val }))
-        setHasChanges(true)
     }
 
     function handleTagAdd(e){
-
         const tag = new TagToken(e[0])
 
         //Make sure tag isnt already in array
         if(tags.some((t)=>{return t.name == tag.name})) 
-            return alert("This tag name already exists")
+            return showErrorToaster("This tag name already exists")
 
         setLoading(true)
+
         try{
             tag.create(props.wallet)
             .then((id)=>{ setTags(old=>[...old, tag]) })
@@ -70,7 +67,7 @@ export default function Admin(props: AdminProps) {
             console.error("Fail: ", error)
             setLoading(false) 
         }
-        setHasChanges(true)
+
     }
 
     function handleTagRemove(e){
@@ -90,8 +87,6 @@ export default function Admin(props: AdminProps) {
             console.error("error: ", error)
             setLoading(false)
         }
-
-        setHasChanges(true)
     }
 
     function createApp(){
@@ -100,7 +95,7 @@ export default function Admin(props: AdminProps) {
         const app  = new Application(appConf)
 
         app.create(props.wallet)
-        .then((ac)=>{ setApp(appConf=>({...appConf, ...ac})) })
+        .then((ac)=>{ setApp(appConf=>({ ...appConf, ...ac })) })
         .finally(()=>{ setLoading(false) })
     }
 
@@ -110,37 +105,51 @@ export default function Admin(props: AdminProps) {
         const app  = new Application(appConf)
 
         app.updateApplication(props.wallet)
-        .then((result)=>{ })
         .finally(()=>{ setLoading(false) })
     }
 
     function updateConf(e){
-        setHasChanges(false)
+        var blob = new Blob([getConfText()], {type: "application/json"});
+
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download =  "config.json";
+        link.click();
     }
 
     function searchForTags(){
         setLoading(true)
-        getTags()
-        .then((foundTags)=>{ setTags([...foundTags]) })
+
+        getTags().then((foundTags)=>{ setTags([...foundTags]) })
         .finally(()=>{setLoading(false)})
     }
 
 
-    let appComponent = 
-    <ApplicationCreator 
+    let appComponent = <ApplicationCreator 
         set={setAppConf} 
         create={createApp} 
-        {...appConf} 
         loading={loading} 
+        {...appConf} 
         />
+
     if (appConf.app_id>0){
-        appComponent = 
-        <ApplicationUpdater 
+        appComponent = <ApplicationUpdater 
             set={setAppConf} 
             update={updateApp} 
-            {...appConf} 
             loading={loading} 
+            {...appConf} 
         />
+    }
+
+    function getConfText() {
+        return JSON.stringify({
+            ...ps,
+            ["algod"]: algod,
+            ["indexer"]: indexer,
+            ["ipfs"]: ipfs,
+            ["application"]:appConf,
+            ["tags"]:tags
+        }, undefined, 4)
     }
 
     return (
@@ -154,22 +163,17 @@ export default function Admin(props: AdminProps) {
                     <Tab title='Tags' id='tags' panel={ <TagCreator loading={loading} searchForTags={searchForTags} handleAdd={handleTagAdd} handleRemove={handleTagRemove} tags={tags} />} />
                 </Tabs>
                 <div className='container config-text-container'>
-                    <SyntaxHighlighter language='json' style={docco}>
-                        {JSON.stringify({
-                            ...ps,
-                            ["algod"]: algod,
-                            ["indexer"]: indexer,
-                            ["ipfs"]: ipfs,
-                            ["application"]:appConf,
-                            ["tags"]:tags
-                        }, undefined, 4)}
+                    <SyntaxHighlighter language='json' style={docco} wrapLongLines={true}>
+                        {getConfText()}
                     </SyntaxHighlighter>
-                    <Button text='update' outlined={true} disabled={!hasChanges} onClick={updateConf} />
+                    <Button text='Download' outlined={true}  onClick={updateConf} />
                 </div>
             </div>
             <Prompt when={true} message="Changes made to config, have you saved them?" />
         </div>
     )
+
+
 }
 
 type AlgodConfigProps = {
@@ -287,7 +291,7 @@ type ApplicationCreatorProps = {
 function ApplicationCreator(props: ApplicationCreatorProps) {
 
     return (
-        <div>
+        <div className='content application-conf' >
             <InputGroup
                 onChange={e=>{props.set('name', e.target.value)}}
                 placeholder="Application Name"
@@ -323,7 +327,7 @@ type ApplicationUpdaterProps = {
 function ApplicationUpdater(props: ApplicationUpdaterProps) {
 
     return (
-        <div className='container application-conf' >
+        <div className='content application-conf' >
             <InputGroup
                 onChange={e=>{props.set('name', e.target.value)}}
                 placeholder="Application Name"

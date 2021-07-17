@@ -12,6 +12,7 @@ import { Dialog, Button, Classes, HTMLSelect, Intent } from '@blueprintjs/core'
 import { IconName } from '@blueprintjs/icons'
 
 import {platform_settings as ps} from './lib/platform-conf'
+import { useEffect } from 'react'
 
 const pkToMnemonic = {
     "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
@@ -30,7 +31,7 @@ const pkToMnemonic = {
 
 const wallet_preference_key = 'wallet-preference'
 const acct_preference_key = 'acct-preference'
-
+const allowedWallets =  { 'algo-signer': AlgoSignerWallet, 'my-algo-connect': MyAlgoConnectWallet, 'insecure-wallet': InsecureWallet }
 
 type AlgorandWalletConnectorProps = {
     walletConnected: boolean
@@ -38,160 +39,130 @@ type AlgorandWalletConnectorProps = {
     setWallet(wallet: Wallet)
 }
 
-type AlgorandWalletConnectorState = {
-    selectorOpen: boolean
-    allowedWallets: object
-    wallet: Wallet
-}
+export default function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
 
-class AlgorandWalletConnector extends React.Component<AlgorandWalletConnectorProps, AlgorandWalletConnectorState> {
+    const [selectorOpen, setSelectorOpen] = React.useState(false)
+    const [wallet, setWallet] = React.useState(undefined)
 
-    state: AlgorandWalletConnectorState = {
-            selectorOpen: false,
-            allowedWallets: {
-                'algo-signer': AlgoSignerWallet,
-                'my-algo-connect': MyAlgoConnectWallet,
-                'insecure-wallet': InsecureWallet
-            },
-            wallet: undefined
-    }
 
-    constructor(props) {
-        super(props);
+    useEffect(()=>{ 
+        tryConnectWallet() 
+        return () => { }
+    }, [wallet])
 
-        this.componentDidMount = this.componentDidMount.bind(this)
-
-        this.tryConnectWallet = this.tryConnectWallet.bind(this)
-        this.disconnectWallet = this.disconnectWallet.bind(this)
-
-        this.handleChangeAccount = this.handleChangeAccount.bind(this)
-        this.handleDisplayWalletSelection = this.handleDisplayWalletSelection.bind(this)
-        this.handleSelectedWallet = this.handleSelectedWallet.bind(this)
-        this.handleDisconnectWallet = this.handleDisconnectWallet.bind(this)
-    }
-
-    componentDidMount() {
-        this.tryConnectWallet()
-    }
-
-    disconnectWallet() {
-        this.props.setWallet(undefined)
-        this.setState({ wallet: undefined })
+    function disconnectWallet() {
+        props.setWallet(undefined)
+        setWallet(undefined)
         sessionStorage.setItem(wallet_preference_key, '')
         sessionStorage.setItem(acct_preference_key, '')
     }
 
-    async tryConnectWallet() {
-        if (this.state.wallet !== undefined) return
+    async function tryConnectWallet() {
+        if (wallet !== undefined) return
 
         const wname = sessionStorage.getItem(wallet_preference_key);
         const acct_idx = sessionStorage.getItem(acct_preference_key)
 
-        if (!(wname in this.state.allowedWallets)) return
+        if (!(wname in allowedWallets)) return
 
-        const wallet = new this.state.allowedWallets[wname](ps.algod.network)
+        const w = new allowedWallets[wname](ps.algod.network)
 
         if (wname == 'insecure-wallet') {
-            if (!await wallet.connect(pkToMnemonic)) return this.disconnectWallet()
+            if (!await w.connect(pkToMnemonic)) return disconnectWallet()
         } else {
-            if (!await wallet.connect()) return this.disconnectWallet()
+            if (!await w.connect()) return disconnectWallet()
         }
 
-        wallet.default_account = acct_idx
+        w.default_account = acct_idx
 
-        this.setState({ wallet: wallet })
-        this.props.setWallet(wallet)
+        setWallet(w)
+        props.setWallet(w)
     }
 
-    handleDisconnectWallet() { this.disconnectWallet() }
+    function handleDisconnectWallet() { disconnectWallet() }
 
-    handleDisplayWalletSelection() { this.setState({ selectorOpen: true }) }
+    function handleDisplayWalletSelection() { setSelectorOpen(true) }
 
-    async handleSelectedWallet(e) {
+    async function handleSelectedWallet(e) {
         const tgt = e.currentTarget
-        if (tgt.id in this.state.allowedWallets) {
+        if (tgt.id in allowedWallets) {
             sessionStorage.setItem(wallet_preference_key, tgt.id)
             sessionStorage.setItem(acct_preference_key, "0")
-            await this.tryConnectWallet()
+            await tryConnectWallet()
         }
-        this.setState({ selectorOpen: false })
+        setSelectorOpen(false)
     }
 
-    handleChangeAccount(e) {
+    function handleChangeAccount(e) {
         const addr_idx = e.target.value
-        this.state.wallet.default_account = addr_idx
+        wallet.default_account = addr_idx
         sessionStorage.setItem(acct_preference_key, addr_idx)
-        this.props.handleChangeAcct()
+        props.handleChangeAcct()
     }
 
-    render() {
-
-        if (!this.props.walletConnected)
-            return (
-                <div>
-                    <Button
-                        minimal={true}
-                        rightIcon='selection'
-                        intent='warning'
-                        outlined={true}
-                        onClick={this.handleDisplayWalletSelection}>Connect Wallet</Button>
-
-                    <Dialog isOpen={this.state.selectorOpen} title='Select Wallet' onClose={this.handleSelectedWallet} >
-                        <div className={Classes.DIALOG_BODY}>
-                            <ul className='wallet-option-list'>
-                                <li>
-                                    <Button id='algo-signer'
-                                        large={true} 
-                                        fill={true} 
-                                        minimal={true} 
-                                        outlined={true} 
-                                        onClick={this.handleSelectedWallet}
-                                        > <img className='wallet-branding' src={ AlgoSignerWallet.img(true) } />Algo Signer
-                                        </Button>
-                                </li>
-                                <li>
-                                    <Button id='my-algo-connect'
-                                        large={true} 
-                                        fill={true} 
-                                        minimal={true} 
-                                        outlined={true} 
-                                        onClick={this.handleSelectedWallet}
-                                        ><img className='wallet-branding' src={ MyAlgoConnectWallet.img(true) } /> MyAlgo Connect</Button>
-                                </li>
-                                <li>
-                                    <Button id='insecure-wallet' 
-                                        large={true} 
-                                        fill={true} 
-                                        minimal={true} 
-                                        outlined={true} 
-                                        onClick={this.handleSelectedWallet}
-                                        > Insecure Wallet </Button>
-                                </li>
-                            </ul>
-                        </div>
-                    </Dialog>
-                </div>
-            )
-
-
-        const addr_list = this.state.wallet.accounts.map((addr, idx) => {
-            return (<option value={idx} key={idx}> {addr.substr(0, 8)}...  </option>)
-        })
-
-        const iconprops = { 
-            icon: 'symbol-circle' as IconName, 
-            intent: 'success'  as Intent
-        }
-
+    if (!props.walletConnected)
         return (
-            <div>
-                <HTMLSelect onChange={this.handleChangeAccount} minimal={true} iconProps={iconprops} defaultValue={this.state.wallet.default_account}>
-                    {addr_list}
-                </HTMLSelect>
-                <Button icon='log-out' minimal={true} onClick={this.handleDisconnectWallet} ></Button>
-            </div>
-        )
-    }
-}
+        <div>
+            <Button
+                minimal={true}
+                rightIcon='selection'
+                intent='warning'
+                outlined={true}
+                onClick={handleDisplayWalletSelection}>Connect Wallet</Button>
 
-export default AlgorandWalletConnector
+            <Dialog isOpen={selectorOpen} title='Select Wallet' onClose={handleSelectedWallet} >
+                <div className={Classes.DIALOG_BODY}>
+                    <ul className='wallet-option-list'>
+                        <li>
+                            <Button id='algo-signer'
+                                large={true} 
+                                fill={true} 
+                                minimal={true} 
+                                outlined={true} 
+                                onClick={handleSelectedWallet}
+                                > <img className='wallet-branding' src={ AlgoSignerWallet.img(true) } />Algo Signer
+                                </Button>
+                        </li>
+                        <li>
+                            <Button id='my-algo-connect'
+                                large={true} 
+                                fill={true} 
+                                minimal={true} 
+                                outlined={true} 
+                                onClick={handleSelectedWallet}
+                                ><img className='wallet-branding' src={ MyAlgoConnectWallet.img(true) } /> MyAlgo Connect</Button>
+                        </li>
+                        <li>
+                            <Button id='insecure-wallet' 
+                                large={true} 
+                                fill={true} 
+                                minimal={true} 
+                                outlined={true} 
+                                onClick={handleSelectedWallet}
+                                > Insecure Wallet </Button>
+                        </li>
+                    </ul>
+                </div>
+            </Dialog>
+        </div>
+    )
+
+
+    const addr_list = wallet.accounts.map((addr, idx) => {
+        return (<option value={idx} key={idx}> {addr.substr(0, 8)}...  </option>)
+    })
+
+    const iconprops = { 
+        icon: 'symbol-circle' as IconName, 
+        intent: 'success'  as Intent
+    }
+
+    return (
+        <div>
+            <HTMLSelect onChange={handleChangeAccount} minimal={true} iconProps={iconprops} defaultValue={wallet.default_account}>
+                {addr_list}
+            </HTMLSelect>
+            <Button icon='log-out' minimal={true} onClick={handleDisconnectWallet} ></Button>
+        </div>
+    )
+}
