@@ -347,14 +347,17 @@ export async function sendWait(signed: any[]) {
 
     if(ps.dev.debug_txns) download_txns("grouped.txns", signed.map((t)=>{return t.blob}))
 
-    const {txId}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
-    showNetworkWaiting(txId)
-
     try {
+        const {txId}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
+        showNetworkWaiting(txId)
+
         const result = await waitForConfirmation(client, txId, 3)
         showNetworkSuccess(txId)
+
         return result 
-    } catch (error) { showNetworkError(txId, error) }
+    } catch (error) { 
+        showNetworkError("", error) 
+    }
     return false
 }
 

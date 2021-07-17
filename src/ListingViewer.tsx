@@ -10,7 +10,8 @@ import { AnchorButton, Button, NumericInput, Card, Elevation } from '@blueprintj
 import Tagger from './Tagger'
 import {TagToken} from './lib/tags'
 import {Wallet} from './wallets/wallet'
-import { Suggest } from '@blueprintjs/select'
+import {platform_settings as ps} from './lib/platform-conf'
+import { showErrorToaster } from './Toaster'
 
 type ListingViewerProps = {
     history: any
@@ -23,16 +24,12 @@ function ListingViewer(props: ListingViewerProps) {
     const history = useHistory();
 
     const {addr} = useParams();
-    const [tagOpts, setTagOpts] = React.useState(undefined);
     const [listing, setListing] = React.useState(undefined);
     const [loading, setLoading] = React.useState(false);
     const [price, setPrice]     = React.useState(0);
     const [updateable, setUpdateable] = React.useState(false)
 
-    React.useEffect(()=>{
-        getTags().then((tags)=>{ setTagOpts(tags) })
-        getListing(addr).then((listing)=>{ setListing(listing) })
-    }, [])
+    React.useEffect(()=>{ getListing(addr).then((listing)=>{ setListing(listing) }) }, [])
 
     async function handleCancelListing(){
         setLoading(true)
@@ -90,7 +87,7 @@ function ListingViewer(props: ListingViewerProps) {
     async function handleUpdatePrice(){
         setLoading(true)
         if (price == 0){ 
-            alert("You didnt change the price g")
+            showErrorToaster("Price not changed")
             setLoading(false)
             return
         }
@@ -124,11 +121,10 @@ function ListingViewer(props: ListingViewerProps) {
             </div>
         )
 
-        console.log(listing)
         if (props.wallet !== undefined && listing.creator_addr == props.wallet.getDefaultAccount()){
             tagsComponent = (
                 <Tagger 
-                    tagOpts={tagOpts} 
+                    tagOpts={ps.application.tags} 
                     tags={listing.tags} 
                     handleAddTag={handleAddTag}
                     handleRemoveTag={handleRemoveTag}
@@ -171,7 +167,7 @@ function ListingViewer(props: ListingViewerProps) {
 
                     <div className='container nft-details' >
                         <div className='nft-name'>
-                            <p><b>{deets.title}</b> - <i>{deets.artist}</i></p>
+                            <p><b>{deets.name}</b> - <i>{deets.properties.artist}</i></p>
                         </div>
                         <div className='nft-id' >
                             <p><a href={listing.nft.explorerSrc()}><b>{listing.asset_id}</b></a></p>

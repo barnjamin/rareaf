@@ -1,10 +1,11 @@
 import {Wallet} from '../wallets/wallet'
 import algosdk, { Transaction } from 'algosdk'
 import { 
-    getSuggested, 
     get_cosign_txn,
     get_asa_create_txn, 
     get_asa_destroy_txn, 
+    getSuggested, 
+    getTransaction,
     sendWait 
 } from './algorand';
 import { platform_settings as ps, get_template_vars } from './platform-conf';
@@ -68,8 +69,9 @@ export class TagToken {
 
         const s_create_txn = algosdk.signLogicSigTransaction(create_txn, lsig)
 
-        const result = await sendWait([s_cosign_txn, s_create_txn])
+        await sendWait([s_cosign_txn, s_create_txn])
 
+        const result = await getTransaction(s_create_txn.txID)
         this.id = result['asset-index']
 
         return this.id

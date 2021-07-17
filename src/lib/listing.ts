@@ -17,6 +17,7 @@ import { NFT } from './nft'
 import {TagToken} from './tags'
 import { Method } from './application'
 import LogicSig from 'algosdk/dist/types/src/logicsig';
+import { showErrorToaster } from '../Toaster';
 
 
 export class Listing {
@@ -40,6 +41,7 @@ export class Listing {
         this.asset_id = asset_id
         this.creator_addr = creator_addr
         this.contract_addr = contract_addr
+        this.tags = []
     }
 
     getVars() {
@@ -133,11 +135,10 @@ export class Listing {
         const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, platform_lsig)
 
         const txngroup =  [s_app_call_txn, s_tag_optin_txn, s_tag_xfer_txn]
-        if(!execute){
-            return txngroup
-        }
 
         this.tags.push(tag)
+
+        if(!execute) return sendWait(txngroup)
 
         return await sendWait(txngroup)
     }
@@ -163,21 +164,26 @@ export class Listing {
         const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, listing_lsig)
 
         const txngroup = [s_app_call_txn, s_tag_xfer_txn]
-        if(!execute){
-            return txngroup
-        }
 
-        this.tags = this.tags.filter((t)=>{ return t.id==tag.id })
+        this.tags = this.tags.filter((t)=>{ return t.id!=tag.id })
 
-        return await sendWait(txngroup)
+        if(!execute) return sendWait(txngroup)
+
+        await sendWait(txngroup)
     }
 
     async doPriceChange(wallet: Wallet, new_price:number ) {
         const diff = this.price - new_price 
 
-        if (diff<0) return await this.doPriceIncrease(wallet, Math.abs(diff))
+        try {
+            if (diff<0) return await this.doPriceIncrease(wallet, Math.abs(diff))
+            else await this.doPriceDecrease(wallet, diff)
+        }catch(error){
+            showErrorToaster("Couldn't update price: " + error)
+            return
+        }
 
-        return await this.doPriceDecrease(wallet, diff)
+        this.price = new_price
     }
 
 
@@ -291,6 +297,12 @@ export class Listing {
 
         const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, ps.application.owner_addr, ps.application.fee_amt))
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
+
+
+        //for(let tag in this.tags) {
+        //    const 
+        //    console.log(tag)
+        //}
 
         const grouped = [
             app_call_txn, purchase_amt_txn, 

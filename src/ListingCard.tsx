@@ -6,9 +6,8 @@ import { Listing} from './lib/listing'
 
 
 type ListingCardProps = { key: string, listing: Listing; };
-type ListingCardState = { };
 
-export function ListingCard(props) {
+export function ListingCard(props: ListingCardProps) {
 
     const l  = props.listing
     const md = l.nft.metadata
@@ -23,7 +22,7 @@ export function ListingCard(props) {
             <div className='container'>
                 <p>
                     <a href={'/listing/'+l.contract_addr}> 
-                        <b>{md.title}</b> - <i>{md.artist}</i> (${l.price})
+                        <b>{md.name}</b> - <i>{md.properties.artist}</i> (${l.price})
                     </a>
 
                 </p>

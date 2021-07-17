@@ -3,8 +3,8 @@
 
 import * as React from 'react'
 import {useParams, useHistory} from 'react-router-dom'
-import { tryGetNFT, getTags, isOptedIntoApp } from './lib/algorand'
-import {Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation} from '@blueprintjs/core'
+import { tryGetNFT, isOptedIntoApp } from './lib/algorand'
+import {Tag, Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation} from '@blueprintjs/core'
 import Listing from './lib/listing'
 import {Wallet} from './wallets/wallet'
 import {NFT} from './lib/nft'
@@ -28,7 +28,6 @@ export default function NFTViewer(props: NFTViewerProps) {
     const [waiting_for_tx, setWaiting]        = React.useState(false)
     const [price, setPrice]                   = React.useState(0)
     const [listingVisible, setListingVisible] = React.useState(false)
-    const [tagOpts, setTagOpts]               = React.useState([])
     const [tags, setTags]                     = React.useState([])
     const [optedIn, setOptedIn]               = React.useState(false)
     
@@ -36,11 +35,6 @@ export default function NFTViewer(props: NFTViewerProps) {
         tryGetNFT(parseInt(id))
             .then((nft)=>{ setNFT(nft) })
             .catch((err)=>{ console.error("Error:", err) })
-
-        getTags()
-            .then((tagOpts)=>{ setTagOpts(tagOpts) })
-            .catch((err)=>{ console.error("Error getting tags: ", err)})
-
     }, []);
 
     React.useEffect(()=>{
@@ -72,8 +66,11 @@ export default function NFTViewer(props: NFTViewerProps) {
     async function handleOptIn() {
         if(props.wallet === undefined || optedIn) return
         const app = new Application(ps.application)
-        const success = await app.optIn(props.wallet)
-        ErrorToaster.show({intent:"danger", message: "Failed to opt into event"}) 
+        try {
+            await app.optIn(props.wallet)
+        }catch(error){
+            ErrorToaster.show({intent:"danger", message: "Failed to opt into event"}) 
+        }
     }
 
     async function handleSubmitListing(){
@@ -83,11 +80,10 @@ export default function NFTViewer(props: NFTViewerProps) {
             await handleOptIn()
 
             const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
-            const res = await lst.doCreate(props.wallet)
-            console.log(res)
+            await lst.doCreate(props.wallet)
 
             if(tags.length > 0 ){
-                await Promise.all(tags.map((tag)=>{ return lst.doTags(props.wallet, tag) }))
+                await lst.doTags(props.wallet, tags)
             }
 
             history.push("/listing/"+lst.contract_addr)
@@ -136,7 +132,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             </Card>
 
 
-            <MultistepDialog isOpen={listingVisible} onClose={handleCancelListing} finalButtonProps={{onClick:handleSubmitListing}} >
+            <MultistepDialog isOpen={listingVisible} onClose={handleCancelListing} finalButtonProps={{loading: waiting_for_tx, onClick:handleSubmitListing}} >
                 <DialogStep 
                     id="price" 
                     title="price" 
@@ -150,7 +146,7 @@ export default function NFTViewer(props: NFTViewerProps) {
                             <Tagger 
                                 renderProps={{"fill":true}} 
                                 tags={tags} 
-                                tagOpts={tagOpts} 
+                                tagOpts={ps.application.tags} 
                                 setTags={setTags}
                                 />
                         </div>
@@ -192,7 +188,7 @@ function ConfirmListingDetails(props){
 
             <p><b>Token:</b> {props.tokenId} </p>
             <p><b>Price:</b> {props.price} </p> 
-            <p><b>Tags:</b> {props.tags.map(t=>{return t.name}).join(", ")}</p>
+            <p><b>Tags:</b> {props.tags.map(t=>{return <Tag key={t.id} round={true} intent='primary'>{t.name}</Tag>})}</p>
         </div>
     )
 }

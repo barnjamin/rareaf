@@ -56,30 +56,15 @@ export class Application {
 
         // Create blank app to reserve ID
         await this.updateApplication(wallet)
-
-        ps.application = this.conf
-        console.log(this.conf)
         // Create Owner contract account for token creation/sending 
         await this.createOwnerAcct(wallet)
-        console.log(this.conf)
-
-        ps.application = this.conf
         // Create price token with app name 
         await this.createPriceToken(wallet) 
-
-        ps.application = this.conf
-        console.log(this.conf)
         // Create listing and compute hash for app update
         await this.setListingHash()
-
-        ps.application = this.conf
-        console.log(this.conf)
-
         // Update Application with hash of contract && price token id
         await this.updateApplication(wallet)
-        ps.application = this.conf
 
-        console.log(this.conf)
         return this.conf 
     }
 
@@ -158,7 +143,6 @@ export class Application {
         await sendWait([s_cosign_txn, s_create_px])
 
         const result = await getTransaction(s_create_px.txID)
-        console.log(result)
         this.conf.price_id = result['asset-index']
     } 
 

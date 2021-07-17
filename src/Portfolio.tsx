@@ -73,9 +73,10 @@ function NFTPanel(props: NFTPanelProps) {
 type ListingPanelProps = { 
     listings: Listing[]
 };
+
 function ListingPanel(props: ListingPanelProps) {
     let l = props.listings.map((l)=>{ 
-        return ( <ListingCard key={l.asset_id} listing={l} /> ) 
+        return ( <ListingCard key={l.asset_id.toString()} listing={l} /> ) 
     })
 
     if(props.listings.length == 0)
