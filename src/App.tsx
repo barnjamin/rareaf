@@ -18,7 +18,6 @@ import ListingViewer from './ListingViewer'
 import Admin from './Admin'
 import {Wallet} from './wallets/wallet'
 import {platform_settings as ps} from './lib/platform-conf'
-import algosdk from 'algosdk' 
 
 
 type AppProps = {
