@@ -2,11 +2,11 @@
 
 
 $background-color: $white;
-$dark-background:  $light-gray3;
+$darker:  $light-gray3;
 $drop-shadow: drop-shadow(0px 0px 6px $dark-gray1);
 
 //$background-color: $dark-gray5;
-//$dark-background:  $dark-gray3;
+//$darker:  $dark-gray3;
 //$drop-shadow: drop-shadow(0px 0px 6px $dark-gray1);
 
 body {
@@ -39,8 +39,8 @@ body {
 	height: 250px;
 	padding: 10px;
 	margin: 10px;
-	background: $dark-background;
-	filter: $drop-shadow;
+	background: $darker;
+	box-shadow: $pt-elevation-shadow-2;
 	img {
 		height: 100%;
 	}
@@ -97,14 +97,14 @@ img.wallet-branding {
 	width: 30%;
 	img {
 		width: 100%;
-		filter: $drop-shadow;
+		box-shadow: $pt-elevation-shadow-2;
 	}
 }
 .listing-card {
 	width: 30%;
 	img {
 		width: 100%;
-		filter: $drop-shadow;
+		box-shadow: $pt-elevation-shadow-2;
 	}
 }
 .listing-card-tags {

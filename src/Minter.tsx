@@ -81,15 +81,9 @@ export default function Minter(props: MinterProps){
 
         const name = target.name
         if (name == "artist"){ //TODO: lol 
-            setMeta(meta=>({
-                ...meta,
-                ["properties"]:{...meta.properties, "artist":value}
-            }))
+            setMeta(meta=>({ ...meta, ["properties"]:{...meta.properties, "artist":value} }))
         }else{
-            setMeta(meta=>({
-                ...meta,
-                [name]: value 
-            }))
+            setMeta(meta=>({ ...meta, [name]: value }))
         }
     }
 
@@ -151,6 +145,8 @@ export default function Minter(props: MinterProps){
                         onClick={mintNFT}
                         rightIcon='clean'
                         large={true}
+                        minimal={true}
+                        outlined={true}
                         intent='success'
                         text='Mint' />
                 </div>
@@ -178,7 +174,7 @@ function Uploader(props: UploaderProps) {
 
     if (props.imgSrc === undefined || props.imgSrc == "" ) return (
         <div className='container'>
-            <div className='content content-piece'>
+            <div className='content content-piece' >
                 <FileInput large={true} disabled={false} text="Choose file..." onInputChange={captureFile} />
             </div>
         </div>

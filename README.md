@@ -41,11 +41,10 @@ donate to this address (charity? Dao?)
 #TODO:
 
    Initialization:
-      - Add contract account for ownership
-      - Update Config on Github
+      - Config write to github? IPFS with link in global var on app?
 
    IPFS:
-      - Pin files
+      - Pin files?
 
    General:
       - Convert numbers to bignum

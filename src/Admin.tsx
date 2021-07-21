@@ -168,7 +168,7 @@ export default function Admin(props: AdminProps) {
                         <SyntaxHighlighter language='json' style={docco} wrapLongLines={true}>
                             {getConfText()}
                         </SyntaxHighlighter>
-                        <Button text='Download' outlined={true}  onClick={updateConf} />
+                        <Button text='Download' minimal={true} outlined={true}  onClick={updateConf} />
                     </div>
                 </Card>
             </div>
@@ -313,7 +313,9 @@ function ApplicationCreator(props: ApplicationCreatorProps) {
                 large={true}
                 value={props.fee_amt.toString()}
             />
-            <Button loading={props.loading} onClick={props.create} intent='success' text='Create'/>
+            <Button 
+            minimal={true} outlined={true}
+            loading={props.loading} onClick={props.create} intent='success' text='Create'/>
         </div>
     )
 }
@@ -349,7 +351,10 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
                 large={true}
                 value={props.fee_amt.toString()}
             />
-            <Button loading={props.loading} onClick={props.update} intent='warning' text='Update Application'/>
+            <Button 
+            minimal={true}
+            outlined={true}
+            loading={props.loading} onClick={props.update} intent='warning' text='Update Application'/>
         </div>
     )
 }
@@ -373,7 +378,8 @@ function TagCreator(props: TagCreatorProps) {
                 placeholder='Add listing tags...'
                 values={props.tags.map(t=>{ return <Tag key={t.id}>{t.name}</Tag> })}
             />
-            <Button loading={props.loading} onClick={props.searchForTags} text='Recover tags'></Button>
+            <Button minimal={true} outlined={true} 
+            loading={props.loading} onClick={props.searchForTags} text='Recover tags'></Button>
         </div>
     )
 }

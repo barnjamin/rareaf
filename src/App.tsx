@@ -64,6 +64,10 @@ export default class App extends React.Component<AppProps, AppState> {
       adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
     }
 
+    let port = <div/>
+    if(this.walletConnected()){
+      port = <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />
+    }
     return (
       <Router history={this.props.history} >
         <Navbar >
@@ -71,8 +75,8 @@ export default class App extends React.Component<AppProps, AppState> {
             <Navbar.Heading><img height={"20px"} src={require('./img/default-monochrome.svg')}></img></Navbar.Heading>
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
-            <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />
             <AnchorButton className='bp3-minimal' icon='clean' text='Mint' href="/mint" />
+            {port}
           </Navbar.Group >
 
           <Navbar.Group align={Alignment.RIGHT}>
