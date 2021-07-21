@@ -1,0 +1,174 @@
+@import "~@blueprintjs/core/lib/scss/variables" ;
+
+
+$background-color: $white;
+$dark-background:  $light-gray3;
+$drop-shadow: drop-shadow(0px 0px 6px $dark-gray1);
+
+//$background-color: $dark-gray5;
+//$dark-background:  $dark-gray3;
+//$drop-shadow: drop-shadow(0px 0px 6px $dark-gray1);
+
+body {
+	background-color: $background-color;
+}
+
+.container {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-around;
+	align-items: center;
+	padding: 20px;
+}
+
+.container-right {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-end;
+	align-items: center;
+	padding: 10px;
+	button {
+		margin: 5px;
+	}
+}
+.content-piece {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 90%;
+	height: 250px;
+	padding: 10px;
+	margin: 10px;
+	background: $dark-background;
+	filter: $drop-shadow;
+	img {
+		height: 100%;
+	}
+}
+.content-card {
+	margin: 10px;
+	width: 30%;
+}
+.details-basic {
+	flex-grow: 1;
+	padding: 10px;
+	margin: 10px;
+}
+.details-description {
+	flex-grow: 1;
+	padding: 10px;
+	margin: 10px;
+}
+.token-mint {
+	width: 100%;
+}
+.token-details {
+	flex-grow: 1;
+	padding: 10px;
+	margin: 10px;
+}
+.container-mint {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-end;
+	padding: 20px;
+}
+.content-viewer {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	padding: 10px;
+	img {
+		width: 100%;
+	}
+}
+img.wallet-branding {
+	width: 25px;
+	margin-right: 10px;
+	float: left;
+}
+.wallet-option-list {
+	list-style: none;
+	li {
+		margin: 10px;
+	}
+}
+.nft-card {
+	width: 30%;
+	img {
+		width: 100%;
+		filter: $drop-shadow;
+	}
+}
+.listing-card {
+	width: 30%;
+	img {
+		width: 100%;
+		filter: $drop-shadow;
+	}
+}
+.listing-card-tags {
+	padding: 8px;
+	border-radius: 5px;
+	justify-content: space-evenly;
+}
+.listing-page {
+	.bp3-card {
+		width: 80%;
+	}
+}
+.nft-viewer {
+	img {
+		filter: $drop-shadow;
+		width: 100%;
+	}
+}
+.nft-details {
+	justify-content: space-between;
+}
+.nft-description {
+	justify-content: left;
+	width: 50%;
+}
+.listing-actions {
+	justify-content: space-between;
+}
+.listing-price-edit {
+	justify-content: space-between;
+	button {
+		margin: 5px;
+	}
+}
+.listing-buy {
+	align-items: baseline;
+}
+.portfolio-content {
+	justify-content: left;
+	width: 66em;
+	box-shadow: 0.3em 0.3em $white;
+}
+
+.portfolio-name {
+	justify-content: left;
+	width: 100%;
+}
+.config-container {
+	.bp3-tab-panel {
+		width: 60em;
+	}
+	align-items: flex-end;
+	.bp3-input-group {
+		margin: 5px;
+	}
+}
+button {
+	margin: 5px;
+}
+.config-text-container {
+	pre {
+		display: block;
+		height: 42em;
+	}
+	display: block;
+	width: 69em;
+}

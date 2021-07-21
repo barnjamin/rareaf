@@ -7,7 +7,7 @@ import {createBrowserHistory} from "history"
 
 import App  from './App'
 
-import "./index.css"
+import "./styles/index.scss"
 
 const history = createBrowserHistory();
 
