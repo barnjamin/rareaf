@@ -12,7 +12,7 @@ import { Card, Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes, Elevation 
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
 import { getTags } from './lib/algorand'
-import { showErrorToaster } from './Toaster'
+import { InfoToaster, showErrorToaster, showInfo } from './Toaster'
 
 type AdminProps = { 
     history: any
@@ -146,8 +146,7 @@ export default function Admin(props: AdminProps) {
             ["algod"]: algod,
             ["indexer"]: indexer,
             ["ipfs"]: ipfs,
-            ["application"]:appConf,
-            ["tags"]:tags
+            ["application"]:{...appConf, tags:tags},
         }, undefined, 4)
     }
 

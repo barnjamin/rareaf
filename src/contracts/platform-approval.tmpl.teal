@@ -1,12 +1,12 @@
 #pragma version 4
-intcblock 1 0 4 2 5 TMPL_PRICE_ID 8 6 7 9 10 11 12 47
+intcblock 1 0 4 2 TMPL_PRICE_ID 8 5 6 7 9 10 11 12 47
 bytecblock TMPL_OWNER_ADDR
 txn ApplicationID
 intc_1 // 0
 ==
 bnz l72
 txn OnCompletion
-intc 4 // DeleteApplication
+intc 6 // DeleteApplication
 ==
 bnz l71
 txn OnCompletion
@@ -59,7 +59,7 @@ store 1
 intc_0 // 1
 &&
 intc_3 // 2
-intc 5 // TMPL_PRICE_ID
+intc 4 // TMPL_PRICE_ID
 asset_holding_get AssetBalance
 store 10
 store 11
@@ -70,41 +70,12 @@ load 11
 global GroupSize
 intc_0 // 1
 -
-intc 4 // 5
+intc 7 // 6
 >
 bnz l15
 intc_0 // 1
 b l16
 l15:
-gtxn 5 TypeEnum
-intc_2 // axfer
-==
-gtxn 5 AssetCloseTo
-load 1
-==
-&&
-gtxn 5 Sender
-bytec_0 // TMPL_OWNER_ADDR
-==
-&&
-gtxn 5 AssetReceiver
-load 1
-==
-&&
-gtxn 5 AssetAmount
-intc_1 // 0
-==
-&&
-l16:
-global GroupSize
-intc_0 // 1
--
-intc 7 // 6
->
-bnz l18
-intc_0 // 1
-b l19
-l18:
 gtxn 6 TypeEnum
 intc_2 // axfer
 ==
@@ -124,17 +95,16 @@ gtxn 6 AssetAmount
 intc_1 // 0
 ==
 &&
-l19:
-&&
+l16:
 global GroupSize
 intc_0 // 1
 -
 intc 8 // 7
 >
-bnz l21
+bnz l18
 intc_0 // 1
-b l22
-l21:
+b l19
+l18:
 gtxn 7 TypeEnum
 intc_2 // axfer
 ==
@@ -154,17 +124,17 @@ gtxn 7 AssetAmount
 intc_1 // 0
 ==
 &&
-l22:
+l19:
 &&
 global GroupSize
 intc_0 // 1
 -
-intc 6 // 8
+intc 5 // 8
 >
-bnz l24
+bnz l21
 intc_0 // 1
-b l25
-l24:
+b l22
+l21:
 gtxn 8 TypeEnum
 intc_2 // axfer
 ==
@@ -184,17 +154,17 @@ gtxn 8 AssetAmount
 intc_1 // 0
 ==
 &&
-l25:
+l22:
 &&
 global GroupSize
 intc_0 // 1
 -
 intc 9 // 9
 >
-bnz l27
+bnz l24
 intc_0 // 1
-b l28
-l27:
+b l25
+l24:
 gtxn 9 TypeEnum
 intc_2 // axfer
 ==
@@ -214,17 +184,17 @@ gtxn 9 AssetAmount
 intc_1 // 0
 ==
 &&
-l28:
+l25:
 &&
 global GroupSize
 intc_0 // 1
 -
 intc 10 // 10
 >
-bnz l30
+bnz l27
 intc_0 // 1
-b l31
-l30:
+b l28
+l27:
 gtxn 10 TypeEnum
 intc_2 // axfer
 ==
@@ -244,17 +214,17 @@ gtxn 10 AssetAmount
 intc_1 // 0
 ==
 &&
-l31:
+l28:
 &&
 global GroupSize
 intc_0 // 1
 -
 intc 11 // 11
 >
-bnz l33
+bnz l30
 intc_0 // 1
-b l34
-l33:
+b l31
+l30:
 gtxn 11 TypeEnum
 intc_2 // axfer
 ==
@@ -274,17 +244,17 @@ gtxn 11 AssetAmount
 intc_1 // 0
 ==
 &&
-l34:
+l31:
 &&
 global GroupSize
 intc_0 // 1
 -
 intc 12 // 12
 >
-bnz l36
+bnz l33
 intc_0 // 1
-b l37
-l36:
+b l34
+l33:
 gtxn 12 TypeEnum
 intc_2 // axfer
 ==
@@ -301,6 +271,36 @@ load 1
 ==
 &&
 gtxn 12 AssetAmount
+intc_1 // 0
+==
+&&
+l34:
+&&
+global GroupSize
+intc_0 // 1
+-
+pushint 13 // 13
+>
+bnz l36
+intc_0 // 1
+b l37
+l36:
+gtxn 13 TypeEnum
+intc_2 // axfer
+==
+gtxn 13 AssetCloseTo
+load 1
+==
+&&
+gtxn 13 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 13 AssetReceiver
+load 1
+==
+&&
+gtxn 13 AssetAmount
 intc_1 // 0
 ==
 &&
@@ -326,7 +326,7 @@ load 1
 global GroupSize
 intc_0 // 1
 -
-intc 4 // 5
+intc 6 // 5
 >
 bnz l40
 intc_0 // 1
@@ -415,7 +415,7 @@ l47:
 global GroupSize
 intc_0 // 1
 -
-intc 6 // 8
+intc 5 // 8
 >
 bnz l49
 intc_0 // 1
@@ -604,7 +604,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 5 // TMPL_PRICE_ID
+intc 4 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -644,7 +644,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 5 // TMPL_PRICE_ID
+intc 4 // TMPL_PRICE_ID
 ==
 &&
 &&
@@ -813,7 +813,7 @@ substring3
 concat
 store 4
 load 5
-intc 6 // 8
+intc 5 // 8
 +
 intc_2 // 4
 +

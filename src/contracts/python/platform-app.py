@@ -99,7 +99,7 @@ def approval():
         check_balance_match(Gtxn[1], Int(2), price_token),
 
         ## Add logic to check intermediate transactions 
-        valid_tag_closes(5, 8, platform_addr, contract_addr.load()),
+        valid_tag_closes(6, 8, platform_addr, contract_addr.load()),
 
         # Remove the contract addr from the creators acct
         remove_listing_addr(Int(1), Gtxn[0].accounts[2]), 

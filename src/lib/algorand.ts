@@ -72,6 +72,8 @@ export async function getListings(tagName: string): Promise<Listing[]> {
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
+        console.log(b)
+
         if (b.address == ps.application.owner_addr || b.amount == 0) continue;
 
         listings.push(await getListing(b.address))
@@ -109,6 +111,7 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
 
         for(let kidx in als['key-value']) {
             const kv = als['key-value'][kidx]
+            console.log(kv)
             listings.push(await getListing(b64ToAddr(kv.key)))
         }
     }
@@ -126,6 +129,8 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
 }
 
 export async function getListing(addr: string): Promise<Listing> {
+    console.log(addr)
+
     const holdings  = await getHoldingsFromListingAddress(addr)
     const creator   = await getCreator(addr, holdings.nft.asset_id)
 

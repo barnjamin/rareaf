@@ -19,6 +19,7 @@ import {
     platform_settings as ps ,
     get_template_vars
 } from "./platform-conf";
+import { showInfo } from "../Toaster";
 
 
 
@@ -55,14 +56,22 @@ export class Application {
         this.conf.admin_addr = wallet.getDefaultAccount()
 
         // Create blank app to reserve ID
+        showInfo("Creating application to reserve ID")
         await this.updateApplication(wallet)
+
         // Create Owner contract account for token creation/sending 
+        showInfo("Creating owner contract account")
         await this.createOwnerAcct(wallet)
+
         // Create price token with app name 
+        showInfo("Creating price token")
         await this.createPriceToken(wallet) 
+
         // Create listing and compute hash for app update
         await this.setListingHash()
+
         // Update Application with hash of contract && price token id
+        showInfo("Updating listing hash")
         await this.updateApplication(wallet)
 
         return this.conf 
