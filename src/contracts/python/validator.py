@@ -133,7 +133,6 @@ class TemplateContract(object):
 
                 self.template_vars.append(tv)
 
-        print(teal_source)
         return teal_source
 
     def get_populated_hash(self, vals):

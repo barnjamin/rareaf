@@ -5,16 +5,14 @@ import * as React from 'react'
 import {Prompt} from 'react-router-dom'
 
 import { Wallet } from './wallets/wallet'
-import {get_template_vars, platform_settings as ps} from './lib/platform-conf'
+import { platform_settings as ps} from './lib/platform-conf'
 import {TagToken} from './lib/tags'
 import { Application } from './lib/application';
-import {Card, Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes, Elevation } from '@blueprintjs/core'
+import { Card, Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes, Elevation } from '@blueprintjs/core'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
 import { getTags } from './lib/algorand'
 import { showErrorToaster } from './Toaster'
-import { get_platform_owner } from './lib/contracts'
-import { ELEVATION_2 } from '@blueprintjs/core/lib/esm/common/classes'
 
 type AdminProps = { 
     history: any

@@ -11,7 +11,7 @@ import {NFT} from './lib/nft'
 import Tagger from './Tagger'
 import {Application} from './lib/application'
 import {platform_settings as ps} from './lib/platform-conf'
-import { ErrorToaster } from './Toaster'
+import { ErrorToaster, showInfo } from './Toaster'
 
 type NFTViewerProps = {
     history: any
@@ -65,6 +65,9 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     async function handleOptIn() {
         if(props.wallet === undefined || optedIn) return
+
+        showInfo("Creating Transaction to Opt-In to application")
+
         const app = new Application(ps.application)
         try {
             await app.optIn(props.wallet)
@@ -79,10 +82,13 @@ export default function NFTViewer(props: NFTViewerProps) {
         try{
             await handleOptIn()
 
+            showInfo("Creating listing transaction")
             const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
             await lst.doCreate(props.wallet)
 
             if(tags.length > 0 ){
+
+                showInfo("Adding tags")
                 await lst.doTags(props.wallet, tags)
             }
 

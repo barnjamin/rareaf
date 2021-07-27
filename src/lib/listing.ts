@@ -251,14 +251,21 @@ export class Listing {
         const asa_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.creator_addr, this.asset_id, 0))
         asa_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
-
         const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, this.creator_addr, 0))
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
-        const grouped = [app_call_txn, price_xfer_txn,  asa_xfer_txn,  asa_cfg_txn, algo_close_txn]
+        const tagTxns = []
+        for(let t in this.tags){
+            const tag = this.tags[t]
+            const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner_addr, tag.id, 1))
+            tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.application.owner_addr)
+            tagTxns.push(tag_xfer_txn)
+        }
+
+        const grouped = [app_call_txn, price_xfer_txn,  asa_xfer_txn,  asa_cfg_txn, ...tagTxns, algo_close_txn]
         algosdk.assignGroupID(grouped)
 
-        const [s_app_call_txn, /*price_xfer */, /*asa_xfer*/, /*asa_cfg */, /*algo_close */]  = await wallet.signTxn(grouped)
+        const [s_app_call_txn, /*price_xfer */, /*asa_xfer*/, /*asa_cfg */, /*tag_txns*/, /*algo_close */]  = await wallet.signTxn(grouped)
 
         const listing_lsig      = await get_listing_sig(this.getVars())
         const s_price_xfer_txn  = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)
@@ -266,7 +273,13 @@ export class Listing {
         const s_asa_xfer_txn    = algosdk.signLogicSigTransaction(asa_xfer_txn, listing_lsig)
         const s_algo_close_txn  = algosdk.signLogicSigTransaction(algo_close_txn, listing_lsig)
 
-        const combined = [s_app_call_txn, s_price_xfer_txn,  s_asa_xfer_txn,  s_asa_cfg_txn, s_algo_close_txn]
+        const s_tagTxns = []
+        for(let t in tagTxns){
+            s_tagTxns.push(algosdk.signLogicSigTransactionObject(tagTxns[t], listing_lsig))
+        }
+
+        const combined = [s_app_call_txn, s_price_xfer_txn,  s_asa_xfer_txn,  s_asa_cfg_txn, ...s_tagTxns, s_algo_close_txn]
+
         return await sendWait(combined)
     }
 
@@ -299,20 +312,23 @@ export class Listing {
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
 
-        //for(let tag in this.tags) {
-        //    const 
-        //    console.log(tag)
-        //}
+        const tagTxns = []
+        for(let t in this.tags){
+            const tag = this.tags[t]
+            const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner_addr, tag.id, 1))
+            tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.application.owner_addr)
+            tagTxns.push(tag_xfer_txn)
+        }
 
         const grouped = [
             app_call_txn, purchase_amt_txn, 
             asa_xfer_txn, price_xfer_txn, 
-            asa_cfg_txn, algo_close_txn
+            asa_cfg_txn, ...tagTxns, algo_close_txn
         ]
 
         algosdk.assignGroupID(grouped)
 
-        const [s_app_call_txn, s_purchase_amt_txn, /*asa_xfer*/, /*price_xfer*/, /*asa_cfg*/ , /*algo_close*/] = await wallet.signTxn(grouped)
+        const [s_app_call_txn, s_purchase_amt_txn, /*asa_xfer*/, /*price_xfer*/, /*asa_cfg*/ , /* tag_txns */, /*algo_close*/] = await wallet.signTxn(grouped)
 
         const listing_lsig     = await get_listing_sig(this.getVars())
         const s_price_xfer_txn = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)
@@ -320,10 +336,15 @@ export class Listing {
         const s_asa_xfer_txn   = algosdk.signLogicSigTransaction(asa_xfer_txn, listing_lsig)
         const s_algo_close_txn = algosdk.signLogicSigTransaction(algo_close_txn, listing_lsig)
 
+        const s_tagTxns = []
+        for(let t in tagTxns){
+            s_tagTxns.push(algosdk.signLogicSigTransactionObject(tagTxns[t], listing_lsig))
+        }
+
         const combined = [
             s_app_call_txn, s_purchase_amt_txn, 
             s_asa_xfer_txn, s_price_xfer_txn, 
-            s_asa_cfg_txn, s_algo_close_txn
+            s_asa_cfg_txn, ...s_tagTxns, s_algo_close_txn
         ]
 
         return await sendWait(combined)

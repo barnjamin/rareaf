@@ -13,37 +13,33 @@
     },
     "ipfs":{
         "host": "/ip4/127.0.0.1/tcp/5001",
-        "display":"https://localhost:8081/ipfs/",
+        "display":"http://localhost:8081/ipfs/",
         "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJnaXRodWJ8NTIwMjM2IiwiaXNzIjoibmZ0LXN0b3JhZ2UiLCJpYXQiOjE2MTc5MTEzNTMzOTQsIm5hbWUiOiJkZWZhdWx0In0.3Hkh9IHXK6OgmXBUsCK12ca0Iit9-dJgqdDtKcQiYZQ" 
     },
     "explorer":"algoexplorer.io",
     "application": {
         "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
-        "app_id": 4,
-        "price_id": 7,
-        "owner_addr": "6JVLXU57KXKRQUSGJXM7WUECB4PGRLT2DFOULMBRC2FANJCQOWQLYAUPHM",
+        "app_id": 5,
+        "price_id": 8,
+        "owner_addr": "MGROESDQITFB2WSKRWWNDQVU4H4I5XOPTN6BZHWWNR5L5ROSSNJESZLZWQ",
         "name": "RareAF",
         "unit": "raf",
         "fee_amt": 10000,
-        "tags": [
+        "tags": [ 
             {
                 "name": "image",
-                "id": 10
+                "id": 11
             },
             {
                 "name": "gif",
-                "id": 12
+                "id": 13
             },
             {
-                "name": "landscape",
-                "id": 14
-            },
-            {
-                "name": "pixel",
-                "id": 16
+                "name": "pixel-art",
+                "id": 15
             }
         ],
-        "listing_hash": "b64(V0R33qabpWj5XA1SgC1caFhPD6EQzmjinf26kOiM8YE=)",
+        "listing_hash": "b64(cBUTAVGtB0StZCTm2iW/hxiORkoHruRZck9EK3EhpMU=)",
         "seed_amt": 5000000,
         "max_price": 10000000000
     },
@@ -53,5 +49,5 @@
         "listing":"listing.teal",
         "listing-positions":"listing.tmpl.teal.json"
     },
-    "dev":{ "debug_txns":false }
+    "dev":{ "debug_txns":true }
 }

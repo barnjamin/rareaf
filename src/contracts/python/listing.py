@@ -31,13 +31,14 @@ def listing():
     delete = And(
         Global.group_size() >= Int(5),
         valid_app_call(Gtxn[0]),
+
         set_addr_as_tx(      Gtxn[1], contract_addr),
         asa_close_xfer_valid(Gtxn[1],  price_token,  contract_addr.load(), platform_addr, platform_addr),
+
         asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), creator_addr.load(), creator_addr.load()),
         asa_cfg_valid(       Gtxn[3], asset_id.load(), creator_addr.load()),
         
-        ## Add logic to check intermediate transactions 
-        valid_tag_closes(5, 8, platform_addr, contract_addr.load()),
+        # Possible Tag closes
 
         pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), creator_addr.load(), creator_addr.load(), Int(0)),
     )
@@ -54,8 +55,7 @@ def listing():
         asa_close_xfer_valid(Gtxn[3], price_token, contract_addr.load(), platform_addr, platform_addr),
         asa_cfg_valid(       Gtxn[4], asset_id.load(), buyer_addr.load()),
 
-        ## Add logic to check intermediate transactions 
-        valid_tag_closes(5, 8, platform_addr, contract_addr.load()),
+        # Possible Tag closes
 
         pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), platform_addr, creator_addr.load(), platform_fee),
     )

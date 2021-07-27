@@ -7,7 +7,7 @@ import IPFS from 'ipfs-core'
 import { Button, Elevation, FileInput, Card } from "@blueprintjs/core"
 import { NFT, NFTMetadata, emptyMetadata } from './lib/nft'
 import { platform_settings as ps } from './lib/platform-conf'
-import { showErrorToaster } from './Toaster'
+import { showErrorToaster, showInfo } from './Toaster'
 import {Wallet} from './wallets/wallet'
 
 type MinterProps = {
@@ -52,10 +52,9 @@ export default function Minter(props: MinterProps){
 
         const metadata = captureMetadata()
 
-        console.log(meta)
+        showInfo("Uploading to IPFS")
 
         storeNFT(fileObj, metadata).then((result) => {
-
             const nft = new NFT(metadata);
             nft.url = "ipfs://"+result.ipnft
 

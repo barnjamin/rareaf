@@ -25,7 +25,10 @@ export const dummy_id = "b64(AAAAAAAAAHs=)"
 
 export async function get_listing_sig(vars: any): Promise<LogicSig> {
     const compiled_program = await get_listing_compiled(vars)
+    console.log(compiled_program)
     const program_bytes = new Uint8Array(Buffer.from(compiled_program.result, "base64"));
+
+    console.log(program_bytes.length)
     return algosdk.makeLogicSig(program_bytes);
 }
 

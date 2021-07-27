@@ -1,50 +1,50 @@
 #pragma version 4
-intcblock 1 0 4 2 TMPL_PRICE_ID 47
+intcblock 1 0 4 2 5 TMPL_PRICE_ID 8 6 7 9 10 11 12 47
 bytecblock TMPL_OWNER_ADDR
 txn ApplicationID
 intc_1 // 0
 ==
-bnz l24
+bnz l72
 txn OnCompletion
-pushint 5 // DeleteApplication
+intc 4 // DeleteApplication
 ==
-bnz l23
+bnz l71
 txn OnCompletion
 intc_2 // UpdateApplication
 ==
-bnz l22
+bnz l70
 txn OnCompletion
 intc_3 // CloseOut
 ==
-bnz l21
+bnz l69
 txn OnCompletion
 intc_0 // OptIn
 ==
-bnz l20
+bnz l68
 txna ApplicationArgs 0
 pushbytes 0x637265617465 // "create"
 ==
-bnz l19
+bnz l67
 txna ApplicationArgs 0
 pushbytes 0x746167 // "tag"
 ==
-bnz l18
+bnz l66
 txna ApplicationArgs 0
 pushbytes 0x756e746167 // "untag"
 ==
-bnz l17
+bnz l65
 txna ApplicationArgs 0
 pushbytes 0x70726963655f6465637265617365 // "price_decrease"
 ==
-bnz l16
+bnz l64
 txna ApplicationArgs 0
 pushbytes 0x70726963655f696e637265617365 // "price_increase"
 ==
-bnz l15
+bnz l63
 txna ApplicationArgs 0
 pushbytes 0x64656c657465 // "delete"
 ==
-bnz l14
+bnz l38
 txna ApplicationArgs 0
 pushbytes 0x7075726368617365 // "purchase"
 ==
@@ -54,8 +54,12 @@ l13:
 gtxn 1 Receiver
 gtxna 0 Accounts 1
 ==
+gtxn 2 Sender
+store 1
+intc_0 // 1
+&&
 intc_3 // 2
-intc 4 // TMPL_PRICE_ID
+intc 5 // TMPL_PRICE_ID
 asset_holding_get AssetBalance
 store 10
 store 11
@@ -63,13 +67,253 @@ gtxn 1 Amount
 load 11
 ==
 &&
+global GroupSize
+intc_0 // 1
+-
+intc 4 // 5
+>
+bnz l15
+intc_0 // 1
+b l16
+l15:
+gtxn 5 TypeEnum
+intc_2 // axfer
+==
+gtxn 5 AssetCloseTo
+load 1
+==
+&&
+gtxn 5 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 5 AssetReceiver
+load 1
+==
+&&
+gtxn 5 AssetAmount
+intc_1 // 0
+==
+&&
+l16:
+global GroupSize
+intc_0 // 1
+-
+intc 7 // 6
+>
+bnz l18
+intc_0 // 1
+b l19
+l18:
+gtxn 6 TypeEnum
+intc_2 // axfer
+==
+gtxn 6 AssetCloseTo
+load 1
+==
+&&
+gtxn 6 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 6 AssetReceiver
+load 1
+==
+&&
+gtxn 6 AssetAmount
+intc_1 // 0
+==
+&&
+l19:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 8 // 7
+>
+bnz l21
+intc_0 // 1
+b l22
+l21:
+gtxn 7 TypeEnum
+intc_2 // axfer
+==
+gtxn 7 AssetCloseTo
+load 1
+==
+&&
+gtxn 7 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 7 AssetReceiver
+load 1
+==
+&&
+gtxn 7 AssetAmount
+intc_1 // 0
+==
+&&
+l22:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 6 // 8
+>
+bnz l24
+intc_0 // 1
+b l25
+l24:
+gtxn 8 TypeEnum
+intc_2 // axfer
+==
+gtxn 8 AssetCloseTo
+load 1
+==
+&&
+gtxn 8 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 8 AssetReceiver
+load 1
+==
+&&
+gtxn 8 AssetAmount
+intc_1 // 0
+==
+&&
+l25:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 9 // 9
+>
+bnz l27
+intc_0 // 1
+b l28
+l27:
+gtxn 9 TypeEnum
+intc_2 // axfer
+==
+gtxn 9 AssetCloseTo
+load 1
+==
+&&
+gtxn 9 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 9 AssetReceiver
+load 1
+==
+&&
+gtxn 9 AssetAmount
+intc_1 // 0
+==
+&&
+l28:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 10 // 10
+>
+bnz l30
+intc_0 // 1
+b l31
+l30:
+gtxn 10 TypeEnum
+intc_2 // axfer
+==
+gtxn 10 AssetCloseTo
+load 1
+==
+&&
+gtxn 10 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 10 AssetReceiver
+load 1
+==
+&&
+gtxn 10 AssetAmount
+intc_1 // 0
+==
+&&
+l31:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 11 // 11
+>
+bnz l33
+intc_0 // 1
+b l34
+l33:
+gtxn 11 TypeEnum
+intc_2 // axfer
+==
+gtxn 11 AssetCloseTo
+load 1
+==
+&&
+gtxn 11 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 11 AssetReceiver
+load 1
+==
+&&
+gtxn 11 AssetAmount
+intc_1 // 0
+==
+&&
+l34:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 12 // 12
+>
+bnz l36
+intc_0 // 1
+b l37
+l36:
+gtxn 12 TypeEnum
+intc_2 // axfer
+==
+gtxn 12 AssetCloseTo
+load 1
+==
+&&
+gtxn 12 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 12 AssetReceiver
+load 1
+==
+&&
+gtxn 12 AssetAmount
+intc_1 // 0
+==
+&&
+l37:
+&&
+&&
 intc_0 // 1
 gtxna 0 Accounts 2
 app_local_del
 intc_0 // 1
 &&
 return
-l14:
+l38:
 gtxn 1 Sender
 store 1
 intc_0 // 1
@@ -78,6 +322,246 @@ load 1
 app_local_get
 load 1
 ==
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 4 // 5
+>
+bnz l40
+intc_0 // 1
+b l41
+l40:
+gtxn 5 TypeEnum
+intc_2 // axfer
+==
+gtxn 5 AssetCloseTo
+load 1
+==
+&&
+gtxn 5 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 5 AssetReceiver
+load 1
+==
+&&
+gtxn 5 AssetAmount
+intc_1 // 0
+==
+&&
+l41:
+global GroupSize
+intc_0 // 1
+-
+intc 7 // 6
+>
+bnz l43
+intc_0 // 1
+b l44
+l43:
+gtxn 6 TypeEnum
+intc_2 // axfer
+==
+gtxn 6 AssetCloseTo
+load 1
+==
+&&
+gtxn 6 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 6 AssetReceiver
+load 1
+==
+&&
+gtxn 6 AssetAmount
+intc_1 // 0
+==
+&&
+l44:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 8 // 7
+>
+bnz l46
+intc_0 // 1
+b l47
+l46:
+gtxn 7 TypeEnum
+intc_2 // axfer
+==
+gtxn 7 AssetCloseTo
+load 1
+==
+&&
+gtxn 7 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 7 AssetReceiver
+load 1
+==
+&&
+gtxn 7 AssetAmount
+intc_1 // 0
+==
+&&
+l47:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 6 // 8
+>
+bnz l49
+intc_0 // 1
+b l50
+l49:
+gtxn 8 TypeEnum
+intc_2 // axfer
+==
+gtxn 8 AssetCloseTo
+load 1
+==
+&&
+gtxn 8 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 8 AssetReceiver
+load 1
+==
+&&
+gtxn 8 AssetAmount
+intc_1 // 0
+==
+&&
+l50:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 9 // 9
+>
+bnz l52
+intc_0 // 1
+b l53
+l52:
+gtxn 9 TypeEnum
+intc_2 // axfer
+==
+gtxn 9 AssetCloseTo
+load 1
+==
+&&
+gtxn 9 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 9 AssetReceiver
+load 1
+==
+&&
+gtxn 9 AssetAmount
+intc_1 // 0
+==
+&&
+l53:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 10 // 10
+>
+bnz l55
+intc_0 // 1
+b l56
+l55:
+gtxn 10 TypeEnum
+intc_2 // axfer
+==
+gtxn 10 AssetCloseTo
+load 1
+==
+&&
+gtxn 10 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 10 AssetReceiver
+load 1
+==
+&&
+gtxn 10 AssetAmount
+intc_1 // 0
+==
+&&
+l56:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 11 // 11
+>
+bnz l58
+intc_0 // 1
+b l59
+l58:
+gtxn 11 TypeEnum
+intc_2 // axfer
+==
+gtxn 11 AssetCloseTo
+load 1
+==
+&&
+gtxn 11 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 11 AssetReceiver
+load 1
+==
+&&
+gtxn 11 AssetAmount
+intc_1 // 0
+==
+&&
+l59:
+&&
+global GroupSize
+intc_0 // 1
+-
+intc 12 // 12
+>
+bnz l61
+intc_0 // 1
+b l62
+l61:
+gtxn 12 TypeEnum
+intc_2 // axfer
+==
+gtxn 12 AssetCloseTo
+load 1
+==
+&&
+gtxn 12 Sender
+bytec_0 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 12 AssetReceiver
+load 1
+==
+&&
+gtxn 12 AssetAmount
+intc_1 // 0
+==
+&&
+l62:
+&&
 &&
 intc_1 // 0
 load 1
@@ -85,7 +569,7 @@ app_local_del
 intc_0 // 1
 &&
 return
-l15:
+l63:
 global GroupSize
 intc_3 // 2
 ==
@@ -102,10 +586,6 @@ load 1
 gtxn 1 TypeEnum
 intc_2 // axfer
 ==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
 gtxn 1 AssetCloseTo
 global ZeroAddress
 ==
@@ -124,12 +604,12 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // TMPL_PRICE_ID
+intc 5 // TMPL_PRICE_ID
 ==
 &&
 &&
 return
-l16:
+l64:
 global GroupSize
 intc_3 // 2
 ==
@@ -146,10 +626,6 @@ load 1
 gtxn 1 TypeEnum
 intc_2 // axfer
 ==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
 gtxn 1 AssetCloseTo
 global ZeroAddress
 ==
@@ -168,12 +644,12 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // TMPL_PRICE_ID
+intc 5 // TMPL_PRICE_ID
 ==
 &&
 &&
 return
-l17:
+l65:
 global GroupSize
 intc_3 // 2
 ==
@@ -202,10 +678,6 @@ load 1
 gtxn 1 TypeEnum
 intc_2 // axfer
 ==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
 gtxn 1 AssetCloseTo
 bytec_0 // TMPL_OWNER_ADDR
 ==
@@ -224,7 +696,7 @@ load 3
 &&
 &&
 return
-l18:
+l66:
 global GroupSize
 pushint 3 // 3
 ==
@@ -253,10 +725,6 @@ load 1
 gtxn 1 TypeEnum
 intc_2 // axfer
 ==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
 gtxn 1 AssetCloseTo
 global ZeroAddress
 ==
@@ -281,10 +749,6 @@ intc_1 // 0
 gtxn 2 TypeEnum
 intc_2 // axfer
 ==
-gtxn 2 RekeyTo
-global ZeroAddress
-==
-&&
 gtxn 2 AssetCloseTo
 global ZeroAddress
 ==
@@ -307,7 +771,7 @@ load 3
 &&
 &&
 return
-l19:
+l67:
 gtxn 1 Receiver
 store 1
 intc_0 // 1
@@ -328,7 +792,7 @@ load 4
 txna ApplicationArgs 2
 load 5
 load 5
-intc 5 // 47
+intc 13 // 47
 +
 substring3
 concat
@@ -336,7 +800,7 @@ store 4
 load 5
 pushint 32 // 32
 +
-intc 5 // 47
+intc 13 // 47
 +
 store 5
 load 4
@@ -349,7 +813,7 @@ substring3
 concat
 store 4
 load 5
-pushint 8 // 8
+intc 6 // 8
 +
 intc_2 // 4
 +
@@ -387,24 +851,24 @@ pushint 10000000000 // 10000000000
 <=
 &&
 return
-l20:
+l68:
 intc_0 // 1
 return
-l21:
+l69:
 global CreatorAddress
 txn Sender
 ==
 return
-l22:
+l70:
 global CreatorAddress
 txn Sender
 ==
 return
-l23:
+l71:
 global CreatorAddress
 txn Sender
 ==
 return
-l24:
+l72:
 intc_0 // 1
 return

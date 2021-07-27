@@ -82,6 +82,10 @@ def approval():
     delete_listing = And(  
         set_addr_as_tx(Gtxn[1], contract_addr),
         caller_is_listing_creator(contract_addr.load()),
+
+        ## Add logic to check intermediate transactions 
+        valid_tag_closes(5, 8, platform_addr, contract_addr.load()),
+
         remove_listing_addr(Int(0), contract_addr.load()),
     )
 
@@ -89,8 +93,13 @@ def approval():
         # Make sure payment is going to creator
         Gtxn[1].receiver() == Gtxn[0].accounts[1],
 
+        set_addr_as_tx(Gtxn[2], contract_addr),
+
         # Make sure payment amount is right 
         check_balance_match(Gtxn[1], Int(2), price_token),
+
+        ## Add logic to check intermediate transactions 
+        valid_tag_closes(5, 8, platform_addr, contract_addr.load()),
 
         # Remove the contract addr from the creators acct
         remove_listing_addr(Int(1), Gtxn[0].accounts[2]), 
@@ -120,10 +129,8 @@ def clear():
 
 
 if __name__ == "__main__":
-
-
-    with open(tealpath(configuration['application']['contracts']['approval']), "w") as pa_file:
+    with open(tealpath(configuration['contracts']['approval']), "w") as pa_file:
         pa_file.write(compileTeal(approval(), Mode.Application, version=4, assembleConstants=True))
 
-    with open(tealpath(configuration['application']['contracts']['clear']), "w") as pc_file:
+    with open(tealpath(configuration['contracts']['clear']), "w") as pc_file:
         pc_file.write(compileTeal(clear(), Mode.Application, version=4, assembleConstants=True))
