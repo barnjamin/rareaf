@@ -19,7 +19,7 @@ const config = {
     open: true,
     host: "localhost",
     historyApiFallback: true,
-    contentBase : './',
+    //contentBase : './',
     watchOptions : {
         poll: true
     }
@@ -50,7 +50,7 @@ const config = {
         ]
       },
       {
-        test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
+        test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif|ico)$/i,
         type: "asset",
       },
       {
