@@ -1,37 +1,44 @@
 {
     "domain": "rare.af",
     "algod":{
-        "server":"http://localhost",
-        "port":4001,
-        "token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "network": "sandnet"
+        "server":"https://testnet.algoexplorerapi.io",
+        "port":0,
+        "token":"",
+        "network": "TestNet"
     },
     "indexer": {
-        "server":"http://localhost",
-        "port":8980,
+        "server":"https://testnet.algoexplorerapi.io/idx2",
+        "port":0,
         "token":""
     },
     "ipfs":{
-        "host": "/ip4/127.0.0.1/tcp/5001",
-        "display":"http://localhost:8081/ipfs/",
+        "display":"https://ipfs.io/ipfs/",
         "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJnaXRodWJ8NTIwMjM2IiwiaXNzIjoibmZ0LXN0b3JhZ2UiLCJpYXQiOjE2MTc5MTEzNTMzOTQsIm5hbWUiOiJkZWZhdWx0In0.3Hkh9IHXK6OgmXBUsCK12ca0Iit9-dJgqdDtKcQiYZQ" 
     },
     "explorer":"algoexplorer.io",
     "application": {
         "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
-        "app_id": 4,
-        "price_id": 7,
-        "owner_addr": "6JVLXU57KXKRQUSGJXM7WUECB4PGRLT2DFOULMBRC2FANJCQOWQLYAUPHM",
+        "app_id": 20814075,
+        "price_id": 20814108,
+        "owner_addr": "HEOIGWE6QT7Q7P2FNMAHDHU56TTBZNG55JSSRJ6VWAC3BQBBT4E6IUSIPY",
         "name": "RareAF",
         "unit": "raf",
         "fee_amt": 10000,
         "tags": [
             {
                 "name": "image",
-                "id": 10
+                "id": 20814180
+            },
+            {
+                "name": "gif",
+                "id": 20814194
+            },
+            {
+                "name": "pixel-art",
+                "id": 20814210
             }
         ],
-        "listing_hash": "b64(a6arlmv3reS08/ZW2Z86lmPTJ0fXjea5eHDhfYdSmq8=)",
+        "listing_hash": "b64(SG/T0AEk1uERN1xAzoLiY95STcuCN2DEDCWGdvasUzM=)",
         "seed_amt": 5000000,
         "max_price": 10000000000
     },
@@ -42,20 +49,7 @@
         "listing-positions":"listing.tmpl.teal.json"
     },
     "dev":{ 
-        "debug_txns":true,
-        "accounts":{
-            "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
-                "loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below",
-                "when", "false", "ripple", "cute", "buffalo", "tissue", "again", "boring", "manual", "excuse", "absent", "injury"
-            ],
-            "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM": [
-                "genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found",
-                "please", "then", "snack", "nice", "arrest", "coin", "seminar", "pyramid", "adult", "flip", "absorb", "apology"
-            ],
-            "DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4": [
-                "train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox",
-                "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"
-            ]
-        }
+        "debug_txns":false,
+        "accounts":{ }
     }
 }

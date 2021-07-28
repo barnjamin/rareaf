@@ -1,7 +1,7 @@
 {
-  "name": "my-webpack-project",
+  "name": "rareaf",
   "version": "1.0.0",
-  "description": "My webpack project",
+  "description": "RareAF NFT Marketplace",
   "private": true,
   "scripts": {
     "clean": "rimraf ./dist",
