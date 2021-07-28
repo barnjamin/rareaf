@@ -48,7 +48,11 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   setWallet(wallet) {
-    this.setState({wallet:wallet, acct: wallet.getDefaultAccount()})
+    if (wallet !== undefined){
+      this.setState({wallet:wallet, acct: wallet.getDefaultAccount()})
+    }else{
+      this.setState({wallet:undefined, acct: ""})
+    }
   }
 
   handleChangeAcct() {
@@ -82,6 +86,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <Navbar.Group align={Alignment.RIGHT}>
             {adminNav}
             <AlgorandWalletConnector 
+              darkMode={false}
               handleChangeAcct={this.handleChangeAcct}
               walletConnected={this.walletConnected()} 
               setWallet={this.setWallet}

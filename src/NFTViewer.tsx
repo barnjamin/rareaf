@@ -72,7 +72,7 @@ export default function NFTViewer(props: NFTViewerProps) {
         try {
             await app.optIn(props.wallet)
         }catch(error){
-            ErrorToaster.show({intent:"danger", message: "Failed to opt into event"}) 
+            ErrorToaster.show({intent:"danger", message: "Failed to opt into Application"}) 
         }
     }
 

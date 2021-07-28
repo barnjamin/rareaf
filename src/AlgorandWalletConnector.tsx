@@ -2,6 +2,8 @@
 'use strict'
 
 import * as React from 'react'
+import algosdk from 'algosdk'
+
 
 import AlgoSignerWallet from './wallets/algosignerwallet'
 import MyAlgoConnectWallet from './wallets/myalgoconnect'
@@ -14,26 +16,19 @@ import { IconName } from '@blueprintjs/icons'
 import {platform_settings as ps} from './lib/platform-conf'
 import { useEffect } from 'react'
 
-const pkToMnemonic = {
-    "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
-        "loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below",
-        "when", "false", "ripple", "cute", "buffalo", "tissue", "again", "boring", "manual", "excuse", "absent", "injury"
-    ],
-    "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM": [
-        "genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found",
-        "please", "then", "snack", "nice", "arrest", "coin", "seminar", "pyramid", "adult", "flip", "absorb", "apology"
-    ],
-    "DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4": [
-        "train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox",
-        "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"
-    ],
-}
-
 const wallet_preference_key = 'wallet-preference'
 const acct_preference_key = 'acct-preference'
-const allowedWallets =  { 'algo-signer': AlgoSignerWallet, 'my-algo-connect': MyAlgoConnectWallet, 'insecure-wallet': InsecureWallet }
+const mnemonic_key = 'mnemonic'
+
+const allowedWallets =  { 
+    'algo-signer': AlgoSignerWallet, 
+    'my-algo-connect': MyAlgoConnectWallet, 
+    'insecure-wallet': InsecureWallet,
+    'dev-wallet':InsecureWallet
+}
 
 type AlgorandWalletConnectorProps = {
+    darkMode: boolean
     walletConnected: boolean
     handleChangeAcct()
     setWallet(wallet: Wallet)
@@ -51,10 +46,12 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
     }, [wallet])
 
     function disconnectWallet() {
-        props.setWallet(undefined)
-        setWallet(undefined)
         sessionStorage.setItem(wallet_preference_key, '')
         sessionStorage.setItem(acct_preference_key, '')
+        sessionStorage.setItem(mnemonic_key, '')
+
+        setWallet(undefined)
+        props.setWallet(undefined)
     }
 
     async function tryConnectWallet() {
@@ -62,14 +59,21 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
 
         const wname = sessionStorage.getItem(wallet_preference_key);
         const acct_idx = sessionStorage.getItem(acct_preference_key)
+        const stored_mnemonic = sessionStorage.getItem(mnemonic_key)
 
         if (!(wname in allowedWallets)) return
 
         const w = new allowedWallets[wname](ps.algod.network)
 
         if (wname == 'insecure-wallet') {
-            if (!await w.connect(pkToMnemonic)) return disconnectWallet()
-        } else {
+            const mnemonic = stored_mnemonic?stored_mnemonic:prompt("Paste your mnemonic space delimited (why are you doing this?)")
+            sessionStorage.setItem(mnemonic_key, mnemonic)
+            const sk = algosdk.mnemonicToSecretKey(mnemonic)
+
+            if (!await w.connect({[sk.addr]:mnemonic.split(" ")})) return disconnectWallet()
+        } else if(wname == 'dev-wallet') {
+            if (!await w.connect(ps.dev.accounts)) return disconnectWallet()
+        }else{
             if (!await w.connect()) return disconnectWallet()
         }
 
@@ -101,6 +105,7 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
     }
 
     if (!props.walletConnected)
+
         return (
         <div>
             <Button
@@ -120,7 +125,11 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
                                 minimal={true} 
                                 outlined={true} 
                                 onClick={handleSelectedWallet}
-                                > <img className='wallet-branding' src={ AlgoSignerWallet.img(true) } />Algo Signer
+                                > 
+                                <div className='wallet-option'>
+                                    <img className='wallet-branding' src={ AlgoSignerWallet.img(props.darkMode) } />
+                                    <h5>Algo Signer</h5>
+                                </div>
                                 </Button>
                         </li>
                         <li>
@@ -130,7 +139,12 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
                                 minimal={true} 
                                 outlined={true} 
                                 onClick={handleSelectedWallet}
-                                ><img className='wallet-branding' src={ MyAlgoConnectWallet.img(true) } /> MyAlgo Connect</Button>
+                                >
+                                <div className='wallet-option'>
+                                    <img className='wallet-branding' src={ MyAlgoConnectWallet.img(props.darkMode) } /> 
+                                    <h5>MyAlgo Connect</h5>
+                                </div>
+                            </Button>
                         </li>
                         <li>
                             <Button id='insecure-wallet' 
@@ -139,7 +153,26 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
                                 minimal={true} 
                                 outlined={true} 
                                 onClick={handleSelectedWallet}
-                                > Insecure Wallet </Button>
+                                > 
+                                <div className='wallet-option'>
+                                    <img className='wallet-branding' src={ InsecureWallet.img(props.darkMode) } /> 
+                                    <h5>Insecure Wallet</h5>
+                                </div>
+                            </Button>
+                        </li>
+                        <li>
+                            <Button id='dev-wallet' 
+                                large={true} 
+                                fill={true} 
+                                minimal={true} 
+                                outlined={true} 
+                                onClick={handleSelectedWallet}
+                                > 
+                                <div className='wallet-option'>
+                                    <img className='wallet-branding' src={ InsecureWallet.img(props.darkMode) } /> 
+                                    <h5>Development Wallet</h5>
+                                </div>
+                            </Button>
                         </li>
                     </ul>
                 </div>

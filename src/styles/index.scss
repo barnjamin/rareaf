@@ -3,11 +3,9 @@
 
 $background-color: $white;
 $darker:  $light-gray3;
-$drop-shadow: drop-shadow(0px 0px 6px $dark-gray1);
 
 //$background-color: $dark-gray5;
 //$darker:  $dark-gray3;
-//$drop-shadow: drop-shadow(0px 0px 6px $dark-gray1);
 
 body {
 	background-color: $background-color;
@@ -82,17 +80,23 @@ body {
 		width: 100%;
 	}
 }
-img.wallet-branding {
-	width: 25px;
-	margin-right: 10px;
-	float: left;
-}
+
 .wallet-option-list {
 	list-style: none;
 	li {
-		margin: 10px;
+		margin: 1em;
 	}
 }
+
+.wallet-option {
+	display: flex;
+	align-items: center;
+	img {
+		width: 2em;
+		margin-right:0.5em
+	}
+}
+
 .nft-card {
 	width: 30%;
 	img {
@@ -119,7 +123,7 @@ img.wallet-branding {
 }
 .nft-viewer {
 	img {
-		filter: $drop-shadow;
+		box-shadow: $pt-elevation-shadow-2;
 		width: 100%;
 	}
 }

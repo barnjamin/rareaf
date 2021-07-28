@@ -39,6 +39,9 @@ type Contracts = {
 
 type DevConf = {
     debug_txns: boolean
+    accounts: {
+        [key: string]: string[]
+    }
 };
 
 type PlatformConf = {
