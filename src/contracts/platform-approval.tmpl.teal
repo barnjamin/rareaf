@@ -1,5 +1,5 @@
 #pragma version 4
-intcblock 1 0 4 2 TMPL_PRICE_ID 8 5 6 7 9 10 11 12 47
+intcblock 1 0 4 2 TMPL_PRICE_ID 8 5 6 7 9 10 11 12 53
 bytecblock TMPL_OWNER_ADDR
 txn ApplicationID
 intc_1 // 0
@@ -792,7 +792,7 @@ load 4
 txna ApplicationArgs 2
 load 5
 load 5
-intc 13 // 47
+intc 13 // 53
 +
 substring3
 concat
@@ -800,7 +800,7 @@ store 4
 load 5
 pushint 32 // 32
 +
-intc 13 // 47
+intc 13 // 53
 +
 store 5
 load 4

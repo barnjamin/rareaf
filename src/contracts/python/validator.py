@@ -34,7 +34,10 @@ class TemplateContract(object):
             self.template_bytes = f.read()
 
         url         = "{}:{}".format(config['algod']['server'], config['algod']['port'])
-        self.client = algod.AlgodClient(config['algod']['token'], url)
+        if config['algod']['port'] == 0:
+            url = config['algod']['server']
+
+        self.client = algod.AlgodClient(config['algod']['token'], url,  headers={'User-Agent': 'DoYouLoveMe?'})
 
         result = self.client.compile(self.populate_tmpl_vars())
 
