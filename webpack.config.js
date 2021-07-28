@@ -27,6 +27,7 @@ const config = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "index.html",
+      favicon:"./src/img/favicon.ico",
     }),
     new webpack.DefinePlugin({
       "process.env": "{}",

@@ -6,6 +6,7 @@ import MyAlgo from '@randlabs/myalgo-connect';
 import logo_inverted from './branding/myalgo-connect/Logo-inverted.png'
 //@ts-ignore
 import logo from './branding/myalgo-connect/Logo.png'
+import { showErrorToaster } from '../Toaster';
 
 
 class MyAlgoConnectWallet implements Wallet {
@@ -36,7 +37,7 @@ class MyAlgoConnectWallet implements Wallet {
             const accounts = await this.walletConn.connect();
             this.accounts = accounts.map((account) => account.address);
         }catch(err){
-            alert("Failed to do the thing")
+            showErrorToaster("Failed to connect to MyAlgoConnect")
             return false
         }
 
@@ -52,12 +53,7 @@ class MyAlgoConnectWallet implements Wallet {
     }
 
     async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
-        throw new Error("Not implemented")
-    }
-
-    async sign(txn: TransactionParams): Promise<SignedTxn> {
-        throw new Error("Not implemented")
-        //return await this.walletConn.signTransaction(txn);
+        return await this.walletConn.signTransaction(txns.map(t=>{return t.bytesToSign()})) 
     }
 
     signBytes(b: Uint8Array): Promise<Uint8Array> {

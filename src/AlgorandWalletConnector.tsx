@@ -66,7 +66,7 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
         const w = new allowedWallets[wname](ps.algod.network)
 
         if (wname == 'insecure-wallet') {
-            const mnemonic = stored_mnemonic?stored_mnemonic:prompt("Paste your mnemonic space delimited (why are you doing this?)")
+            const mnemonic = stored_mnemonic?stored_mnemonic:prompt("Paste your mnemonic space delimited (DO NOT USE WITH MAINNET ACCOUNTS)")
             sessionStorage.setItem(mnemonic_key, mnemonic)
             const sk = algosdk.mnemonicToSecretKey(mnemonic)
 

@@ -9,6 +9,7 @@ import App  from './App'
 
 import "./styles/index.scss"
 
+
 const history = createBrowserHistory();
 
 ReactDOM.render(<App history={history} />, document.getElementById('root'))
