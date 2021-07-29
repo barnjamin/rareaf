@@ -115,7 +115,9 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
 
         for(let kidx in als['key-value']) {
             const kv = als['key-value'][kidx]
-            portfolio.listings.push(await getListing(b64ToAddr(kv.key)))
+            const listing = await getListing(b64ToAddr(kv.key))
+            if(listing===undefined) continue
+            portfolio.listings.push(listing)
         }
     }
 
@@ -132,12 +134,13 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
 
 export async function getListing(addr: string): Promise<Listing> {
     const holdings  = await getHoldingsFromListingAddress(addr)
-    const creator   = await getCreator(addr, holdings.nft.asset_id)
+    if(holdings.nft === undefined) return undefined;
 
+    const creator   = await getCreator(addr, holdings.nft.asset_id)
 
     let l = new Listing(holdings.price, holdings.nft.asset_id, creator, addr)
     l.tags = holdings.tags
-    l.nft = holdings['nft']
+    l.nft = holdings.nft
 
     return l
 }
