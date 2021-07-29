@@ -22,7 +22,7 @@ export function ListingCard(props: ListingCardProps) {
             <div className='container'>
                 <p>
                     <a href={'/listing/'+l.contract_addr}> 
-                        <b>{md.name}</b> - <i>{md.properties.artist}</i> (${l.price})
+                        <b>{md.name}</b> - <i>{md.properties.artist}</i> ({l.price} μAlgos)
                     </a>
 
                 </p>
