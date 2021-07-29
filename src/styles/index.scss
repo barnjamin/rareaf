@@ -111,11 +111,17 @@ body {
 		box-shadow: $pt-elevation-shadow-2;
 	}
 }
+
+.listing-tags {
+	flex-basis:  40%;
+}
+
 .listing-card-tags {
 	padding: 8px;
 	border-radius: 5px;
 	justify-content: space-evenly;
 }
+
 .listing-page {
 	.bp3-card {
 		width: 80%;
@@ -143,9 +149,11 @@ body {
 		margin: 5px;
 	}
 }
+
 .listing-buy {
 	align-items: baseline;
 }
+
 .portfolio-content {
 	justify-content: left;
 	width: 66em;
