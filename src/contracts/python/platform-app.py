@@ -102,7 +102,7 @@ def approval():
         valid_tag_closes(6, 8, platform_addr, contract_addr.load()),
 
         # Remove the contract addr from the creators acct
-        remove_listing_addr(Int(1), Gtxn[0].accounts[2]), 
+        remove_listing_addr(Int(1), contract_addr.load()), 
     )
 
 

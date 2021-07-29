@@ -308,7 +308,7 @@ l37:
 &&
 &&
 intc_0 // 1
-gtxna 0 Accounts 2
+load 1
 app_local_del
 intc_0 // 1
 &&
