@@ -61,6 +61,7 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
         const acct_idx = sessionStorage.getItem(acct_preference_key)
         const stored_mnemonic = sessionStorage.getItem(mnemonic_key)
 
+        console.log(wname)
         if (!(wname in allowedWallets)) return
 
         const w = new allowedWallets[wname](ps.algod.network)
@@ -103,6 +104,27 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
         sessionStorage.setItem(acct_preference_key, addr_idx)
         props.handleChangeAcct()
     }
+
+
+
+    const dev_wallet = Object.keys(ps.dev.accounts).length>0?(
+        <li>
+            <Button id='dev-wallet' 
+                large={true} 
+                fill={true} 
+                minimal={true} 
+                outlined={true} 
+                onClick={handleSelectedWallet}
+                > 
+                <div className='wallet-option'>
+                    <img className='wallet-branding' src={ InsecureWallet.img(props.darkMode) } /> 
+                    <h5>Development Wallet</h5>
+                </div>
+            </Button>
+        </li>
+    ):(<div></div>)
+
+
 
     if (!props.walletConnected)
 
@@ -157,20 +179,6 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
                                 <div className='wallet-option'>
                                     <img className='wallet-branding' src={ InsecureWallet.img(props.darkMode) } /> 
                                     <h5>Insecure Wallet</h5>
-                                </div>
-                            </Button>
-                        </li>
-                        <li>
-                            <Button id='dev-wallet' 
-                                large={true} 
-                                fill={true} 
-                                minimal={true} 
-                                outlined={true} 
-                                onClick={handleSelectedWallet}
-                                > 
-                                <div className='wallet-option'>
-                                    <img className='wallet-branding' src={ InsecureWallet.img(props.darkMode) } /> 
-                                    <h5>Development Wallet</h5>
                                 </div>
                             </Button>
                         </li>
