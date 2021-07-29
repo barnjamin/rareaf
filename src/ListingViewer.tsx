@@ -117,7 +117,7 @@ function ListingViewer(props: ListingViewerProps) {
 
         let priceComponent = (
             <div className='container listing-price' >
-                <p>{listing.price}</p>
+                <p>{listing.price} μAlgos</p>
             </div>
         )
 

@@ -177,7 +177,7 @@ function ListingDetails(props){
     return (
         <div className={Classes.DIALOG_BODY}>
             <FormGroup>
-                <Label htmlFor="input-price">Price in USD</Label>
+                <Label htmlFor="input-price">Price in μAlgos</Label>
                 <NumericInput buttonPosition="none" 
                     min={0} large={true} 
                     id="input-price" value={props.price} 
@@ -193,7 +193,7 @@ function ConfirmListingDetails(props){
             <h3>Listing:</h3>
 
             <p><b>Token:</b> {props.tokenId} </p>
-            <p><b>Price:</b> {props.price} </p> 
+            <p><b>Price:</b> {props.price} μAlgos</p> 
             <p><b>Tags:</b> {props.tags.map(t=>{return <Tag key={t.id} round={true} intent='primary'>{t.name}</Tag>})}</p>
         </div>
     )
