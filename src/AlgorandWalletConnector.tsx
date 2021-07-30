@@ -10,7 +10,7 @@ import MyAlgoConnectWallet from './wallets/myalgoconnect'
 import InsecureWallet from './wallets/insecurewallet'
 import {Wallet} from './wallets/wallet'
 
-import { Dialog, Button, Classes, HTMLSelect, Intent } from '@blueprintjs/core'
+import { Dialog, Button, Classes, HTMLSelect, Intent, Icon } from '@blueprintjs/core'
 import { IconName } from '@blueprintjs/icons'
 
 import {platform_settings as ps} from './lib/platform-conf'
@@ -178,7 +178,7 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
                                 onClick={handleSelectedWallet}
                                 > 
                                 <div className='wallet-option'>
-                                    <img className='wallet-branding' src={ InsecureWallet.img(props.darkMode) } /> 
+                                    <Icon icon='unlock' className='wallet-branding' />
                                     <h5>Insecure Wallet</h5>
                                 </div>
                             </Button>

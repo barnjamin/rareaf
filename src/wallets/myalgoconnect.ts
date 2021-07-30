@@ -58,13 +58,17 @@ class MyAlgoConnectWallet implements Wallet {
     async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
         const default_acct = this.getDefaultAccount()
 
-        const filtered = txns.filter(t=>{ 
-            return algosdk.encodeAddress(t.from.publicKey) == default_acct 
-        }).map(t=>{ 
-            return t.toByte()
-        })
+        const signed = []
+        for(let tidx in txns){
+            const txn  = txns[tidx]
+            if(algosdk.encodeAddress(txn.from.publicKey) == default_acct){
+                signed.push(await this.walletConn.signTransaction(txn.toByte()))
+            }else{
+                signed.push({})
+            }
+        }
 
-        return await this.walletConn.signTransaction(filtered)
+        return signed
     }
 
     signBytes(b: Uint8Array): Promise<Uint8Array> {

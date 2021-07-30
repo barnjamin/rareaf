@@ -53,7 +53,7 @@
         "listing-positions":"listing.tmpl.teal.json"
     },
     "dev":{ 
-        "debug_txns":false,
+        "debug_txns":true,
         "accounts":{ }
     }
 }
