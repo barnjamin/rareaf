@@ -20,11 +20,11 @@ listing_key   = Bytes("listing")
 
 tag_key       = Bytes("tag:") 
 
-app_id        = Tmpl.Int("TMPL_APP_ID")
 price_token   = Tmpl.Int("TMPL_PRICE_ID")
 platform_fee  = Tmpl.Int("TMPL_FEE_AMT")
 platform_addr = Tmpl.Bytes("TMPL_OWNER_ADDR")
 platform_admin= Tmpl.Bytes("TMPL_ADMIN_ADDR")
+app_id        = Tmpl.Int("TMPL_APP_ID")
 
 seed_amt      = Int(int(configuration['application']['seed_amt']))
 max_price     = Int(int(configuration['application']['max_price']))

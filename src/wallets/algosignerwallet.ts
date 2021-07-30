@@ -30,6 +30,8 @@ class AlgoSignerWallet implements Wallet {
 
     async connect(): Promise<boolean> {
 
+        if(this.isConnected()) return true;
+
         const loaded = await this.waitForLoaded() 
 
         if(!loaded){
@@ -52,9 +54,7 @@ class AlgoSignerWallet implements Wallet {
 
     async waitForLoaded(): Promise<boolean> {
         for(let x=0; x<3; x++){
-            if (typeof AlgoSigner !== 'undefined'){
-                return true
-            }
+            if (typeof AlgoSigner !== 'undefined'){ return true }
             await new Promise(r=>{setTimeout(r, 1000)})
         }
 
@@ -64,7 +64,7 @@ class AlgoSignerWallet implements Wallet {
 
     isConnected(): boolean {
         if (typeof AlgoSigner === 'undefined') return false;
-        return this.accounts.length>0
+        return this.accounts && this.accounts.length>0
     }
 
     getDefaultAccount(): string {

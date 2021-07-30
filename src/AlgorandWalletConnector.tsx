@@ -17,6 +17,7 @@ import {platform_settings as ps} from './lib/platform-conf'
 import { useEffect } from 'react'
 
 const wallet_preference_key = 'wallet-preference'
+const acct_list_key = 'acct-list'
 const acct_preference_key = 'acct-preference'
 const mnemonic_key = 'mnemonic'
 
@@ -40,14 +41,12 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
     const [wallet, setWallet] = React.useState(undefined)
 
 
-    useEffect(()=>{ 
-        tryConnectWallet() 
-        return () => { }
-    }, [wallet])
+    useEffect(()=>{tryConnectWallet()}, [])
 
     function disconnectWallet() {
         sessionStorage.setItem(wallet_preference_key, '')
         sessionStorage.setItem(acct_preference_key, '')
+        sessionStorage.setItem(acct_list_key, '')
         sessionStorage.setItem(mnemonic_key, '')
 
         setWallet(undefined)
@@ -59,12 +58,14 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
 
         const wname = sessionStorage.getItem(wallet_preference_key);
         const acct_idx = sessionStorage.getItem(acct_preference_key)
+        const acct_list = sessionStorage.getItem(acct_list_key)
         const stored_mnemonic = sessionStorage.getItem(mnemonic_key)
 
-        console.log(wname)
         if (!(wname in allowedWallets)) return
 
         const w = new allowedWallets[wname](ps.algod.network)
+        w.accounts = acct_list==""?[]:JSON.parse(acct_list)
+        w.default_account = acct_idx
 
         if (wname == 'insecure-wallet') {
             const mnemonic = stored_mnemonic?stored_mnemonic:prompt("Paste your mnemonic space delimited (DO NOT USE WITH MAINNET ACCOUNTS)")
@@ -78,7 +79,7 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
             if (!await w.connect()) return disconnectWallet()
         }
 
-        w.default_account = acct_idx
+        sessionStorage.setItem(acct_list_key, JSON.stringify(w.accounts))
 
         setWallet(w)
         props.setWallet(w)
@@ -182,6 +183,7 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
                                 </div>
                             </Button>
                         </li>
+                        {dev_wallet}
                     </ul>
                 </div>
             </Dialog>

@@ -4,7 +4,7 @@ from config import *
 def tealpath(name):
     return "../" + name.replace("teal", "tmpl.teal")
 
-def valid_app_call(txn):
+def valid_app_call(txn, app_id):
     return And(
         txn.type_enum() == TxnType.ApplicationCall,
         txn.application_id() == app_id,

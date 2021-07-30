@@ -1,4 +1,4 @@
-import { TransactionParams, Transaction } from 'algosdk'
+import algosdk, { TransactionParams, Transaction } from 'algosdk'
 import {SignedTxn, Wallet} from './wallet'
 import MyAlgo from '@randlabs/myalgo-connect';
 
@@ -33,6 +33,9 @@ class MyAlgoConnectWallet implements Wallet {
     }
 
     async connect(): Promise<boolean> {
+        //Dont need to try to reconnect if we already have the account list
+        if(this.isConnected()) return true;
+
         try {
             const accounts = await this.walletConn.connect();
             this.accounts = accounts.map((account) => account.address);
@@ -45,7 +48,7 @@ class MyAlgoConnectWallet implements Wallet {
     }
 
     isConnected(): boolean {
-        return this.accounts.length>0;
+        return this.accounts && this.accounts.length>0;
     }
 
     getDefaultAccount(): string {
@@ -53,7 +56,15 @@ class MyAlgoConnectWallet implements Wallet {
     }
 
     async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
-        return await this.walletConn.signTransaction(txns.map(t=>{return t.bytesToSign()})) 
+        const default_acct = this.getDefaultAccount()
+
+        const filtered = txns.filter(t=>{ 
+            return algosdk.encodeAddress(t.from.publicKey) == default_acct 
+        }).map(t=>{ 
+            return t.toByte()
+        })
+
+        return await this.walletConn.signTransaction(filtered)
     }
 
     signBytes(b: Uint8Array): Promise<Uint8Array> {

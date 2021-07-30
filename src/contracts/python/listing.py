@@ -8,16 +8,18 @@ def listing():
     contract_addr = ScratchVar(TealType.bytes)
     buyer_addr    = ScratchVar(TealType.bytes)
     asset_id      = ScratchVar(TealType.uint64)
+    app_id        = ScratchVar(TealType.uint64)
 
     setup = Seq([
         creator_addr.store(Tmpl.Bytes("TMPL_CREATOR_ADDR")),
         asset_id.store(Btoi(Tmpl.Bytes("TMPL_ASSET_ID"))),
+        app_id.store(Tmpl.Int("TMPL_APP_ID")),
         Int(0) # return 0 so this cond case doesnt get executed
     ])
 
     create = And(
         Global.group_size() == Int(7),
-        valid_app_call( Gtxn[0]),
+        valid_app_call( Gtxn[0], app_id.load()),
         set_addr_as_rx( Gtxn[1], contract_addr),
         pay_txn_valid(  Gtxn[1], seed_amt, creator_addr.load(), contract_addr.load()),
         asa_optin_valid(Gtxn[2], asset_id.load(), contract_addr.load()),
@@ -30,7 +32,7 @@ def listing():
 
     delete = And(
         Global.group_size() >= Int(5),
-        valid_app_call(Gtxn[0]),
+        valid_app_call(Gtxn[0], app_id.load()),
 
         set_addr_as_tx(      Gtxn[1], contract_addr),
         asa_close_xfer_valid(Gtxn[1],  price_token,  contract_addr.load(), platform_addr, platform_addr),
@@ -45,7 +47,7 @@ def listing():
 
     purchase = And(
         Global.group_size() >= Int(6),
-        valid_app_call(Gtxn[0]),
+        valid_app_call(Gtxn[0], app_id.load()),
 
         set_addr_as_tx(      Gtxn[1], buyer_addr),
         set_addr_as_tx(      Gtxn[2], contract_addr),
@@ -61,7 +63,7 @@ def listing():
     )
 
     app_offload = Or(Gtxn[0].application_args[0] == action_tag, Gtxn[0].application_args[0] == action_untag, Gtxn[0].application_args[0] == action_dprice)
-    app_validate = valid_app_call(Gtxn[0])
+    app_validate = valid_app_call(Gtxn[0], app_id.load())
 
     return Cond([setup, Int(0)], #NoOp
                 [Gtxn[0].application_args[0] == action_create,   create], 
