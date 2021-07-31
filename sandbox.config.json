@@ -1,0 +1,72 @@
+{
+    "domain": "rare.af",
+    "algod":{
+        "server":"http://localhost",
+        "port":4001,
+        "token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "network": "sandnet"
+    },
+    "indexer": {
+        "server":"http://localhost",
+        "port":8980,
+        "token":""
+    },
+    "ipfs":{
+        "display":"https://ipfs.io/ipfs/",
+        "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJnaXRodWJ8NTIwMjM2IiwiaXNzIjoibmZ0LXN0b3JhZ2UiLCJpYXQiOjE2MTc5MTEzNTMzOTQsIm5hbWUiOiJkZWZhdWx0In0.3Hkh9IHXK6OgmXBUsCK12ca0Iit9-dJgqdDtKcQiYZQ" 
+    },
+    "explorer":"algoexplorer.io",
+    "application": {
+        "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
+        "app_id": 4,
+        "price_id": 7,
+        "owner_addr": "R5I7JHJ37K5R2YZTHBFTBGZK3TZY3YPUYWVUKXYHVAT5POXBL5HHAKQVHI",
+        "name": "RareAF",
+        "unit": "raf",
+        "fee_amt": 10000,
+        "tags": [
+            {
+                "name": "image",
+                "id": 19
+            },
+            {
+                "name": "gif",
+                "id": 21
+            },
+            {
+                "name": "pixel-art",
+                "id": 23
+            },
+            {
+                "name": "computer-generated",
+                "id": 25
+            }
+        ],
+        "listing_hash": "b64(VuM8L8nbl1v6npvrG7YZTd2bbdYChpA8Prq8rb4kh+A=)",
+        "seed_amt": 5000000,
+        "max_price": 10000000000
+    },
+    "contracts":{
+        "approval":"platform-approval.teal",
+        "clear":"platform-clear.teal",
+        "listing":"listing.teal",
+        "listing-positions":"listing.tmpl.teal.json"
+    },
+    "dev":{ 
+        "debug_txns":false,
+        "accounts":{
+            "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
+                "loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below",
+                "when", "false", "ripple", "cute", "buffalo", "tissue", "again", "boring", "manual", "excuse", "absent", "injury"
+            ],
+            "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM": [
+                "genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found",
+                "please", "then", "snack", "nice", "arrest", "coin", "seminar", "pyramid", "adult", "flip", "absorb", "apology"
+            ],
+            "DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4": [
+                "train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox",
+                "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"
+            ]
+        }
+    }
+}

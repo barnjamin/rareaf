@@ -6,6 +6,7 @@ import { NFT } from "./nft";
 import { TagToken} from './tags'
 import { dummy_addr } from './contracts'
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
+import LogicSig from 'algosdk/dist/types/src/logicsig';
 
 
 type Holdings= {
@@ -35,6 +36,21 @@ export function getIndexer() {
         indexer = new algosdk.Indexer(token, server, port)
     }
     return indexer
+}
+
+export async function getLogicFromTransaction(addr: string): Promise<LogicSig> {
+    const indexer = getIndexer()
+    const txns = await indexer.searchForTransactions()
+        .address(addr).do()
+
+    for(let tidx in txns.transactions){
+        const txn = txns.transactions[tidx]
+        if(txn.sender == addr){
+            const program_bytes = new Uint8Array(Buffer.from(txn.signature.logicsig.logic, "base64"));
+            return algosdk.makeLogicSig(program_bytes);
+        }
+    }
+    return undefined
 }
 
 export async function getTags(): Promise<TagToken[]> {
