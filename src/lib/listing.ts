@@ -4,13 +4,15 @@ import {
     uintToB64, 
     addrToB64, 
     getSuggested, 
+    sendWait
+} from './algorand'
+import {
     get_asa_cfg_txn, 
     get_asa_xfer_txn, 
     get_asa_optin_txn, 
     get_pay_txn, 
-    get_app_call_txn,
-    sendWait
-} from './algorand'
+    get_app_call_txn
+} from './transactions'
 import algosdk, { assignGroupID, Transaction } from 'algosdk';
 import { Wallet } from '../wallets/wallet';
 import { NFT } from './nft'

@@ -4,16 +4,16 @@ from utils import *
 
 def platform_owner():
     #Allow any grouped atomic txns that are approved by the application or the admin
-    app_id        = ScratchVar(TealType.uint64)
+    _app_id        = ScratchVar(TealType.uint64)
 
     return And( 
                 Global.group_size() > Int(1), 
                 Seq([
-                    app_id.store(Btoi(Tmpl.Bytes("TMPL_APP_ID"))),
+                    _app_id.store(app_id),
                     Int(1)
                 ]),
                 Or(
-                    valid_app_call(Gtxn[0]),
+                    valid_app_call(Gtxn[0], _app_id.load()),
                     valid_admin_fee_pay(Gtxn[0])
                 )
             )

@@ -9,104 +9,55 @@ import AlgoSignerWallet from './wallets/algosignerwallet'
 import MyAlgoConnectWallet from './wallets/myalgoconnect'
 import InsecureWallet from './wallets/insecurewallet'
 import {Wallet} from './wallets/wallet'
+import { SessionWallet } from './wallets/session-wallet'
 
 import { Dialog, Button, Classes, HTMLSelect, Intent, Icon } from '@blueprintjs/core'
 import { IconName } from '@blueprintjs/icons'
 
 import {platform_settings as ps} from './lib/platform-conf'
 import { useEffect } from 'react'
+import { showErrorToaster } from './Toaster'
 
-const wallet_preference_key = 'wallet-preference'
-const acct_list_key = 'acct-list'
-const acct_preference_key = 'acct-preference'
-const mnemonic_key = 'mnemonic'
 
-const allowedWallets =  { 
-    'algo-signer': AlgoSignerWallet, 
-    'my-algo-connect': MyAlgoConnectWallet, 
-    'insecure-wallet': InsecureWallet,
-    'dev-wallet':InsecureWallet
-}
 
 type AlgorandWalletConnectorProps = {
     darkMode: boolean
     walletConnected: boolean
-    handleChangeAcct()
-    setWallet(wallet: Wallet)
+    sessionWallet: SessionWallet
+    updateWallet(sw: SessionWallet)
 }
 
-export default function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
+export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
 
     const [selectorOpen, setSelectorOpen] = React.useState(false)
-    const [wallet, setWallet] = React.useState(undefined)
 
+    useEffect(()=>{ connectWallet() },[])
 
-    useEffect(()=>{tryConnectWallet()}, [])
-
-    function disconnectWallet() {
-        sessionStorage.setItem(wallet_preference_key, '')
-        sessionStorage.setItem(acct_preference_key, '')
-        sessionStorage.setItem(acct_list_key, '')
-        sessionStorage.setItem(mnemonic_key, '')
-
-        setWallet(undefined)
-        props.setWallet(undefined)
+    async function connectWallet() {
+        await props.sessionWallet.connect()
+        props.updateWallet(props.sessionWallet)
     }
-
-    async function tryConnectWallet() {
-        if (wallet !== undefined) return
-
-        const wname = sessionStorage.getItem(wallet_preference_key);
-        const acct_idx = sessionStorage.getItem(acct_preference_key)
-        const acct_list = sessionStorage.getItem(acct_list_key)
-        const stored_mnemonic = sessionStorage.getItem(mnemonic_key)
-
-        if (!(wname in allowedWallets)) return
-
-        const w = new allowedWallets[wname](ps.algod.network)
-        w.accounts = acct_list==""?[]:JSON.parse(acct_list)
-        w.default_account = acct_idx
-
-        if (wname == 'insecure-wallet') {
-            const mnemonic = stored_mnemonic?stored_mnemonic:prompt("Paste your mnemonic space delimited (DO NOT USE WITH MAINNET ACCOUNTS)")
-            sessionStorage.setItem(mnemonic_key, mnemonic)
-            const sk = algosdk.mnemonicToSecretKey(mnemonic)
-
-            if (!await w.connect({[sk.addr]:mnemonic.split(" ")})) return disconnectWallet()
-        } else if(wname == 'dev-wallet') {
-            if (!await w.connect(ps.dev.accounts)) return disconnectWallet()
-        }else{
-            if (!await w.connect()) return disconnectWallet()
-        }
-
-        sessionStorage.setItem(acct_list_key, JSON.stringify(w.accounts))
-
-        setWallet(w)
-        props.setWallet(w)
+    function disconnectWallet() { 
+        props.sessionWallet.wipe()
+        props.updateWallet(props.sessionWallet) 
     }
-
-    function handleDisconnectWallet() { disconnectWallet() }
 
     function handleDisplayWalletSelection() { setSelectorOpen(true) }
 
     async function handleSelectedWallet(e) {
         const tgt = e.currentTarget
-        if (tgt.id in allowedWallets) {
-            sessionStorage.setItem(wallet_preference_key, tgt.id)
-            sessionStorage.setItem(acct_preference_key, "0")
-            await tryConnectWallet()
-        }
+        const sw = new SessionWallet(tgt.id)
+
+        if(!await sw.connect()) return showErrorToaster("Couldn't connect to wallet") 
+
+        props.updateWallet(sw)
         setSelectorOpen(false)
     }
 
     function handleChangeAccount(e) {
-        const addr_idx = e.target.value
-        wallet.default_account = addr_idx
-        sessionStorage.setItem(acct_preference_key, addr_idx)
-        props.handleChangeAcct()
+        props.sessionWallet.setAccountIndex(parseInt(e.target.value))
+        props.updateWallet(props.sessionWallet)
     }
-
-
 
     const dev_wallet = Object.keys(ps.dev.accounts).length>0?(
         <li>
@@ -127,9 +78,7 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
 
 
 
-    if (!props.walletConnected)
-
-        return (
+    if (!props.walletConnected) return (
         <div>
             <Button
                 minimal={true}
@@ -191,7 +140,7 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
     )
 
 
-    const addr_list = wallet.accounts.map((addr, idx) => {
+    const addr_list = props.sessionWallet.accountList().map((addr, idx) => {
         return (<option value={idx} key={idx}> {addr.substr(0, 8)}...  </option>)
     })
 
@@ -202,10 +151,14 @@ export default function AlgorandWalletConnector(props:AlgorandWalletConnectorPro
 
     return (
         <div>
-            <HTMLSelect onChange={handleChangeAccount} minimal={true} iconProps={iconprops} defaultValue={wallet.default_account}>
+            <HTMLSelect 
+                onChange={handleChangeAccount} 
+                minimal={true} 
+                iconProps={iconprops} 
+                defaultValue={props.sessionWallet.accountIndex()} >
                 {addr_list}
             </HTMLSelect>
-            <Button icon='log-out' minimal={true} onClick={handleDisconnectWallet} ></Button>
+            <Button icon='log-out' minimal={true} onClick={disconnectWallet} ></Button>
         </div>
     )
 }

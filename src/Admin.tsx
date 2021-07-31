@@ -77,8 +77,7 @@ export default function Admin(props: AdminProps) {
         const tag = tags.find(t=>{return t.id==tid})
 
         try {
-
-            tag.delete(props.wallet)
+            tag.destroy(props.wallet)
             .then(success=>{ if(success) return setTags(tags.filter(t=>{return t.id!==tid})) })
             .finally(()=>{ setLoading(false) })
 
@@ -105,6 +104,17 @@ export default function Admin(props: AdminProps) {
 
         app.updateApplication(props.wallet)
         .finally(()=>{ setLoading(false) })
+    }
+
+    function destroyApp(){
+        setLoading(true)
+
+        const app  = new Application(appConf)
+
+        app.destroyApplication(props.wallet)
+        .then((ac)=>{setApp(appConf=>({...appConf, ...ac}))})
+        .finally(()=>{ setLoading(false) })
+
     }
 
     function updateConf(e){
@@ -135,6 +145,7 @@ export default function Admin(props: AdminProps) {
         appComponent = <ApplicationUpdater 
             set={setAppConf} 
             update={updateApp} 
+            destroy={destroyApp}
             loading={loading} 
             {...appConf} 
         />
@@ -324,6 +335,7 @@ type ApplicationUpdaterProps = {
     loading: boolean
     set(key: string, value: string)
     update()
+    destroy()
 };
 
 function ApplicationUpdater(props: ApplicationUpdaterProps) {
@@ -352,6 +364,10 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
             minimal={true}
             outlined={true}
             loading={props.loading} onClick={props.update} intent='warning' text='Update Application'/>
+            <Button 
+            minimal={true}
+            outlined={true}
+            loading={props.loading} onClick={props.destroy} intent='danger' text='Destroy Application'/>
         </div>
     )
 }

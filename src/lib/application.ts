@@ -2,15 +2,19 @@ import {
     addrToB64, 
     sendWait, 
     getSuggested, 
+    getTransaction
+} from "./algorand"
+import {
     get_app_update_txn, 
     get_app_create_txn,  
     get_app_optin_txn,
+    get_app_destroy_txn,
     get_asa_create_txn, 
+    get_asa_destroy_txn,
     get_cosign_txn,
     get_pay_txn,
-    waitForConfirmation,
-    getTransaction
-} from "./algorand"
+} from "./transactions"
+
 import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash, get_platform_owner } from "./contracts"
 import {Wallet} from '../wallets/wallet'
 import algosdk, { Transaction } from 'algosdk';
@@ -19,7 +23,7 @@ import {
     platform_settings as ps ,
     get_template_vars
 } from "./platform-conf";
-import { showInfo } from "../Toaster";
+import { showErrorToaster, showInfo } from "../Toaster";
 
 
 
@@ -129,7 +133,7 @@ export class Application {
         }
     }
 
-    async createPriceToken(wallet: Wallet)  { 
+    async createPriceToken(wallet: Wallet): Promise<boolean>  { 
         const suggestedParams = await getSuggested(10)
         const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
 
@@ -152,8 +156,100 @@ export class Application {
         await sendWait([s_cosign_txn, s_create_px])
 
         const result = await getTransaction(s_create_px.txID)
+
+        if(result === undefined) return false
+
         this.conf.price_id = result['asset-index']
+        return true
     } 
+
+    async destroyPriceToken(wallet: Wallet) : Promise<boolean> { 
+        if(this.conf.price_id == 0) return true
+
+        const suggestedParams = await getSuggested(10)
+
+        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
+
+        const destroy_px = new Transaction(get_asa_destroy_txn(suggestedParams, this.conf.owner_addr, this.conf.price_id))
+        
+        const grouped = [cosign_txn, destroy_px]
+
+        algosdk.assignGroupID(grouped)
+        const [s_cosign_txn, /* s_destroy_px */] = await wallet.signTxn(grouped)
+
+        const ls = await get_platform_owner(this.getVars({
+            "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr),
+        }))
+
+        const s_destroy_px = algosdk.signLogicSigTransaction(destroy_px, ls)
+
+        return (await sendWait([s_cosign_txn, s_destroy_px])) !== undefined
+    } 
+
+    async destroyApplication(wallet: Wallet): Promise<AppConf> {
+
+        // Destroy tag tokens
+        showInfo("Destroying tag tokens")
+        const destroys = []
+        for(let tidx in this.conf.tags){
+            const tag = this.conf.tags[tidx]
+            destroys.push(tag.destroy(wallet))
+        }
+        const results = await Promise.all(destroys)
+
+        if(results.filter(r=>{r === undefined}).length>0){
+            showErrorToaster("Could not destroy all tag tokens")
+            return this.conf
+        }
+        this.conf.tags = []
+
+
+        // Destroy price token
+        showInfo("Destroying price token")
+        if(!await this.destroyPriceToken(wallet)){
+            showErrorToaster("Couldn't delete price token")
+            return this.conf
+        }
+        this.conf.price_id = 0
+
+        // Return algos to admin
+        if(this.conf.owner_addr !== ""){
+            showInfo("Returning algos to admin")
+            const suggestedParams = await getSuggested(10)
+
+            const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
+            const pay_txn = new Transaction(get_pay_txn(suggestedParams, this.conf.owner_addr, this.conf.admin_addr, 0))
+            pay_txn.closeRemainderTo = algosdk.decodeAddress(this.conf.admin_addr)
+
+            const grouped = [cosign_txn, pay_txn]
+            algosdk.assignGroupID(grouped)
+
+            const [s_cosign_txn, /* s_pay_txn */] = await wallet.signTxn(grouped)
+            const ls = await get_platform_owner(this.getVars({ "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr) }))
+
+            const s_pay_txn = algosdk.signLogicSigTransaction(pay_txn, ls)
+
+            if((await sendWait([s_cosign_txn, s_pay_txn])) === undefined){
+                showErrorToaster("Couldn't return algos to admin")
+                return this.conf 
+            }
+        }
+
+        // Destroy application
+        showInfo("Destroying application")
+        const suggestedParams = await getSuggested(10)
+        const destroy_app_txn = new Transaction(get_app_destroy_txn(suggestedParams, this.conf.admin_addr, this.conf.app_id))
+        const [s_destroy_app_txn] = await wallet.signTxn([destroy_app_txn])
+        if((await sendWait([s_destroy_app_txn])) == undefined){
+            showErrorToaster("Couldn't destroy application")
+            return this.conf
+        }
+
+        this.conf.listing_hash = ""
+        this.conf.app_id = 0
+        return this.conf
+    }
+
 
     getVars(overwrite: any): any {
         return get_template_vars(overwrite)

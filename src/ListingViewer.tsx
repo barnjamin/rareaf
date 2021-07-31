@@ -5,12 +5,21 @@ import * as React from 'react'
 
 import {Transaction} from 'algosdk'
 import { useParams, useHistory } from 'react-router-dom'
-import { getListing, getSuggested, getTags, get_asa_optin_txn, isOptedIntoAsset, sendWait } from './lib/algorand'
 import { AnchorButton, Button, NumericInput, Card, Elevation } from '@blueprintjs/core'
-import Tagger from './Tagger'
-import {TagToken} from './lib/tags'
-import {Wallet} from './wallets/wallet'
+
+import { 
+    getListing, 
+    getSuggested, 
+    isOptedIntoAsset, 
+    sendWait 
+} from './lib/algorand'
+import {
+get_asa_optin_txn
+} from './lib/transactions'
 import {platform_settings as ps} from './lib/platform-conf'
+import {Wallet} from './wallets/wallet'
+import {TagToken} from './lib/tags'
+import Tagger from './Tagger'
 import { showErrorToaster } from './Toaster'
 
 type ListingViewerProps = {

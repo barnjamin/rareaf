@@ -1,0 +1,59 @@
+{
+    "domain": "rare.af",
+    "algod":{
+        "server":"https://testnet.algoexplorerapi.io",
+        "port":0,
+        "token":"",
+        "network": "TestNet"
+    },
+    "indexer": {
+        "server":"https://testnet.algoexplorerapi.io/idx2",
+        "port":0,
+        "token":""
+    },
+    "ipfs":{
+        "display":"https://ipfs.io/ipfs/",
+        "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJnaXRodWJ8NTIwMjM2IiwiaXNzIjoibmZ0LXN0b3JhZ2UiLCJpYXQiOjE2MTc5MTEzNTMzOTQsIm5hbWUiOiJkZWZhdWx0In0.3Hkh9IHXK6OgmXBUsCK12ca0Iit9-dJgqdDtKcQiYZQ" 
+    },
+    "explorer":"algoexplorer.io",
+    "application": {
+        "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
+        "app_id": 20814075,
+        "price_id": 20814108,
+        "owner_addr": "HEOIGWE6QT7Q7P2FNMAHDHU56TTBZNG55JSSRJ6VWAC3BQBBT4E6IUSIPY",
+        "name": "RareAF",
+        "unit": "raf",
+        "fee_amt": 10000,
+        "tags": [
+            {
+                "name": "image",
+                "id": 20814180
+            },
+            {
+                "name": "gif",
+                "id": 20814194
+            },
+            {
+                "name": "pixel-art",
+                "id": 20814210
+            },
+            {
+                "name": "generative-art",
+                "id": 20925292
+            }
+        ],
+        "listing_hash": "b64(aVRMRrjSo1kYy1G5LTOmaLNoMWEnfpc7Nvqcj9VSTnM=)",
+        "seed_amt": 5000000,
+        "max_price": 10000000000
+    },
+    "contracts":{
+        "approval":"platform-approval.teal",
+        "clear":"platform-clear.teal",
+        "listing":"listing.teal",
+        "listing-positions":"listing.tmpl.teal.json"
+    },
+    "dev":{ 
+        "debug_txns":true,
+        "accounts":{ }
+    }
+}

@@ -12,6 +12,8 @@ class InsecureWallet implements Wallet {
 
     //Takes a {pk=>[mnemonic]}
     async connect(settings: object): Promise<boolean> {
+        // Not doing this cuz we need to make the sks every time for now
+        //if(this.isConnected()) return true
 
         this.accounts = []
         this.pkToSk  = {}
@@ -34,7 +36,7 @@ class InsecureWallet implements Wallet {
     }
 
     isConnected(): boolean {
-        return this.accounts.length>0;
+        return this.accounts && this.accounts.length>0;
     }
 
     getDefaultAccount(): string {
@@ -43,9 +45,10 @@ class InsecureWallet implements Wallet {
 
     async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
         const signed = [];
+        const default_addr = this.getDefaultAccount()
         for(let txidx in txns){
             let addr = algosdk.encodeAddress(txns[txidx].from.publicKey)
-            if(addr in this.pkToSk){
+            if(addr == default_addr){
                 signed.push(algosdk.signTransaction(txns[txidx], this.pkToSk[addr].sk)) 
             }else{
                 signed.push({})

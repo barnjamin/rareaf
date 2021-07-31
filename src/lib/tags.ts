@@ -1,13 +1,15 @@
 import {Wallet} from '../wallets/wallet'
 import algosdk, { Transaction } from 'algosdk'
 import { 
-    get_cosign_txn,
-    get_asa_create_txn, 
-    get_asa_destroy_txn, 
     getSuggested, 
     getTransaction,
     sendWait 
 } from './algorand';
+import {
+    get_cosign_txn,
+    get_asa_create_txn, 
+    get_asa_destroy_txn, 
+} from './transactions'
 import { platform_settings as ps, get_template_vars } from './platform-conf';
 import { get_platform_owner } from './contracts';
 import { DESKTOP } from '@blueprintjs/icons/lib/esm/generated/iconContents';
@@ -29,7 +31,7 @@ export class TagToken {
         return  new TagToken(asset.params.name, asset.index)  
     }
 
-    async delete(wallet: Wallet): Promise<boolean> {
+    async destroy(wallet: Wallet): Promise<boolean> {
         const suggestedParams = await getSuggested(10)
 
         const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, ps.application.admin_addr))
