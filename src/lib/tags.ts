@@ -1,4 +1,4 @@
-import {Wallet} from '../wallets/wallet'
+import { Wallet } from '../wallets/wallet'
 import algosdk, { Transaction } from 'algosdk'
 import { 
     getSuggested, 
@@ -12,7 +12,6 @@ import {
 } from './transactions'
 import { platform_settings as ps, get_template_vars } from './platform-conf';
 import { get_platform_owner } from './contracts';
-import { DESKTOP } from '@blueprintjs/icons/lib/esm/generated/iconContents';
 
 export class TagToken {
 

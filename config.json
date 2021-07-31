@@ -1,14 +1,14 @@
 {
     "domain": "rare.af",
     "algod":{
-        "server":"http://localhost",
-        "port":4001,
-        "token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "network": "sandnet"
+        "server":"https://testnet.algoexplorerapi.io",
+        "port":0,
+        "token":"",
+        "network": "TestNet"
     },
     "indexer": {
-        "server":"http://localhost",
-        "port":8980,
+        "server":"https://testnet.algoexplorerapi.io/idx2",
+        "port":0,
         "token":""
     },
     "ipfs":{
@@ -18,31 +18,31 @@
     "explorer":"algoexplorer.io",
     "application": {
         "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
-        "app_id": 4,
-        "price_id": 7,
-        "owner_addr": "R5I7JHJ37K5R2YZTHBFTBGZK3TZY3YPUYWVUKXYHVAT5POXBL5HHAKQVHI",
+        "app_id": 21166538,
+        "price_id": 21166573,
+        "owner_addr": "Y5GPVW55QWXQ5BDXG5TSC7WW66IMXM33FJXJP736JGPGT2SGLBUFW6ESRY",
         "name": "RareAF",
         "unit": "raf",
         "fee_amt": 10000,
         "tags": [
             {
                 "name": "image",
-                "id": 19
+                "id": 21166637
+            },
+            {
+                "name": "generative-art",
+                "id": 21166653
             },
             {
                 "name": "gif",
-                "id": 21
+                "id": 21166666
             },
             {
                 "name": "pixel-art",
-                "id": 23
-            },
-            {
-                "name": "computer-generated",
-                "id": 25
+                "id": 21166689
             }
         ],
-        "listing_hash": "b64(VuM8L8nbl1v6npvrG7YZTd2bbdYChpA8Prq8rb4kh+A=)",
+        "listing_hash": "b64(Xkp0Du66+zPNS1615ZNEO5l+k40okzUUfKXRTY+R8bo=)",
         "seed_amt": 5000000,
         "max_price": 10000000000
     },
@@ -54,19 +54,6 @@
     },
     "dev":{ 
         "debug_txns":false,
-        "accounts":{
-            "6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI": [
-                "loan", "journey", "alarm", "garage", "bulk", "olympic", "detail", "pig", "edit", "other", "brisk", "sense", "below",
-                "when", "false", "ripple", "cute", "buffalo", "tissue", "again", "boring", "manual", "excuse", "absent", "injury"
-            ],
-            "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM": [
-                "genuine", "burger", "urge", "heart", "spot", "science", "vague", "guess", "timber", "rich", "olympic", "cheese", "found",
-                "please", "then", "snack", "nice", "arrest", "coin", "seminar", "pyramid", "adult", "flip", "absorb", "apology"
-            ],
-            "DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4": [
-                "train", "rather", "absorb", "mouse", "tone", "scorpion", "group", "vacuum", "depth", "nothing", "assault", "silent", "fox",
-                "relax", "depart", "lady", "hurdle", "million", "jaguar", "ensure", "define", "mule", "silk", "able", "order"
-            ]
-        }
+        "accounts":{ }
     }
 }

@@ -1,10 +1,9 @@
 import { Wallet } from '../wallets/wallet'
 import { getNFT } from './ipfs'
 import { Transaction } from 'algosdk'
-import {  sendWait, getSuggested } from './algorand'
+import { sendWait, getSuggested } from './algorand'
 import { get_asa_create_txn, get_asa_destroy_txn} from './transactions'
 import { platform_settings as ps } from './platform-conf'
-import CID from 'cids'
 import { showErrorToaster } from '../Toaster'
 
 export class NFT {

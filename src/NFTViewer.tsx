@@ -32,16 +32,25 @@ export default function NFTViewer(props: NFTViewerProps) {
     const [optedIn, setOptedIn]               = React.useState(false)
     
     React.useEffect(()=>{
+        let subscribed = true
         tryGetNFT(parseInt(id))
-            .then((nft)=>{  setNFT(nft) })
+            .then((nft)=>{  
+                if(subscribed) setNFT(nft) 
+            })
             .catch((err)=>{ showErrorToaster("Couldn't find that asset") })
+        return ()=>{subscribed=false}
     }, []);
 
     React.useEffect(()=>{
         if(props.wallet === undefined) return
 
+        let subscribed = true
         isOptedIntoApp(props.acct)
-            .then((oi)=>{ setOptedIn(oi) })
+            .then((oi)=>{ 
+                if(subscribed) setOptedIn(oi) 
+            })
+
+        return ()=>{subscribed=false}
 
     }, [props.acct])
 

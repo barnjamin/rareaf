@@ -1,5 +1,5 @@
-import  {get_template_vars, platform_settings as ps} from './platform-conf'
-import { get_listing_compiled, get_listing_sig, get_platform_owner } from './contracts'
+import { get_template_vars, platform_settings as ps} from './platform-conf'
+import { get_listing_sig, get_platform_owner } from './contracts'
 import {
     uintToB64, 
     addrToB64, 
@@ -13,10 +13,10 @@ import {
     get_pay_txn, 
     get_app_call_txn
 } from './transactions'
-import algosdk, { assignGroupID, Transaction } from 'algosdk';
+import algosdk, { Transaction } from 'algosdk';
 import { Wallet } from '../wallets/wallet';
 import { NFT } from './nft'
-import {TagToken} from './tags'
+import { TagToken } from './tags'
 import { Method } from './application'
 import LogicSig from 'algosdk/dist/types/src/logicsig';
 import { showErrorToaster } from '../Toaster';

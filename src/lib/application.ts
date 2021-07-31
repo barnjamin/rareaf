@@ -1,9 +1,5 @@
-import { 
-    addrToB64, 
-    sendWait, 
-    getSuggested, 
-    getTransaction
-} from "./algorand"
+import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash, get_platform_owner } from "./contracts"
+import { addrToB64, sendWait, getSuggested, getTransaction } from "./algorand"
 import {
     get_app_update_txn, 
     get_app_create_txn,  
@@ -14,8 +10,6 @@ import {
     get_cosign_txn,
     get_pay_txn,
 } from "./transactions"
-
-import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash, get_platform_owner } from "./contracts"
 import {Wallet} from '../wallets/wallet'
 import algosdk, { Transaction } from 'algosdk';
 import { 
