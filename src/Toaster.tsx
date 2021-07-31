@@ -1,8 +1,8 @@
-import { ProgressBar, Position, Toaster } from "@blueprintjs/core";
+import { Position, Toaster } from "@blueprintjs/core";
  
 export const InfoToaster = Toaster.create({
     className: "info-toaster",
-    position: Position.BOTTOM_LEFT,
+    position: Position.TOP,
     maxToasts: 5,
 });
 

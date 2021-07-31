@@ -18,14 +18,31 @@
     "explorer":"algoexplorer.io",
     "application": {
         "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
-        "app_id": 44,
-        "price_id": 47,
-        "owner_addr": "F2MKAHDWVRGAOH6V4BI4RIEJVEB2RU3TE6S4PPGWGO5RCAFOMWRF2KNMGY",
+        "app_id": 4,
+        "price_id": 7,
+        "owner_addr": "R5I7JHJ37K5R2YZTHBFTBGZK3TZY3YPUYWVUKXYHVAT5POXBL5HHAKQVHI",
         "name": "RareAF",
         "unit": "raf",
         "fee_amt": 10000,
-        "tags": [],
-        "listing_hash": "b64(qrYPcZuc/IWBlMn6iA+TVdhmgbKhitp1gM3rs38WC8M=)",
+        "tags": [
+            {
+                "name": "image",
+                "id": 19
+            },
+            {
+                "name": "gif",
+                "id": 21
+            },
+            {
+                "name": "pixel-art",
+                "id": 23
+            },
+            {
+                "name": "computer-generated",
+                "id": 25
+            }
+        ],
+        "listing_hash": "b64(VuM8L8nbl1v6npvrG7YZTd2bbdYChpA8Prq8rb4kh+A=)",
         "seed_amt": 5000000,
         "max_price": 10000000000
     },

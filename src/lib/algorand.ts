@@ -7,6 +7,18 @@ import { TagToken} from './tags'
 import { dummy_addr } from './contracts'
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
 
+
+type Holdings= {
+    price: number
+    tags: TagToken[]
+    nft: NFT
+};
+
+type Portfolio = {
+    listings: Listing[]
+    nfts: NFT[]
+}
+
 let client = undefined;
 export function getAlgodClient(){
     if(client===undefined){
@@ -41,9 +53,7 @@ export async function getTags(): Promise<TagToken[]> {
 export async function isOptedIntoApp(address: string): Promise<boolean> {
     const client = getAlgodClient()
     const result = await client.accountInformation(address).do()
-
     const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ps.application.app_id })
-
     return optedIn !== undefined 
 }
 
@@ -92,19 +102,14 @@ export async function getTagToken(name: string): Promise<TagToken> {
     return new TagToken(name)
 }
 
-type Portfolio = {
-    listings: Listing[]
-    nfts: NFT[]
-}
 
 export async function getPortfolio(addr: string): Promise<Portfolio> {
-    const indexer = getIndexer()
+    const client = getAlgodClient()
     const portfolio: Portfolio = {listings:[], nfts:[]}
     let acct = undefined
 
     try{
-        const balances = await indexer.lookupAccountByID(addr).do()
-        acct = balances.account
+        acct = await client.accountInformation(addr).do()
     }catch(error){
         return portfolio
     }
@@ -136,7 +141,7 @@ export async function getListing(addr: string): Promise<Listing> {
     const holdings  = await getHoldingsFromListingAddress(addr)
     if(holdings.nft === undefined) return undefined;
 
-    const creator   = await getCreator(addr, holdings.nft.asset_id)
+    const creator  = await getCreator(addr, holdings.nft.asset_id)
 
     let l = new Listing(holdings.price, holdings.nft.asset_id, creator, addr)
     l.tags = holdings.tags
@@ -144,13 +149,6 @@ export async function getListing(addr: string): Promise<Listing> {
 
     return l
 }
-
-type Holdings= {
-    price: number
-    tags: TagToken[]
-    nft: NFT
-};
-
 
 export async function getHoldingsFromListingAddress(address: string): Promise<Holdings> {
     const client   = getAlgodClient()
@@ -193,6 +191,7 @@ export async function getToken(asset_id: number): Promise<any> {
 export async function getCreator(addr: string, asset_id: number): Promise<string> {
     // Find the txn that xfered the asa to this addr, sender is creator
     const indexer = getIndexer()
+
     const txns = await indexer
         .searchForTransactions()
         .address(addr)
@@ -237,7 +236,9 @@ export function b64ToAddr(x){
 export async function sendWait(signed: any[]): Promise<any> {
     const client = getAlgodClient()
 
+
     if(ps.dev.debug_txns) download_txns("grouped.txns", signed.map((t)=>{return t.blob}))
+
 
     try {
         const {txId}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()

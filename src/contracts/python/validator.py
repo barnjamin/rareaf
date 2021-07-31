@@ -135,7 +135,6 @@ class TemplateContract(object):
                     teal_source = teal_source.replace(chunks[1], dummy_string_bytes)
 
                 self.template_vars.append(tv)
-
         return teal_source
 
     def get_populated_hash(self, vals):

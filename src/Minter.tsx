@@ -58,6 +58,7 @@ export default function Minter(props: MinterProps){
             const nft = new NFT(metadata);
             nft.url = "ipfs://"+result.ipnft
 
+            showInfo("Creating token")
             nft.createToken(props.wallet).then((res) => {
                 if ('asset-index' in res) 
                     props.history.push("/nft/" + res['asset-index'])

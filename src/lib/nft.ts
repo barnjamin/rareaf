@@ -23,8 +23,7 @@ export class NFT {
     async createToken(wallet: Wallet) {
         const creator = wallet.getDefaultAccount()
         const suggested = await getSuggested(10)
-        const create_txn = new Transaction(await get_asa_create_txn(suggested, creator, this.url))
-        create_txn.assetDecimals = 1 //TODO: take out
+        const create_txn = new Transaction(await get_asa_create_txn(suggested, creator, NFT.metaUrl(this.url)))
         const [s_create_txn] = await wallet.signTxn([create_txn])
         return await sendWait([s_create_txn])
     }
@@ -74,7 +73,7 @@ export class NFT {
     }
 
     static async fromToken(token: any): Promise<NFT> {
-        const nft = await getNFT(NFT.metaUrl(token['params']['url']))
+        const nft = await getNFT(token['params']['url'])
         nft.asset_id = token['index']
         nft.manager = token['params']['manager']
         return nft

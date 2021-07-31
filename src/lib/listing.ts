@@ -231,14 +231,11 @@ export class Listing {
         return await sendWait([s_app_call_txn, s_price_xfer_txn])
     }
 
-    async doDelete(wallet: Wallet) {
+    async doDelete(wallet: Wallet): Promise<boolean> {
         const args = [Method.Delete]
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.creator_addr, args))
-
-        const rawTx = algosdk.decodeUnsignedTransaction(app_call_txn.toByte());
-        const processedTx = rawTx._getDictForDisplay();
 
         const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner_addr, ps.application.price_id, 0))
         price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.application.owner_addr)
@@ -259,7 +256,7 @@ export class Listing {
         const tagTxns = []
         for(let t in this.tags){
             const tag = this.tags[t]
-            const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner_addr, tag.id, 1))
+            const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner_addr, tag.id, 0))
             tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.application.owner_addr)
             tagTxns.push(tag_xfer_txn)
         }
@@ -282,10 +279,10 @@ export class Listing {
 
         const combined = [s_app_call_txn, s_price_xfer_txn,  s_asa_xfer_txn,  s_asa_cfg_txn, ...s_tagTxns, s_algo_close_txn]
 
-        return await sendWait(combined)
+        return await sendWait(combined) !== undefined
     }
 
-    async doPurchase(wallet: Wallet) {
+    async doPurchase(wallet: Wallet): Promise<boolean> {
         const args = [Method.Purchase]
         const suggestedParams = await getSuggested(10)
 
@@ -317,7 +314,7 @@ export class Listing {
         const tagTxns = []
         for(let t in this.tags){
             const tag = this.tags[t]
-            const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner_addr, tag.id, 1))
+            const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, ps.application.owner_addr, tag.id, 0))
             tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(ps.application.owner_addr)
             tagTxns.push(tag_xfer_txn)
         }
@@ -349,7 +346,7 @@ export class Listing {
             s_asa_cfg_txn, ...s_tagTxns, s_algo_close_txn
         ]
 
-        return await sendWait(combined)
+        return await sendWait(combined) !== undefined
     }
 }
 

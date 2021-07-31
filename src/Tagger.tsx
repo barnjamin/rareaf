@@ -6,14 +6,18 @@ import { MultiSelect } from "@blueprintjs/select";
 import { MenuItem } from '@blueprintjs/core'
 
 import {TagToken } from './lib/tags'
-
+import { showErrorToaster } from './Toaster';
 
 const TagMultiSelect = MultiSelect.ofType<TagToken>();
+
+export const MAX_LISTING_TAGS = 8;
 
 type TaggerProps = {
     tags: TagToken[]
     tagOpts: TagToken[]
     renderProps: any
+
+    maxTags?: number
 
     setTags?(tags: TagToken[])
 
@@ -21,7 +25,8 @@ type TaggerProps = {
     handleAddTag?(tag: TagToken)
 };
 
-export default function Tagger(props: TaggerProps) {
+
+export function Tagger(props: TaggerProps) {
 
     function renderTagTag(t: TagToken) { return t.name }
 
@@ -32,6 +37,11 @@ export default function Tagger(props: TaggerProps) {
     }
 
     function handleTag(t: TagToken) { 
+
+        if (props.maxTags && props.maxTags>0 && props.tags.length>= props.maxTags) {
+            showErrorToaster("Can't apply > " + props.maxTags + " Tags")
+        }
+
         if(props.handleAddTag !== undefined) 
            props.handleAddTag(t)
 

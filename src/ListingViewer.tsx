@@ -19,7 +19,7 @@ get_asa_optin_txn
 import {platform_settings as ps} from './lib/platform-conf'
 import {Wallet} from './wallets/wallet'
 import {TagToken} from './lib/tags'
-import Tagger from './Tagger'
+import { MAX_LISTING_TAGS, Tagger} from './Tagger'
 import { showErrorToaster } from './Toaster'
 
 type ListingViewerProps = {
@@ -27,6 +27,7 @@ type ListingViewerProps = {
     acct: string
     wallet: Wallet
 };
+
 
 function ListingViewer(props: ListingViewerProps) {
 
@@ -42,8 +43,10 @@ function ListingViewer(props: ListingViewerProps) {
 
     async function handleCancelListing(){
         setLoading(true)
-        await listing.doDelete(props.wallet)
-        history.push("/nft/"+listing.asset_id)
+        if(await listing.doDelete(props.wallet)) {
+            return history.push("/nft/"+listing.asset_id)
+        }
+        showErrorToaster("Couldn't cancel listing") 
         setLoading(false)
     }
 
@@ -67,15 +70,25 @@ function ListingViewer(props: ListingViewerProps) {
     async function handleBuy(){
         setLoading(true)
         await handleOptIntoAsset()
-        await listing.doPurchase(props.wallet)
-        history.push("/nft/"+listing.asset_id)
+
+        if(await listing.doPurchase(props.wallet)){
+            return history.push("/nft/"+listing.asset_id)
+        }
+
+        showErrorToaster("Failed to complete purchase")
         setLoading(false)
     }
 
     async function handleAddTag(tag: TagToken){
         setLoading(true)
-        await listing.doTag(props.wallet, tag)
-        setListing(listing)
+
+        if(listing.tags.length<MAX_LISTING_TAGS) {
+            await listing.doTag(props.wallet, tag)
+            setListing(listing)
+        }else{
+            showErrorToaster("Can't apply > " + MAX_LISTING_TAGS + " tags")
+        }
+
         setLoading(false)
     }
 
@@ -95,11 +108,13 @@ function ListingViewer(props: ListingViewerProps) {
 
     async function handleUpdatePrice(){
         setLoading(true)
+
         if (price == 0){ 
             showErrorToaster("Price not changed")
             setLoading(false)
             return
         }
+
         await listing.doPriceChange(props.wallet, price)
         setListing(listing)
         setLoading(false)

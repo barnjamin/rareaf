@@ -146,7 +146,8 @@ def valid_tag_closes(start_idx, max_tags, platform_addr, contract_addr):
     for x in range(max_tags):
         idx = x + start_idx
         valid_ops.append(
-            If(Global.group_size() - Int(1) > Int(idx),  tag_close_valid(Gtxn[idx], platform_addr, contract_addr), Int(1))
+            # +2 to account for 0 indexed && for last transaction which should not be a tag close
+            If(Int(idx) + Int(2) < Global.group_size(),  tag_close_valid(Gtxn[idx], contract_addr, platform_addr), Int(1))
         )
 
     return And(*valid_ops)

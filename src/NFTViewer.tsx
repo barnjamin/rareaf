@@ -8,10 +8,10 @@ import {Tag, Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classe
 import Listing from './lib/listing'
 import {Wallet} from './wallets/wallet'
 import {NFT} from './lib/nft'
-import Tagger from './Tagger'
+import  {Tagger, MAX_LISTING_TAGS } from './Tagger'
 import {Application} from './lib/application'
 import {platform_settings as ps} from './lib/platform-conf'
-import { ErrorToaster, showInfo } from './Toaster'
+import { ErrorToaster, showErrorToaster, showInfo } from './Toaster'
 
 type NFTViewerProps = {
     history: any
@@ -33,17 +33,17 @@ export default function NFTViewer(props: NFTViewerProps) {
     
     React.useEffect(()=>{
         tryGetNFT(parseInt(id))
-            .then((nft)=>{ setNFT(nft) })
-            .catch((err)=>{ console.error("Error:", err) })
+            .then((nft)=>{  setNFT(nft) })
+            .catch((err)=>{ showErrorToaster("Couldn't find that asset") })
     }, []);
 
     React.useEffect(()=>{
         if(props.wallet === undefined) return
 
-        isOptedIntoApp(props.wallet.getDefaultAccount())
+        isOptedIntoApp(props.acct)
             .then((oi)=>{ setOptedIn(oi) })
 
-    }, [props.wallet, props.acct])
+    }, [props.acct])
 
 
     function handleCreateListing(){ setListingVisible(true) }
@@ -55,7 +55,7 @@ export default function NFTViewer(props: NFTViewerProps) {
         try {
             await nft.destroyToken(props.wallet)
             history.push("/")
-        } catch (error) { console.error(error) }
+        } catch (error) { showErrorToaster("Couldn't destroy token") }
 
         setWaiting(false)
     }
@@ -72,7 +72,7 @@ export default function NFTViewer(props: NFTViewerProps) {
         try {
             await app.optIn(props.wallet)
         }catch(error){
-            ErrorToaster.show({intent:"danger", message: "Failed to opt into Application"}) 
+            showErrorToaster("Failed to opt into Application") 
         }
     }
 
@@ -87,7 +87,6 @@ export default function NFTViewer(props: NFTViewerProps) {
             await lst.doCreate(props.wallet)
 
             if(tags.length > 0 ){
-
                 showInfo("Adding tags")
                 await lst.doTags(props.wallet, tags)
             }
@@ -95,8 +94,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             history.push("/listing/"+lst.contract_addr)
 
         }catch(error){ 
-            ErrorToaster.show({intent:"danger", message:"Failed to create listing"})
-            console.error(error) 
+            showErrorToaster("Failed to create listing")
         }
 
         setWaiting(false);
@@ -104,7 +102,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     let editButtons = <div />
 
-    if(props.wallet !== undefined && nft.manager === props.wallet.getDefaultAccount()){
+    if(props.wallet !== undefined && nft !== undefined && nft.manager === props.wallet.getDefaultAccount()){
         editButtons = (
         <div className='container-right'>
             <div className='content'>
@@ -154,6 +152,7 @@ export default function NFTViewer(props: NFTViewerProps) {
                                 tags={tags} 
                                 tagOpts={ps.application.tags} 
                                 setTags={setTags}
+                                maxTags={MAX_LISTING_TAGS}
                                 />
                         </div>
                     } />

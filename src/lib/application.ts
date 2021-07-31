@@ -99,6 +99,8 @@ export class Application {
             "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr),
         }))
         
+        console.log(ls.address())
+        
         // Save it
         this.conf.owner_addr = ls.address()
 
@@ -126,6 +128,7 @@ export class Application {
             const result     = await sendWait([signed])
 
             this.conf.app_id = result['application-index']
+            console.log(this.conf)
         }else{
             const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.app_id))
             const [signed]   = await wallet.signTxn([update_txn])
