@@ -19,7 +19,7 @@ const config = {
     open: true,
     host: "localhost",
     historyApiFallback: true,
-    //contentBase : './',
+    contentBase : '/',
     watchOptions : {
         poll: true
     }

@@ -34,11 +34,17 @@ export default function Portfolio(props: PortfolioProps) {
     React.useEffect(()=>{
         if(port_acct === undefined) return
 
+        let isSubscribed = true
+
         getPortfolio(port_acct).then(p=>{
+          if (isSubscribed) {
             setListings(p['listings'])
             setNFTs(p['nfts'])
+          }
         })
-    }, [port_acct])
+
+        return () => {isSubscribed = false}
+    }, [])
 
 
     return (

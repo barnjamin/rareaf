@@ -1,4 +1,4 @@
-from pyteal import *
+from pyteal import ScratchVar, TealType, Return, Btoi, Txn, OnComplete, Mode, Cond, compileTeal
 
 from validator import *
 from utils import *

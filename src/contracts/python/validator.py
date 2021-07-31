@@ -1,7 +1,7 @@
 import base64
 import hashlib
 from algosdk.logic import check_byte_const_block, check_int_const_block
-from pyteal import *
+from pyteal import ScratchVar, TealType, Substring, Len, Sha256
 from utils import *
 
 from algosdk.v2client import algod

@@ -1,4 +1,4 @@
-from pyteal import *
+from pyteal import ScratchVar, Or, TealType, Mode, compileTeal
 from config import *
 from utils import *
 
