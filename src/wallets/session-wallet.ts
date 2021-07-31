@@ -77,7 +77,7 @@ export class SessionWallet {
         accountList() : string[] { const accts = sessionStorage.getItem(acct_list_key); return accts=="" ? [] : JSON.parse(accts) }
 
         setAccountIndex(idx: number) { this.wallet.default_account = idx; sessionStorage.setItem(acct_preference_key, idx.toString()) }
-        accountIndex(): number { const idx = sessionStorage.getItem(acct_preference_key); return idx == ""?0:parseInt(idx) }
+        accountIndex(): number { const idx = sessionStorage.getItem(acct_preference_key); return idx==null||idx==""?0:parseInt(idx) }
 
         setWalletPreference(wname: string) { this.wname = wname; sessionStorage.setItem(wallet_preference_key, wname) }
         walletPreference(): string{ return sessionStorage.getItem(wallet_preference_key) }
