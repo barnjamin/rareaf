@@ -1,5 +1,5 @@
 #pragma version 4
-intcblock 1 4 0 6 TMPL_PRICE_ID 3
+intcblock 1 4 0 6 3
 bytecblock TMPL_OWNER_ADDR
 pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
 store 0
@@ -8,6 +8,8 @@ btoi
 store 3
 pushint TMPL_APP_ID // TMPL_APP_ID
 store 4
+pushint TMPL_PRICE_ID // TMPL_PRICE_ID
+store 5
 intc_2 // 0
 bnz l10
 gtxna 0 ApplicationArgs 0
@@ -124,12 +126,12 @@ bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 3 XferAsset
-intc 4 // TMPL_PRICE_ID
+load 5
 ==
 &&
 &&
 gtxn 4 TypeEnum
-intc 5 // acfg
+intc 4 // acfg
 ==
 gtxn 4 RekeyTo
 global ZeroAddress
@@ -231,7 +233,7 @@ bytec_0 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 XferAsset
-intc 4 // TMPL_PRICE_ID
+load 5
 ==
 &&
 &&
@@ -256,7 +258,7 @@ load 3
 &&
 &&
 gtxn 3 TypeEnum
-intc 5 // acfg
+intc 4 // acfg
 ==
 gtxn 3 RekeyTo
 global ZeroAddress
@@ -398,7 +400,7 @@ global ZeroAddress
 ==
 &&
 gtxn 3 XferAsset
-intc 4 // TMPL_PRICE_ID
+load 5
 ==
 &&
 gtxn 3 Sender
@@ -459,12 +461,12 @@ btoi
 ==
 &&
 gtxn 5 XferAsset
-intc 4 // TMPL_PRICE_ID
+load 5
 ==
 &&
 &&
 gtxn 6 TypeEnum
-intc 5 // acfg
+intc 4 // acfg
 ==
 gtxn 6 RekeyTo
 global ZeroAddress
