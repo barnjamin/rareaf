@@ -1,5 +1,5 @@
 import { Wallet } from '../wallets/wallet'
-import { getNFT } from './ipfs'
+import { getNFTFromMetadata } from './ipfs'
 import { Transaction } from 'algosdk'
 import { sendWait, getSuggested } from './algorand'
 import { get_asa_create_txn, get_asa_destroy_txn} from './transactions'
@@ -72,7 +72,11 @@ export class NFT {
     }
 
     static async fromToken(token: any): Promise<NFT> {
-        const nft = await getNFT(token['params']['url'])
+
+        const nft = await getNFTFromMetadata(token['params']['url'])
+
+        if (nft===undefined) return undefined;
+
         nft.asset_id = token['index']
         nft.manager = token['params']['manager']
         return nft

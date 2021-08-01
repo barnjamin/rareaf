@@ -106,6 +106,7 @@ body {
 }
 .listing-card {
 	width: 30%;
+	margin-bottom: 25px;
 	img {
 		width: 100%;
 		box-shadow: $pt-elevation-shadow-2;
@@ -120,6 +121,9 @@ body {
 	padding: 8px;
 	border-radius: 5px;
 	justify-content: space-evenly;
+	a {
+		margin:5px;
+	}	
 }
 
 .listing-page {

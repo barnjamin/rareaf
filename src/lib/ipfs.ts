@@ -13,10 +13,11 @@ export async function storeNFT(file: File, md: NFTMetadata): Promise<any> {
     return await client.store({...md, image:file}) 
 }
 
-export async function getNFT(url: string): Promise<NFT> {
+export async function getNFTFromMetadata(url: string): Promise<NFT> {
     const data =  await get_file(url)
 
-    const md = JSON.parse(data) as NFTMetadata
+    if(data.toString() == 'null' || data == undefined) return undefined;
 
+    const md = JSON.parse(data) as NFTMetadata
     return new NFT(md)
 }

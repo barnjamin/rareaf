@@ -146,8 +146,12 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
         const ass = acct['assets'][aidx]
         if (ass.amount !== 1) continue
 
-        const nft = await tryGetNFT(ass['asset-id'])
-        if (nft  !== undefined) portfolio.nfts.push(nft)
+        try{
+            const nft = await tryGetNFT(ass['asset-id'])
+            if (nft !== undefined) portfolio.nfts.push(nft)
+        }catch(error){
+            showErrorToaster("couldn't parse nft for asset:"+ass['asset-id'])
+        }
     }
 
     return portfolio
