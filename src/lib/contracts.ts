@@ -19,6 +19,10 @@ import platform_clear_template from '../contracts/platform-clear.tmpl.teal'
 //@ts-ignore
 import platform_owner_template from '../contracts/platform-owner.tmpl.teal'
 
+import fetch from "node-fetch";
+
+
+
 
 export const dummy_addr = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
 export const dummy_id = "b64(AAAAAAAAAHs=)"
