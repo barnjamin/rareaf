@@ -94,14 +94,19 @@ export async function getListings(tagName: string): Promise<Listing[]> {
 
     const balances =  await indexer.lookupAssetBalances(token_id).currencyGreaterThan(0).do()
 
-    let listings = []
+    const lp = []
+    const listings = []
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
         if (b.address == ps.application.owner_addr || b.amount == 0) continue;
 
-        listings.push(await getListing(b.address))
+        lp.push(getListing(b.address).then((listing)=>{
+             listings.push(listing)
+        }))
     }
+
+    await Promise.all(lp)
 
     return listings
 }
@@ -130,29 +135,34 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
         return portfolio
     }
 
+    const lp = []
     for(let aidx in acct['apps-local-state']){
         const als = acct['apps-local-state'][aidx]
         if(als.id !== ps.application.app_id) continue
 
         for(let kidx in als['key-value']) {
             const kv = als['key-value'][kidx]
-            const listing = await getListing(b64ToAddr(kv.key))
-            if(listing===undefined) continue
-            portfolio.listings.push(listing)
+            lp.push(getListing(b64ToAddr(kv.key)).then((listing)=>{
+                if(listing!==undefined) portfolio.listings.push(listing)
+            }))
         }
     }
+    await Promise.all(lp)
 
+    const np = []
     for(let aidx in acct['assets']) {
         const ass = acct['assets'][aidx]
         if (ass.amount !== 1) continue
 
         try{
-            const nft = await tryGetNFT(ass['asset-id'])
-            if (nft !== undefined) portfolio.nfts.push(nft)
+            np.push(tryGetNFT(ass['asset-id']).then((nft)=>{
+                if (nft !== undefined) portfolio.nfts.push(nft)
+            }))
         }catch(error){
             showErrorToaster("couldn't parse nft for asset:"+ass['asset-id'])
         }
     }
+    await Promise.all(np)
 
     return portfolio
 }
@@ -175,6 +185,7 @@ export async function getHoldingsFromListingAddress(address: string): Promise<Ho
     const account = await client.accountInformation(address).do()
     const holdings  = { 'price':0, 'tags':[], 'nft':undefined, }
 
+    const gets = []
     for (let aid in account.assets) {
         const asa = account.assets[aid]
 
@@ -183,11 +194,13 @@ export async function getHoldingsFromListingAddress(address: string): Promise<Ho
             continue
         }
 
-        const token = await getToken(asa['asset-id'])
-
-        if(token.params.creator == ps.application.owner_addr) holdings.tags.push(TagToken.fromAsset(token))
-        else holdings.nft = await NFT.fromToken(token)
+        gets.push(getToken(asa['asset-id']).then(async (token)=>{
+            if(token.params.creator == ps.application.owner_addr) holdings.tags.push(TagToken.fromAsset(token))
+            else holdings.nft = await NFT.fromToken(token)
+        }))
     }
+
+    await Promise.all(gets)
 
     return holdings
 }
