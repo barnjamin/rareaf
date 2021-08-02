@@ -44,7 +44,7 @@ export default function Portfolio(props: PortfolioProps) {
         })
 
         return () => {isSubscribed = false}
-    }, [])
+    }, [port_acct])
 
 
     return (

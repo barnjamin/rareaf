@@ -142,7 +142,7 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
 
         for(let kidx in als['key-value']) {
             const kv = als['key-value'][kidx]
-            lp.push(await getListing(b64ToAddr(kv.key)).then((listing)=>{
+            lp.push(getListing(b64ToAddr(kv.key)).then((listing)=>{
                 if(listing!==undefined) portfolio.listings.push(listing)
             }))
         }
@@ -155,7 +155,7 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
         if (ass.amount !== 1) continue
 
         try{
-            np.push(await tryGetNFT(ass['asset-id']).then((nft)=>{
+            np.push(tryGetNFT(ass['asset-id']).then((nft)=>{
                 if (nft !== undefined) portfolio.nfts.push(nft)
             }))
         }catch(error){
