@@ -19,14 +19,21 @@ type BrowserProps = {
 export default function Browser(props: BrowserProps) {
     const {tag} = useParams()
     const [listings, setListings] = React.useState([]);
+    const [loaded, setLoaded] = React.useState(false)
 
     React.useEffect(()=>{
-        getListings(tag).then((l)=>{ setListings(l) })
+        getListings(tag).then((l)=>{ 
+            setLoaded(true)
+            setListings(l) 
+        })
     }, [])
 
     let l = listings.map((l) => {     return (<ListingCard key={l.contract_addr} listing={l} />) }) 
     if(listings.length==0){
-        l = [<h3 key='none' >No Listings... <a href='/mint'>mint</a> one?</h3>]
+        if(loaded){
+            l = [<h3 key='none' >No Listings... <a href='/mint'>mint</a> one?</h3>]
+        }
+        l = [<h3 key='none' >Searching for listings...</h3>]
     }
     return (
         <div className='container' >
