@@ -69,7 +69,7 @@ export class SessionWallet {
                 }
 
                 // Fail
-                this.wipe()
+                this.disconnect()
                 return false
         }
 
@@ -85,7 +85,7 @@ export class SessionWallet {
         setMnemonic(m: string) { sessionStorage.setItem(mnemonic_key, m) }
         mnemonic(): string { return  sessionStorage.getItem(mnemonic_key) }
 
-        wipe () {
+        disconnect () {
                 sessionStorage.setItem(wallet_preference_key, '')
                 sessionStorage.setItem(acct_preference_key, '')
                 sessionStorage.setItem(acct_list_key, '')

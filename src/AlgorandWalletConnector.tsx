@@ -38,7 +38,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
         props.updateWallet(props.sessionWallet)
     }
     function disconnectWallet() { 
-        props.sessionWallet.wipe()
+        props.sessionWallet.disconnect()
         props.updateWallet(props.sessionWallet) 
     }
 
