@@ -5,24 +5,28 @@ import {addrToB64, concatTypedArrays} from './algorand'
 import { platform_settings as ps, get_template_vars } from './platform-conf'
 import {sha256} from 'js-sha256'
 
+
 //@ts-ignore
 import listing_var_positions from '../contracts/listing.tmpl.teal.json'
+const listing_var_path = 'src/contracts/listing.tmpl.teal.json'
+
 //@ts-ignore
 import listing_template from '../contracts/listing.tmpl.teal'
-
+const listing_template_path =  'src/contracts/listing.tmpl.teal'
 
 //@ts-ignore
 import platform_approval_template from '../contracts/platform-approval.tmpl.teal'
+const platform_approval_path = 'src/contracts/platform-approval.tmpl.teal'
+
 //@ts-ignore
 import platform_clear_template from '../contracts/platform-clear.tmpl.teal'
+const platform_clear_path = 'src/contracts/platform-clear.tmpl.teal'
 
 //@ts-ignore
 import platform_owner_template from '../contracts/platform-owner.tmpl.teal'
+const platform_owner_path = 'src/contracts/platform-owner.tmpl.teal'
 
-import fetch from "node-fetch";
-
-
-
+import fetch from 'node-fetch'
 
 export const dummy_addr = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
 export const dummy_id = "b64(AAAAAAAAAHs=)"
@@ -34,18 +38,21 @@ export async function get_listing_sig(vars: any): Promise<LogicSig> {
 }
 
 export async function get_platform_owner(vars: any): Promise<LogicSig> {
-    const program       = await get_contract_compiled(platform_owner_template, vars)
+    const path = platform_owner_template?platform_owner_template:platform_owner_path;
+    const program = await get_contract_compiled(path, vars)
     const program_bytes = new Uint8Array(Buffer.from(program.result, "base64"));
     return algosdk.makeLogicSig(program_bytes);
 }
 
 export async function get_listing_hash(vars: any): Promise<Buffer> {
+    const path = listing_var_positions?listing_var_positions:listing_var_path
     const compiled = await get_listing_compiled(vars)
-    return get_hash(new Uint8Array(Buffer.from(compiled.result, "base64")), listing_var_positions)
+    return get_hash(new Uint8Array(Buffer.from(compiled.result, "base64")), path)
 }
 
 export async function get_listing_compiled(vars: any) {
-    return get_contract_compiled(listing_template, get_template_vars(vars))
+    const path = listing_template?listing_template:listing_template_path
+    return get_contract_compiled(path, get_template_vars(vars))
 }
 
 export async function get_contract_compiled(template: string, vars: any) {
@@ -55,12 +62,14 @@ export async function get_contract_compiled(template: string, vars: any) {
 }
 
 export async function get_approval_program(vars: any){
-    const compiled =  await get_contract_compiled(platform_approval_template, get_template_vars(vars))
+    const path = platform_approval_template?platform_approval_template:platform_approval_path
+    const compiled =  await get_contract_compiled(path, get_template_vars(vars))
     return new Uint8Array(Buffer.from(compiled.result, "base64"))
 }
 
 export async function get_clear_program(vars: any){
-    const compiled =  await get_contract_compiled(platform_clear_template, vars)
+    const path = platform_clear_template?platform_clear_template:platform_clear_path
+    const compiled =  await get_contract_compiled(path, vars)
     return new Uint8Array(Buffer.from(compiled.result, "base64"))
 }
 
@@ -79,7 +88,6 @@ export async function populate_contract(template: string, vars: any) {
 }
 
 export async function get_hash(program_bytes: Uint8Array, listing_vars: any): Promise<Buffer> {
-
     let removed = 0 
     let blanked = program_bytes
     for(let i in listing_vars){
@@ -97,6 +105,12 @@ export async function get_hash(program_bytes: Uint8Array, listing_vars: any): Pr
 }
 
 export async function get_file(program) {
+    if(program.slice(0,13) == "src/contracts"){
+        const fs = require('fs')
+        const resolve = require('path').resolve
+        return  fs.readFileSync(resolve(program), "utf8")
+    }
+
     return await fetch(program)
         .then(response => checkStatus(response) && response.arrayBuffer())
         .then(buffer => {
@@ -106,15 +120,6 @@ export async function get_file(program) {
             console.error(err)
             return ""
         });
-}
-
-export function extract_vars(teal){
-    let vars = {}
-    for(let vname in listing_var_positions){
-        const v = listing_var_positions[vname]
-        vars[vname] = teal.subarray(v.start, v.start+v.length)
-    }
-    return vars
 }
 
 function checkStatus(response) {
