@@ -5,6 +5,7 @@ import { sendWait, getSuggested } from './algorand'
 import { get_asa_create_txn, get_asa_destroy_txn} from './transactions'
 import { platform_settings as ps } from './platform-conf'
 import { showErrorToaster } from '../Toaster'
+import { sha256 } from 'js-sha256'
 
 export class NFT {
     asset_id: number // ASA idx in algorand
@@ -23,6 +24,8 @@ export class NFT {
         const creator = wallet.getDefaultAccount()
         const suggested = await getSuggested(10)
         const create_txn = new Transaction(await get_asa_create_txn(suggested, creator, NFT.metaUrl(this.url)))
+        create_txn.assetName = NFT.arc3AssetName(this.metadata.name)
+        create_txn.assetMetadataHash = mdhash(this.metadata)
         const [s_create_txn] = await wallet.signTxn([create_txn])
         return await sendWait([s_create_txn])
     }
@@ -46,6 +49,13 @@ export class NFT {
     explorerSrc(): string {
         const net = ps.algod.network == "mainnet" ? "" : ps.algod.network + "."
         return "https://" + net + ps.explorer + "/asset/" + this.asset_id
+    }
+
+    static arc3AssetName(name: string): string {
+        if(name.length>28){
+            name = name.slice(0,28)
+        }
+        return name + "@arc3"
     }
 
     static resolveUrl(url: string): string {
@@ -100,6 +110,12 @@ export type NFTMetadata = {
         }
         artist: string
     }
+}
+
+export function mdhash(md: NFTMetadata): Uint8Array {
+    const hash = sha256.create();
+    hash.update(JSON.stringify(md));
+    return new Uint8Array(hash.digest())
 }
 
 export function emptyMetadata(): NFTMetadata {

@@ -12,7 +12,7 @@ import { Card, Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes, Elevation 
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
 import { getTags } from './lib/algorand'
-import { InfoToaster, showErrorToaster, showInfo } from './Toaster'
+import { showErrorToaster, showInfo } from './Toaster'
 
 type AdminProps = { 
     history: any
@@ -56,6 +56,7 @@ export default function Admin(props: AdminProps) {
         if(tags.some((t)=>{return t.name == tag.name})) 
             return showErrorToaster("This tag name already exists")
 
+        showInfo("Creating tag")
         setLoading(true)
 
         try{
@@ -72,6 +73,7 @@ export default function Admin(props: AdminProps) {
     function handleTagRemove(e){
         // Create Txn to remove  
         setLoading(true)
+        showInfo("Removing tag")
 
         const tid = parseInt(e.key)
         const tag = tags.find(t=>{return t.id==tid})
@@ -90,6 +92,7 @@ export default function Admin(props: AdminProps) {
     function createApp(){
         setLoading(true)
 
+        showInfo("Creating Application")
         const app  = new Application(appConf)
 
         app.create(props.wallet)
@@ -99,6 +102,8 @@ export default function Admin(props: AdminProps) {
 
     function updateApp(){
         setLoading(true)
+
+        showInfo("Updating Application")
 
         const app  = new Application(appConf)
 
@@ -110,6 +115,7 @@ export default function Admin(props: AdminProps) {
         setLoading(true)
 
         const app  = new Application(appConf)
+        showInfo("Destroying Application")
 
         app.destroyApplication(props.wallet)
         .then((ac)=>{setApp(appConf=>({...appConf, ...ac}))})
