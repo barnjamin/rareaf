@@ -52,8 +52,8 @@ export class NFT {
     }
 
     static arc3AssetName(name: string): string {
-        if(name.length>28){
-            name = name.slice(0,28)
+        if(name.length>27){
+            name = name.slice(0,27)
         }
         return name + "@arc3"
     }
