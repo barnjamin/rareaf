@@ -330,6 +330,7 @@ export class Listing {
 
         algosdk.assignGroupID(grouped)
 
+
         const [s_app_call_txn, s_purchase_amt_txn, /*asa_xfer*/, /*price_xfer*/, /*asa_cfg*/ , /* tag_txns */, /*algo_close*/] = await wallet.signTxn(grouped)
 
         const listing_lsig     = await getLogicFromTransaction(this.contract_addr)

@@ -48,9 +48,13 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
         const tgt = e.currentTarget
         const sw = new SessionWallet(tgt.id)
 
-        if(!await sw.connect()) return showErrorToaster("Couldn't connect to wallet") 
+        if(!await sw.connect()) {
+            sw.disconnect()
+            showErrorToaster("Couldn't connect to wallet") 
+        }else{
+            props.updateWallet(sw)
+        }
 
-        props.updateWallet(sw)
         setSelectorOpen(false)
     }
 

@@ -68,6 +68,8 @@ class AlgoSignerWallet implements Wallet {
     }
 
     getDefaultAccount(): string {
+        if(!this.isConnected()) return ""
+
         return this.accounts[this.default_account];
     }
 
