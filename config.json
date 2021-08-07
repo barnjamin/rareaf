@@ -12,7 +12,7 @@
         "token":""
     },
     "ipfs":{
-        "display":"https://ipfs.io/ipfs/",
+        "display":"https://cloudflare-ipfs.com/ipfs/",
         "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJnaXRodWJ8NTIwMjM2IiwiaXNzIjoibmZ0LXN0b3JhZ2UiLCJpYXQiOjE2MTc5MTEzNTMzOTQsIm5hbWUiOiJkZWZhdWx0In0.3Hkh9IHXK6OgmXBUsCK12ca0Iit9-dJgqdDtKcQiYZQ" 
     },
     "explorer":"algoscan.app",
