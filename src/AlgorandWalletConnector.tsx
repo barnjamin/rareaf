@@ -58,6 +58,26 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
         props.updateWallet(props.sessionWallet)
     }
 
+    const walletOptions = []
+    for(const [k,v] of Object.entries(allowedWallets)){
+        walletOptions.push((
+        <li>
+            <Button id={k}
+                large={true} 
+                fill={true} 
+                minimal={true} 
+                outlined={true} 
+                onClick={handleSelectedWallet}
+                > 
+                <div className='wallet-option'>
+                    <img className='wallet-branding' src={  v.img(props.darkMode)} />
+                    <h5>{v.displayName()}</h5>
+                </div>
+                </Button>
+        </li>
+        ))
+    }
+
     if (!props.connected) return (
         <div>
             <Button
@@ -70,49 +90,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
             <Dialog isOpen={selectorOpen} title='Select Wallet' onClose={handleSelectedWallet} >
                 <div className={Classes.DIALOG_BODY}>
                     <ul className='wallet-option-list'>
-                        <li>
-                            <Button id='algo-signer'
-                                large={true} 
-                                fill={true} 
-                                minimal={true} 
-                                outlined={true} 
-                                onClick={handleSelectedWallet}
-                                > 
-                                <div className='wallet-option'>
-                                    <img className='wallet-branding' src={  allowedWallets['algo-signer'].img(props.darkMode)} />
-                                    <h5>{allowedWallets['algo-signer'].displayName()}</h5>
-                                </div>
-                                </Button>
-                        </li>
-                        <li>
-                            <Button id='my-algo-connect'
-                                large={true} 
-                                fill={true} 
-                                minimal={true} 
-                                outlined={true} 
-                                onClick={handleSelectedWallet}
-                                >
-                                <div className='wallet-option'>
-                                    <img className='wallet-branding' src={ allowedWallets['my-algo-connect'].img(props.darkMode)  } /> 
-                                    <h5>{allowedWallets['my-algo-connect'].displayName()}</h5>
-                                </div>
-                            </Button>
-                        </li>
-
-                        <li>
-                            <Button id='insecure-wallet' 
-                                large={true} 
-                                fill={true} 
-                                minimal={true} 
-                                outlined={true} 
-                                onClick={handleSelectedWallet}
-                                > 
-                                <div className='wallet-option'>
-                                    <img className='wallet-branding' src={ allowedWallets['insecure-wallet'].img(props.darkMode)  } /> 
-                                    <h5>{allowedWallets['insecure-wallet'].displayName()}</h5>
-                                </div>
-                            </Button>
-                        </li>
+                        {walletOptions}
                     </ul>
                 </div>
             </Dialog>
