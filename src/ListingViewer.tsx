@@ -17,7 +17,7 @@ import {
 get_asa_optin_txn
 } from './lib/transactions'
 import {platform_settings as ps} from './lib/platform-conf'
-import {Wallet} from './wallets/wallet'
+import {Wallet} from 'algorand-session-wallet'
 import {TagToken} from './lib/tags'
 import { MAX_LISTING_TAGS, Tagger} from './Tagger'
 import { showErrorToaster } from './Toaster'

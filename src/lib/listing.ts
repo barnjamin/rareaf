@@ -15,11 +15,11 @@ import {
     get_app_call_txn
 } from './transactions'
 import algosdk, { Transaction } from 'algosdk';
-import { Wallet } from '../wallets/wallet';
+import { Wallet } from 'algorand-session-wallet';
 import { NFT } from './nft'
 import { TagToken } from './tags'
 import { Method } from './application'
-import LogicSig from 'algosdk/dist/types/src/logicsig';
+import {LogicSig} from 'algosdk/dist/types/src/logicsig';
 import { showErrorToaster } from '../Toaster';
 
 

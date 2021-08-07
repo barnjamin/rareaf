@@ -7,7 +7,7 @@ import {useParams} from 'react-router-dom'
 import { getListings } from './lib/algorand'
 import {ListingCard} from './ListingCard'
 
-import {Wallet} from './wallets/wallet'
+import {Wallet} from 'algorand-session-wallet'
 
 
 type BrowserProps = {

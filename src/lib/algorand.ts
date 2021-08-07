@@ -6,7 +6,7 @@ import { NFT } from "./nft";
 import { TagToken} from './tags'
 import { dummy_addr } from './contracts'
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
-import LogicSig from 'algosdk/dist/types/src/logicsig';
+import {LogicSig} from 'algosdk/dist/types/src/logicsig';
 
 
 type Holdings= {

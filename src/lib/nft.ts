@@ -1,4 +1,4 @@
-import { Wallet } from '../wallets/wallet'
+import { Wallet } from 'algorand-session-wallet'
 import { getNFTFromMetadata } from './ipfs'
 import { Transaction } from 'algosdk'
 import { sendWait, getSuggested } from './algorand'

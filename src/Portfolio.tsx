@@ -9,7 +9,7 @@ import { ListingCard } from './ListingCard'
 import {Card, Elevation, Tab, Tabs} from "@blueprintjs/core"
 
 
-import { Wallet } from './wallets/wallet'
+import { Wallet } from 'algorand-session-wallet'
 import { Listing } from './lib/listing'
 import { NFT } from './lib/nft'
 import { getPortfolio } from './lib/algorand'

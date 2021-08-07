@@ -2,27 +2,21 @@
 'use strict'
 
 import * as React from 'react'
-import algosdk from 'algosdk'
 
-
-import AlgoSignerWallet from './wallets/algosignerwallet'
-import MyAlgoConnectWallet from './wallets/myalgoconnect'
-import InsecureWallet from './wallets/insecurewallet'
-import {Wallet} from './wallets/wallet'
-import { SessionWallet } from './wallets/session-wallet'
+import { SessionWallet, allowedWallets } from 'algorand-session-wallet'
 
 import { Dialog, Button, Classes, HTMLSelect, Intent, Icon } from '@blueprintjs/core'
 import { IconName } from '@blueprintjs/icons'
 
-import {platform_settings as ps} from './lib/platform-conf'
 import { useEffect } from 'react'
 import { showErrorToaster } from './Toaster'
-
+import {platform_settings as ps } from './lib/platform-conf'
 
 
 type AlgorandWalletConnectorProps = {
     darkMode: boolean
-    walletConnected: boolean
+    connected: boolean
+    accts: string[]
     sessionWallet: SessionWallet
     updateWallet(sw: SessionWallet)
 }
@@ -31,22 +25,23 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
 
     const [selectorOpen, setSelectorOpen] = React.useState(false)
 
-    useEffect(()=>{ connectWallet() },[])
+    useEffect(()=>{ connectWallet() },[props.sessionWallet])
 
     async function connectWallet() {
         await props.sessionWallet.connect()
         props.updateWallet(props.sessionWallet)
     }
+
     function disconnectWallet() { 
         props.sessionWallet.disconnect()
-        props.updateWallet(props.sessionWallet) 
+        props.updateWallet(new SessionWallet(props.sessionWallet.network)) 
     }
 
     function handleDisplayWalletSelection() { setSelectorOpen(true) }
 
     async function handleSelectedWallet(e) {
         const tgt = e.currentTarget
-        const sw = new SessionWallet(tgt.id)
+        const sw = new SessionWallet(ps.algod.network, tgt.id)
 
         if(!await sw.connect()) {
             sw.disconnect()
@@ -63,26 +58,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
         props.updateWallet(props.sessionWallet)
     }
 
-    const dev_wallet = Object.keys(ps.dev.accounts).length>0?(
-        <li>
-            <Button id='dev-wallet' 
-                large={true} 
-                fill={true} 
-                minimal={true} 
-                outlined={true} 
-                onClick={handleSelectedWallet}
-                > 
-                <div className='wallet-option'>
-                    <img className='wallet-branding' src={ InsecureWallet.img(props.darkMode) } /> 
-                    <h5>Development Wallet</h5>
-                </div>
-            </Button>
-        </li>
-    ):(<div></div>)
-
-
-
-    if (!props.walletConnected) return (
+    if (!props.connected) return (
         <div>
             <Button
                 minimal={true}
@@ -103,7 +79,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
                                 onClick={handleSelectedWallet}
                                 > 
                                 <div className='wallet-option'>
-                                    <img className='wallet-branding' src={ AlgoSignerWallet.img(props.darkMode) } />
+                                    <img className='wallet-branding' src={  allowedWallets['algo-signer'].img(props.darkMode)} />
                                     <h5>Algo Signer</h5>
                                 </div>
                                 </Button>
@@ -117,7 +93,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
                                 onClick={handleSelectedWallet}
                                 >
                                 <div className='wallet-option'>
-                                    <img className='wallet-branding' src={ MyAlgoConnectWallet.img(props.darkMode) } /> 
+                                    <img className='wallet-branding' src={ allowedWallets['my-algo-connect'].img(props.darkMode)  } /> 
                                     <h5>MyAlgo Connect</h5>
                                 </div>
                             </Button>
@@ -136,7 +112,6 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
                                 </div>
                             </Button>
                         </li>
-                        {dev_wallet}
                     </ul>
                 </div>
             </Dialog>
@@ -144,7 +119,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
     )
 
 
-    const addr_list = props.sessionWallet.accountList().map((addr, idx) => {
+    const addr_list = props.accts.map((addr, idx) => {
         return (<option value={idx} key={idx}> {addr.substr(0, 8)}...  </option>)
     })
 

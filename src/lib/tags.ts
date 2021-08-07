@@ -1,4 +1,4 @@
-import { Wallet } from '../wallets/wallet'
+import { Wallet } from 'algorand-session-wallet'
 import algosdk, { Transaction } from 'algosdk'
 import { 
     getSuggested, 

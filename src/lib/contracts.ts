@@ -1,4 +1,4 @@
-import LogicSig from 'algosdk/dist/types/src/logicsig'
+import {LogicSig} from 'algosdk/dist/types/src/logicsig'
 import {getAlgodClient} from './algorand'
 import algosdk from 'algosdk'
 import {addrToB64, concatTypedArrays} from './algorand'

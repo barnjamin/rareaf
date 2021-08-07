@@ -8,7 +8,7 @@ import { Button, Elevation, FileInput, Card } from "@blueprintjs/core"
 import { NFT, NFTMetadata, emptyMetadata } from './lib/nft'
 import { platform_settings as ps } from './lib/platform-conf'
 import { showErrorToaster, showInfo } from './Toaster'
-import {Wallet} from './wallets/wallet'
+import {Wallet} from 'algorand-session-wallet'
 
 type MinterProps = {
     history: any 

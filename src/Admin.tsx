@@ -4,7 +4,7 @@
 import * as React from 'react'
 import {Prompt} from 'react-router-dom'
 
-import { Wallet } from './wallets/wallet'
+import { Wallet } from 'algorand-session-wallet'
 import { platform_settings as ps} from './lib/platform-conf'
 import {TagToken} from './lib/tags'
 import { Application } from './lib/application';

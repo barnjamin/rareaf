@@ -10,7 +10,7 @@ import {
     get_cosign_txn,
     get_pay_txn,
 } from "./transactions"
-import {Wallet} from '../wallets/wallet'
+import {Wallet} from 'algorand-session-wallet'
 import algosdk, { Transaction } from 'algosdk';
 import { 
     AppConf,
