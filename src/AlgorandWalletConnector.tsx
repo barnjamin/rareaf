@@ -80,7 +80,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
                                 > 
                                 <div className='wallet-option'>
                                     <img className='wallet-branding' src={  allowedWallets['algo-signer'].img(props.darkMode)} />
-                                    <h5>Algo Signer</h5>
+                                    <h5>{allowedWallets['algo-signer'].displayName()}</h5>
                                 </div>
                                 </Button>
                         </li>
@@ -94,10 +94,11 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
                                 >
                                 <div className='wallet-option'>
                                     <img className='wallet-branding' src={ allowedWallets['my-algo-connect'].img(props.darkMode)  } /> 
-                                    <h5>MyAlgo Connect</h5>
+                                    <h5>{allowedWallets['my-algo-connect'].displayName()}</h5>
                                 </div>
                             </Button>
                         </li>
+
                         <li>
                             <Button id='insecure-wallet' 
                                 large={true} 
@@ -107,8 +108,8 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
                                 onClick={handleSelectedWallet}
                                 > 
                                 <div className='wallet-option'>
-                                    <Icon icon='unlock' className='wallet-branding' />
-                                    <h5>Insecure Wallet</h5>
+                                    <img className='wallet-branding' src={ allowedWallets['insecure-wallet'].img(props.darkMode)  } /> 
+                                    <h5>{allowedWallets['insecure-wallet'].displayName()}</h5>
                                 </div>
                             </Button>
                         </li>
