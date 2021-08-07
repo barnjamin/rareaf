@@ -40,15 +40,21 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
     function handleDisplayWalletSelection() { setSelectorOpen(true) }
 
     async function handleSelectedWallet(e) {
-        const tgt = e.currentTarget
-        const sw = new SessionWallet(ps.algod.network, tgt.id)
+        const choice = e.currentTarget.id
+
+        if(!(choice in allowedWallets)) {
+            props.sessionWallet.disconnect()
+            return setSelectorOpen(false)
+        }
+
+        const sw = new SessionWallet(props.sessionWallet.network, choice)
 
         if(!await sw.connect()) {
             sw.disconnect()
             showErrorToaster("Couldn't connect to wallet") 
-        }else{
-            props.updateWallet(sw)
         }
+
+        props.updateWallet(sw)
 
         setSelectorOpen(false)
     }
@@ -61,7 +67,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
     const walletOptions = []
     for(const [k,v] of Object.entries(allowedWallets)){
         walletOptions.push((
-        <li>
+        <li key={k}>
             <Button id={k}
                 large={true} 
                 fill={true} 
