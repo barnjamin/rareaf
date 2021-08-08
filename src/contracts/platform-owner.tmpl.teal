@@ -9,6 +9,10 @@ int 1
 gtxn 0 TypeEnum
 int appl
 ==
+gtxn 0 OnCompletion
+int NoOp
+==
+&&
 gtxn 0 ApplicationID
 load 0
 ==
