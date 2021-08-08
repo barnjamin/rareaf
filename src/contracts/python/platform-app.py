@@ -106,7 +106,7 @@ def approval():
     )
 
 
-    deplatform_listing = And(  
+    delist_listing = And(  
         # Sent by admin
         Gtxn[0].sender() == Global.creator_address() ,
 
@@ -129,9 +129,9 @@ def approval():
         [Txn.application_args[0] == action_untag,       Return(untag_listing)],   # App approves untag coming from listing creator
         [Txn.application_args[0] == action_dprice,      Return(price_decrease_listing)], # App validates caller 
         [Txn.application_args[0] == action_iprice,      Return(price_increase_listing)], # App validates caller 
-        [Txn.application_args[0] == action_delete,      Return(delete_listing)],  # App approves sender owns listing
-        [Txn.application_args[0] == action_purchase,    Return(purchase_listing)], # App removes listing from local state
-        [Txn.application_args[0] == action_deplatform,  Return(deplatform_listing)] # App removes listing from local state
+        [Txn.application_args[0] == action_delete,      Return(delete_listing)],    # App approves sender owns listing
+        [Txn.application_args[0] == action_purchase,    Return(purchase_listing)],  # App removes listing from local state
+        [Txn.application_args[0] == action_safety,      Return(delist_listing)]     # App removes listing from local state
     )
 
 

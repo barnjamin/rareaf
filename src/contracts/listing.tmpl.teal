@@ -36,7 +36,7 @@ pushbytes 0x70726963655f6465637265617365 // "price_decrease"
 ==
 ||
 gtxna 0 ApplicationArgs 0
-pushbytes 0x6465706c6174666f726d // "deplatform"
+pushbytes 0x736166657479 // "safety"
 ==
 ||
 bnz l6

@@ -70,7 +70,7 @@ def listing():
         Gtxn[0].application_args[0] == action_tag, 
         Gtxn[0].application_args[0] == action_untag, 
         Gtxn[0].application_args[0] == action_dprice,
-        Gtxn[0].application_args[0] == action_deplatform
+        Gtxn[0].application_args[0] == action_safety
     )
     app_validate = valid_app_call(Gtxn[0], _app_id.load())
 

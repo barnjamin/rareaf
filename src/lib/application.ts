@@ -1,5 +1,5 @@
 import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash, get_platform_owner } from "./contracts"
-import { addrToB64, sendWait, getSuggested, getTransaction } from "./algorand"
+import { addrToB64, sendWait, getSuggested, getTransaction, getLogicFromTransaction } from "./algorand"
 import {
     get_app_update_txn, 
     get_app_create_txn,  
@@ -18,6 +18,7 @@ import {
     get_template_vars
 } from "./platform-conf";
 import { showErrorToaster, showInfo } from "../Toaster";
+import {TagToken} from './tags'
 
 
 
@@ -174,9 +175,7 @@ export class Application {
         algosdk.assignGroupID(grouped)
         const [s_cosign_txn, /* s_destroy_px */] = await wallet.signTxn(grouped)
 
-        const ls = await get_platform_owner(this.getVars({
-            "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr),
-        }))
+        const ls = await getLogicFromTransaction(this.conf.owner_addr)
 
         const s_destroy_px = algosdk.signLogicSigTransaction(destroy_px, ls)
 
@@ -189,25 +188,22 @@ export class Application {
         showInfo("Destroying tag tokens")
         const destroys = []
         for(let tidx in this.conf.tags){
-            const tag = this.conf.tags[tidx]
-            destroys.push(tag.destroy(wallet))
-        }
-        const results = await Promise.all(destroys)
-
-        if(results.filter(r=>{r === undefined}).length>0){
-            showErrorToaster("Could not destroy all tag tokens")
-            return this.conf
+            const t = this.conf.tags[tidx]
+            const tag = new TagToken(t.name, t.id)
+            await tag.destroy(wallet)
         }
         this.conf.tags = []
 
 
         // Destroy price token
         showInfo("Destroying price token")
-        if(!await this.destroyPriceToken(wallet)){
-            showErrorToaster("Couldn't delete price token")
-            return this.conf
+        if(this.conf.price_id !== 0) {
+            if(!await this.destroyPriceToken(wallet)){
+                showErrorToaster("Couldn't delete price token")
+                return this.conf
+            }
+            this.conf.price_id = 0
         }
-        this.conf.price_id = 0
 
         // Return algos to admin
         if(this.conf.owner_addr !== ""){
@@ -222,8 +218,8 @@ export class Application {
             algosdk.assignGroupID(grouped)
 
             const [s_cosign_txn, /* s_pay_txn */] = await wallet.signTxn(grouped)
-            const ls = await get_platform_owner(this.getVars({ "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr) }))
 
+            const ls = await getLogicFromTransaction(this.conf.owner_addr)
             const s_pay_txn = algosdk.signLogicSigTransaction(pay_txn, ls)
 
             if((await sendWait([s_cosign_txn, s_pay_txn])) === undefined){

@@ -48,8 +48,7 @@ export default function NFTViewer(props: NFTViewerProps) {
         isOptedIntoApp(props.acct)
             .then((oi)=>{ 
                 if(subscribed) setOptedIn(oi) 
-            })
-
+            }).catch((err)=>{ console.error(err) })
         return ()=>{subscribed=false}
 
     }, [props.acct])
@@ -92,7 +91,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             await handleOptIn()
 
             showInfo("Creating listing transaction")
-            const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
+            const lst = new Listing(price, parseInt(id), props.acct)
             await lst.doCreate(props.wallet)
 
             if(tags.length > 0 ){
@@ -103,6 +102,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             history.push("/listing/"+lst.contract_addr)
 
         }catch(error){ 
+            console.error(error)
             showErrorToaster("Failed to create listing")
         }
 

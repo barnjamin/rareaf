@@ -18,31 +18,14 @@
     "explorer":"algoscan.app",
     "application": {
         "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
-        "app_id": 21166538,
-        "price_id": 21166573,
-        "owner_addr": "Y5GPVW55QWXQ5BDXG5TSC7WW66IMXM33FJXJP736JGPGT2SGLBUFW6ESRY",
+        "app_id": 21963064,
+        "price_id": 21963098,
+        "owner_addr": "RRD635EQSU7JNBXP77KR6UKJSN5XSKM4XU3GCLY757KNJRJ7QTTSEFEK2U",
         "name": "RareAF",
         "unit": "raf",
         "fee_amt": 10000,
-        "tags": [
-            {
-                "name": "image",
-                "id": 21166637
-            },
-            {
-                "name": "generative-art",
-                "id": 21166653
-            },
-            {
-                "name": "gif",
-                "id": 21166666
-            },
-            {
-                "name": "pixel-art",
-                "id": 21166689
-            }
-        ],
-        "listing_hash": "b64(T38PSgREXmrVLsN3OsGqmoM1OHCzVvYqY8/hKsfFLT8=)",
+        "tags": [],
+        "listing_hash": "b64(5P0GmxbaPMC61GpBDv8dpgkIEJwd5W1qC22IiA5Qjbk=)",
         "seed_amt": 5000000,
         "max_price": 10000000000
     },
