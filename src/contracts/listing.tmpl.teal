@@ -35,6 +35,10 @@ gtxna 0 ApplicationArgs 0
 pushbytes 0x70726963655f6465637265617365 // "price_decrease"
 ==
 ||
+gtxna 0 ApplicationArgs 0
+pushbytes 0x6465706c6174666f726d // "deplatform"
+==
+||
 bnz l6
 err
 l6:
