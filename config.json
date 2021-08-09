@@ -24,7 +24,20 @@
         "name": "RareAF",
         "unit": "raf",
         "fee_amt": 10000,
-        "tags": [],
+        "tags": [
+            {
+                "name": "image",
+                "id": 22040659
+            },
+            {
+                "name": "generative-art",
+                "id": 22040679
+            },
+            {
+                "name": "gif",
+                "id": 22040709
+            }
+        ],
         "listing_hash": "b64(5P0GmxbaPMC61GpBDv8dpgkIEJwd5W1qC22IiA5Qjbk=)",
         "seed_amt": 5000000,
         "max_price": 10000000000
