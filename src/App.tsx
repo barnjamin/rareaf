@@ -34,10 +34,11 @@ export default class App extends React.Component<AppProps, AppState> {
   constructor(props) {
     super(props)
 
+    const sw = new SessionWallet(ps.algod.network)
     this.state = { 
-      sessionWallet: new SessionWallet(ps.algod.network) ,
-      accts: [],
-      connected: false
+      sessionWallet:  sw,
+      accts: sw.accountList(),
+      connected: sw.connected(),
     }
 
     this.updateWallet    = this.updateWallet.bind(this)

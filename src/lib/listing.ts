@@ -58,8 +58,6 @@ export class Listing {
         const lsig = await get_listing_sig(this.getVars())
         this.contract_addr = lsig.address();
 
-        console.log(lsig.address())
-
         const args = [Method.Create, uintToB64(this.price), Buffer.from(lsig.logic).toString('base64')]
 
         const suggestedParams = await getSuggested(10)
@@ -79,7 +77,6 @@ export class Listing {
 
         const grouped = [app_call_txn, seed_txn, asa_opt_in, price_opt_in, asa_send, price_send, asa_cfg]
 
-        console.log(grouped)
         algosdk.assignGroupID(grouped)
 
         const [s_app_call_txn, s_seed_txn, /*asa_optin*/, /*price_optin*/,s_asa_send, /*price_send*/, s_asa_cfg] = await wallet.signTxn(grouped)

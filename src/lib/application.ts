@@ -94,8 +94,6 @@ export class Application {
             "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr),
         }))
         
-        console.log(ls.address())
-        
         // Save it
         this.conf.owner_addr = ls.address()
 

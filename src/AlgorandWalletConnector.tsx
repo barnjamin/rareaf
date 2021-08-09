@@ -28,6 +28,8 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
     useEffect(()=>{ connectWallet() },[props.sessionWallet])
 
     async function connectWallet() {
+        if(props.sessionWallet.connected()) return
+
         await props.sessionWallet.connect()
         props.updateWallet(props.sessionWallet)
     }
