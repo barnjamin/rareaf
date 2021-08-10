@@ -1,0 +1,43 @@
+{
+    "domain": "YOUR DOMAIN",
+    "algod":{
+        "server":"https://testnet.algoexplorerapi.io",
+        "port":0,
+        "token":"",
+        "network": "TestNet"
+    },
+    "indexer": {
+        "server":"https://testnet.algoexplorerapi.io/idx2",
+        "port":0,
+        "token":""
+    },
+    "ipfs":{
+        "display":"https://cloudflare-ipfs.com/ipfs/",
+        "token":"YOUR nft.storage TOKEN" 
+    },
+    "explorer":"algoscan.app",
+    "application": {
+        "admin_addr": "YOUR ADDRESS",
+        "app_id": 0,
+        "price_id": 0,
+        "owner_addr": "",
+        "name": "YOUR APP NAME",
+        "unit": "YOUR APP SHORT NAME (3 char)",
+        "fee_amt": 10000,
+        "tags": [
+        ],
+        "listing_hash": "",
+        "seed_amt": 5000000,
+        "max_price": 10000000000
+    },
+    "contracts":{
+        "approval":"platform-approval.teal",
+        "clear":"platform-clear.teal",
+        "listing":"listing.teal",
+        "listing-positions":"listing.tmpl.teal.json"
+    },
+    "dev":{ 
+        "debug_txns":false,
+        "accounts":{ }
+    }
+}
