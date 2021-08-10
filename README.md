@@ -69,7 +69,7 @@ To get started:
 - fork this repository
 - `cp init.config.json config.json`
 - set the fields market with YOUR XXX
-- in the root dir run `npm run serve`
+- in the root dir run `npm install` then `npm run serve`
 - connect a wallet
 - navigate to the admin page
 - click "create"
@@ -83,5 +83,5 @@ To get started:
 #### WARNING #####
 the contracts have _not_ been audited. you are responsible for reading and validating that there is nothing dangerous.
 
-Happy to receive pull requests especially for the items in the todo list
+Happy to receive pull requests especially for the items in the todo list or improved docs
 
