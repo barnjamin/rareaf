@@ -1,12 +1,11 @@
 /* eslint-disable no-console */
 import {platform_settings as ps} from './platform-conf'
-import algosdk from 'algosdk'  
+import algosdk, {LogicSigAccount} from 'algosdk'  
 import Listing from "./listing";
 import { NFT } from "./nft";
 import { TagToken} from './tags'
 import { dummy_addr, get_platform_owner } from './contracts'
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
-import {LogicSig} from 'algosdk/dist/types/src/logicsig';
 
 
 type Holdings= {
@@ -38,7 +37,7 @@ export function getIndexer() {
     return indexer
 }
 
-export async function getLogicFromTransaction(addr: string): Promise<LogicSig> {
+export async function getLogicFromTransaction(addr: string): Promise<LogicSigAccount> {
     const indexer = getIndexer()
     const txns = await indexer.searchForTransactions()
         .address(addr).do()
@@ -47,7 +46,7 @@ export async function getLogicFromTransaction(addr: string): Promise<LogicSig> {
         const txn = txns.transactions[tidx]
         if(txn.sender == addr){
             const program_bytes = new Uint8Array(Buffer.from(txn.signature.logicsig.logic, "base64"));
-            return algosdk.makeLogicSig(program_bytes);
+            return new LogicSigAccount(program_bytes);
         }
     }
     return undefined

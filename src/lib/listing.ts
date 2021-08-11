@@ -58,7 +58,7 @@ export class Listing {
         const lsig = await get_listing_sig(this.getVars())
         this.contract_addr = lsig.address();
 
-        const args = [Method.Create, uintToB64(this.price), Buffer.from(lsig.logic).toString('base64')]
+        const args = [Method.Create, uintToB64(this.price), Buffer.from(lsig.lsig.logic).toString('base64')]
 
         const suggestedParams = await getSuggested(10)
 
