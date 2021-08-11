@@ -98,14 +98,14 @@ body {
 }
 
 .nft-card {
-	width: 30%;
+	width: 30vw;
 	img {
 		width: 100%;
 		box-shadow: $pt-elevation-shadow-2;
 	}
 }
 .listing-card {
-	width: 30%;
+	width: 30vw;
 	margin-bottom: 25px;
 	img {
 		width: 100%;
@@ -128,15 +128,23 @@ body {
 
 .listing-page {
 	.bp3-card {
-		width: 80%;
+		width: 66vw;
 	}
 }
-.nft-viewer {
+
+.nft-image {
 	img {
 		box-shadow: $pt-elevation-shadow-2;
 		width: 100%;
 	}
 }
+.nft-display {
+	justify-content: center;
+	.bp3-card {
+		width: 66vw;
+	}
+}
+
 .nft-details {
 	justify-content: space-between;
 }
@@ -144,9 +152,11 @@ body {
 	justify-content: left;
 	width: 50%;
 }
+
 .listing-actions {
 	justify-content: space-between;
 }
+
 .listing-price-edit {
 	justify-content: space-between;
 	button {

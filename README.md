@@ -9,9 +9,17 @@
 
 ```
 
-**Do not use on MainNet**
+**PLEASE do not use on MainNet yet**
+
+## Developers
+Please visit  [Setup](https://github.com/barnjamin/rareaf/wiki/Setup) page to create your own marketplace
+
+#### WARNING #####
+the contracts have _not_ been audited. you are responsible for reading and validating that there is nothing dangerous.
+
 
 Rare AF is _your_ NFT Marketplace
+----------------------------------
 
 - Fork this repo and configure it
 - Publish it on Cloudflare or Fleek or Github Pages
@@ -20,6 +28,7 @@ Rare AF is _your_ NFT Marketplace
 
 
 *huh?*
+------
 
 You own the platform, decide who has access and can customize its appearance. 
 
@@ -27,10 +36,14 @@ Rare AF showrooms let you display your digital assets.  Showrooms can be persona
 
 
 *how much tho?*
+---------------
 
-Fork it for free, configure it, publish it on a static hosting site. Then you set commision fees on the works that sell.
+Fork it for free, configure it for free, publish it for free on a static hosting site. You set commision fees on the works that sell.
 
-donate to this address (charity? Dao?)
+
+*donate to this address (charity? Dao?)*
+
+
 
 ```
 #TODO:
@@ -58,13 +71,3 @@ donate to this address (charity? Dao?)
       - Remove tags prior during purchase txn 
    
 ```
-
-## Developers
-Please visit  [Setup](https://github.com/barnjamin/rareaf/wiki/Setup) page to create your own marketplace
-
-
-
-#### WARNING #####
-the contracts have _not_ been audited. you are responsible for reading and validating that there is nothing dangerous.
-
-

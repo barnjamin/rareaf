@@ -185,7 +185,7 @@ function ListingViewer(props: ListingViewerProps) {
         return (
             <div className='container listing-page'>
                 <Card elevation={Elevation.TWO}>
-                    <div className='content nft-viewer' >
+                    <div className='content nft-image' >
                         <img className='content-img' src={listing.nft.imgSrc()} />
                     </div>
 
