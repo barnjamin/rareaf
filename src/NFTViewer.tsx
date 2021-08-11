@@ -122,14 +122,14 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     let editButtons = <div />
 
-    if(listingAddr !== "" && props.wallet !== undefined && nft !== undefined && nft.manager === props.wallet.getDefaultAccount()){
+    if(listingAddr == "" && props.wallet !== undefined && nft !== undefined && nft.manager === props.wallet.getDefaultAccount()){
         editButtons = (
-        <div className='container-right'>
-            <div className='content'>
-                <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
-                <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
+            <div className='container-right'>
+                <div className='content'>
+                    <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
+                    <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
+                </div>
             </div>
-        </div>
         )
     }
 

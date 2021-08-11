@@ -19,6 +19,14 @@ body {
 	padding: 20px;
 }
 
+.vertical-container {
+	display: flex;
+	flex-flow: column;
+	justify-content: space-around;
+	align-items: center;
+	padding: 20px;
+}
+
 .container-right {
 	display: flex;
 	flex-flow: row wrap;
@@ -105,8 +113,8 @@ body {
 	}
 }
 .listing-card {
-	width: 30vw;
-	margin-bottom: 25px;
+	width: 25vw;
+	margin: 15px;
 	img {
 		width: 100%;
 		box-shadow: $pt-elevation-shadow-2;
@@ -197,4 +205,13 @@ button {
 	}
 	display: block;
 	width: 69em;
+}
+.price-filter {
+	label.bp3-label {
+		margin-bottom: 0px;
+	}
+	button {
+		margin-bottom:0px;
+	}
+	align-items: flex-end;
 }

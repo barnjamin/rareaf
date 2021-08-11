@@ -66,7 +66,7 @@ export default class App extends React.Component<AppProps, AppState> {
       <Router history={this.props.history} >
         <Navbar >
           <Navbar.Group align={Alignment.LEFT}>
-            <Navbar.Heading><img height={"20px"} src={require('./img/default-monochrome.svg')}></img></Navbar.Heading>
+            <Navbar.Heading><a href='/'><img height={"20px"} src={require('./img/default-monochrome.svg')}></img></a></Navbar.Heading>
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
             <AnchorButton className='bp3-minimal' icon='clean' text='Mint' href="/mint" />

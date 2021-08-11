@@ -86,7 +86,7 @@ export async function isListing(address: string): Promise<boolean> {
     return hasPriceToken !== undefined
 }
 
-export async function getListings(tagName: string): Promise<Listing[]> {
+export async function getListings(tagName: string, minPrice=0, maxPrice=0): Promise<Listing[]> {
     const indexer  = getIndexer()
 
     let token_id = ps.application.price_id
@@ -98,7 +98,15 @@ export async function getListings(tagName: string): Promise<Listing[]> {
         token_id = tt.id
     }
 
-    const balances =  await indexer.lookupAssetBalances(token_id).currencyGreaterThan(0).do()
+    let lookup = indexer.lookupAssetBalances(token_id)
+    if(tagName !== undefined){
+        lookup = lookup.currencyGreaterThan(0)
+    }else{
+        if(maxPrice>0) lookup = lookup.currencyLessThan(maxPrice) 
+        lookup = lookup.currencyGreaterThan(minPrice)
+    }
+
+    const balances =  await lookup.do()
 
     const lp = []
     const listings = []
