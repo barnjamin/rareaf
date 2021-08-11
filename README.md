@@ -11,10 +11,7 @@
 
 ```
 
-**Do not use**
-
-
-**For real, don't**
+**Do not use on MainNet**
 
 Rare AF is _your_ NFT Marketplace
 
@@ -41,7 +38,7 @@ donate to this address (charity? Dao?)
 #TODO:
 
    Initialization:
-      - Config write to github? IPFS with link in global var on app?
+      - Config write to github? IPFS with link in global var on app? Set app params in app global state?
 
    IPFS:
       - Pin files?
@@ -65,23 +62,11 @@ donate to this address (charity? Dao?)
 ```
 
 ## Developers
-To get started:
-- fork this repository
-- `cp init.config.json config.json`
-- set the fields market with YOUR XXX
-- in the root dir run `npm install` then `npm run serve`
-- connect a wallet
-- navigate to the admin page
-- click "create"
-- copy the json generated in the `application` section over into your config, it will include owner addr, listing hash, price id and app id
-- restart the npm server
-- optionally create tags on the admin page by typing the tag name into the box and hitting enter (limited to 32 bytes - (short name of app + 1), dont use a colon), add the tag array created in the json to your config and restart the server
-- Set up static hosting on cloudflare or github or fleek or ipfs for your fork
-- Shill your market to artists
-- profit?
+Please visit  [Setup](https://github.com/barnjamin/rareaf/wiki/Setup) page to create your own marketplace
+
+
 
 #### WARNING #####
 the contracts have _not_ been audited. you are responsible for reading and validating that there is nothing dangerous.
 
-Happy to receive pull requests especially for the items in the todo list or improved docs
 
