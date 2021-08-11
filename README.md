@@ -1,5 +1,3 @@
-
-
 ```
 
    _____                _____   ________) 
@@ -16,7 +14,7 @@
 Rare AF is _your_ NFT Marketplace
 
 - Fork this repo and configure it
-- Publish it on Cloudflare or Fleek
+- Publish it on Cloudflare or Fleek or Github Pages
 - Mint NFTs, Exhibit them, List them for sale, Host others
 - Profit?
 
