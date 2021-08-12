@@ -3,17 +3,17 @@
 
 import * as React from 'react'
 import { storeNFT  } from './lib/ipfs'
-import IPFS from 'ipfs-core'
 import { Button, Elevation, FileInput, Card } from "@blueprintjs/core"
 import { NFT, NFTMetadata, emptyMetadata } from './lib/nft'
-import { platform_settings as ps } from './lib/platform-conf'
 import { showErrorToaster, showInfo } from './Toaster'
 import {Wallet} from 'algorand-session-wallet'
+import { ApplicationConfiguration } from './lib/application-conf'
 
 type MinterProps = {
     history: any 
     wallet: Wallet
     acct: string
+    ac: ApplicationConfiguration
 };
 
 export default function Minter(props: MinterProps){

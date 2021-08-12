@@ -1,4 +1,5 @@
-import { get_template_vars, platform_settings as ps} from './platform-conf'
+import { platform_settings as ps} from './platform-conf'
+import { ApplicationConfiguration, get_template_vars } from './application-conf'
 import { get_listing_sig, get_platform_owner } from './contracts'
 import {
     uintToB64, 
@@ -38,8 +39,9 @@ export class Listing {
 
     lsig: LogicSig
 
+    ac: ApplicationConfiguration
 
-    constructor(price: number, asset_id: number, creator_addr: string, contract_addr?: string) {
+    constructor(price: number, asset_id: number, creator_addr: string, ac: ApplicationConfiguration, contract_addr?: string) {
         this.price = price
         this.asset_id = asset_id
         this.creator_addr = creator_addr
@@ -48,7 +50,7 @@ export class Listing {
     }
 
     getVars() {
-        return get_template_vars({
+        return get_template_vars(this.ac, {
             "TMPL_ASSET_ID":"b64("+uintToB64(this.asset_id)+")",
             "TMPL_CREATOR_ADDR": addrToB64(this.creator_addr)
         })
@@ -84,7 +86,7 @@ export class Listing {
         const s_asa_opt_in = algosdk.signLogicSigTransactionObject(asa_opt_in, lsig);
         const s_price_opt_in = algosdk.signLogicSigTransactionObject(price_opt_in, lsig);
 
-        const platform_lsig = await get_platform_owner(get_template_vars({}))
+        const platform_lsig = await get_platform_owner(get_template_vars(this.ac, {}))
         const s_price_send = algosdk.signLogicSigTransactionObject(price_send, platform_lsig)
 
         const combined = [
@@ -133,7 +135,7 @@ export class Listing {
 
         const s_tag_optin_txn = algosdk.signLogicSigTransactionObject(tag_optin_txn, listing_lsig)
 
-        const platform_lsig = await get_platform_owner(get_template_vars({}))
+        const platform_lsig = await get_platform_owner(get_template_vars(this.ac, {}))
         const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, platform_lsig)
 
         const txngroup =  [s_app_call_txn, s_tag_optin_txn, s_tag_xfer_txn]
@@ -205,7 +207,7 @@ export class Listing {
 
         const [s_app_call_txn, /* price_xfer */] = await wallet.signTxn(grouped)
 
-        const platform_lsig = await get_platform_owner(get_template_vars({}))
+        const platform_lsig = await get_platform_owner(get_template_vars(this.ac, {}))
         const s_price_xfer_txn = algosdk.signLogicSigTransactionObject(price_xfer_txn, platform_lsig)
 
         return await sendWait([s_app_call_txn, s_price_xfer_txn])

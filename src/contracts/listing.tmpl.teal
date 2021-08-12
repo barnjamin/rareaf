@@ -384,7 +384,7 @@ load 1
 ==
 &&
 gtxn 1 Amount
-pushint 5000000 // 5000000
+pushint TMPL_SEED_AMT // TMPL_SEED_AMT
 ==
 &&
 &&

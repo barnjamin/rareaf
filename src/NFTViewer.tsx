@@ -8,15 +8,17 @@ import {Tag, Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classe
 import Listing from './lib/listing'
 import {Wallet} from 'algorand-session-wallet'
 import {NFT} from './lib/nft'
-import  {Tagger, MAX_LISTING_TAGS } from './Tagger'
+import {Tagger, MAX_LISTING_TAGS } from './Tagger'
 import {Application} from './lib/application'
 import {platform_settings as ps} from './lib/platform-conf'
-import { ErrorToaster, showErrorToaster, showInfo } from './Toaster'
+import { showErrorToaster, showInfo } from './Toaster'
+import { ApplicationConfiguration } from './lib/application-conf'
 
 type NFTViewerProps = {
     history: any
     wallet: Wallet
     acct: string
+    ac: ApplicationConfiguration
 }
 
 export default function NFTViewer(props: NFTViewerProps) {
@@ -102,7 +104,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             await handleOptIn()
 
             showInfo("Creating listing transaction")
-            const lst = new Listing(price, parseInt(id), props.acct)
+            const lst = new Listing(price, parseInt(id), props.acct, props.ac)
             await lst.doCreate(props.wallet)
 
             if(tags.length > 0 ){

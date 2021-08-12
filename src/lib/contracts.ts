@@ -1,7 +1,7 @@
 import {getAlgodClient} from './algorand'
 import algosdk, {LogicSigAccount} from 'algosdk'
 import {addrToB64, concatTypedArrays} from './algorand'
-import { platform_settings as ps, get_template_vars } from './platform-conf'
+import { platform_settings as ps } from './platform-conf'
 import {sha256} from 'js-sha256'
 
 //@ts-ignore
@@ -40,17 +40,18 @@ export async function get_listing_hash(vars: any): Promise<Buffer> {
 }
 
 export async function get_listing_compiled(vars: any) {
-    return get_contract_compiled(listing_template, get_template_vars(vars))
+    return get_contract_compiled(listing_template, vars)
 }
 
 export async function get_contract_compiled(template: string, vars: any) {
     const client = getAlgodClient()
     const populated = await populate_contract(template, vars)
+    console.log(populated)
     return client.compile(populated).do()
 }
 
 export async function get_approval_program(vars: any){
-    const compiled =  await get_contract_compiled(platform_approval_template, get_template_vars(vars))
+    const compiled =  await get_contract_compiled(platform_approval_template, vars)
     return new Uint8Array(Buffer.from(compiled.result, "base64"))
 }
 

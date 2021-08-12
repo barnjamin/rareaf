@@ -7,7 +7,7 @@ import {
   Route,
   Switch
 } from "react-router-dom";
-import { Alignment, AnchorButton, Navbar, Divider } from "@blueprintjs/core"
+import { Alignment, AnchorButton, Navbar } from "@blueprintjs/core"
 
 import Minter from './Minter'
 import Browser  from './Browser'
@@ -16,8 +16,10 @@ import NFTViewer from './NFTViewer'
 import Portfolio from './Portfolio'
 import ListingViewer from './ListingViewer'
 import Admin from './Admin'
-import {SessionWallet, Wallet} from 'algorand-session-wallet'
-import {platform_settings as ps} from './lib/platform-conf'
+import { SessionWallet } from 'algorand-session-wallet'
+import { PlatformConf, platform_settings as ps } from './lib/platform-conf'
+import { ApplicationConfiguration } from './lib/application-conf';
+import { createNoSubstitutionTemplateLiteral } from 'typescript';
 
 
 type AppProps = {
@@ -28,7 +30,9 @@ type AppState = {
   sessionWallet: SessionWallet
   accts: string[]
   connected: boolean
+  ac: ApplicationConfiguration 
 };
+
 
 export default class App extends React.Component<AppProps, AppState> {
   constructor(props) {
@@ -39,13 +43,23 @@ export default class App extends React.Component<AppProps, AppState> {
       sessionWallet:  sw,
       accts: sw.accountList(),
       connected: sw.connected(),
+      ac: ps.application,
     }
 
+
     this.updateWallet    = this.updateWallet.bind(this)
+    this.updateAppConf    = this.updateAppConf.bind(this)
+
+    this.initConfiguration()
   }
 
-  updateWallet(sw: SessionWallet){ 
-    this.setState({ sessionWallet:sw, accts: sw.accountList(), connected: sw.connected() }) 
+  updateWallet(sw: SessionWallet){ this.setState({ sessionWallet:sw, accts: sw.accountList(), connected: sw.connected() }) }
+  updateAppConf(ac: ApplicationConfiguration) { this.setState({ac: ac}) }
+
+  async initConfiguration(){
+    let appConf = await ApplicationConfiguration.fromLocalStorage()
+    if(appConf !== undefined)  return this.updateAppConf(appConf)
+    this.updateAppConf(await ApplicationConfiguration.fromNetwork(ps.application.id))
   }
 
   render() {
@@ -53,7 +67,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const acct = this.state.sessionWallet.getDefaultAccount()
 
     let adminNav = <div/>
-    if(this.state.connected  && (ps.application.admin_addr == "" || acct == ps.application.admin_addr)) {
+    if(this.state.connected  && (!ps.application.admin_addr  || acct == ps.application.admin_addr)) {
       adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
     }
 
@@ -86,24 +100,24 @@ export default class App extends React.Component<AppProps, AppState> {
         </Navbar>
         <Switch>
           <Route path="/portfolio" >
-            <Portfolio history={this.props.history} wallet={wallet} acct={acct} /> 
+            <Portfolio ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} /> 
           </Route>
           <Route path="/portfolio/:addr" >
-            <Portfolio history={this.props.history} wallet={wallet} acct={acct} /> 
+            <Portfolio ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} /> 
           </Route>
 
-          <Route path="/mint" children={<Minter history={this.props.history} wallet={wallet} acct={acct} /> } />
-          <Route path="/nft/:id" children={<NFTViewer history={this.props.history} wallet={wallet} acct={acct} /> } />
-          <Route path="/listing/:addr" children={<ListingViewer  history={this.props.history} wallet={wallet} acct={acct} />} />
+          <Route path="/mint" children={<Minter ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} /> } />
+          <Route path="/nft/:id" children={<NFTViewer ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} /> } />
+          <Route path="/listing/:addr" children={<ListingViewer ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} />} />
 
           <Route exact path="/" >
-            <Browser history={this.props.history} wallet={wallet} acct={acct} />
+            <Browser ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} />
           </Route>
           <Route path="/tag/:tag"  >
-            <Browser history={this.props.history} wallet={wallet} acct={acct} />
+            <Browser ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} />
           </Route>
           <Route path="/admin"  >
-            <Admin history={this.props.history} wallet={wallet} acct={acct} />
+            <Admin updateAppConf={this.updateAppConf} ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} />
           </Route>
         </Switch>
       </Router>

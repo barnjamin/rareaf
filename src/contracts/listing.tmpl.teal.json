@@ -1,1 +1,1 @@
-{"TMPL_CREATOR_ADDR": {"start": 45, "length": 32, "distance": 45}, "TMPL_ASSET_ID": {"start": 81, "length": 8, "distance": 4}}
+{"TMPL_CREATOR_ADDR": {"start": 45, "length": 32, "distance": 45}, "TMPL_ASSET_ID": {"start": 81, "length": 8, "distance": 4}, "TMPL_APP_ID": {"start": 94, "length": 0, "distance": 5}, "TMPL_PRICE_ID": {"start": 99, "length": 53, "distance": 5}, "TMPL_FEE_AMT": {"start": 157, "length": 26, "distance": 5}, "TMPL_SEED_AMT": {"start": 188, "length": 101, "distance": 5}}

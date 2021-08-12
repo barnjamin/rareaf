@@ -85,11 +85,25 @@ export function get_app_create_txn(suggestedParams, addr, approval, clear) {
    return {
         from:addr,
         type:'appl',
+        appGlobalByteSlices: 24,
+        appGlobalInts: 24,
         appLocalByteSlices: 16,
         appApprovalProgram: approval,
         appClearProgram: clear,
         ...suggestedParams
    } 
+}
+
+export function get_app_config_txn(suggestedParams, addr, id, params) {
+    return {
+        from: addr,
+        appArgs:params.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64')) }),
+        appIndex:ps.application.id,
+        appOnComplete: algosdk.OnApplicationComplete.NoOpOC,
+        type:"appl",
+        ...suggestedParams
+    }
+
 }
 
 export function get_app_update_txn(suggestedParams, addr, approval, clear, id) {
@@ -119,7 +133,7 @@ export function get_app_call_txn(suggestedParams, addr, args) {
     return {
         from: addr,
         appArgs:args.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64'))}),
-        appIndex:ps.application.app_id,
+        appIndex:ps.application.id,
         appOnComplete: algosdk.OnApplicationComplete.NoOpOC,
         type:"appl",
         ...suggestedParams

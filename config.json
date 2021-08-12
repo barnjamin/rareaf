@@ -1,4 +1,5 @@
 {
+
     "domain": "rare.af",
     "algod":{
         "server":"https://testnet.algoexplorerapi.io",
@@ -15,33 +16,11 @@
         "display":"https://cloudflare-ipfs.com/ipfs/",
         "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJnaXRodWJ8NTIwMjM2IiwiaXNzIjoibmZ0LXN0b3JhZ2UiLCJpYXQiOjE2MTc5MTEzNTMzOTQsIm5hbWUiOiJkZWZhdWx0In0.3Hkh9IHXK6OgmXBUsCK12ca0Iit9-dJgqdDtKcQiYZQ" 
     },
-    "explorer":"algoscan.app",
-    "application": {
-        "admin_addr": "7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
-        "app_id": 21963064,
-        "price_id": 21963098,
-        "owner_addr": "RRD635EQSU7JNBXP77KR6UKJSN5XSKM4XU3GCLY757KNJRJ7QTTSEFEK2U",
-        "name": "RareAF",
-        "unit": "raf",
-        "fee_amt": 10000,
-        "tags": [
-            {
-                "name": "image",
-                "id": 22040659
-            },
-            {
-                "name": "generative-art",
-                "id": 22040679
-            },
-            {
-                "name": "gif",
-                "id": 22040709
-            }
-        ],
-        "listing_hash": "b64(5P0GmxbaPMC61GpBDv8dpgkIEJwd5W1qC22IiA5Qjbk=)",
-        "seed_amt": 5000000,
-        "max_price": 10000000000
+    "application":{
+        "id":0,
+        "state_fields":["owner_addr", "name", "name", "unit", "owner_addr", "fee_amt", "seed_amt", "max_price", "listing_hash", "price_id"]
     },
+    "explorer":"algoscan.app",
     "contracts":{
         "approval":"platform-approval.teal",
         "clear":"platform-clear.teal",

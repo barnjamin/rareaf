@@ -1,4 +1,4 @@
-from pyteal import Bytes, Tmpl, Int
+from pyteal import Bytes, Tmpl, Int, App, Seq, If
 import json
 import os
 
@@ -14,21 +14,30 @@ def get_config():
     return config
 
 
+
+
 configuration = get_config()
 
 listing_key   = Bytes("listing")
-
 tag_key       = Bytes("tag:") 
 
-platform_fee  = Tmpl.Int("TMPL_FEE_AMT")
-platform_addr = Tmpl.Bytes("TMPL_OWNER_ADDR")
-platform_admin= Tmpl.Bytes("TMPL_ADMIN_ADDR")
 
-app_id        = Tmpl.Int("TMPL_APP_ID")
-price_token   = Tmpl.Int("TMPL_PRICE_ID")
+def get_var(name):
+    return App.globalGet(Bytes(name))
 
-seed_amt      = Int(int(configuration['application']['seed_amt']))
-max_price     = Int(int(configuration['application']['max_price']))
+platform_fee  = get_var("fee")
+platform_addr = get_var("owner_addr")
+seed_amt      = get_var("seed_amt")
+max_price     = get_var("max_price")
+price_token   = get_var("price_id")
+
+
+tmpl_seed_amt      = Tmpl.Int("TMPL_SEED_AMT")
+tmpl_platform_fee  = Tmpl.Int("TMPL_FEE_AMT")
+tmpl_price_token   = Tmpl.Int("TMPL_PRICE_ID")
+tmpl_app_id        = Tmpl.Int("TMPL_APP_ID")
+tmpl_platform_addr = Tmpl.Bytes("TMPL_OWNER_ADDR")
+
 
 action_create  = Bytes("create")
 action_tag     = Bytes("tag")  
@@ -38,3 +47,4 @@ action_dprice  = Bytes("price_decrease")
 action_delete  = Bytes("delete")
 action_purchase= Bytes("purchase")
 action_safety  = Bytes("safety")
+action_config  = Bytes("config")

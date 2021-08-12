@@ -11,7 +11,8 @@ import {
     get_asa_create_txn, 
     get_asa_destroy_txn, 
 } from './transactions'
-import { platform_settings as ps, get_template_vars } from './platform-conf';
+import { platform_settings as ps } from './platform-conf';
+import { ApplicationConfiguration, get_template_vars } from './application-conf';
 import { get_platform_owner } from './contracts';
 
 export class TagToken {
@@ -19,7 +20,6 @@ export class TagToken {
     id: number;
     name: string;
     constructor(name: string, id?: number) {
-
         //Check if its prefixed unit and remove it
         if(name.substr(0,3) == ps.application.unit)  name = name.substr(4)
 
@@ -50,7 +50,7 @@ export class TagToken {
         return true
     }
 
-    async create(wallet: Wallet): Promise<number> {
+    async create(ac: ApplicationConfiguration, wallet: Wallet): Promise<number> {
         const suggestedParams = await getSuggested(10)
 
         const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, ps.application.admin_addr))
@@ -67,7 +67,7 @@ export class TagToken {
 
         const [s_cosign_txn, /* create_txn */] = await wallet.signTxn(grouped)
 
-        const lsig = await get_platform_owner(get_template_vars({}))
+        const lsig = await get_platform_owner(get_template_vars(ac, {}))
 
         const s_create_txn = algosdk.signLogicSigTransaction(create_txn, lsig)
 

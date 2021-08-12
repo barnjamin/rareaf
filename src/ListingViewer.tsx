@@ -21,11 +21,13 @@ import {Wallet} from 'algorand-session-wallet'
 import {TagToken} from './lib/tags'
 import { MAX_LISTING_TAGS, Tagger} from './Tagger'
 import { showErrorToaster } from './Toaster'
+import { ApplicationConfiguration } from './lib/application-conf'
 
 type ListingViewerProps = {
     history: any
     acct: string
     wallet: Wallet
+    ac: ApplicationConfiguration
 };
 
 
@@ -39,7 +41,7 @@ function ListingViewer(props: ListingViewerProps) {
     const [price, setPrice]     = React.useState(0);
     const [updateable, setUpdateable] = React.useState(false)
 
-    React.useEffect(()=>{ getListing(addr).then((listing)=>{ setListing(listing) }) }, [])
+    React.useEffect(()=>{ getListing(props.ac, addr).then((listing)=>{ setListing(listing) }) }, [])
 
     async function handleCancelListing(){
         setLoading(true)

@@ -9,12 +9,14 @@ import {ListingCard} from './ListingCard'
 
 import {Wallet} from 'algorand-session-wallet'
 import { Button, Label, NumericInput } from '@blueprintjs/core'
+import { ApplicationConfiguration } from './lib/application-conf'
 
 
 type BrowserProps = {
     history: any
     wallet: Wallet 
     acct: string
+    ac: ApplicationConfiguration
 };
 
 export default function Browser(props: BrowserProps) {
@@ -38,7 +40,7 @@ export default function Browser(props: BrowserProps) {
     React.useEffect(()=>{
         let subscribed = true
         if(!loaded && filtersChanged)
-            getListings(tag, minPrice, maxPrice).then((l)=>{ 
+            getListings(props.ac, tag, minPrice, maxPrice).then((l)=>{ 
                 if(!subscribed) return
 
                 setLoaded(true)

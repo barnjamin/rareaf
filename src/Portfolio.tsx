@@ -13,12 +13,14 @@ import { Wallet } from 'algorand-session-wallet'
 import { Listing } from './lib/listing'
 import { NFT } from './lib/nft'
 import { getPortfolio } from './lib/algorand'
+import { ApplicationConfiguration } from './lib/application-conf'
 
 
 type PortfolioProps = { 
     history: any
     wallet: Wallet
     acct: string
+    ac: ApplicationConfiguration
 };
 
 export default function Portfolio(props: PortfolioProps) {
@@ -36,7 +38,7 @@ export default function Portfolio(props: PortfolioProps) {
 
         let isSubscribed = true
 
-        getPortfolio(port_acct).then(p=>{
+        getPortfolio(props.ac, port_acct).then(p=>{
           if (isSubscribed) {
             setListings(p['listings'])
             setNFTs(p['nfts'])

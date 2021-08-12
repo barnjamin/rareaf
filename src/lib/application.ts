@@ -9,14 +9,14 @@ import {
     get_asa_destroy_txn,
     get_cosign_txn,
     get_pay_txn,
+    get_app_config_txn,
 } from "./transactions"
 import {Wallet} from 'algorand-session-wallet'
 import algosdk, { Transaction } from 'algosdk';
 import { 
-    AppConf,
     platform_settings as ps ,
-    get_template_vars
 } from "./platform-conf";
+import {makeArgs, get_template_vars, ApplicationConfiguration} from './application-conf'
 import { showErrorToaster, showInfo } from "../Toaster";
 import {TagToken} from './tags'
 
@@ -34,9 +34,9 @@ export enum Method {
 
 
 export class Application {
-    conf: AppConf;
+    conf: ApplicationConfiguration;
 
-    constructor(settings: AppConf){
+    constructor(settings: ApplicationConfiguration){
         this.conf = settings
     }
 
@@ -44,14 +44,14 @@ export class Application {
         const suggested = await getSuggested(10)
         const addr = wallet.getDefaultAccount()
 
-        const optin = new Transaction(get_app_optin_txn(suggested, addr, this.conf.app_id))
+        const optin = new Transaction(get_app_optin_txn(suggested, addr, this.conf.id))
         const [signed] = await wallet.signTxn([optin])
         const result = await sendWait([signed])
 
         return result  
     }
 
-    async create(wallet: Wallet): Promise<AppConf> {
+    async create(wallet: Wallet): Promise<ApplicationConfiguration> {
         this.conf.admin_addr = wallet.getDefaultAccount()
 
         // Create blank app to reserve ID
@@ -112,20 +112,27 @@ export class Application {
 
         await this.setListingHash()
 
+        //Set this in create or its already set
+
         const app = await get_approval_program(this.getVars({})) 
         const clear = await get_clear_program({})
 
-        if (!this.conf.app_id){
+        if (!this.conf.id){
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.admin_addr, app, clear))
             const [signed]   = await wallet.signTxn([create_txn])
             const result     = await sendWait([signed])
 
-            this.conf.app_id = result['application-index']
+            this.conf.id = result['application-index']
             console.log(this.conf)
         }else{
-            const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.app_id))
-            const [signed]   = await wallet.signTxn([update_txn])
-            await sendWait([signed])
+            const params = makeArgs(this.conf)
+            const config_txn = new Transaction(get_app_config_txn(suggestedParams, this.conf.admin_addr, this.conf.id, params))
+
+            console.log(config_txn)
+
+            const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.id))
+            const [s_update_txn, s_config_txn]   = await wallet.signTxn([update_txn, config_txn])
+            await sendWait([s_update_txn, s_config_txn])
         }
     }
 
@@ -180,7 +187,7 @@ export class Application {
         return (await sendWait([s_cosign_txn, s_destroy_px])) !== undefined
     } 
 
-    async destroyApplication(wallet: Wallet): Promise<AppConf> {
+    async destroyApplication(wallet: Wallet): Promise<ApplicationConfiguration> {
 
         // Destroy tag tokens
         showInfo("Destroying tag tokens")
@@ -229,7 +236,7 @@ export class Application {
         // Destroy application
         showInfo("Destroying application")
         const suggestedParams = await getSuggested(10)
-        const destroy_app_txn = new Transaction(get_app_destroy_txn(suggestedParams, this.conf.admin_addr, this.conf.app_id))
+        const destroy_app_txn = new Transaction(get_app_destroy_txn(suggestedParams, this.conf.admin_addr, this.conf.id))
         const [s_destroy_app_txn] = await wallet.signTxn([destroy_app_txn])
         if((await sendWait([s_destroy_app_txn])) == undefined){
             showErrorToaster("Couldn't destroy application")
@@ -237,12 +244,12 @@ export class Application {
         }
 
         this.conf.listing_hash = ""
-        this.conf.app_id = 0
+        this.conf.id = 0
         return this.conf
     }
 
 
     getVars(overwrite: any): any {
-        return get_template_vars(overwrite)
+        return get_template_vars(this.conf, overwrite)
     }
 }

@@ -4,7 +4,8 @@ import algosdk, {LogicSigAccount} from 'algosdk'
 import Listing from "./listing";
 import { NFT } from "./nft";
 import { TagToken} from './tags'
-import { dummy_addr, get_platform_owner } from './contracts'
+import { dummy_addr } from './contracts'
+import { ApplicationConfiguration } from './application-conf';
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
 
 
@@ -65,10 +66,16 @@ export async function getTags(): Promise<TagToken[]> {
     })
 }
 
+export async function getGlobalState(app_id: number): Promise<any> {
+    const client = getAlgodClient()
+    const result = await client.getApplicationByID(app_id).do()
+    console.log(result)
+}
+
 export async function isOptedIntoApp(address: string): Promise<boolean> {
     const client = getAlgodClient()
     const result = await client.accountInformation(address).do()
-    const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ps.application.app_id })
+    const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ps.application.id })
     return optedIn !== undefined 
 }
 
@@ -86,7 +93,7 @@ export async function isListing(address: string): Promise<boolean> {
     return hasPriceToken !== undefined
 }
 
-export async function getListings(tagName: string, minPrice=0, maxPrice=0): Promise<Listing[]> {
+export async function getListings(ac: ApplicationConfiguration, tagName: string, minPrice=0, maxPrice=0): Promise<Listing[]> {
     const indexer  = getIndexer()
 
     let token_id = ps.application.price_id
@@ -115,7 +122,7 @@ export async function getListings(tagName: string, minPrice=0, maxPrice=0): Prom
 
         if (b.address == ps.application.owner_addr || b.amount == 0) continue;
 
-        lp.push(getListing(b.address).then((listing)=>{
+        lp.push(getListing(ac, b.address).then((listing)=>{
              listings.push(listing)
         }))
     }
@@ -138,7 +145,7 @@ export async function getTagToken(name: string): Promise<TagToken> {
 }
 
 
-export async function getPortfolio(addr: string): Promise<Portfolio> {
+export async function getPortfolio(ac: ApplicationConfiguration, addr: string): Promise<Portfolio> {
     const client = getAlgodClient()
     const portfolio: Portfolio = {listings:[], nfts:[]}
     let acct = undefined
@@ -152,11 +159,11 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
     const lp = []
     for(let aidx in acct['apps-local-state']){
         const als = acct['apps-local-state'][aidx]
-        if(als.id !== ps.application.app_id) continue
+        if(als.id !== ps.application.id) continue
 
         for(let kidx in als['key-value']) {
             const kv = als['key-value'][kidx]
-            lp.push(getListing(b64ToAddr(kv.key)).then((listing)=>{
+            lp.push(getListing(ac, b64ToAddr(kv.key)).then((listing)=>{
                 if(listing!==undefined) portfolio.listings.push(listing)
             }))
         }
@@ -181,13 +188,13 @@ export async function getPortfolio(addr: string): Promise<Portfolio> {
     return portfolio
 }
 
-export async function getListing(addr: string): Promise<Listing> {
+export async function getListing(ac: ApplicationConfiguration, addr: string): Promise<Listing> {
     const holdings  = await getHoldingsFromListingAddress(addr)
     if(holdings.nft === undefined) return undefined;
 
     const creator  = await getCreator(addr, holdings.nft.asset_id)
 
-    let l = new Listing(holdings.price, holdings.nft.asset_id, creator, addr)
+    let l = new Listing(holdings.price, holdings.nft.asset_id, creator, ac, addr)
     l.tags = holdings.tags
     l.nft = holdings.nft
 

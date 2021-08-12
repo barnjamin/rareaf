@@ -41,7 +41,7 @@ def approval():
         price.load() <= max_price,
     )
 
-    # TODO, check that contract doesnt already hold 1
+    # TODO, check that contract doesnt already hold this one 
     tag_listing = And( 
         Global.group_size() == Int(3),
         valid_platform_asset(), # first and only foreign arg
@@ -117,6 +117,21 @@ def approval():
     )
 
 
+
+    field_set = []
+    for idx in range(len(configuration['application']['state_fields'])):
+        field = configuration['application']['state_fields'][idx]
+        field_set.append(App.globalPut(Bytes(field), Txn.application_args[idx+1]))
+    field_set.append(Int(1))
+
+    application_config = And(
+        Txn.sender() == Global.creator_address(),
+        # Set fields that come in how are they stored? app args 
+        Seq(field_set),
+        Int(1)
+    )
+
+
     return Cond(
         [Txn.application_id() == Int(0),                        on_creation],
         [Txn.on_completion()  == OnComplete.DeleteApplication,  on_delete],
@@ -131,13 +146,13 @@ def approval():
         [Txn.application_args[0] == action_iprice,      Return(price_increase_listing)], # App validates caller 
         [Txn.application_args[0] == action_delete,      Return(delete_listing)],    # App approves sender owns listing
         [Txn.application_args[0] == action_purchase,    Return(purchase_listing)],  # App removes listing from local state
-        [Txn.application_args[0] == action_safety,      Return(delist_listing)]     # App removes listing from local state
+        [Txn.application_args[0] == action_safety,      Return(delist_listing)],     # App removes listing from local state
+        [Txn.application_args[0] == action_config,      Return(application_config)]     # App removes listing from local state
     )
 
 
 def clear():
     return Int(1)
-
 
 
 if __name__ == "__main__":

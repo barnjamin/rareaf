@@ -5,29 +5,31 @@ import * as React from 'react'
 import {Prompt} from 'react-router-dom'
 
 import { Wallet } from 'algorand-session-wallet'
-import { platform_settings as ps} from './lib/platform-conf'
 import {TagToken} from './lib/tags'
 import { Application } from './lib/application';
 import { Card, Tag, Button, Tabs, Tab, InputGroup, TagInput, Classes, Elevation } from '@blueprintjs/core'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
 import { getTags } from './lib/algorand'
+import { platform_settings as ps } from './lib/platform-conf'
+import { ApplicationConfiguration } from './lib/application-conf'
 import { showErrorToaster, showInfo } from './Toaster'
 
 type AdminProps = { 
     history: any
     wallet: Wallet
     acct: string
+    ac: ApplicationConfiguration
+    updateAppConf(ApplicationConfiguration)
 };
 
 export default function Admin(props: AdminProps) {
-    if (props.acct != ps.application.admin_addr && ps.application.admin_addr != "")  return (<div className='container'><p>no</p></div>)
+    if (props.ac.admin_addr && props.acct == props.ac.admin_addr )  return (<div className='container'><p>no</p></div>)
 
     const [algod, setAlgod] = React.useState(ps.algod)
     const [indexer, setIndexer] = React.useState(ps.indexer)
     const [ipfs, setIPFS] = React.useState(ps.ipfs)
     const [loading, setLoading] = React.useState(false)
-    const [appConf, setApp] = React.useState(ps.application)
     const [tags, setTags] = React.useState(ps.application.tags)
 
     function setAlgodValue (k: string, v: string){
@@ -46,7 +48,7 @@ export default function Admin(props: AdminProps) {
 
     function setAppConf(k: string, v: string) {
         const val = k=="fee_amt"? parseInt(v) :v
-        setApp(appConf =>({ ...appConf, [k]: val }))
+        props.updateAppConf({ ...props.ac, [k]: val })
     }
 
     function handleTagAdd(e){
@@ -60,7 +62,7 @@ export default function Admin(props: AdminProps) {
         setLoading(true)
 
         try{
-            tag.create(props.wallet)
+            tag.create(props.ac, props.wallet)
             .then((id)=>{ setTags(old=>[...old, tag]) })
             .finally(()=>{ setLoading(false) })
         }catch(error){
@@ -93,10 +95,10 @@ export default function Admin(props: AdminProps) {
         setLoading(true)
 
         showInfo("Creating Application")
-        const app  = new Application(appConf)
+        const app  = new Application(props.ac)
 
         app.create(props.wallet)
-        .then((ac)=>{ setApp(appConf=>({ ...appConf, ...ac })) })
+        .then((ac)=>{ props.updateAppConf({...props.ac, ...ac }) })
         .finally(()=>{ setLoading(false) })
     }
 
@@ -105,7 +107,7 @@ export default function Admin(props: AdminProps) {
 
         showInfo("Updating Application")
 
-        const app  = new Application(appConf)
+        const app  = new Application(props.ac)
 
         app.updateApplication(props.wallet)
         .finally(()=>{ setLoading(false) })
@@ -114,11 +116,11 @@ export default function Admin(props: AdminProps) {
     function destroyApp(){
         setLoading(true)
 
-        const app  = new Application(appConf)
+        const app  = new Application(props.ac)
         showInfo("Destroying Application")
 
         app.destroyApplication(props.wallet)
-        .then((ac)=>{setApp(appConf=>({...appConf, ...ac}))})
+        .then((ac)=>{props.updateAppConf({...props.ac, ...ac})})
         .finally(()=>{ setLoading(false) })
 
     }
@@ -144,16 +146,16 @@ export default function Admin(props: AdminProps) {
         set={setAppConf} 
         create={createApp} 
         loading={loading} 
-        {...appConf} 
+        {...props.ac} 
         />
 
-    if (appConf.app_id>0){
+    if (props.ac.id>0){
         appComponent = <ApplicationUpdater 
             set={setAppConf} 
             update={updateApp} 
             destroy={destroyApp}
             loading={loading} 
-            {...appConf} 
+            {...props.ac} 
         />
     }
 
@@ -163,7 +165,7 @@ export default function Admin(props: AdminProps) {
             ["algod"]: algod,
             ["indexer"]: indexer,
             ["ipfs"]: ipfs,
-            ["application"]:{...appConf, tags:tags},
+            ["application"]:{...props.ac, tags:tags},
         }, undefined, 4)
     }
 
@@ -325,7 +327,7 @@ function ApplicationCreator(props: ApplicationCreatorProps) {
                 onChange={e=>{props.set('fee_amt', e.target.value)}}
                 placeholder="Fee"
                 large={true}
-                value={props.fee_amt.toString()}
+                value={props.fee_amt?props.fee_amt.toString():""}
             />
             <Button 
             minimal={true} outlined={true}
@@ -364,7 +366,7 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
                 onChange={e=>{props.set('fee_amt', e.target.value)}}
                 placeholder="Fee"
                 large={true}
-                value={props.fee_amt.toString()}
+                value={props.fee_amt?props.fee_amt.toString():""}
             />
             <Button 
             minimal={true}
@@ -387,6 +389,8 @@ type TagCreatorProps ={
 };
 
 function TagCreator(props: TagCreatorProps) {
+    const tags = props.tags !== undefined?props.tags:[]
+
     return (
         <div>
             <TagInput 
@@ -395,7 +399,7 @@ function TagCreator(props: TagCreatorProps) {
                 onAdd={props.handleAdd}
                 onRemove={props.handleRemove}
                 placeholder='Add listing tags...'
-                values={props.tags.map(t=>{ return <Tag key={t.id}>{t.name}</Tag> })}
+                values={tags.map(t=>{ return <Tag key={t.id}>{t.name}</Tag> })}
             />
             <Button minimal={true} outlined={true} 
             loading={props.loading} onClick={props.searchForTags} text='Recover tags'></Button>
