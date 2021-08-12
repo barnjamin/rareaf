@@ -9,7 +9,7 @@ Actions:
     - decrease_price: Xfers price tokens from a listing
     - delete: Destroys listing by sending Platform tokens (Price/Tags) back to platform owner and NFT/Algos back to creator
     - purchase: Xfers NFT to buyer, $fee Algos to platform with close to creator, and platform tokens back to platform owner 
-    - deplatform: Same as delete but issued by the admin accouont in the case that there is a dangerous bug or some legal issue
+    - safety: Same as delete but issued by the admin accouont in the case that there is a dangerous bug or some legal issue
 
 Roles:
 
