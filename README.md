@@ -48,15 +48,18 @@ Fork it for free, configure it for free, publish it for free on a static hosting
 ```
 #TODO:
 
+   Testing: 
+	https://github.com/barnjamin/rareaf/pull/8
+
    Initialization:
       - Config write to github? IPFS with link in global var on app? Set app params in app global state?
+	https://github.com/barnjamin/rareaf/pull/11
 
    IPFS:
       - Pin files?
 
    General:
       - Convert numbers to bignum
-      - Add descriptive messages for the txns being signed
       - Add more currencies for price tokens
       - Add other contract type hashes
 
@@ -64,10 +67,6 @@ Fork it for free, configure it for free, publish it for free on a static hosting
       - Add more fields for metadata
 
    Browse:
-      - Add filters on browse page for tags/price
       - Check filetype/dimensions for display
 
-   Purchase
-      - Remove tags prior during purchase txn 
-   
 ```
