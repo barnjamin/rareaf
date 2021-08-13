@@ -18,11 +18,11 @@ export class ApplicationConfiguration  {
         public fields: string[]     = []
     ){ }
 
-    static async fromNetwork(app_id: number): Promise<ApplicationConfiguration> {
-        if(app_id==0){ return new ApplicationConfiguration() }
+    static async fromNetwork(ac: ApplicationConfiguration): Promise<ApplicationConfiguration> {
+        if(ac.id==0){ return {...ac} }
 
         // get global state of application
-        const result = await getGlobalState(app_id)
+        const result = await getGlobalState(ac.id)
 
         //Parse result fields into appropriate fields
         console.log(result)
@@ -30,11 +30,11 @@ export class ApplicationConfiguration  {
         return undefined;
     }
 
-    static async fromLocalStorage(): Promise<ApplicationConfiguration> {
+    static async fromLocalStorage(ac: ApplicationConfiguration): Promise<ApplicationConfiguration> {
+        if(ac.id==0){ return {...ac} }
+
         return undefined;
     }
-
-
 
 }
 export function get_template_vars(ac: ApplicationConfiguration, override: any): any {
@@ -43,7 +43,7 @@ export function get_template_vars(ac: ApplicationConfiguration, override: any): 
         "TMPL_ADMIN_ADDR": addrToB64(ac.admin_addr),
         "TMPL_OWNER_ADDR": addrToB64(ac.owner_addr),
         "TMPL_FEE_AMT": ac.fee_amt,
-        "TMPL_PRICE_ID": ac.price_id,
+        "TMPL_PRICE_ID": ac.price_id?ac.price_id:0,
         "TMPL_BLANK_HASH": ac.listing_hash,
         "TMPL_SEED_AMT": ac.seed_amt,
         ...override

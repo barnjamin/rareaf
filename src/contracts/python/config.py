@@ -37,7 +37,7 @@ tmpl_platform_fee  = Tmpl.Int("TMPL_FEE_AMT")
 tmpl_price_token   = Tmpl.Int("TMPL_PRICE_ID")
 tmpl_app_id        = Tmpl.Int("TMPL_APP_ID")
 tmpl_platform_addr = Tmpl.Bytes("TMPL_OWNER_ADDR")
-
+tmpl_admin_addr    = Tmpl.Bytes("TMPL_ADMIN_ADDR")
 
 action_create  = Bytes("create")
 action_tag     = Bytes("tag")  

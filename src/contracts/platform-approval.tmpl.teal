@@ -80,17 +80,14 @@ app_global_put
 pushbytes 0x6665655f616d74 // "fee_amt"
 txna ApplicationArgs 6
 app_global_put
-pushbytes 0x736565645f616d74 // "seed_amt"
+bytec_3 // "max_price"
 txna ApplicationArgs 7
 app_global_put
-bytec_3 // "max_price"
+pushbytes 0x6c697374696e675f68617368 // "listing_hash"
 txna ApplicationArgs 8
 app_global_put
-pushbytes 0x6c697374696e675f68617368 // "listing_hash"
-txna ApplicationArgs 9
-app_global_put
 bytec_1 // "price_id"
-txna ApplicationArgs 10
+txna ApplicationArgs 9
 app_global_put
 intc_0 // 1
 &&
@@ -1218,21 +1215,6 @@ concat
 store 4
 load 5
 pushint 26 // 26
-+
-intc 4 // 5
-+
-store 5
-load 4
-txna ApplicationArgs 2
-load 5
-load 5
-intc 4 // 5
-+
-substring3
-concat
-store 4
-load 5
-pushint 101 // 101
 +
 intc 4 // 5
 +

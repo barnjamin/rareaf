@@ -1,5 +1,5 @@
 import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash, get_platform_owner } from "./contracts"
-import { addrToB64, sendWait, getSuggested, getTransaction, getLogicFromTransaction } from "./algorand"
+import { addrToB64, sendWait, getSuggested, getTransaction, getLogicFromTransaction, download_txns } from "./algorand"
 import {
     get_app_update_txn, 
     get_app_create_txn,  
@@ -19,6 +19,9 @@ import {
 import {makeArgs, get_template_vars, ApplicationConfiguration} from './application-conf'
 import { showErrorToaster, showInfo } from "../Toaster";
 import {TagToken} from './tags'
+
+declare const AlgoSigner: any;
+
 
 
 
@@ -100,11 +103,12 @@ export class Application {
         // Seed it
         const suggestedParams = await getSuggested(10)
         const seed_txn        = new Transaction(get_pay_txn(suggestedParams, this.conf.admin_addr, this.conf.owner_addr, this.conf.seed_amt))
+        console.log(seed_txn)
         const [signed_seed]   = await wallet.signTxn([seed_txn])
         const result          = await sendWait([signed_seed])
         if(result['pool-error'] != "") console.error("Failed to seed the owner")
 
-        return ls.address() 
+        return this.conf.owner_addr 
     }
 
     async updateApplication(wallet: Wallet) {
@@ -118,8 +122,13 @@ export class Application {
         const clear = await get_clear_program({})
 
         if (!this.conf.id){
+
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.admin_addr, app, clear))
+            console.log(create_txn)
+            console.log(create_txn.get_obj_for_encoding())
+            console.log(wallet)
             const [signed]   = await wallet.signTxn([create_txn])
+
             const result     = await sendWait([signed])
 
             this.conf.id = result['application-index']

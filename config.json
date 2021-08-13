@@ -18,7 +18,8 @@
     },
     "application":{
         "id":0,
-        "state_fields":["owner_addr", "name", "name", "unit", "owner_addr", "fee_amt", "seed_amt", "max_price", "listing_hash", "price_id"]
+        "seed_amt": 5000000,
+        "state_fields":["owner_addr", "name", "name", "unit", "owner_addr", "fee_amt", "max_price", "listing_hash", "price_id"]
     },
     "explorer":"algoscan.app",
     "contracts":{

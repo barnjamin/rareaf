@@ -35,6 +35,7 @@ export async function get_platform_owner(vars: any): Promise<LogicSigAccount> {
 }
 
 export async function get_listing_hash(vars: any): Promise<Buffer> {
+    console.log(vars)
     const compiled = await get_listing_compiled(vars)
     return get_hash(new Uint8Array(Buffer.from(compiled.result, "base64")), listing_var_positions)
 }

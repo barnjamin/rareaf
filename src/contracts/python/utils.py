@@ -12,11 +12,11 @@ def valid_app_call(txn, app_id):
     )
 
 def valid_admin_fee_pay(txn):
-    return pay_txn_valid(txn, Int(0), platform_admin, platform_admin)
+    return pay_txn_valid(txn, Int(0), tmpl_admin_addr, tmpl_admin_addr)
 
 def valid_platform_asset():
     expr = AssetParam.manager(Int(0))
-    return Seq([ expr, expr.value() == platform_addr ])
+    return Seq([ expr, expr.value() == tmpl_platform_addr ])
 
 def valid_contract(tc, contract_source, contract_addr):
     return And(

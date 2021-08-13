@@ -88,11 +88,14 @@ export function get_app_create_txn(suggestedParams, addr, approval, clear) {
         appGlobalByteSlices: 24,
         appGlobalInts: 24,
         appLocalByteSlices: 16,
+        appLocalInts: 0,
         appApprovalProgram: approval,
         appClearProgram: clear,
+        extraPages:getExtraPages(approval.length+clear.length),
         ...suggestedParams
    } 
 }
+
 
 export function get_app_config_txn(suggestedParams, addr, id, params) {
     return {
@@ -115,8 +118,15 @@ export function get_app_update_txn(suggestedParams, addr, approval, clear, id) {
         appOnComplete: algosdk.OnApplicationComplete.UpdateApplicationOC,
         appApprovalProgram: approval,
         appClearProgram: clear,
+        extraPages: getExtraPages(approval.length+clear.length),
         ...suggestedParams
    } 
+}
+
+const max_app_size = 2048
+function getExtraPages(len: number): number {
+    if(len<=max_app_size) return 0
+    return (Math.floor((len-max_app_size)/max_app_size) % max_app_size) + 1
 }
 
 export function get_app_destroy_txn(suggestedParams, addr, id) {

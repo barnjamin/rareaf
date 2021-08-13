@@ -17,9 +17,8 @@ import Portfolio from './Portfolio'
 import ListingViewer from './ListingViewer'
 import Admin from './Admin'
 import { SessionWallet } from 'algorand-session-wallet'
-import { PlatformConf, platform_settings as ps } from './lib/platform-conf'
+import { platform_settings as ps } from './lib/platform-conf'
 import { ApplicationConfiguration } from './lib/application-conf';
-import { createNoSubstitutionTemplateLiteral } from 'typescript';
 
 
 type AppProps = {
@@ -39,6 +38,8 @@ export default class App extends React.Component<AppProps, AppState> {
     super(props)
 
     const sw = new SessionWallet(ps.algod.network)
+    sw.connect()
+
     this.state = { 
       sessionWallet:  sw,
       accts: sw.accountList(),
@@ -57,9 +58,9 @@ export default class App extends React.Component<AppProps, AppState> {
   updateAppConf(ac: ApplicationConfiguration) { this.setState({ac: ac}) }
 
   async initConfiguration(){
-    let appConf = await ApplicationConfiguration.fromLocalStorage()
+    let appConf = await ApplicationConfiguration.fromLocalStorage(this.state.ac)
     if(appConf !== undefined)  return this.updateAppConf(appConf)
-    this.updateAppConf(await ApplicationConfiguration.fromNetwork(ps.application.id))
+    this.updateAppConf(await ApplicationConfiguration.fromNetwork(this.state.ac))
   }
 
   render() {
