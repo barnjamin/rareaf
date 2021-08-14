@@ -78,7 +78,7 @@ export class NFT {
     }
 
     static metaUrl(url: string): string {
-        return NFT.resolveUrl(url + "/metadata.json")
+        return url + "/metadata.json"
     }
 
     static async fromToken(token: any): Promise<NFT> {
