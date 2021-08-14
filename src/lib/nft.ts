@@ -70,6 +70,8 @@ export class NFT {
                 return 
             case "http":
                 return url
+            case "https":
+                return url
         }
 
         showErrorToaster("Unknown protocol: " + protocol)
