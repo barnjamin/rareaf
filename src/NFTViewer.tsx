@@ -3,10 +3,10 @@
 
 import * as React from 'react'
 import {useParams, useHistory} from 'react-router-dom'
-import { tryGetNFT, isOptedIntoApp } from './lib/algorand'
+import { tryGetNFT, isOptedIntoApp, getListingAddr } from './lib/algorand'
 import {Tag, Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation} from '@blueprintjs/core'
 import Listing from './lib/listing'
-import {Wallet} from './wallets/wallet'
+import {Wallet} from 'algorand-session-wallet'
 import {NFT} from './lib/nft'
 import  {Tagger, MAX_LISTING_TAGS } from './Tagger'
 import {Application} from './lib/application'
@@ -30,6 +30,7 @@ export default function NFTViewer(props: NFTViewerProps) {
     const [listingVisible, setListingVisible] = React.useState(false)
     const [tags, setTags]                     = React.useState([])
     const [optedIn, setOptedIn]               = React.useState(false)
+    const [listingAddr, setListingAddr]       = React.useState("")
     
     React.useEffect(()=>{
         let subscribed = true
@@ -42,14 +43,23 @@ export default function NFTViewer(props: NFTViewerProps) {
     }, []);
 
     React.useEffect(()=>{
+        let subscribed = true
+        getListingAddr(parseInt(id))
+            .then((addr)=>{  
+                if(subscribed) setListingAddr(addr) 
+            })
+            .catch((err)=>{ console.error("Couldn't check to see if this NFT is listed") })
+        return ()=>{subscribed=false}
+    }, []);
+
+    React.useEffect(()=>{
         if(props.wallet === undefined) return
 
         let subscribed = true
         isOptedIntoApp(props.acct)
             .then((oi)=>{ 
                 if(subscribed) setOptedIn(oi) 
-            })
-
+            }).catch((err)=>{ console.error(err) })
         return ()=>{subscribed=false}
 
     }, [props.acct])
@@ -92,7 +102,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             await handleOptIn()
 
             showInfo("Creating listing transaction")
-            const lst = new Listing(price, parseInt(id), props.wallet.getDefaultAccount())
+            const lst = new Listing(price, parseInt(id), props.acct)
             await lst.doCreate(props.wallet)
 
             if(tags.length > 0 ){
@@ -103,6 +113,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             history.push("/listing/"+lst.contract_addr)
 
         }catch(error){ 
+            console.error(error)
             showErrorToaster("Failed to create listing")
         }
 
@@ -111,21 +122,25 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     let editButtons = <div />
 
-    if(props.wallet !== undefined && nft !== undefined && nft.manager === props.wallet.getDefaultAccount()){
+    if(listingAddr == "" && props.wallet !== undefined && nft !== undefined && nft.manager === props.wallet.getDefaultAccount()){
         editButtons = (
-        <div className='container-right'>
-            <div className='content'>
-                <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
-                <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
+            <div className='container-right'>
+                <div className='content'>
+                    <Button loading={waiting_for_tx} onClick={handleCreateListing} intent='success' icon='tag' >Create Listing</Button>
+                    <Button loading={waiting_for_tx} onClick={deleteToken} intent='danger' icon='cross' >Delete token</Button>
+                </div>
             </div>
-        </div>
         )
     }
 
+    const listing_link = listingAddr !== ""?(
+        <p>This NFT is listed <a href={ps.domain+"listing/"+listingAddr}><b>here</b></a></p>
+    ):<p></p>
+
     return (
-        <div className='container' >
-            <Card  elevation={Elevation.TWO} >
-                <div className='content nft-viewer'>
+        <div className='container nft-display' >
+            <Card  elevation={Elevation.TWO} className='nft-card' >
+                <div className='content nft-image'>
                     <img src={nft.imgSrc()} />
                 </div>
 
@@ -141,7 +156,12 @@ export default function NFTViewer(props: NFTViewerProps) {
                 <div className='container nft-description'>
                     <p> { nft.metadata.description }</p>
                 </div>
+
                 { editButtons }
+
+                <div className='container'>
+                    {listing_link}
+                </div>
             </Card>
 
 

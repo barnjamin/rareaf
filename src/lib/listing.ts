@@ -15,11 +15,11 @@ import {
     get_app_call_txn
 } from './transactions'
 import algosdk, { Transaction } from 'algosdk';
-import { Wallet } from '../wallets/wallet';
+import { Wallet } from 'algorand-session-wallet';
 import { NFT } from './nft'
 import { TagToken } from './tags'
 import { Method } from './application'
-import LogicSig from 'algosdk/dist/types/src/logicsig';
+import {LogicSig} from 'algosdk/dist/types/src/logicsig';
 import { showErrorToaster } from '../Toaster';
 
 
@@ -55,13 +55,10 @@ export class Listing {
     }
 
     async doCreate(wallet: Wallet) {
-
-        this.creator_addr = wallet.getDefaultAccount()
-
         const lsig = await get_listing_sig(this.getVars())
         this.contract_addr = lsig.address();
 
-        const args = [Method.Create, uintToB64(this.price), Buffer.from(lsig.logic).toString('base64')]
+        const args = [Method.Create, uintToB64(this.price), Buffer.from(lsig.lsig.logic).toString('base64')]
 
         const suggestedParams = await getSuggested(10)
 
@@ -329,6 +326,7 @@ export class Listing {
         ]
 
         algosdk.assignGroupID(grouped)
+
 
         const [s_app_call_txn, s_purchase_amt_txn, /*asa_xfer*/, /*price_xfer*/, /*asa_cfg*/ , /* tag_txns */, /*algo_close*/] = await wallet.signTxn(grouped)
 

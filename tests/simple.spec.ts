@@ -23,7 +23,6 @@ const price = 10000
 
 const wallet = new InsecureWallet()
 
-
 // Application
 //describe('Application', ()=>{
 //  describe('Create', async ()=>{ 
@@ -76,29 +75,31 @@ const wallet = new InsecureWallet()
 //})
 
 
+const img = "iVBORw0KGgoAAAANSUhEUgAAABwAAAAjCAYAAACHIWrsAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAALNSURBVFhH7ZVZTxNRGIb9mV4ZE/VGvXBJXBLXuMUtgkZRwSiKCAFBbNgUFGQtlLYsslaIQJfZzsx02k5bSl+/045BQgdK2xhjeJNJJpM5efLMfOc9+/CXswcsef5tYDpl3RSRHYGyLwFXlYquCwJ6rwjwPFMQGIxiLbpuvbG7bAtc6I6g4aAfjuMBdJ0Pof+GCPcjGdMvGZY/6kiw3SvbAqX5BGr3r6DpiB/tp4LouSzAeU/CxFMFC29VrBCQDUWAXYraAvvKFNQfWIXjWACfz4UwQHauciljt9igItQZhjZgICWuWSvyiy2w4ZAfTYf9aDtJdpcEDN+VME528zUMKy06pC8GIqNRJHxxa0V+yQlcX0tn7FqOkt3ZEPquCRgrl/H9hUJ2GgLtOrT+CEwPAedMa1V+sTVsPR1E24kgvl4kuzsSvE9kzNWoWP6gQeo2YIxYwMUSGPJM1On4dCZIdiJGH0hkx/CjXiW7MNQ+A3FvLANMySX6h1EphR7ad0O3RbJTMPeG4WezBrErDMOZ+3MmjJ1H1hbIw2jTewg2WamQnQZ/q052G7B0PG29mY33lWrd2WdbIE+SGkXymgj2GFBoUGLTZs6tEHCb6L8uIjQWs57kzo7AfOOkKeaff6KSIWVuNv8zJQEuUgXy2nOVyZh8rkB02VsWDYxRn/JS58XgeSxjtlrNNFFSy92zRQOnG3UM3MzaTVUxLNRSz1ITabRtcqUooEJT3HtVzNZehYKZaoalxmwT8WlOsa3DVRTQTUbcjtfeVJUC37vsKcKbKDwcQXxma+0VDPSPxshOwMh9qr0Kqr3XKpbeawh1hMG+GTDd0WwTCZstCwKmqVAG6WwcvEV2D3mpM/jqVKw6+Cmy0USZazyKdHJjmxQE9HUamY51kh0/kGd57TXpCHbQv+PlQHa/u5ZfyeWEtbLIf1hI9oAlzx6w5PnfgcAvcHnfAMSDd5sAAAAASUVORK5CYII="
+
 // NFT
-//describe('NFT', ()=>{
-//  describe('Upload', ()=>{ 
-//    
-//    //const file = new File("")
-//    //const meta = emptyMetadata()
-//    //meta.name = "Test"
-//    //meta.description = "Test Metadata"
-//    //meta.image = ""
-//    //meta.properties = {
-//    //  file:{
-//    //      name: "",
-//    //      type: "",
-//    //      size: 0,
-//    //  },
-//    //  artist: "",
-//    //}
-//    //storeNFT(file, meta)
-//  })
-//
-//  describe('Create', ()=>{ })
-//  describe ('Destroy', ()=>{ })
-//})
+describe('NFT', ()=>{
+  describe('Mint', ()=>{
+
+    describe('Upload', ()=>{ 
+      const file = new File(new Array(Buffer.from(img, "base64")), "favicon.ico")
+      const meta = emptyMetadata()
+      meta.name = "Test"
+      meta.description = "Test Metadata"
+      meta.image = ""
+      meta.properties = {
+        file:{ name: file.name, type: file.type, size: file.size, },
+        artist: "rareaf",
+      }
+      storeNFT(file, meta)
+    })
+
+    describe('Mint', ()=>{ })
+
+  })
+
+  describe ('Destroy', ()=>{ })
+})
 
 
 // Listing

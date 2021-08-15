@@ -66,7 +66,12 @@ def listing():
         pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), platform_addr, creator_addr.load(), platform_fee),
     )
 
-    app_offload = Or(Gtxn[0].application_args[0] == action_tag, Gtxn[0].application_args[0] == action_untag, Gtxn[0].application_args[0] == action_dprice)
+    app_offload = Or(
+        Gtxn[0].application_args[0] == action_tag, 
+        Gtxn[0].application_args[0] == action_untag, 
+        Gtxn[0].application_args[0] == action_dprice,
+        Gtxn[0].application_args[0] == action_safety
+    )
     app_validate = valid_app_call(Gtxn[0], _app_id.load())
 
     return Cond([setup, Int(0)], #NoOp

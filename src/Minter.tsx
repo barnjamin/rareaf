@@ -8,7 +8,7 @@ import { Button, Elevation, FileInput, Card } from "@blueprintjs/core"
 import { NFT, NFTMetadata, emptyMetadata } from './lib/nft'
 import { platform_settings as ps } from './lib/platform-conf'
 import { showErrorToaster, showInfo } from './Toaster'
-import {Wallet} from './wallets/wallet'
+import {Wallet} from 'algorand-session-wallet'
 
 type MinterProps = {
     history: any 
@@ -56,7 +56,7 @@ export default function Minter(props: MinterProps){
 
         storeNFT(fileObj, metadata).then((result) => {
             const nft = new NFT(metadata);
-            nft.url = "ipfs://"+result.ipnft
+            nft.url = result.url 
 
             showInfo("Creating token")
             nft.createToken(props.wallet).then((res) => {

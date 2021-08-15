@@ -1,6 +1,5 @@
-import LogicSig from 'algosdk/dist/types/src/logicsig'
 import {getAlgodClient} from './algorand'
-import algosdk from 'algosdk'
+import algosdk, {LogicSigAccount} from 'algosdk'
 import {addrToB64, concatTypedArrays} from './algorand'
 import { platform_settings as ps, get_template_vars } from './platform-conf'
 import {sha256} from 'js-sha256'
@@ -31,17 +30,22 @@ import fetch from 'node-fetch'
 export const dummy_addr = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
 export const dummy_id = "b64(AAAAAAAAAHs=)"
 
-export async function get_listing_sig(vars: any): Promise<LogicSig> {
+export async function get_listing_sig(vars: any): Promise<LogicSigAccount> {
     const compiled_program = await get_listing_compiled(vars)
     const program_bytes = new Uint8Array(Buffer.from(compiled_program.result, "base64"));
-    return algosdk.makeLogicSig(program_bytes);
+    return new LogicSigAccount(program_bytes);
 }
 
+<<<<<<< HEAD
 export async function get_platform_owner(vars: any): Promise<LogicSig> {
     const path = platform_owner_template?platform_owner_template:platform_owner_path;
     const program = await get_contract_compiled(path, vars)
+=======
+export async function get_platform_owner(vars: any): Promise<LogicSigAccount> {
+    const program       = await get_contract_compiled(platform_owner_template, vars)
+>>>>>>> main
     const program_bytes = new Uint8Array(Buffer.from(program.result, "base64"));
-    return algosdk.makeLogicSig(program_bytes);
+    return new LogicSigAccount(program_bytes);
 }
 
 export async function get_listing_hash(vars: any): Promise<Buffer> {

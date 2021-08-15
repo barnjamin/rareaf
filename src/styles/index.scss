@@ -19,6 +19,14 @@ body {
 	padding: 20px;
 }
 
+.vertical-container {
+	display: flex;
+	flex-flow: column;
+	justify-content: space-around;
+	align-items: center;
+	padding: 20px;
+}
+
 .container-right {
 	display: flex;
 	flex-flow: row wrap;
@@ -98,15 +106,15 @@ body {
 }
 
 .nft-card {
-	width: 30%;
+	width: 30vw;
 	img {
 		width: 100%;
 		box-shadow: $pt-elevation-shadow-2;
 	}
 }
 .listing-card {
-	width: 30%;
-	margin-bottom: 25px;
+	width: 25vw;
+	margin: 15px;
 	img {
 		width: 100%;
 		box-shadow: $pt-elevation-shadow-2;
@@ -128,15 +136,23 @@ body {
 
 .listing-page {
 	.bp3-card {
-		width: 80%;
+		width: 66vw;
 	}
 }
-.nft-viewer {
+
+.nft-image {
 	img {
 		box-shadow: $pt-elevation-shadow-2;
 		width: 100%;
 	}
 }
+.nft-display {
+	justify-content: center;
+	.bp3-card {
+		width: 66vw;
+	}
+}
+
 .nft-details {
 	justify-content: space-between;
 }
@@ -144,9 +160,11 @@ body {
 	justify-content: left;
 	width: 50%;
 }
+
 .listing-actions {
 	justify-content: space-between;
 }
+
 .listing-price-edit {
 	justify-content: space-between;
 	button {
@@ -187,4 +205,13 @@ button {
 	}
 	display: block;
 	width: 69em;
+}
+.price-filter {
+	label.bp3-label {
+		margin-bottom: 0px;
+	}
+	button {
+		margin-bottom:0px;
+	}
+	align-items: flex-end;
 }

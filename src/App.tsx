@@ -16,9 +16,8 @@ import NFTViewer from './NFTViewer'
 import Portfolio from './Portfolio'
 import ListingViewer from './ListingViewer'
 import Admin from './Admin'
-import {Wallet} from './wallets/wallet'
+import {SessionWallet, Wallet} from 'algorand-session-wallet'
 import {platform_settings as ps} from './lib/platform-conf'
-import { SessionWallet } from './wallets/session-wallet';
 
 
 type AppProps = {
@@ -27,44 +26,47 @@ type AppProps = {
 
 type AppState = {
   sessionWallet: SessionWallet
+  accts: string[]
+  connected: boolean
 };
 
 export default class App extends React.Component<AppProps, AppState> {
   constructor(props) {
     super(props)
 
-    this.state = { sessionWallet: new SessionWallet() }
+    const sw = new SessionWallet(ps.algod.network)
+    this.state = { 
+      sessionWallet:  sw,
+      accts: sw.accountList(),
+      connected: sw.connected(),
+    }
 
-    this.walletConnected = this.walletConnected.bind(this)
     this.updateWallet    = this.updateWallet.bind(this)
   }
 
-  walletConnected(){
-    return (this.state.sessionWallet.wallet !== undefined && this.state.sessionWallet.wallet.isConnected())
-  }
-
   updateWallet(sw: SessionWallet){ 
-    this.setState((state)=>{ return { sessionWallet:sw } }) 
+    this.setState({ sessionWallet:sw, accts: sw.accountList(), connected: sw.connected() }) 
   }
 
   render() {
     const wallet = this.state.sessionWallet.wallet
-    const acct = wallet?wallet.getDefaultAccount():""
+    const acct = this.state.sessionWallet.getDefaultAccount()
 
     let adminNav = <div/>
-    if(this.walletConnected()  && (ps.application.admin_addr == "" || acct == ps.application.admin_addr)) {
+    if(this.state.connected  && (ps.application.admin_addr == "" || acct == ps.application.admin_addr)) {
       adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
     }
 
     let port = <div/>
-    if(this.walletConnected()){
+    if(this.state.connected){
       port = <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />
     }
+
     return (
       <Router history={this.props.history} >
         <Navbar >
           <Navbar.Group align={Alignment.LEFT}>
-            <Navbar.Heading><img height={"20px"} src={require('./img/default-monochrome.svg')}></img></Navbar.Heading>
+            <Navbar.Heading><a href='/'><img height={"20px"} src={require('./img/default-monochrome.svg')}></img></a></Navbar.Heading>
             <Navbar.Divider />
             <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
             <AnchorButton className='bp3-minimal' icon='clean' text='Mint' href="/mint" />
@@ -76,7 +78,8 @@ export default class App extends React.Component<AppProps, AppState> {
             <AlgorandWalletConnector 
               darkMode={false}
               sessionWallet={this.state.sessionWallet}
-              walletConnected={this.walletConnected()} 
+              accts={this.state.accts}
+              connected={this.state.connected} 
               updateWallet={this.updateWallet}
               />
           </Navbar.Group>

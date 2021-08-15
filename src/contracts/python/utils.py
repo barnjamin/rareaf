@@ -1,4 +1,4 @@
-from pyteal import And, TxnType, Int, AssetParam, Seq, Global, If, App, Bytes, Concat, Sha512_256,  AssetHolding, Gtxn
+from pyteal import And, TxnType, Int, AssetParam, Seq, Global, If, App, Bytes, Concat, Sha512_256,  AssetHolding, Gtxn, OnComplete
 from config import *
 
 def tealpath(name):
@@ -7,6 +7,7 @@ def tealpath(name):
 def valid_app_call(txn, app_id):
     return And(
         txn.type_enum() == TxnType.ApplicationCall,
+        txn.on_completion() ==  OnComplete.NoOp,
         txn.application_id() == app_id,
     )
 

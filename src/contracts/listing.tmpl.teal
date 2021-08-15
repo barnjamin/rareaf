@@ -1,5 +1,5 @@
 #pragma version 4
-intcblock 1 4 0 6 3
+intcblock 1 0 4 6 3
 bytecblock TMPL_OWNER_ADDR
 pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
 store 0
@@ -10,7 +10,7 @@ pushint TMPL_APP_ID // TMPL_APP_ID
 store 4
 pushint TMPL_PRICE_ID // TMPL_PRICE_ID
 store 5
-intc_2 // 0
+intc_1 // 0
 bnz l10
 gtxna 0 ApplicationArgs 0
 pushbytes 0x637265617465 // "create"
@@ -35,12 +35,20 @@ gtxna 0 ApplicationArgs 0
 pushbytes 0x70726963655f6465637265617365 // "price_decrease"
 ==
 ||
+gtxna 0 ApplicationArgs 0
+pushbytes 0x736166657479 // "safety"
+==
+||
 bnz l6
 err
 l6:
 gtxn 0 TypeEnum
 intc_3 // appl
 ==
+gtxn 0 OnCompletion
+intc_1 // NoOp
+==
+&&
 gtxn 0 ApplicationID
 load 4
 ==
@@ -53,6 +61,10 @@ intc_3 // 6
 gtxn 0 TypeEnum
 intc_3 // appl
 ==
+gtxn 0 OnCompletion
+intc_1 // NoOp
+==
+&&
 gtxn 0 ApplicationID
 load 4
 ==
@@ -91,7 +103,7 @@ gtxn 1 Amount
 &&
 &&
 gtxn 2 TypeEnum
-intc_1 // axfer
+intc_2 // axfer
 ==
 gtxn 2 AssetCloseTo
 load 2
@@ -111,7 +123,7 @@ load 3
 &&
 &&
 gtxn 3 TypeEnum
-intc_1 // axfer
+intc_2 // axfer
 ==
 gtxn 3 AssetCloseTo
 bytec_0 // TMPL_OWNER_ADDR
@@ -208,6 +220,10 @@ pushint 5 // 5
 gtxn 0 TypeEnum
 intc_3 // appl
 ==
+gtxn 0 OnCompletion
+intc_1 // NoOp
+==
+&&
 gtxn 0 ApplicationID
 load 4
 ==
@@ -218,7 +234,7 @@ store 1
 intc_0 // 1
 &&
 gtxn 1 TypeEnum
-intc_1 // axfer
+intc_2 // axfer
 ==
 gtxn 1 AssetCloseTo
 bytec_0 // TMPL_OWNER_ADDR
@@ -238,7 +254,7 @@ load 5
 &&
 &&
 gtxn 2 TypeEnum
-intc_1 // axfer
+intc_2 // axfer
 ==
 gtxn 2 AssetCloseTo
 load 0
@@ -323,7 +339,7 @@ global GroupSize
 intc_0 // 1
 -
 gtxns Amount
-intc_2 // 0
+intc_1 // 0
 ==
 &&
 &&
@@ -335,6 +351,10 @@ pushint 7 // 7
 gtxn 0 TypeEnum
 intc_3 // appl
 ==
+gtxn 0 OnCompletion
+intc_1 // NoOp
+==
+&&
 gtxn 0 ApplicationID
 load 4
 ==
@@ -369,7 +389,7 @@ pushint 5000000 // 5000000
 &&
 &&
 gtxn 2 TypeEnum
-intc_1 // axfer
+intc_2 // axfer
 ==
 gtxn 2 AssetCloseTo
 global ZeroAddress
@@ -388,12 +408,12 @@ load 1
 ==
 &&
 gtxn 2 AssetAmount
-intc_2 // 0
+intc_1 // 0
 ==
 &&
 &&
 gtxn 3 TypeEnum
-intc_1 // axfer
+intc_2 // axfer
 ==
 gtxn 3 AssetCloseTo
 global ZeroAddress
@@ -412,12 +432,12 @@ load 1
 ==
 &&
 gtxn 3 AssetAmount
-intc_2 // 0
+intc_1 // 0
 ==
 &&
 &&
 gtxn 4 TypeEnum
-intc_1 // axfer
+intc_2 // axfer
 ==
 gtxn 4 AssetCloseTo
 global ZeroAddress
@@ -441,7 +461,7 @@ load 3
 &&
 &&
 gtxn 5 TypeEnum
-intc_1 // axfer
+intc_2 // axfer
 ==
 gtxn 5 AssetCloseTo
 global ZeroAddress
@@ -495,5 +515,5 @@ load 1
 &&
 b l11
 l10:
-intc_2 // 0
+intc_1 // 0
 l11:

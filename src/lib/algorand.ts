@@ -1,12 +1,11 @@
 /* eslint-disable no-console */
 import {platform_settings as ps} from './platform-conf'
-import algosdk from 'algosdk'  
+import algosdk, {LogicSigAccount} from 'algosdk'  
 import Listing from "./listing";
 import { NFT } from "./nft";
 import { TagToken} from './tags'
-import { dummy_addr } from './contracts'
+import { dummy_addr, get_platform_owner } from './contracts'
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
-import LogicSig from 'algosdk/dist/types/src/logicsig';
 
 
 type Holdings= {
@@ -38,7 +37,7 @@ export function getIndexer() {
     return indexer
 }
 
-export async function getLogicFromTransaction(addr: string): Promise<LogicSig> {
+export async function getLogicFromTransaction(addr: string): Promise<LogicSigAccount> {
     const indexer = getIndexer()
     const txns = await indexer.searchForTransactions()
         .address(addr).do()
@@ -47,7 +46,7 @@ export async function getLogicFromTransaction(addr: string): Promise<LogicSig> {
         const txn = txns.transactions[tidx]
         if(txn.sender == addr){
             const program_bytes = new Uint8Array(Buffer.from(txn.signature.logicsig.logic, "base64"));
-            return algosdk.makeLogicSig(program_bytes);
+            return new LogicSigAccount(program_bytes);
         }
     }
     return undefined
@@ -80,7 +79,14 @@ export async function isOptedIntoAsset(address: string, idx: number): Promise<bo
     return optedIn !== undefined 
 }
 
-export async function getListings(tagName: string): Promise<Listing[]> {
+export async function isListing(address: string): Promise<boolean> {
+    const client = getAlgodClient()
+    const result = await client.accountInformation(address).do()
+    const hasPriceToken = result['assets'].find((r)=>{ return r['asset-id'] == ps.application.price_id })
+    return hasPriceToken !== undefined
+}
+
+export async function getListings(tagName: string, minPrice=0, maxPrice=0): Promise<Listing[]> {
     const indexer  = getIndexer()
 
     let token_id = ps.application.price_id
@@ -92,7 +98,15 @@ export async function getListings(tagName: string): Promise<Listing[]> {
         token_id = tt.id
     }
 
-    const balances =  await indexer.lookupAssetBalances(token_id).currencyGreaterThan(0).do()
+    let lookup = indexer.lookupAssetBalances(token_id)
+    if(tagName !== undefined){
+        lookup = lookup.currencyGreaterThan(0)
+    }else{
+        if(maxPrice>0) lookup = lookup.currencyLessThan(maxPrice) 
+        lookup = lookup.currencyGreaterThan(minPrice)
+    }
+
+    const balances =  await lookup.do()
 
     const lp = []
     const listings = []
@@ -205,6 +219,14 @@ export async function getHoldingsFromListingAddress(address: string): Promise<Ho
     return holdings
 }
 
+export async function getListingAddr(asset_id: number): Promise<string> {
+    const owner = await getOwner(asset_id)
+    if (owner !== "" && await isListing(owner)){
+        return owner
+    }
+    return ""
+}
+
 export async function tryGetNFT(asset_id: number): Promise<NFT> {
     try {
         const token = await getToken(asset_id)
@@ -219,6 +241,25 @@ export async function tryGetNFT(asset_id: number): Promise<NFT> {
 export async function getToken(asset_id: number): Promise<any> {
     const client = getAlgodClient()
     return await client.getAssetByID(asset_id).do()
+}
+
+export async function getOwner(asset_id: number):Promise<string> {
+    const client = getIndexer()
+    const balances = await client.lookupAssetBalances(asset_id).currencyGreaterThan(0).do()
+
+    //TODO: when js-sdk take out
+    const holders = []
+    for(const idx in balances['balances']){
+        const bal = balances['balances'][idx]
+        if(bal.amount>0){
+            holders.push(bal.address)
+        }
+    }
+
+    if(holders.length==1){
+        return holders[0]
+    }
+    return ""
 }
 
 export async function getCreator(addr: string, asset_id: number): Promise<string> {

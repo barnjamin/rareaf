@@ -1,6 +1,7 @@
-import { Wallet } from '../wallets/wallet'
+import { Wallet } from 'algorand-session-wallet'
 import algosdk, { Transaction } from 'algosdk'
 import { 
+    getLogicFromTransaction,
     getSuggested, 
     getTransaction,
     sendWait 
@@ -41,7 +42,7 @@ export class TagToken {
 
         const [s_cosigned_txn, /* s_destroy_txn */] = await wallet.signTxn(grouped)
 
-        const lsig = await get_platform_owner(get_template_vars({}))
+        const lsig = await getLogicFromTransaction(ps.application.owner_addr) 
         const s_destroy_txn = algosdk.signLogicSigTransaction(destroy_txn, lsig)
 
         const result = await sendWait([s_cosigned_txn, s_destroy_txn])

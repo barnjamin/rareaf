@@ -106,6 +106,17 @@ def approval():
     )
 
 
+    delist_listing = And(  
+        # Sent by admin
+        Gtxn[0].sender() == Global.creator_address() ,
+
+        set_addr_as_tx(Gtxn[1], contract_addr),
+        valid_tag_closes(4, 8, platform_addr, contract_addr.load()),
+
+        remove_listing_addr(Int(1), contract_addr.load()),
+    )
+
+
     return Cond(
         [Txn.application_id() == Int(0),                        on_creation],
         [Txn.on_completion()  == OnComplete.DeleteApplication,  on_delete],
@@ -113,13 +124,14 @@ def approval():
         [Txn.on_completion()  == OnComplete.CloseOut,           on_closeout],
         [Txn.on_completion()  == OnComplete.OptIn,              register],
 
-        [Txn.application_args[0] == action_create,   Return(create_listing)],  # App approve price tokens && adds listing to local state
-        [Txn.application_args[0] == action_tag,      Return(tag_listing)],     # App approves manager of token requested
-        [Txn.application_args[0] == action_untag,    Return(untag_listing)],   # App approves untag coming from listing creator
-        [Txn.application_args[0] == action_dprice,   Return(price_decrease_listing)], # App validates caller 
-        [Txn.application_args[0] == action_iprice,   Return(price_increase_listing)], # App validates caller 
-        [Txn.application_args[0] == action_delete,   Return(delete_listing)],  # App approves sender owns listing
-        [Txn.application_args[0] == action_purchase, Return(purchase_listing)] # App removes listing from local state
+        [Txn.application_args[0] == action_create,      Return(create_listing)],  # App approve price tokens && adds listing to local state
+        [Txn.application_args[0] == action_tag,         Return(tag_listing)],     # App approves manager of token requested
+        [Txn.application_args[0] == action_untag,       Return(untag_listing)],   # App approves untag coming from listing creator
+        [Txn.application_args[0] == action_dprice,      Return(price_decrease_listing)], # App validates caller 
+        [Txn.application_args[0] == action_iprice,      Return(price_increase_listing)], # App validates caller 
+        [Txn.application_args[0] == action_delete,      Return(delete_listing)],    # App approves sender owns listing
+        [Txn.application_args[0] == action_purchase,    Return(purchase_listing)],  # App removes listing from local state
+        [Txn.application_args[0] == action_safety,      Return(delist_listing)]     # App removes listing from local state
     )
 
 
