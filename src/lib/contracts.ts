@@ -36,14 +36,8 @@ export async function get_listing_sig(vars: any): Promise<LogicSigAccount> {
     return new LogicSigAccount(program_bytes);
 }
 
-<<<<<<< HEAD
-export async function get_platform_owner(vars: any): Promise<LogicSig> {
-    const path = platform_owner_template?platform_owner_template:platform_owner_path;
-    const program = await get_contract_compiled(path, vars)
-=======
 export async function get_platform_owner(vars: any): Promise<LogicSigAccount> {
     const program       = await get_contract_compiled(platform_owner_template, vars)
->>>>>>> main
     const program_bytes = new Uint8Array(Buffer.from(program.result, "base64"));
     return new LogicSigAccount(program_bytes);
 }

@@ -10,10 +10,12 @@ import Listing from '../src/lib/listing';
 import {Application} from '../src/lib/application';
 import {TagToken} from '../src/lib/tags';
 
-import InsecureWallet from '../src/wallets/insecurewallet';
+import {SignedTxn, Wallet} from 'algorand-session-wallet';
 import { storeNFT } from '../src/lib/ipfs';
-import { emptyMetadata, NFTMetadata } from '../src/lib/nft';
+import { emptyMetadata, NFT, NFTMetadata } from '../src/lib/nft';
 import { get_listing_hash, get_listing_compiled } from '../src/lib/contracts';
+import algosdk, { Transaction } from 'algosdk';
+import {File} from 'nft.storage'
 
 const admin_addr = ""
 const listing_addr =  "3ESDM4QRMD4DJ43NURUBLWRSUBY4RYL6WPEPU77QFJSYX6KKCBVZFR6ZCM"
@@ -21,7 +23,63 @@ const creator_addr = ""
 const asset_id = 0
 const price = 10000
 
-const wallet = new InsecureWallet()
+
+
+class TestingWallet implements Wallet {
+  accounts: string[];
+  defaultAccount: number;
+  network: string;
+
+  mnemonic: string
+
+
+  constructor(){
+    this.accounts =  ["VUKHGKWZDTBHDH6UPGHFYP2LL574OALDCSYI7EFYHURGZGHSMZLEODQORY"]
+    this.mnemonic = "end captain piece offer math panda spirit potato human asthma catch orange absent execute intact weekend antenna profit balcony inmate basic ice useful abandon summer"
+
+  }
+  displayName(): string {
+    return "TestWallet"
+  }
+  img(inverted: boolean): string {
+    return ""
+  }
+  connect(settings?: any): Promise<boolean> {
+    throw new Error('Method not implemented.');
+  }
+  isConnected(): boolean {
+    throw new Error('Method not implemented.');
+  }
+  getDefaultAccount(): string {
+    throw new Error('Method not implemented.');
+  }
+  signBytes(b: Uint8Array): Promise<Uint8Array> {
+    throw new Error('Method not implemented.');
+  }
+  signTeal(teal: Uint8Array): Promise<Uint8Array> {
+    throw new Error('Method not implemented.');
+  }
+  async signTxn(txns: Transaction[]): Promise<SignedTxn[]> {
+    const sk = algosdk.mnemonicToSecretKey(this.mnemonic)
+
+    const signed = [];
+    const defaultAddr = this.accounts[0] 
+
+    for(const txidx in txns){
+        if(!txns[txidx]) continue
+
+        const addr = algosdk.encodeAddress(txns[txidx].from.publicKey)
+        if(addr === defaultAddr){
+            signed.push(algosdk.signTransaction(txns[txidx], sk.sk))
+        }else{
+            signed.push({txID:"", blob:new Uint8Array()})
+        }
+    }
+    return signed
+  }
+}
+
+const wallet = new TestingWallet()
 
 // Application
 //describe('Application', ()=>{
@@ -79,26 +137,38 @@ const img = "iVBORw0KGgoAAAANSUhEUgAAABwAAAAjCAYAAACHIWrsAAAAAXNSR0IArs4c6QAAAAR
 
 // NFT
 describe('NFT', ()=>{
-  describe('Mint', ()=>{
+  let nft: NFT = undefined
 
-    describe('Upload', ()=>{ 
-      const file = new File(new Array(Buffer.from(img, "base64")), "favicon.ico")
-      const meta = emptyMetadata()
-      meta.name = "Test"
-      meta.description = "Test Metadata"
-      meta.image = ""
-      meta.properties = {
-        file:{ name: file.name, type: file.type, size: file.size, },
-        artist: "rareaf",
-      }
-      storeNFT(file, meta)
+  describe('Mint', ()=>{
+    const file = new File(new Array(Buffer.from(img, "base64")),  "favicon.ico", {type:"image/jpg"})
+
+    const meta = emptyMetadata()
+    meta.name = "Test"
+    meta.description = "Test Metadata"
+    meta.properties = {
+      file:{ name: file.name, type: file.type, size: file.size, },
+      artist: "rareaf",
+    }
+    let result: any = undefined
+
+    it("Should upload", async ()=>{
+      result = await storeNFT(file, meta)
+      expect(result.url).to.include("ipfs://")
     })
 
-    describe('Mint', ()=>{ })
+    it("Should create a token", async ()=>{
+      nft = new NFT(meta)
+      nft.url = result.url
+      const res = nft.createToken(wallet)
+      expect(res).to.contain('asset-id')
+    })
 
   })
 
-  describe ('Destroy', ()=>{ })
+  //describe ('Destroy', async ()=>{ 
+  //    const res = nft.destroyToken(wallet)
+  //    expect(res).to.contain('asset-id')
+  //})
 })
 
 

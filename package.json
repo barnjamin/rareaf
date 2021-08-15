@@ -4,7 +4,7 @@
   "description": "RareAF NFT Marketplace",
   "private": true,
   "scripts": {
-    "test": "mocha -r ts-node/register -r ignore-styles tests/**/*.spec.ts",
+    "test": "mocha -r ts-node/register -r ignore-styles tests/**/*.spec.ts -b --timeout 5000",
     "clean": "rimraf ./dist",
     "build": "webpack --mode=production --node-env=production",
     "build:dev": "webpack --mode=development",
@@ -19,27 +19,15 @@
     "@blueprintjs/select": "^3.15.9",
     "@randlabs/myalgo-connect": "^1.1.0",
     "@testdeck/mocha": "^0.1.2",
-<<<<<<< HEAD
-    "@types/node-fetch": "^2.5.12",
-    "algosdk": "^1.10.0",
-    "assert": "^2.0.0",
-    "cids": "^1.1.5",
-=======
     "algorand-session-wallet": "^1.1.7",
-    "algosdk": "^1.10.0",
+    "algosdk": "^1.11.0",
     "assert": "^2.0.0",
     "chai": "^4.3.4",
->>>>>>> main
     "crypto-browserify": "^3.12.0",
     "jquery": "^3.5.1",
     "js-sha256": "^0.9.0",
-<<<<<<< HEAD
-    "nft.storage": "^2.1.1",
-    "node-fetch": "^2.6.1",
-=======
     "mocha": "^9.0.3",
     "nft.storage": "^3.0.1",
->>>>>>> main
     "nyc": "^15.1.0",
     "react-async": "^10.0.1",
     "react-router-dom": "^5.2.0",
@@ -59,6 +47,7 @@
     "ignore-styles": "^5.0.1",
     "ipfs": "^0.54.2",
     "mocha": "^9.0.3",
+    "mocha-logger": "^1.0.7",
     "node-sass": "^6.0.1",
     "prettier": "^2.3.2",
     "react": "^17.0.2",
