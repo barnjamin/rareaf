@@ -63,7 +63,7 @@ int 2 //iter, calling it n below
 
 callsub get_blanked_contract
 sha256
-pushbytes b64(AAA=) // TMPL_BLANK_HASH
+pushbytes 0xdeadbeef // TMPL_BLANK_HASH, obviously deadbeef is a placeholder for now
 ==
 return
 
@@ -107,7 +107,7 @@ txna ApplicationArgs 0  // blank, pos, populated
 dup                     // blank, pos, pop, pop
 len                     // blank, pos, pop, len
 uncover 2               // blank, pop, len, pos
-swap                    // blank pop, pos, len
+swap                    // blank, pop, pos, len
 substring3
 concat
 retsub
