@@ -8,7 +8,6 @@ type AlgodConf = {
     network: string
 };
 type IpfsConf = {
-    host: string
     display: string
     token: string
 };
