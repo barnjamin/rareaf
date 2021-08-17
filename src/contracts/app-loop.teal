@@ -50,7 +50,22 @@ return
 
 
 l10:
-// push ints for distance from last and length, in a real contract these might be set in a pre-processing step 
+callsub get_blanked_contract
+sha256
+pushbytes 0xdeadbeef // TMPL_BLANK_HASH, obviously deadbeef is a placeholder for now
+==
+return
+
+get_blanked_contract:
+// we set the stack values that we are going to use and discard later before the ones 
+// we need to reference and update so they have a known stack index
+// this way we dont have to compute the position of the ones we need to update
+// as far as i can tell there is no opcode that lets you reference a stack element
+// dynamically like `int 2; int 1; +; dig {implicit 3 because its top of the stack}`
+
+// push ints for distance from last and length, 
+// in a real contract these might be set in a pre-processing step 
+
 //ASSET_ID
 int 4 // dist
 int 8 // length
@@ -59,23 +74,17 @@ int 8 // length
 int 45  // dist
 int 32  // length
 
-int 2 //iter, calling it n below
+int 2   // iterator init, calling it n below
 
-callsub get_blanked_contract
-sha256
-pushbytes 0xdeadbeef // TMPL_BLANK_HASH, obviously deadbeef is a placeholder for now
-==
-return
-
-get_blanked_contract:
 byte 0x // Start with nothing in the blank hash
 int 0   // Start with 0 as position
 
 uncover 2 // Get n
-dup
+dup       // dupe it, bnz pops one 
 bnz do
 
 do:
+// Update blanked contract with subsection of populated contract
 uncover 2               // Pull the blank hash up to the top of the stack  
 txna ApplicationArgs 0  // Get the populated_contract
 dig 3                   // Get the Last Position 
@@ -94,7 +103,7 @@ uncover 3   // Last distance
 +           // Sum them 
 cover 1     // put it back
 
-//decrement n
+//decrement n by 1
 int 1
 -
 dup
@@ -108,6 +117,6 @@ dup                     // blank, pos, pop, pop
 len                     // blank, pos, pop, len
 uncover 2               // blank, pop, len, pos
 swap                    // blank, pop, pos, len
-substring3
-concat
+substring3              // blank, rest of contract
+concat                  // blank
 retsub
