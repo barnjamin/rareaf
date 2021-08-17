@@ -1,1133 +1,51 @@
 #pragma version 4
 intcblock 1 0 4 2 5 8 6 7 9 10 11 45
-bytecblock 0x6f776e65725f61646472 0x70726963655f6964 0x6e616d65 0x6d61785f7072696365
+bytecblock 0x6f776e65725f61646472 0x70726963655f6964 0x6d61785f7072696365 TMPL_OWNER_ADDR 0x6e616d65
 txn ApplicationID
 intc_1 // 0
 ==
-bnz l100
+bz l2
+intc_0 // 1
+return
+l2:
 txn OnCompletion
 intc 4 // DeleteApplication
 ==
-bnz l99
+bz l4
+global CreatorAddress
+txn Sender
+==
+return
+l4:
 txn OnCompletion
 intc_2 // UpdateApplication
 ==
-bnz l98
+bz l6
+global CreatorAddress
+txn Sender
+==
+return
+l6:
 txn OnCompletion
 intc_3 // CloseOut
 ==
-bnz l97
+bz l8
+global CreatorAddress
+txn Sender
+==
+return
+l8:
 txn OnCompletion
 intc_0 // OptIn
 ==
-bnz l96
+bz l10
+intc_0 // 1
+return
+l10:
 txna ApplicationArgs 0
 pushbytes 0x637265617465 // "create"
 ==
-bnz l95
-txna ApplicationArgs 0
-pushbytes 0x746167 // "tag"
-==
-bnz l94
-txna ApplicationArgs 0
-pushbytes 0x756e746167 // "untag"
-==
-bnz l93
-txna ApplicationArgs 0
-pushbytes 0x70726963655f6465637265617365 // "price_decrease"
-==
-bnz l92
-txna ApplicationArgs 0
-pushbytes 0x70726963655f696e637265617365 // "price_increase"
-==
-bnz l91
-txna ApplicationArgs 0
-pushbytes 0x64656c657465 // "delete"
-==
-bnz l66
-txna ApplicationArgs 0
-pushbytes 0x7075726368617365 // "purchase"
-==
-bnz l41
-txna ApplicationArgs 0
-pushbytes 0x736166657479 // "safety"
-==
-bnz l16
-txna ApplicationArgs 0
-pushbytes 0x636f6e666967 // "config"
-==
-bnz l15
-err
-l15:
-txn Sender
-global CreatorAddress
-==
-bytec_0 // "owner_addr"
-txna ApplicationArgs 1
-app_global_put
-bytec_2 // "name"
-txna ApplicationArgs 2
-app_global_put
-bytec_2 // "name"
-txna ApplicationArgs 3
-app_global_put
-pushbytes 0x756e6974 // "unit"
-txna ApplicationArgs 4
-app_global_put
-bytec_0 // "owner_addr"
-txna ApplicationArgs 5
-app_global_put
-pushbytes 0x6665655f616d74 // "fee_amt"
-txna ApplicationArgs 6
-app_global_put
-bytec_3 // "max_price"
-txna ApplicationArgs 7
-app_global_put
-pushbytes 0x6c697374696e675f68617368 // "listing_hash"
-txna ApplicationArgs 8
-app_global_put
-bytec_1 // "price_id"
-txna ApplicationArgs 9
-app_global_put
-intc_0 // 1
-&&
-intc_0 // 1
-&&
-return
-l16:
-gtxn 0 Sender
-global CreatorAddress
-==
-gtxn 1 Sender
-store 1
-intc_0 // 1
-&&
-intc_2 // 4
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l18
-intc_0 // 1
-b l19
-l18:
-gtxn 4 TypeEnum
-intc_2 // axfer
-==
-gtxn 4 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 4 Sender
-load 1
-==
-&&
-gtxn 4 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 4 AssetAmount
-intc_1 // 0
-==
-&&
-l19:
-intc 4 // 5
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l21
-intc_0 // 1
-b l22
-l21:
-gtxn 5 TypeEnum
-intc_2 // axfer
-==
-gtxn 5 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 5 Sender
-load 1
-==
-&&
-gtxn 5 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 5 AssetAmount
-intc_1 // 0
-==
-&&
-l22:
-&&
-intc 6 // 6
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l24
-intc_0 // 1
-b l25
-l24:
-gtxn 6 TypeEnum
-intc_2 // axfer
-==
-gtxn 6 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 6 Sender
-load 1
-==
-&&
-gtxn 6 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 6 AssetAmount
-intc_1 // 0
-==
-&&
-l25:
-&&
-intc 7 // 7
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l27
-intc_0 // 1
-b l28
-l27:
-gtxn 7 TypeEnum
-intc_2 // axfer
-==
-gtxn 7 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 7 Sender
-load 1
-==
-&&
-gtxn 7 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 7 AssetAmount
-intc_1 // 0
-==
-&&
-l28:
-&&
-intc 5 // 8
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l30
-intc_0 // 1
-b l31
-l30:
-gtxn 8 TypeEnum
-intc_2 // axfer
-==
-gtxn 8 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 8 Sender
-load 1
-==
-&&
-gtxn 8 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 8 AssetAmount
-intc_1 // 0
-==
-&&
-l31:
-&&
-intc 8 // 9
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l33
-intc_0 // 1
-b l34
-l33:
-gtxn 9 TypeEnum
-intc_2 // axfer
-==
-gtxn 9 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 9 Sender
-load 1
-==
-&&
-gtxn 9 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 9 AssetAmount
-intc_1 // 0
-==
-&&
-l34:
-&&
-intc 9 // 10
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l36
-intc_0 // 1
-b l37
-l36:
-gtxn 10 TypeEnum
-intc_2 // axfer
-==
-gtxn 10 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 10 Sender
-load 1
-==
-&&
-gtxn 10 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 10 AssetAmount
-intc_1 // 0
-==
-&&
-l37:
-&&
-intc 10 // 11
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l39
-intc_0 // 1
-b l40
-l39:
-gtxn 11 TypeEnum
-intc_2 // axfer
-==
-gtxn 11 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 11 Sender
-load 1
-==
-&&
-gtxn 11 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 11 AssetAmount
-intc_1 // 0
-==
-&&
-l40:
-&&
-&&
-intc_0 // 1
-load 1
-app_local_del
-intc_0 // 1
-&&
-return
-l41:
-gtxn 1 Receiver
-gtxna 0 Accounts 1
-==
-gtxn 2 Sender
-store 1
-intc_0 // 1
-&&
-intc_3 // 2
-bytec_1 // "price_id"
-app_global_get
-asset_holding_get AssetBalance
-store 10
-store 11
-gtxn 1 Amount
-load 11
-==
-&&
-intc 4 // 5
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l43
-intc_0 // 1
-b l44
-l43:
-gtxn 5 TypeEnum
-intc_2 // axfer
-==
-gtxn 5 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 5 Sender
-load 1
-==
-&&
-gtxn 5 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 5 AssetAmount
-intc_1 // 0
-==
-&&
-l44:
-intc 6 // 6
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l46
-intc_0 // 1
-b l47
-l46:
-gtxn 6 TypeEnum
-intc_2 // axfer
-==
-gtxn 6 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 6 Sender
-load 1
-==
-&&
-gtxn 6 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 6 AssetAmount
-intc_1 // 0
-==
-&&
-l47:
-&&
-intc 7 // 7
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l49
-intc_0 // 1
-b l50
-l49:
-gtxn 7 TypeEnum
-intc_2 // axfer
-==
-gtxn 7 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 7 Sender
-load 1
-==
-&&
-gtxn 7 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 7 AssetAmount
-intc_1 // 0
-==
-&&
-l50:
-&&
-intc 5 // 8
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l52
-intc_0 // 1
-b l53
-l52:
-gtxn 8 TypeEnum
-intc_2 // axfer
-==
-gtxn 8 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 8 Sender
-load 1
-==
-&&
-gtxn 8 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 8 AssetAmount
-intc_1 // 0
-==
-&&
-l53:
-&&
-intc 8 // 9
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l55
-intc_0 // 1
-b l56
-l55:
-gtxn 9 TypeEnum
-intc_2 // axfer
-==
-gtxn 9 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 9 Sender
-load 1
-==
-&&
-gtxn 9 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 9 AssetAmount
-intc_1 // 0
-==
-&&
-l56:
-&&
-intc 9 // 10
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l58
-intc_0 // 1
-b l59
-l58:
-gtxn 10 TypeEnum
-intc_2 // axfer
-==
-gtxn 10 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 10 Sender
-load 1
-==
-&&
-gtxn 10 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 10 AssetAmount
-intc_1 // 0
-==
-&&
-l59:
-&&
-intc 10 // 11
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l61
-intc_0 // 1
-b l62
-l61:
-gtxn 11 TypeEnum
-intc_2 // axfer
-==
-gtxn 11 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 11 Sender
-load 1
-==
-&&
-gtxn 11 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 11 AssetAmount
-intc_1 // 0
-==
-&&
-l62:
-&&
-pushint 12 // 12
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l64
-intc_0 // 1
-b l65
-l64:
-gtxn 12 TypeEnum
-intc_2 // axfer
-==
-gtxn 12 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 12 Sender
-load 1
-==
-&&
-gtxn 12 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 12 AssetAmount
-intc_1 // 0
-==
-&&
-l65:
-&&
-&&
-intc_0 // 1
-load 1
-app_local_del
-intc_0 // 1
-&&
-return
-l66:
-gtxn 1 Sender
-store 1
-intc_0 // 1
-intc_1 // 0
-load 1
-app_local_get
-load 1
-==
-&&
-intc_2 // 4
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l68
-intc_0 // 1
-b l69
-l68:
-gtxn 4 TypeEnum
-intc_2 // axfer
-==
-gtxn 4 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 4 Sender
-load 1
-==
-&&
-gtxn 4 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 4 AssetAmount
-intc_1 // 0
-==
-&&
-l69:
-intc 4 // 5
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l71
-intc_0 // 1
-b l72
-l71:
-gtxn 5 TypeEnum
-intc_2 // axfer
-==
-gtxn 5 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 5 Sender
-load 1
-==
-&&
-gtxn 5 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 5 AssetAmount
-intc_1 // 0
-==
-&&
-l72:
-&&
-intc 6 // 6
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l74
-intc_0 // 1
-b l75
-l74:
-gtxn 6 TypeEnum
-intc_2 // axfer
-==
-gtxn 6 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 6 Sender
-load 1
-==
-&&
-gtxn 6 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 6 AssetAmount
-intc_1 // 0
-==
-&&
-l75:
-&&
-intc 7 // 7
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l77
-intc_0 // 1
-b l78
-l77:
-gtxn 7 TypeEnum
-intc_2 // axfer
-==
-gtxn 7 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 7 Sender
-load 1
-==
-&&
-gtxn 7 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 7 AssetAmount
-intc_1 // 0
-==
-&&
-l78:
-&&
-intc 5 // 8
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l80
-intc_0 // 1
-b l81
-l80:
-gtxn 8 TypeEnum
-intc_2 // axfer
-==
-gtxn 8 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 8 Sender
-load 1
-==
-&&
-gtxn 8 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 8 AssetAmount
-intc_1 // 0
-==
-&&
-l81:
-&&
-intc 8 // 9
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l83
-intc_0 // 1
-b l84
-l83:
-gtxn 9 TypeEnum
-intc_2 // axfer
-==
-gtxn 9 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 9 Sender
-load 1
-==
-&&
-gtxn 9 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 9 AssetAmount
-intc_1 // 0
-==
-&&
-l84:
-&&
-intc 9 // 10
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l86
-intc_0 // 1
-b l87
-l86:
-gtxn 10 TypeEnum
-intc_2 // axfer
-==
-gtxn 10 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 10 Sender
-load 1
-==
-&&
-gtxn 10 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 10 AssetAmount
-intc_1 // 0
-==
-&&
-l87:
-&&
-intc 10 // 11
-intc_3 // 2
-+
-global GroupSize
-<
-bnz l89
-intc_0 // 1
-b l90
-l89:
-gtxn 11 TypeEnum
-intc_2 // axfer
-==
-gtxn 11 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 11 Sender
-load 1
-==
-&&
-gtxn 11 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 11 AssetAmount
-intc_1 // 0
-==
-&&
-l90:
-&&
-&&
-intc_1 // 0
-load 1
-app_local_del
-intc_0 // 1
-&&
-return
-l91:
-global GroupSize
-intc_3 // 2
-==
-gtxn 1 AssetReceiver
-store 1
-intc_0 // 1
-&&
-intc_1 // 0
-load 1
-app_local_get
-load 1
-==
-&&
-gtxn 1 TypeEnum
-intc_2 // axfer
-==
-gtxn 1 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 1 Sender
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 1 AssetReceiver
-load 1
-==
-&&
-gtxn 1 AssetAmount
-txna ApplicationArgs 1
-btoi
-==
-&&
-gtxn 1 XferAsset
-bytec_1 // "price_id"
-app_global_get
-==
-&&
-&&
-return
-l92:
-global GroupSize
-intc_3 // 2
-==
-gtxn 1 Sender
-store 1
-intc_0 // 1
-&&
-intc_1 // 0
-load 1
-app_local_get
-load 1
-==
-&&
-gtxn 1 TypeEnum
-intc_2 // axfer
-==
-gtxn 1 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 1 AssetAmount
-txna ApplicationArgs 1
-btoi
-==
-&&
-gtxn 1 XferAsset
-bytec_1 // "price_id"
-app_global_get
-==
-&&
-&&
-return
-l93:
-global GroupSize
-intc_3 // 2
-==
-gtxna 0 Assets 0
-store 3
-intc_0 // 1
-&&
-intc_1 // 0
-asset_params_get AssetManager
-store 8
-store 9
-load 9
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 1 Sender
-store 1
-intc_0 // 1
-&&
-intc_1 // 0
-load 1
-app_local_get
-load 1
-==
-&&
-gtxn 1 TypeEnum
-intc_2 // axfer
-==
-gtxn 1 AssetCloseTo
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 1 XferAsset
-load 3
-==
-&&
-&&
-return
-l94:
-global GroupSize
-pushint 3 // 3
-==
-intc_1 // 0
-asset_params_get AssetManager
-store 6
-store 7
-load 7
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxna 0 Assets 0
-store 3
-intc_0 // 1
-&&
-gtxn 1 Sender
-store 1
-intc_0 // 1
-&&
-intc_1 // 0
-load 1
-app_local_get
-load 1
-==
-&&
-gtxn 1 TypeEnum
-intc_2 // axfer
-==
-gtxn 1 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 1 XferAsset
-load 3
-==
-&&
-gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
-load 1
-==
-&&
-gtxn 1 AssetAmount
-intc_1 // 0
-==
-&&
-&&
-gtxn 2 TypeEnum
-intc_2 // axfer
-==
-gtxn 2 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 2 Sender
-bytec_0 // "owner_addr"
-app_global_get
-==
-&&
-gtxn 2 AssetReceiver
-load 1
-==
-&&
-gtxn 2 AssetAmount
-intc_0 // 1
-==
-&&
-gtxn 2 XferAsset
-load 3
-==
-&&
-&&
-return
-l95:
+bz l12
 gtxn 1 Receiver
 store 1
 intc_0 // 1
@@ -1248,29 +166,1112 @@ app_local_put
 intc_0 // 1
 &&
 load 2
-bytec_3 // "max_price"
+bytec_2 // "max_price"
 app_global_get
 <=
 &&
 return
-l96:
+l12:
+txna ApplicationArgs 0
+pushbytes 0x746167 // "tag"
+==
+bz l14
+global GroupSize
+pushint 3 // 3
+==
+intc_1 // 0
+asset_params_get AssetManager
+store 6
+store 7
+load 7
+bytec_3 // TMPL_OWNER_ADDR
+==
+&&
+gtxna 0 Assets 0
+store 3
 intc_0 // 1
+&&
+gtxn 1 Sender
+store 1
+intc_0 // 1
+&&
+intc_1 // 0
+load 1
+app_local_get
+load 1
+==
+&&
+gtxn 1 TypeEnum
+intc_2 // axfer
+==
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 XferAsset
+load 3
+==
+&&
+gtxn 1 Sender
+load 1
+==
+&&
+gtxn 1 AssetReceiver
+load 1
+==
+&&
+gtxn 1 AssetAmount
+intc_1 // 0
+==
+&&
+&&
+gtxn 2 TypeEnum
+intc_2 // axfer
+==
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 Sender
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 2 AssetReceiver
+load 1
+==
+&&
+gtxn 2 AssetAmount
+intc_0 // 1
+==
+&&
+gtxn 2 XferAsset
+load 3
+==
+&&
+&&
+return
+l14:
+txna ApplicationArgs 0
+pushbytes 0x756e746167 // "untag"
+==
+bz l16
+global GroupSize
+intc_3 // 2
+==
+gtxna 0 Assets 0
+store 3
+intc_0 // 1
+&&
+intc_1 // 0
+asset_params_get AssetManager
+store 8
+store 9
+load 9
+bytec_3 // TMPL_OWNER_ADDR
+==
+&&
+gtxn 1 Sender
+store 1
+intc_0 // 1
+&&
+intc_1 // 0
+load 1
+app_local_get
+load 1
+==
+&&
+gtxn 1 TypeEnum
+intc_2 // axfer
+==
+gtxn 1 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 1 Sender
+load 1
+==
+&&
+gtxn 1 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 1 XferAsset
+load 3
+==
+&&
+&&
+return
+l16:
+txna ApplicationArgs 0
+pushbytes 0x70726963655f6465637265617365 // "price_decrease"
+==
+bz l18
+global GroupSize
+intc_3 // 2
+==
+gtxn 1 Sender
+store 1
+intc_0 // 1
+&&
+intc_1 // 0
+load 1
+app_local_get
+load 1
+==
+&&
+gtxn 1 TypeEnum
+intc_2 // axfer
+==
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 Sender
+load 1
+==
+&&
+gtxn 1 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 1 AssetAmount
+txna ApplicationArgs 1
+btoi
+==
+&&
+gtxn 1 XferAsset
+bytec_1 // "price_id"
+app_global_get
+==
+&&
+&&
+return
+l18:
+txna ApplicationArgs 0
+pushbytes 0x70726963655f696e637265617365 // "price_increase"
+==
+bz l20
+global GroupSize
+intc_3 // 2
+==
+gtxn 1 AssetReceiver
+store 1
+intc_0 // 1
+&&
+intc_1 // 0
+load 1
+app_local_get
+load 1
+==
+&&
+gtxn 1 TypeEnum
+intc_2 // axfer
+==
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 Sender
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 1 AssetReceiver
+load 1
+==
+&&
+gtxn 1 AssetAmount
+txna ApplicationArgs 1
+btoi
+==
+&&
+gtxn 1 XferAsset
+bytec_1 // "price_id"
+app_global_get
+==
+&&
+&&
+return
+l20:
+txna ApplicationArgs 0
+pushbytes 0x64656c657465 // "delete"
+==
+bz l45
+gtxn 1 Sender
+store 1
+intc_0 // 1
+intc_1 // 0
+load 1
+app_local_get
+load 1
+==
+&&
+intc_2 // 4
+intc_3 // 2
++
+global GroupSize
+<
+bz l44
+gtxn 4 TypeEnum
+intc_2 // axfer
+==
+gtxn 4 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 4 Sender
+load 1
+==
+&&
+gtxn 4 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 4 AssetAmount
+intc_1 // 0
+==
+&&
+l23:
+intc 4 // 5
+intc_3 // 2
++
+global GroupSize
+<
+bz l43
+gtxn 5 TypeEnum
+intc_2 // axfer
+==
+gtxn 5 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 5 Sender
+load 1
+==
+&&
+gtxn 5 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 5 AssetAmount
+intc_1 // 0
+==
+&&
+l25:
+&&
+intc 6 // 6
+intc_3 // 2
++
+global GroupSize
+<
+bz l42
+gtxn 6 TypeEnum
+intc_2 // axfer
+==
+gtxn 6 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 6 Sender
+load 1
+==
+&&
+gtxn 6 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 6 AssetAmount
+intc_1 // 0
+==
+&&
+l27:
+&&
+intc 7 // 7
+intc_3 // 2
++
+global GroupSize
+<
+bz l41
+gtxn 7 TypeEnum
+intc_2 // axfer
+==
+gtxn 7 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 7 Sender
+load 1
+==
+&&
+gtxn 7 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 7 AssetAmount
+intc_1 // 0
+==
+&&
+l29:
+&&
+intc 5 // 8
+intc_3 // 2
++
+global GroupSize
+<
+bz l40
+gtxn 8 TypeEnum
+intc_2 // axfer
+==
+gtxn 8 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 8 Sender
+load 1
+==
+&&
+gtxn 8 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 8 AssetAmount
+intc_1 // 0
+==
+&&
+l31:
+&&
+intc 8 // 9
+intc_3 // 2
++
+global GroupSize
+<
+bz l39
+gtxn 9 TypeEnum
+intc_2 // axfer
+==
+gtxn 9 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 9 Sender
+load 1
+==
+&&
+gtxn 9 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 9 AssetAmount
+intc_1 // 0
+==
+&&
+l33:
+&&
+intc 9 // 10
+intc_3 // 2
++
+global GroupSize
+<
+bz l38
+gtxn 10 TypeEnum
+intc_2 // axfer
+==
+gtxn 10 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 10 Sender
+load 1
+==
+&&
+gtxn 10 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 10 AssetAmount
+intc_1 // 0
+==
+&&
+l35:
+&&
+intc 10 // 11
+intc_3 // 2
++
+global GroupSize
+<
+bz l37
+gtxn 11 TypeEnum
+intc_2 // axfer
+==
+gtxn 11 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 11 Sender
+load 1
+==
+&&
+gtxn 11 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 11 AssetAmount
+intc_1 // 0
+==
+&&
+b l99
+l37:
+intc_0 // 1
+b l99
+l38:
+intc_0 // 1
+b l35
+l39:
+intc_0 // 1
+b l33
+l40:
+intc_0 // 1
+b l31
+l41:
+intc_0 // 1
+b l29
+l42:
+intc_0 // 1
+b l27
+l43:
+intc_0 // 1
+b l25
+l44:
+intc_0 // 1
+b l23
+l45:
+txna ApplicationArgs 0
+pushbytes 0x7075726368617365 // "purchase"
+==
+bz l70
+gtxn 1 Receiver
+gtxna 0 Accounts 1
+==
+gtxn 2 Sender
+store 1
+intc_0 // 1
+&&
+intc_3 // 2
+bytec_1 // "price_id"
+app_global_get
+asset_holding_get AssetBalance
+store 10
+store 11
+gtxn 1 Amount
+load 11
+==
+&&
+intc 4 // 5
+intc_3 // 2
++
+global GroupSize
+<
+bz l69
+gtxn 5 TypeEnum
+intc_2 // axfer
+==
+gtxn 5 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 5 Sender
+load 1
+==
+&&
+gtxn 5 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 5 AssetAmount
+intc_1 // 0
+==
+&&
+l48:
+intc 6 // 6
+intc_3 // 2
++
+global GroupSize
+<
+bz l68
+gtxn 6 TypeEnum
+intc_2 // axfer
+==
+gtxn 6 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 6 Sender
+load 1
+==
+&&
+gtxn 6 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 6 AssetAmount
+intc_1 // 0
+==
+&&
+l50:
+&&
+intc 7 // 7
+intc_3 // 2
++
+global GroupSize
+<
+bz l67
+gtxn 7 TypeEnum
+intc_2 // axfer
+==
+gtxn 7 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 7 Sender
+load 1
+==
+&&
+gtxn 7 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 7 AssetAmount
+intc_1 // 0
+==
+&&
+l52:
+&&
+intc 5 // 8
+intc_3 // 2
++
+global GroupSize
+<
+bz l66
+gtxn 8 TypeEnum
+intc_2 // axfer
+==
+gtxn 8 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 8 Sender
+load 1
+==
+&&
+gtxn 8 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 8 AssetAmount
+intc_1 // 0
+==
+&&
+l54:
+&&
+intc 8 // 9
+intc_3 // 2
++
+global GroupSize
+<
+bz l65
+gtxn 9 TypeEnum
+intc_2 // axfer
+==
+gtxn 9 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 9 Sender
+load 1
+==
+&&
+gtxn 9 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 9 AssetAmount
+intc_1 // 0
+==
+&&
+l56:
+&&
+intc 9 // 10
+intc_3 // 2
++
+global GroupSize
+<
+bz l64
+gtxn 10 TypeEnum
+intc_2 // axfer
+==
+gtxn 10 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 10 Sender
+load 1
+==
+&&
+gtxn 10 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 10 AssetAmount
+intc_1 // 0
+==
+&&
+l58:
+&&
+intc 10 // 11
+intc_3 // 2
++
+global GroupSize
+<
+bz l63
+gtxn 11 TypeEnum
+intc_2 // axfer
+==
+gtxn 11 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 11 Sender
+load 1
+==
+&&
+gtxn 11 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 11 AssetAmount
+intc_1 // 0
+==
+&&
+l60:
+&&
+pushint 12 // 12
+intc_3 // 2
++
+global GroupSize
+<
+bz l62
+gtxn 12 TypeEnum
+intc_2 // axfer
+==
+gtxn 12 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 12 Sender
+load 1
+==
+&&
+gtxn 12 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 12 AssetAmount
+intc_1 // 0
+==
+&&
+b l100
+l62:
+intc_0 // 1
+b l100
+l63:
+intc_0 // 1
+b l60
+l64:
+intc_0 // 1
+b l58
+l65:
+intc_0 // 1
+b l56
+l66:
+intc_0 // 1
+b l54
+l67:
+intc_0 // 1
+b l52
+l68:
+intc_0 // 1
+b l50
+l69:
+intc_0 // 1
+b l48
+l70:
+txna ApplicationArgs 0
+pushbytes 0x736166657479 // "safety"
+==
+bz l95
+gtxn 0 Sender
+global CreatorAddress
+==
+gtxn 1 Sender
+store 1
+intc_0 // 1
+&&
+intc_2 // 4
+intc_3 // 2
++
+global GroupSize
+<
+bz l94
+gtxn 4 TypeEnum
+intc_2 // axfer
+==
+gtxn 4 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 4 Sender
+load 1
+==
+&&
+gtxn 4 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 4 AssetAmount
+intc_1 // 0
+==
+&&
+l73:
+intc 4 // 5
+intc_3 // 2
++
+global GroupSize
+<
+bz l93
+gtxn 5 TypeEnum
+intc_2 // axfer
+==
+gtxn 5 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 5 Sender
+load 1
+==
+&&
+gtxn 5 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 5 AssetAmount
+intc_1 // 0
+==
+&&
+l75:
+&&
+intc 6 // 6
+intc_3 // 2
++
+global GroupSize
+<
+bz l92
+gtxn 6 TypeEnum
+intc_2 // axfer
+==
+gtxn 6 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 6 Sender
+load 1
+==
+&&
+gtxn 6 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 6 AssetAmount
+intc_1 // 0
+==
+&&
+l77:
+&&
+intc 7 // 7
+intc_3 // 2
++
+global GroupSize
+<
+bz l91
+gtxn 7 TypeEnum
+intc_2 // axfer
+==
+gtxn 7 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 7 Sender
+load 1
+==
+&&
+gtxn 7 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 7 AssetAmount
+intc_1 // 0
+==
+&&
+l79:
+&&
+intc 5 // 8
+intc_3 // 2
++
+global GroupSize
+<
+bz l90
+gtxn 8 TypeEnum
+intc_2 // axfer
+==
+gtxn 8 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 8 Sender
+load 1
+==
+&&
+gtxn 8 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 8 AssetAmount
+intc_1 // 0
+==
+&&
+l81:
+&&
+intc 8 // 9
+intc_3 // 2
++
+global GroupSize
+<
+bz l89
+gtxn 9 TypeEnum
+intc_2 // axfer
+==
+gtxn 9 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 9 Sender
+load 1
+==
+&&
+gtxn 9 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 9 AssetAmount
+intc_1 // 0
+==
+&&
+l83:
+&&
+intc 9 // 10
+intc_3 // 2
++
+global GroupSize
+<
+bz l88
+gtxn 10 TypeEnum
+intc_2 // axfer
+==
+gtxn 10 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 10 Sender
+load 1
+==
+&&
+gtxn 10 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 10 AssetAmount
+intc_1 // 0
+==
+&&
+l85:
+&&
+intc 10 // 11
+intc_3 // 2
++
+global GroupSize
+<
+bz l87
+gtxn 11 TypeEnum
+intc_2 // axfer
+==
+gtxn 11 AssetCloseTo
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 11 Sender
+load 1
+==
+&&
+gtxn 11 AssetReceiver
+bytec_0 // "owner_addr"
+app_global_get
+==
+&&
+gtxn 11 AssetAmount
+intc_1 // 0
+==
+&&
+b l101
+l87:
+intc_0 // 1
+b l101
+l88:
+intc_0 // 1
+b l85
+l89:
+intc_0 // 1
+b l83
+l90:
+intc_0 // 1
+b l81
+l91:
+intc_0 // 1
+b l79
+l92:
+intc_0 // 1
+b l77
+l93:
+intc_0 // 1
+b l75
+l94:
+intc_0 // 1
+b l73
+l95:
+txna ApplicationArgs 0
+pushbytes 0x636f6e666967 // "config"
+==
+bz l97
+txn Sender
+global CreatorAddress
+==
+bytec_0 // "owner_addr"
+txna ApplicationArgs 1
+app_global_put
+bytec 4 // "name"
+txna ApplicationArgs 2
+app_global_put
+bytec 4 // "name"
+txna ApplicationArgs 3
+app_global_put
+pushbytes 0x756e6974 // "unit"
+txna ApplicationArgs 4
+app_global_put
+bytec_0 // "owner_addr"
+txna ApplicationArgs 5
+app_global_put
+pushbytes 0x6665655f616d74 // "fee_amt"
+txna ApplicationArgs 6
+app_global_put
+bytec_2 // "max_price"
+txna ApplicationArgs 7
+app_global_put
+pushbytes 0x6c697374696e675f68617368 // "listing_hash"
+txna ApplicationArgs 8
+app_global_put
+bytec_1 // "price_id"
+txna ApplicationArgs 9
+app_global_put
+intc_0 // 1
+&&
+intc_0 // 1
+&&
 return
 l97:
-global CreatorAddress
-txn Sender
-==
-return
-l98:
-global CreatorAddress
-txn Sender
-==
-return
+err
 l99:
-global CreatorAddress
-txn Sender
-==
+&&
+&&
+intc_1 // 0
+load 1
+app_local_del
+intc_0 // 1
+&&
 return
 l100:
+&&
+&&
 intc_0 // 1
+load 1
+app_local_del
+intc_0 // 1
+&&
+return
+l101:
+&&
+&&
+intc_0 // 1
+load 1
+app_local_del
+intc_0 // 1
+&&
 return

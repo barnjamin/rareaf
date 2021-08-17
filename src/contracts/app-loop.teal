@@ -1,0 +1,113 @@
+#pragma version 5
+
+txn ApplicationID
+int 0
+==
+bz l2
+int 1
+return
+
+
+l2:
+txn OnCompletion
+int DeleteApplication
+==
+bz l4
+global CreatorAddress
+txn Sender
+==
+return
+
+l4:
+txn OnCompletion
+int UpdateApplication
+==
+bz l6
+global CreatorAddress
+txn Sender
+==
+return
+
+l6:
+txn OnCompletion
+int CloseOut
+==
+bz l8
+global CreatorAddress
+txn Sender
+==
+return
+
+
+l8:
+txn OnCompletion
+int OptIn
+==
+bz l10
+int 1
+return
+
+
+
+l10:
+// push ints for distance from last and length, in a real contract these might be set in a pre-processing step 
+//ASSET_ID
+int 4 // dist
+int 8 // length
+
+//CREATOR_ADDR
+int 45  // dist
+int 32  // length
+
+int 2 //iter, calling it n below
+
+callsub get_blanked_contract
+sha256
+pushbytes b64(AAA=) // TMPL_BLANK_HASH
+==
+return
+
+get_blanked_contract:
+byte 0x // Start with nothing in the blank hash
+int 0   // Start with 0 as position
+
+uncover 2 // Get n
+dup
+bnz do
+
+do:
+uncover 2               // Pull the blank hash up to the top of the stack  
+txna ApplicationArgs 0  // Get the populated_contract
+dig 3                   // Get the Last Position 
+dup
+dig 7                   // distance value is 6 deep (pos, pos, contract, blank, iter, pos, length, dist) 
++                       // Last Position + next dist
+substring3              // populated_contract[pos:pos+nextdist]
+concat                  // Combine blank hash so far with the chunk we just got
+cover 2                 // Put it back 
+
+// Update position 
+uncover 1   // Get the last position
+uncover 3   // Last length
++           // Sum them
+uncover 3   // Last distance
++           // Sum them 
+cover 1     // put it back
+
+//decrement n
+int 1
+-
+dup
+bnz do
+bz done
+
+//Add the last parts
+done:
+txna ApplicationArgs 0  // blank, pos, populated
+dup                     // blank, pos, pop, pop
+len                     // blank, pos, pop, len
+uncover 2               // blank, pop, len, pos
+swap                    // blank pop, pos, len
+substring3
+concat
+retsub
