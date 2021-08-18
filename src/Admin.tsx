@@ -271,6 +271,7 @@ function Indexer(props: IndexerConfigProps)  {
 
 type IPFSConfigProps = {
     display: string 
+    token: string
     setProp(key: string, val: string)
 }
 
@@ -279,6 +280,12 @@ function IPFSConfig(props: IPFSConfigProps)  {
 
     return (
         <div className='content indexer-config'>
+            <InputGroup fill={true}
+                onChange={setter("display")}
+                placeholder="nft.storage token" 
+                large={true}
+                value={props.token} 
+            />
             <InputGroup fill={true}
                 onChange={setter("display")}
                 placeholder="IPFS Display URL" 
