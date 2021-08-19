@@ -82,17 +82,19 @@ export default function NFTViewer(props: NFTViewerProps) {
     async function handlePriceChange(price){ setPrice(price) }
 
 
-    async function handleOptIn() {
-        if(props.wallet === undefined || optedIn) return
+    async function handleOptIn(): Promise<boolean> {
+        if(props.wallet === undefined || optedIn) return false
 
         showInfo("Creating Transaction to Opt-In to application")
 
         const app = new Application(ps.application)
         try {
-            await app.optIn(props.wallet)
+            await app.optIn(props.wallet) 
+            return true
         }catch(error){
-            showErrorToaster("Failed to opt into Application") 
+            showErrorToaster("Failed to opt into Application: "+error.toString())
         }
+        return false 
     }
 
     async function handleSubmitListing(){
@@ -101,8 +103,11 @@ export default function NFTViewer(props: NFTViewerProps) {
         try{
             await handleOptIn()
 
+
             showInfo("Creating listing transaction")
             const lst = new Listing(price, parseInt(id), props.acct)
+
+               // Trigger popup to get event for signing 
             await lst.doCreate(props.wallet)
 
             if(tags.length > 0 ){
@@ -113,8 +118,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             history.push("/listing/"+lst.contract_addr)
 
         }catch(error){ 
-            console.error(error)
-            showErrorToaster("Failed to create listing")
+            showErrorToaster("Failed to create listing: "+error.toString())
         }
 
         setWaiting(false);
