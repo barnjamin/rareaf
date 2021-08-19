@@ -11,6 +11,7 @@ import { IconName } from '@blueprintjs/icons'
 import { useEffect } from 'react'
 import { showErrorToaster } from './Toaster'
 import {platform_settings as ps } from './lib/platform-conf'
+import { RequestPopup } from './RequestPopup'
 
 
 type AlgorandWalletConnectorProps = {
@@ -36,7 +37,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
 
     function disconnectWallet() { 
         props.sessionWallet.disconnect()
-        props.updateWallet(new SessionWallet(props.sessionWallet.network)) 
+        props.updateWallet(new SessionWallet(props.sessionWallet.network, props.sessionWallet.permissionCallback)) 
     }
 
     function handleDisplayWalletSelection() { setSelectorOpen(true) }
@@ -49,7 +50,7 @@ export function AlgorandWalletConnector(props:AlgorandWalletConnectorProps)  {
             return setSelectorOpen(false)
         }
 
-        const sw = new SessionWallet(props.sessionWallet.network, choice)
+        const sw = new SessionWallet(props.sessionWallet.network, props.sessionWallet.permissionCallback, choice)
 
         if(!await sw.connect()) {
             sw.disconnect()
