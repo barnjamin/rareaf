@@ -27,14 +27,15 @@ export function RequestPopup(props: RequestPopupProps) {
     function handleProceed(){ props.handleOption(PopupPermission.Proceed) }
 
     return (
-        <Overlay isOpen={props.isOpen} className={Classes.OVERLAY_CONTAINER} hasBackdrop={true} usePortal={false}>
-            <div className={Classes.CARD}>
-                Please click proceed to allow signing popup
-                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                    <Button intent={Intent.DANGER} onClick={handleDecline} style={{ margin: "" }} text='Nevermind' />
-                    <Button intent={Intent.SUCCESS} onClick={handleProceed} style={{ margin: "" }} text='Proceed' />
+            <Overlay isOpen={props.isOpen} className='popup-request' hasBackdrop={false} onClose={handleDecline}>
+                <div className={Classes.CARD}>
+                    <p>Please click proceed to allow signing popup</p>
+                    <br />
+                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                        <Button intent={Intent.DANGER} onClick={handleDecline} style={{ margin: "" }} text='Nevermind' />
+                        <Button intent={Intent.SUCCESS} onClick={handleProceed} style={{ margin: "" }} text='Proceed' />
+                    </div>
                 </div>
-            </div>
-        </Overlay>
+            </Overlay>
     )
 }
