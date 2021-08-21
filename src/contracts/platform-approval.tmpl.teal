@@ -1,6 +1,6 @@
-#pragma version 5
+#pragma version 4
 intcblock 1 0 4 2 5 8 6 7 9 10 11 45
-bytecblock 0x6f776e65725f61646472 0x70726963655f6964 0x6d61785f7072696365 TMPL_OWNER_ADDR 0x6e616d65
+bytecblock 0x6f776e65725f61646472 0x70726963655f6964 0x6d61785f7072696365 TMPL_OWNER_ADDR
 txn ApplicationID
 intc_1 // 0
 ==
@@ -132,7 +132,7 @@ substring3
 concat
 store 4
 load 5
-pushint 26 // 26
+intc_0 // 1
 +
 intc 4 // 5
 +
@@ -1217,29 +1217,26 @@ global CreatorAddress
 bytec_0 // "owner_addr"
 txna ApplicationArgs 1
 app_global_put
-bytec 4 // "name"
+pushbytes 0x6e616d65 // "name"
 txna ApplicationArgs 2
 app_global_put
-bytec 4 // "name"
+pushbytes 0x756e6974 // "unit"
 txna ApplicationArgs 3
 app_global_put
-pushbytes 0x756e6974 // "unit"
+bytec_0 // "owner_addr"
 txna ApplicationArgs 4
 app_global_put
-bytec_0 // "owner_addr"
+pushbytes 0x6665655f616d74 // "fee_amt"
 txna ApplicationArgs 5
 app_global_put
-pushbytes 0x6665655f616d74 // "fee_amt"
+bytec_2 // "max_price"
 txna ApplicationArgs 6
 app_global_put
-bytec_2 // "max_price"
+pushbytes 0x6c697374696e675f68617368 // "listing_hash"
 txna ApplicationArgs 7
 app_global_put
-pushbytes 0x6c697374696e675f68617368 // "listing_hash"
-txna ApplicationArgs 8
-app_global_put
 bytec_1 // "price_id"
-txna ApplicationArgs 9
+txna ApplicationArgs 8
 app_global_put
 intc_0 // 1
 &&

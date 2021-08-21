@@ -13,7 +13,7 @@ import { Wallet } from 'algorand-session-wallet'
 import { Listing } from './lib/listing'
 import { NFT } from './lib/nft'
 import { getPortfolio } from './lib/algorand'
-import { ApplicationConfiguration } from './lib/application-conf'
+import { ApplicationConfiguration } from './lib/application-configuration'
 
 
 type PortfolioProps = { 

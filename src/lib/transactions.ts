@@ -100,8 +100,8 @@ export function get_app_create_txn(suggestedParams, addr, approval, clear) {
 export function get_app_config_txn(suggestedParams, addr, id, params) {
     return {
         from: addr,
-        appArgs:params.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64')) }),
-        appIndex:ps.application.id,
+        appArgs: params.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64')) }),
+        appIndex:id,
         appOnComplete: algosdk.OnApplicationComplete.NoOpOC,
         type:"appl",
         ...suggestedParams
@@ -118,7 +118,7 @@ export function get_app_update_txn(suggestedParams, addr, approval, clear, id) {
         appOnComplete: algosdk.OnApplicationComplete.UpdateApplicationOC,
         appApprovalProgram: approval,
         appClearProgram: clear,
-        extraPages: getExtraPages(approval.length+clear.length),
+        //extraPages: getExtraPages(approval.length+clear.length),
         ...suggestedParams
    } 
 }

@@ -9,7 +9,7 @@ import {ListingCard} from './ListingCard'
 
 import {Wallet} from 'algorand-session-wallet'
 import { Button, Label, NumericInput } from '@blueprintjs/core'
-import { ApplicationConfiguration } from './lib/application-conf'
+import { ApplicationConfiguration } from './lib/application-configuration'
 
 
 type BrowserProps = {

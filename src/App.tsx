@@ -20,7 +20,7 @@ import {SessionWallet, PermissionResult, SignedTxn, Wallet} from 'algorand-sessi
 import {platform_settings as ps} from './lib/platform-conf'
 import {RequestPopupProps, RequestPopup, PopupPermission, DefaultPopupProps} from './RequestPopup'
 import { useEffect } from 'react';
-import { ApplicationConfiguration } from './lib/application-conf';
+import { ApplicationConfiguration } from './lib/application-configuration';
 
 
 type AppProps = {
@@ -35,14 +35,12 @@ export default function App(props: AppProps) {
   const [ac, setApplicationConfiguration] = React.useState(ps.application)
 
   useEffect(()=>{
-    ApplicationConfiguration.fromLocalStorage(this.state.ac).then((appConf)=>{
-      if(appConf !== undefined)  return setApplicationConfiguration(appConf)
-      else ApplicationConfiguration.fromNetwork(this.state.ac).then((appConf)=>{
-        return setApplicationConfiguration(appConf)
+    if(!ac.loaded)
+      ApplicationConfiguration.fromLocalStorage(ac).then((appConf)=>{
+        if(appConf !== undefined)  setApplicationConfiguration(appConf)
+        else ApplicationConfiguration.fromNetwork(ac).then((appConf)=>{ return setApplicationConfiguration(appConf) })
       })
-    })
-  })
-
+  }, [ac])
 
   const popupCallback = {
     async request(pr: PermissionResult): Promise<SignedTxn[]> {
@@ -70,6 +68,7 @@ export default function App(props: AppProps) {
 
 
   const sw = new SessionWallet(ps.algod.network, popupCallback)
+  useEffect(()=>{ if(!sw.connected()) sw.connect() }, [sw])
 
   const [sessionWallet, setSessionWallet] =  React.useState(sw)
   const [accts, setAccounts] = React.useState(sw.accountList())

@@ -12,7 +12,7 @@ import {Tagger, MAX_LISTING_TAGS } from './Tagger'
 import {Application} from './lib/application'
 import {platform_settings as ps} from './lib/platform-conf'
 import { showErrorToaster, showInfo } from './Toaster'
-import { ApplicationConfiguration } from './lib/application-conf'
+import { ApplicationConfiguration } from './lib/application-configuration'
 
 type NFTViewerProps = {
     history: any

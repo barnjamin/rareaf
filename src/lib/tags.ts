@@ -12,7 +12,7 @@ import {
     get_asa_destroy_txn, 
 } from './transactions'
 import { platform_settings as ps } from './platform-conf';
-import { ApplicationConfiguration, get_template_vars } from './application-conf';
+import { ApplicationConfiguration, get_template_vars } from './application-configuration';
 import { get_platform_owner } from './contracts';
 
 export class TagToken {

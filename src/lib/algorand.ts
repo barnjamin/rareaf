@@ -5,7 +5,7 @@ import Listing from "./listing";
 import { NFT } from "./nft";
 import { TagToken} from './tags'
 import { dummy_addr } from './contracts'
-import { ApplicationConfiguration } from './application-conf';
+import { ApplicationConfiguration } from './application-configuration';
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
 
 
@@ -69,7 +69,7 @@ export async function getTags(): Promise<TagToken[]> {
 export async function getGlobalState(app_id: number): Promise<any> {
     const client = getAlgodClient()
     const result = await client.getApplicationByID(app_id).do()
-    console.log(result)
+    return result['params']['global-state']
 }
 
 export async function isOptedIntoApp(address: string): Promise<boolean> {
@@ -97,6 +97,8 @@ export async function getListings(ac: ApplicationConfiguration, tagName: string,
     const indexer  = getIndexer()
 
     let token_id = ps.application.price_id
+
+    if(token_id === undefined) return []
 
     if(tagName !== undefined){
         const tag = new TagToken(tagName)

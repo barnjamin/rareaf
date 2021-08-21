@@ -1,5 +1,5 @@
 import { platform_settings as ps} from './platform-conf'
-import { ApplicationConfiguration, get_template_vars } from './application-conf'
+import { ApplicationConfiguration, get_template_vars } from './application-configuration'
 import { get_listing_sig, get_platform_owner } from './contracts'
 import {
     uintToB64, 

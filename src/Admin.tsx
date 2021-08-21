@@ -12,7 +12,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import { docco } from  'react-syntax-highlighter/dist/esm/styles/hljs'
 import { getTags } from './lib/algorand'
 import { platform_settings as ps } from './lib/platform-conf'
-import { ApplicationConfiguration } from './lib/application-conf'
+import { ApplicationConfiguration } from './lib/application-configuration'
 import { showErrorToaster, showInfo } from './Toaster'
 
 type AdminProps = { 
@@ -24,7 +24,7 @@ type AdminProps = {
 };
 
 export default function Admin(props: AdminProps) {
-    if (props.ac.admin_addr && props.acct == props.ac.admin_addr )  return (<div className='container'><p>no</p></div>)
+    if (props.ac.admin_addr && props.acct !== props.ac.admin_addr )  return (<div className='container'><p>no</p></div>)
 
     const [algod, setAlgod] = React.useState(ps.algod)
     const [indexer, setIndexer] = React.useState(ps.indexer)

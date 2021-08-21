@@ -16,7 +16,7 @@ import algosdk, { Transaction } from 'algosdk';
 import { 
     platform_settings as ps ,
 } from "./platform-conf";
-import {makeArgs, get_template_vars, ApplicationConfiguration} from './application-conf'
+import {makeArgs, get_template_vars, ApplicationConfiguration} from './application-configuration'
 import { showErrorToaster, showInfo } from "../Toaster";
 import {TagToken} from './tags'
 
@@ -33,6 +33,8 @@ export enum Method {
     PriceIncrease = "cHJpY2VfaW5jcmVhc2U=",
     PriceDecrease = "cHJpY2VfZGVjcmVhc2U=",
     Purchase = "cHVyY2hhc2U=",
+    Safety = "c2FmZXR5",
+    Config = "Y29uZmln",
 }
 
 
@@ -119,29 +121,29 @@ export class Application {
         //Set this in create or its already set
 
         const app = await get_approval_program(this.getVars({})) 
+        console.log(app)
         const clear = await get_clear_program({})
 
         if (!this.conf.id){
 
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.admin_addr, app, clear))
-            console.log(create_txn)
-            console.log(create_txn.get_obj_for_encoding())
-            console.log(wallet)
+
             const [signed]   = await wallet.signTxn([create_txn])
 
             const result     = await sendWait([signed])
 
             this.conf.id = result['application-index']
-            console.log(this.conf)
         }else{
-            const params = makeArgs(this.conf)
+            const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.id))
+            const [s_update_txn]   = await wallet.signTxn([update_txn])
+            await sendWait([s_update_txn])
+            
+            const params = [Method.Config, ...makeArgs(this.conf)]
             const config_txn = new Transaction(get_app_config_txn(suggestedParams, this.conf.admin_addr, this.conf.id, params))
 
-            console.log(config_txn)
+            const [s_config_txn]   = await wallet.signTxn([config_txn])
 
-            const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.id))
-            const [s_update_txn, s_config_txn]   = await wallet.signTxn([update_txn, config_txn])
-            await sendWait([s_update_txn, s_config_txn])
+            await sendWait([s_config_txn])
         }
     }
 

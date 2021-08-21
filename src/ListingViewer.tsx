@@ -21,7 +21,7 @@ import {Wallet} from 'algorand-session-wallet'
 import {TagToken} from './lib/tags'
 import { MAX_LISTING_TAGS, Tagger} from './Tagger'
 import { showErrorToaster } from './Toaster'
-import { ApplicationConfiguration } from './lib/application-conf'
+import { ApplicationConfiguration } from './lib/application-configuration'
 
 type ListingViewerProps = {
     history: any
