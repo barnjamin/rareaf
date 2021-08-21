@@ -28,12 +28,11 @@ export class ApplicationConfiguration  {
 
         //Set fields
         const new_ac = {...new ApplicationConfiguration(), ...ac, loaded: true}
-        console.log(new_ac)
+
         for(let idx=0; idx<state.length; idx++){
             const key = Buffer.from(state[idx].key, 'base64').toString()
             let value_bytes = Buffer.from(state[idx].value.bytes, 'base64')
 
-            console.log(key, new_ac[key], typeof new_ac[key])
             if(typeof new_ac[key] ==='number') {
                 new_ac[key] = algosdk.decodeUint64(new Uint8Array(value_bytes), 'safe')
             }else if (key.slice(-4) === 'addr') {
@@ -42,7 +41,9 @@ export class ApplicationConfiguration  {
                 new_ac[key] = value_bytes.toString()
             }
         }
-        console.log(new_ac)
+
+        // TODO: write to session storage?
+
         //Parse result fields into appropriate fields
         return new_ac 
     }
