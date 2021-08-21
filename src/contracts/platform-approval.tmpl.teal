@@ -1,6 +1,6 @@
 #pragma version 4
 intcblock 1 0 4 2 5 8 6 7 9 10 11 45
-bytecblock 0x6f776e65725f61646472 0x70726963655f6964 0x6d61785f7072696365 TMPL_OWNER_ADDR
+bytecblock 0x6f776e65725f61646472 0x70726963655f6964 0x6c697374696e675f68617368 0x6d61785f7072696365 TMPL_OWNER_ADDR
 txn ApplicationID
 intc_1 // 0
 ==
@@ -148,7 +148,8 @@ store 4
 intc_0 // 1
 load 4
 sha256
-pushbytes TMPL_BLANK_HASH // TMPL_BLANK_HASH
+bytec_2 // "listing_hash"
+app_global_get
 ==
 &&
 pushbytes 0x50726f6772616d // "Program"
@@ -166,7 +167,7 @@ app_local_put
 intc_0 // 1
 &&
 load 2
-bytec_2 // "max_price"
+bytec_3 // "max_price"
 app_global_get
 <=
 &&
@@ -184,7 +185,7 @@ asset_params_get AssetManager
 store 6
 store 7
 load 7
-bytec_3 // TMPL_OWNER_ADDR
+bytec 4 // TMPL_OWNER_ADDR
 ==
 &&
 gtxna 0 Assets 0
@@ -268,7 +269,7 @@ asset_params_get AssetManager
 store 8
 store 9
 load 9
-bytec_3 // TMPL_OWNER_ADDR
+bytec 4 // TMPL_OWNER_ADDR
 ==
 &&
 gtxn 1 Sender
@@ -1229,10 +1230,10 @@ app_global_put
 pushbytes 0x6665655f616d74 // "fee_amt"
 txna ApplicationArgs 5
 app_global_put
-bytec_2 // "max_price"
+bytec_3 // "max_price"
 txna ApplicationArgs 6
 app_global_put
-pushbytes 0x6c697374696e675f68617368 // "listing_hash"
+bytec_2 // "listing_hash"
 txna ApplicationArgs 7
 app_global_put
 bytec_1 // "price_id"

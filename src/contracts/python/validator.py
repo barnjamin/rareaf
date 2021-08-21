@@ -83,7 +83,7 @@ class TemplateContract(object):
             # prepare the blank contract
             Seq(concat_ops), 
             # Make sure this is the contract being distributed to
-            Sha256(blank_contract.load()) == Tmpl.Bytes("TMPL_BLANK_HASH"),
+            Sha256(blank_contract.load()) == listing_hash,
         )
 
     def populate_tmpl_vars(self):
