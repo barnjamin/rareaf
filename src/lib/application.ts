@@ -105,9 +105,9 @@ export class Application {
         // Seed it
         const suggestedParams = await getSuggested(10)
         const seed_txn        = new Transaction(get_pay_txn(suggestedParams, this.conf.admin_addr, this.conf.owner_addr, this.conf.seed_amt))
-        console.log(seed_txn)
         const [signed_seed]   = await wallet.signTxn([seed_txn])
         const result          = await sendWait([signed_seed])
+
         if(result['pool-error'] != "") console.error("Failed to seed the owner")
 
         return this.conf.owner_addr 
@@ -121,7 +121,6 @@ export class Application {
         //Set this in create or its already set
 
         const app = await get_approval_program(this.getVars({})) 
-        console.log(app)
         const clear = await get_clear_program({})
 
         if (!this.conf.id){

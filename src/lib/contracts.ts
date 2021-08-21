@@ -35,7 +35,6 @@ export async function get_platform_owner(vars: any): Promise<LogicSigAccount> {
 }
 
 export async function get_listing_hash(vars: any): Promise<Buffer> {
-    console.log(vars)
     const compiled = await get_listing_compiled(vars)
     return get_hash(new Uint8Array(Buffer.from(compiled.result, "base64")), listing_var_positions)
 }
@@ -47,7 +46,6 @@ export async function get_listing_compiled(vars: any) {
 export async function get_contract_compiled(template: string, vars: any) {
     const client = getAlgodClient()
     const populated = await populate_contract(template, vars)
-    console.log(populated)
     return client.compile(populated).do()
 }
 

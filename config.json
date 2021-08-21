@@ -19,7 +19,7 @@
     "application":{
         "id":46,
         "admin_addr":"7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
-        "state_fields":["owner_addr", "name", "unit", "owner_addr", "fee_amt", "max_price", "listing_hash", "price_id"],
+        "state_fields":["owner_addr", "name", "unit", "fee_amt", "max_price", "listing_hash", "price_id"],
         "seed_amt": 5000000,
         "max_price": 1000000000
     },
@@ -31,7 +31,7 @@
         "listing-positions":"listing.tmpl.teal.json"
     },
     "dev":{ 
-        "debug_txns":true,
+        "debug_txns":false,
         "accounts":{ }
     }
 }

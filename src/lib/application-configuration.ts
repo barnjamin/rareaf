@@ -1,4 +1,4 @@
-import { addrToB64, getGlobalState, uintToB64 } from './algorand'
+import { addrToB64, getGlobalState, getTags, uintToB64 } from './algorand'
 import {TagToken} from './tags'
 import algosdk from 'algosdk'
 
@@ -35,14 +35,15 @@ export class ApplicationConfiguration  {
 
             if(typeof new_ac[key] ==='number') {
                 new_ac[key] = algosdk.decodeUint64(new Uint8Array(value_bytes), 'safe')
-            }else if (key.slice(-4) === 'addr') {
-                new_ac[key] = algosdk.encodeAddress(new Uint8Array(value_bytes))
-            }else{
+            }else {
                 new_ac[key] = value_bytes.toString()
             }
         }
 
+        new_ac['tags'] = await getTags(new_ac['owner_addr'], new_ac['unit'])
+
         // TODO: write to session storage?
+        sessionStorage.setItem("config", JSON.stringify(new_ac))
 
         //Parse result fields into appropriate fields
         return new_ac 
@@ -50,6 +51,10 @@ export class ApplicationConfiguration  {
 
     static async fromLocalStorage(ac: ApplicationConfiguration): Promise<ApplicationConfiguration> {
         if(ac.id==0){ return {...ac, loaded: true} }
+
+        const conf = sessionStorage.getItem("config")
+        if(conf) return JSON.parse(conf)
+
         return undefined;
     }
 }
@@ -76,11 +81,13 @@ export function makeArgs(ac: ApplicationConfiguration): string[] {
         if(typeof val === 'number'){
             args.push(uintToB64(val))
         }else if(field.slice(-4)==='addr') {
-            args.push(addrToB64(val))
+            //args.push(addrToB64(val))
+            args.push(Buffer.from("K7DHIOE3FJNDRPTRHM6S3BAM77OPRYHNYVIPWRQQSANWJ3SKS2ZO36SY6Y").toString('base64'))
         }else if(typeof val === 'string') {
-             args.push(Buffer.from(val).toString('base64'))
+            args.push(Buffer.from(val).toString('base64'))
         }else{
-            console.log("No conf entry for: ", field)
+            if(field=='price_id') args.push(uintToB64(33))
+            console.log("No conf entry for: ", field, typeof val)
         }
     }
 

@@ -63,7 +63,6 @@ export default function NFTViewer(props: NFTViewerProps) {
                 if(subscribed) setOptedIn(oi) 
             }).catch((err)=>{ console.error(err) })
         return ()=>{subscribed=false}
-
     }, [props.acct])
 
 
@@ -109,6 +108,7 @@ export default function NFTViewer(props: NFTViewerProps) {
             showInfo("Creating listing transaction")
             const lst = new Listing(price, parseInt(id), props.acct, props.ac)
 
+            console.log(lst)
                // Trigger popup to get event for signing 
             await lst.doCreate(props.wallet)
 
@@ -185,7 +185,7 @@ export default function NFTViewer(props: NFTViewerProps) {
                             <Tagger 
                                 renderProps={{"fill":true}} 
                                 tags={tags} 
-                                tagOpts={ps.application.tags} 
+                                tagOpts={props.ac.tags} 
                                 setTags={setTags}
                                 maxTags={MAX_LISTING_TAGS}
                                 />

@@ -56,8 +56,8 @@ export class TagToken {
         const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, ps.application.admin_addr))
 
         const create_txn = new Transaction(get_asa_create_txn(suggestedParams, ps.application.owner_addr, this.getUrl()))
-        create_txn.assetName = this.getTokenName() 
-        create_txn.assetUnitName = TagToken.getUnitName()
+        create_txn.assetName = this.getTokenName(ac.unit) 
+        create_txn.assetUnitName = TagToken.getUnitName(ac.unit)
         create_txn.assetTotal = 1e6
         create_txn.assetDecimals = 0
 
@@ -79,12 +79,12 @@ export class TagToken {
         return this.id
     }
 
-    getTokenName(): string {
-        return ps.application.unit + ":" + this.name
+    getTokenName(unit: string): string {
+        return unit + ":" + this.name
     }
 
-    static getUnitName(): string {
-       return ps.application.unit + ":tag"
+    static getUnitName(unit: string): string {
+       return unit + ":tag"
     }
 
     getUrl(): string {

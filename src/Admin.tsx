@@ -137,7 +137,7 @@ export default function Admin(props: AdminProps) {
     function searchForTags(){
         setLoading(true)
 
-        getTags().then((foundTags)=>{ setTags([...foundTags]) })
+        getTags(props.ac.owner_addr, props.ac.unit).then((foundTags)=>{ setTags([...foundTags]) })
         .finally(()=>{setLoading(false)})
     }
 

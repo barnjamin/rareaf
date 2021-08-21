@@ -1224,20 +1224,17 @@ app_global_put
 pushbytes 0x756e6974 // "unit"
 txna ApplicationArgs 3
 app_global_put
-bytec_0 // "owner_addr"
+pushbytes 0x6665655f616d74 // "fee_amt"
 txna ApplicationArgs 4
 app_global_put
-pushbytes 0x6665655f616d74 // "fee_amt"
+bytec_3 // "max_price"
 txna ApplicationArgs 5
 app_global_put
-bytec_3 // "max_price"
+bytec_2 // "listing_hash"
 txna ApplicationArgs 6
 app_global_put
-bytec_2 // "listing_hash"
-txna ApplicationArgs 7
-app_global_put
 bytec_1 // "price_id"
-txna ApplicationArgs 8
+txna ApplicationArgs 7
 app_global_put
 intc_0 // 1
 &&
