@@ -2,14 +2,14 @@
 
     "domain": "rare.af",
     "algod":{
-        "server":"http://localhost",
-        "port":4001,
-        "token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "network": "sandnet"
+        "server":"https://testnet.algoexplorerapi.io",
+        "port":0,
+        "token":"",
+        "network": "TestNet"
     },
     "indexer": {
-        "server":"http://localhost",
-        "port":8980,
+        "server":"https://testnet.algoexplorerapi.io/idx2",
+        "port":0,
         "token":""
     },
     "ipfs":{

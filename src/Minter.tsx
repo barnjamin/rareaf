@@ -56,7 +56,7 @@ export default function Minter(props: MinterProps){
 
         storeNFT(fileObj, metadata).then((result) => {
             const nft = new NFT(metadata);
-            nft.url = "ipfs://"+result.ipnft
+            nft.url = "ipfs://"+result.ipnft+"/metadata.json"
 
             showInfo("Creating token")
             nft.createToken(props.wallet).then((res) => {

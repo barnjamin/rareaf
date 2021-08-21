@@ -16,8 +16,10 @@ import NFTViewer from './NFTViewer'
 import Portfolio from './Portfolio'
 import ListingViewer from './ListingViewer'
 import Admin from './Admin'
-import { SessionWallet } from 'algorand-session-wallet'
-import { platform_settings as ps } from './lib/platform-conf'
+import {SessionWallet, PermissionResult, SignedTxn, Wallet} from 'algorand-session-wallet'
+import {platform_settings as ps} from './lib/platform-conf'
+import {RequestPopupProps, RequestPopup, PopupPermission, DefaultPopupProps} from './RequestPopup'
+import { useEffect } from 'react';
 import { ApplicationConfiguration } from './lib/application-conf';
 
 
@@ -25,103 +27,120 @@ type AppProps = {
   history: any
 };
 
-type AppState = {
-  sessionWallet: SessionWallet
-  accts: string[]
-  connected: boolean
-  ac: ApplicationConfiguration 
-};
+const timeout = async(ms: number) => new Promise(res => setTimeout(res, ms));
+
+export default function App(props: AppProps) {
+
+  const [popupProps, setPopupProps] = React.useState(DefaultPopupProps)
+  const [ac, setApplicationConfiguration] = React.useState(ps.application)
+
+  useEffect(()=>{
+    ApplicationConfiguration.fromLocalStorage(this.state.ac).then((appConf)=>{
+      if(appConf !== undefined)  return setApplicationConfiguration(appConf)
+      else ApplicationConfiguration.fromNetwork(this.state.ac).then((appConf)=>{
+        return setApplicationConfiguration(appConf)
+      })
+    })
+  })
 
 
-export default class App extends React.Component<AppProps, AppState> {
-  constructor(props) {
-    super(props)
+  const popupCallback = {
+    async request(pr: PermissionResult): Promise<SignedTxn[]> {
+      let result = PopupPermission.Undecided;
+      setPopupProps({isOpen:true, handleOption: (res: PopupPermission)=>{ result = res} })		
+      
 
-    const sw = new SessionWallet(ps.algod.network)
-    sw.connect()
+      async function wait(): Promise<SignedTxn[]> {
+        while(result === PopupPermission.Undecided) await timeout(50);
 
-    this.state = { 
-      sessionWallet:  sw,
-      accts: sw.accountList(),
-      connected: sw.connected(),
-      ac: ps.application,
+        if(result == PopupPermission.Proceed) return pr.approved()
+        return pr.declined()
+      }
+
+      //get signed
+      const txns = await wait()
+
+      //close popup
+      setPopupProps(DefaultPopupProps)
+
+      //return signed
+      return txns
     }
-
-
-    this.updateWallet    = this.updateWallet.bind(this)
-    this.updateAppConf    = this.updateAppConf.bind(this)
-
-    this.initConfiguration()
   }
 
-  updateWallet(sw: SessionWallet){ this.setState({ sessionWallet:sw, accts: sw.accountList(), connected: sw.connected() }) }
-  updateAppConf(ac: ApplicationConfiguration) { this.setState({ac: ac}) }
 
-  async initConfiguration(){
-    let appConf = await ApplicationConfiguration.fromLocalStorage(this.state.ac)
-    if(appConf !== undefined)  return this.updateAppConf(appConf)
-    this.updateAppConf(await ApplicationConfiguration.fromNetwork(this.state.ac))
+  const sw = new SessionWallet(ps.algod.network, popupCallback)
+
+  const [sessionWallet, setSessionWallet] =  React.useState(sw)
+  const [accts, setAccounts] = React.useState(sw.accountList())
+  const [connected, setConnected] = React.useState(sw.connected())
+
+  function updateWallet(sw: SessionWallet){ 
+    setSessionWallet(sw)
+    setAccounts(sw.accountList())
+    setConnected(sw.connected())
   }
 
-  render() {
-    const wallet = this.state.sessionWallet.wallet
-    const acct = this.state.sessionWallet.getDefaultAccount()
+  const wallet = sessionWallet.wallet
+  const acct = sessionWallet.getDefaultAccount()
 
-    let adminNav = <div/>
-    if(this.state.connected  && (!ps.application.admin_addr  || acct == ps.application.admin_addr)) {
-      adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
-    }
-
-    let port = <div/>
-    if(this.state.connected){
-      port = <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />
-    }
-
-    return (
-      <Router history={this.props.history} >
-        <Navbar >
-          <Navbar.Group align={Alignment.LEFT}>
-            <Navbar.Heading><a href='/'><img height={"20px"} src={require('./img/default-monochrome.svg')}></img></a></Navbar.Heading>
-            <Navbar.Divider />
-            <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
-            <AnchorButton className='bp3-minimal' icon='clean' text='Mint' href="/mint" />
-            {port}
-          </Navbar.Group >
-
-          <Navbar.Group align={Alignment.RIGHT}>
-            {adminNav}
-            <AlgorandWalletConnector 
-              darkMode={false}
-              sessionWallet={this.state.sessionWallet}
-              accts={this.state.accts}
-              connected={this.state.connected} 
-              updateWallet={this.updateWallet}
-              />
-          </Navbar.Group>
-        </Navbar>
-        <Switch>
-          <Route path="/portfolio" >
-            <Portfolio ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} /> 
-          </Route>
-          <Route path="/portfolio/:addr" >
-            <Portfolio ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} /> 
-          </Route>
-
-          <Route path="/mint" children={<Minter ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} /> } />
-          <Route path="/nft/:id" children={<NFTViewer ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} /> } />
-          <Route path="/listing/:addr" children={<ListingViewer ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} />} />
-
-          <Route exact path="/" >
-            <Browser ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} />
-          </Route>
-          <Route path="/tag/:tag"  >
-            <Browser ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} />
-          </Route>
-          <Route path="/admin"  >
-            <Admin updateAppConf={this.updateAppConf} ac={this.state.ac} history={this.props.history} wallet={wallet} acct={acct} />
-          </Route>
-        </Switch>
-      </Router>
-    )
+  let adminNav = <div/>
+  if(connected  && (ps.application.admin_addr == "" || acct == ps.application.admin_addr)) {
+    adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
   }
+
+  let port = <div/>
+  if(connected){
+    port = <AnchorButton className='bp3-minimal' icon='folder-open' text='Portfolio' href="/portfolio" />
+  }
+
+  return (
+      <div>
+        <Router history={props.history} >
+          <Navbar >
+            <Navbar.Group align={Alignment.LEFT}>
+              <Navbar.Heading><a href='/'><img height={"20px"} src={require('./img/default-monochrome.svg')}></img></a></Navbar.Heading>
+              <Navbar.Divider />
+              <AnchorButton className='bp3-minimal' icon='grid-view' text='Browse' href="/" />
+              <AnchorButton className='bp3-minimal' icon='clean' text='Mint' href="/mint" />
+              {port}
+            </Navbar.Group >
+
+            <Navbar.Group align={Alignment.RIGHT}>
+              {adminNav}
+              <AlgorandWalletConnector 
+                darkMode={false}
+                sessionWallet={sessionWallet}
+                accts={accts}
+                connected={connected} 
+                updateWallet={updateWallet}
+                />
+            </Navbar.Group>
+          </Navbar>
+          <Switch>
+            <Route path="/portfolio" >
+              <Portfolio ac={ac} history={props.history} wallet={wallet} acct={acct} /> 
+            </Route>
+            <Route path="/portfolio/:addr" >
+              <Portfolio ac={ac} history={props.history} wallet={wallet} acct={acct} /> 
+            </Route>
+
+            <Route path="/mint" children={<Minter ac={ac} history={props.history} wallet={wallet} acct={acct} /> } />
+            <Route path="/nft/:id" children={<NFTViewer ac={ac} history={props.history} wallet={wallet} acct={acct} /> } />
+            <Route path="/listing/:addr" children={<ListingViewer ac={ac} history={props.history} wallet={wallet} acct={acct} />} />
+
+            <Route exact path="/" >
+              <Browser ac={ac} history={props.history} wallet={wallet} acct={acct} />
+            </Route>
+            <Route path="/tag/:tag"  >
+              <Browser ac={ac} history={props.history} wallet={wallet} acct={acct} />
+            </Route>
+            <Route path="/admin"  >
+              <Admin ac={ac} updateAppConf={setApplicationConfiguration} history={props.history} wallet={wallet} acct={acct} />
+            </Route>
+          </Switch>
+        </Router>
+        <RequestPopup {...popupProps}/>
+      </div>
+  )
 }

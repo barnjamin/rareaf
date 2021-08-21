@@ -124,9 +124,9 @@ def approval():
         field_set.append(App.globalPut(Bytes(field), Txn.application_args[idx+1]))
     field_set.append(Int(1))
 
+    # Set fields that come in how are they stored? app args 
     application_config = And(
         Txn.sender() == Global.creator_address(),
-        # Set fields that come in how are they stored? app args 
         Seq(field_set),
         Int(1)
     )
@@ -139,15 +139,15 @@ def approval():
         [Txn.on_completion()  == OnComplete.CloseOut,           on_closeout],
         [Txn.on_completion()  == OnComplete.OptIn,              register],
 
-        [Txn.application_args[0] == action_create,      Return(create_listing)],  # App approve price tokens && adds listing to local state
-        [Txn.application_args[0] == action_tag,         Return(tag_listing)],     # App approves manager of token requested
-        [Txn.application_args[0] == action_untag,       Return(untag_listing)],   # App approves untag coming from listing creator
+        [Txn.application_args[0] == action_create,      Return(create_listing)],        # App approve price tokens && adds listing to local state
+        [Txn.application_args[0] == action_tag,         Return(tag_listing)],           # App approves manager of token requested
+        [Txn.application_args[0] == action_untag,       Return(untag_listing)],         # App approves untag coming from listing creator
         [Txn.application_args[0] == action_dprice,      Return(price_decrease_listing)], # App validates caller 
         [Txn.application_args[0] == action_iprice,      Return(price_increase_listing)], # App validates caller 
-        [Txn.application_args[0] == action_delete,      Return(delete_listing)],    # App approves sender owns listing
-        [Txn.application_args[0] == action_purchase,    Return(purchase_listing)],  # App removes listing from local state
-        [Txn.application_args[0] == action_safety,      Return(delist_listing)],     # App removes listing from local state
-        [Txn.application_args[0] == action_config,      Return(application_config)]     # App removes listing from local state
+        [Txn.application_args[0] == action_delete,      Return(delete_listing)],        # App approves sender owns listing
+        [Txn.application_args[0] == action_purchase,    Return(purchase_listing)],      # App removes listing from local state
+        [Txn.application_args[0] == action_safety,      Return(delist_listing)],        # App removes listing from local state
+        [Txn.application_args[0] == action_config,      Return(application_config)]     # App sets config vars 
     )
 
 

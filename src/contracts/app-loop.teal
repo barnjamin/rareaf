@@ -50,13 +50,6 @@ return
 
 
 l10:
-callsub get_blanked_contract
-sha256
-pushbytes 0xdeadbeef // TMPL_BLANK_HASH, obviously deadbeef is a placeholder for now
-==
-return
-
-get_blanked_contract:
 // we set the stack values that we are going to use and discard later before the ones 
 // we need to reference and update so they have a known stack index
 // this way we dont have to compute the position of the ones we need to update
@@ -76,6 +69,13 @@ int 32  // length
 
 int 2   // iterator init, calling it n below
 
+callsub get_blanked_contract
+sha256
+pushbytes 0xdeadbeef // TMPL_BLANK_HASH, obviously deadbeef is a placeholder for now
+==
+return
+
+get_blanked_contract:
 byte 0x // Start with nothing in the blank contract 
 int 0   // Start with 0 as position
 
