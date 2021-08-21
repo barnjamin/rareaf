@@ -42,10 +42,8 @@ export class ApplicationConfiguration  {
 
         new_ac['tags'] = await getTags(new_ac['owner_addr'], new_ac['unit'])
 
-        // TODO: write to session storage?
         sessionStorage.setItem("config", JSON.stringify(new_ac))
 
-        //Parse result fields into appropriate fields
         return new_ac 
     }
 
@@ -80,13 +78,9 @@ export function makeArgs(ac: ApplicationConfiguration): string[] {
         const val = ac[field]
         if(typeof val === 'number'){
             args.push(uintToB64(val))
-        }else if(field.slice(-4)==='addr') {
-            //args.push(addrToB64(val))
-            args.push(Buffer.from("K7DHIOE3FJNDRPTRHM6S3BAM77OPRYHNYVIPWRQQSANWJ3SKS2ZO36SY6Y").toString('base64'))
         }else if(typeof val === 'string') {
             args.push(Buffer.from(val).toString('base64'))
         }else{
-            if(field=='price_id') args.push(uintToB64(33))
             console.log("No conf entry for: ", field, typeof val)
         }
     }
