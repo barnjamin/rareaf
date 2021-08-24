@@ -37,10 +37,11 @@ export default function App(props: AppProps) {
   useEffect(()=>{
     if(!ac.loaded)
       ApplicationConfiguration.fromLocalStorage(ac).then((appConf)=>{
-        if(appConf !== undefined)  setApplicationConfiguration(appConf)
-        else ApplicationConfiguration.fromNetwork(ac).then((appConf)=>{ return setApplicationConfiguration(appConf) })
-      })
+        if(appConf !== undefined)  setApplicationConfiguration({...appConf})
+        else ApplicationConfiguration.fromNetwork(ac).then((appConf)=>{ setApplicationConfiguration(appConf)  })
+    })
   }, [ac])
+
 
   const popupCallback = {
     async request(pr: PermissionResult): Promise<SignedTxn[]> {

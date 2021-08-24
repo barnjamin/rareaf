@@ -89,7 +89,7 @@ export class Application {
             "TMPL_ASSET_ID": dummy_id //Dummy int
         })) 
 
-        this.conf.listing_hash = "b64("+lc.toString('base64')+")"
+        this.conf.listing_hash = new Uint8Array(lc)
     }
 
     async createOwnerAcct(wallet: Wallet): Promise<string> {
@@ -253,7 +253,7 @@ export class Application {
             return this.conf
         }
 
-        this.conf.listing_hash = ""
+        this.conf.listing_hash = new Uint8Array()
         this.conf.id = 0
         return this.conf
     }

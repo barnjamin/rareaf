@@ -86,23 +86,23 @@ export async function isOptedIntoAsset(address: string, idx: number): Promise<bo
     return optedIn !== undefined 
 }
 
-export async function isListing(address: string): Promise<boolean> {
+export async function isListing(ac: ApplicationConfiguration, address: string): Promise<boolean> {
     const client = getAlgodClient()
     const result = await client.accountInformation(address).do()
-    const hasPriceToken = result['assets'].find((r)=>{ return r['asset-id'] == ps.application.price_id })
+    const hasPriceToken = result['assets'].find((r)=>{ return r['asset-id'] == ac.price_id })
     return hasPriceToken !== undefined
 }
 
 export async function getListings(ac: ApplicationConfiguration, tagName: string, minPrice=0, maxPrice=0): Promise<Listing[]> {
     const indexer  = getIndexer()
 
-    let token_id = ps.application.price_id
+    let token_id = ac.price_id
 
     if(token_id === undefined) return []
 
     if(tagName !== undefined){
         const tag = new TagToken(tagName)
-        const tt = await getTagToken(tag.getTokenName(ac.unit))
+        const tt = await getTagToken(ac, tag.getTokenName(ac.unit))
         if (tt.id == 0) return []
         token_id = tt.id
     }
@@ -122,7 +122,7 @@ export async function getListings(ac: ApplicationConfiguration, tagName: string,
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
-        if (b.address == ps.application.owner_addr || b.amount == 0) continue;
+        if (b.address == ac.owner_addr || b.amount == 0) continue;
 
         lp.push(getListing(ac, b.address).then((listing)=>{
              listings.push(listing)
@@ -134,12 +134,12 @@ export async function getListings(ac: ApplicationConfiguration, tagName: string,
     return listings
 }
 
-export async function getTagToken(name: string): Promise<TagToken> {
+export async function getTagToken(ac: ApplicationConfiguration, name: string): Promise<TagToken> {
     const indexer  = getIndexer()
     const assets = await indexer.searchForAssets().name(name).do()
 
     for(let aidx in assets.assets){
-        if(assets.assets[aidx].params.creator == ps.application.owner_addr)
+        if(assets.assets[aidx].params.creator == ac.owner_addr)
             return new TagToken(name, assets.assets[aidx].index)
     }
 
@@ -161,7 +161,7 @@ export async function getPortfolio(ac: ApplicationConfiguration, addr: string): 
     const lp = []
     for(let aidx in acct['apps-local-state']){
         const als = acct['apps-local-state'][aidx]
-        if(als.id !== ps.application.id) continue
+        if(als.id !== ac.id) continue
 
         for(let kidx in als['key-value']) {
             const kv = als['key-value'][kidx]
@@ -191,7 +191,8 @@ export async function getPortfolio(ac: ApplicationConfiguration, addr: string): 
 }
 
 export async function getListing(ac: ApplicationConfiguration, addr: string): Promise<Listing> {
-    const holdings  = await getHoldingsFromListingAddress(addr)
+    const holdings  = await getHoldingsFromListingAddress(ac, addr)
+
     if(holdings.nft === undefined) return undefined;
 
     const creator  = await getCreator(addr, holdings.nft.asset_id)
@@ -203,7 +204,7 @@ export async function getListing(ac: ApplicationConfiguration, addr: string): Pr
     return l
 }
 
-export async function getHoldingsFromListingAddress(address: string): Promise<Holdings> {
+export async function getHoldingsFromListingAddress(ac: ApplicationConfiguration, address: string): Promise<Holdings> {
     const client   = getAlgodClient()
     const account = await client.accountInformation(address).do()
     const holdings  = { 'price':0, 'tags':[], 'nft':undefined, }
@@ -212,13 +213,13 @@ export async function getHoldingsFromListingAddress(address: string): Promise<Ho
     for (let aid in account.assets) {
         const asa = account.assets[aid]
 
-        if(asa['asset-id'] == ps.application.price_id){
+        if(asa['asset-id'] == ac.price_id){
             holdings.price = asa['amount']
             continue
         }
 
         gets.push(getToken(asa['asset-id']).then(async (token)=>{
-            if(token.params.creator == ps.application.owner_addr) holdings.tags.push(TagToken.fromAsset(token))
+            if(token.params.creator == ac.owner_addr) holdings.tags.push(TagToken.fromAsset(token))
             else holdings.nft = await NFT.fromToken(token)
         }))
     }
@@ -228,9 +229,9 @@ export async function getHoldingsFromListingAddress(address: string): Promise<Ho
     return holdings
 }
 
-export async function getListingAddr(asset_id: number): Promise<string> {
+export async function getListingAddr(ac: ApplicationConfiguration, asset_id: number): Promise<string> {
     const owner = await getOwner(asset_id)
-    if (owner !== "" && await isListing(owner)){
+    if (owner !== "" && await isListing(ac, owner)){
         return owner
     }
     return ""
@@ -282,6 +283,7 @@ export async function getCreator(addr: string, asset_id: number): Promise<string
         .assetID(asset_id)
         .do()
 
+    console.log(asset_id, addr)
     for(let idx in txns.transactions){
         const txn = txns.transactions[idx]
         if(txn.sender != addr){

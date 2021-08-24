@@ -46,7 +46,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     React.useEffect(()=>{
         let subscribed = true
-        getListingAddr(parseInt(id))
+        getListingAddr(props.ac, parseInt(id))
             .then((addr)=>{  
                 if(subscribed) setListingAddr(addr) 
             })

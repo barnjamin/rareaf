@@ -2,6 +2,8 @@ import { addrToB64, getGlobalState, getTags, uintToB64 } from './algorand'
 import {TagToken} from './tags'
 import algosdk from 'algosdk'
 
+const conf_session_key = "config"
+
 export class ApplicationConfiguration  {
 
     constructor(
@@ -14,7 +16,7 @@ export class ApplicationConfiguration  {
         public fee_amt: number          = 0,   // Amount to be sent to app onwer on sales
         public seed_amt: number         = 0,   // Amount sent to each listing to cover costs
         public max_price: number        = 0,   // The max number of price tokens that can be distributed to a listing
-        public listing_hash: string     = "",  // The hash of the blanked out listing template contract
+        public listing_hash: Uint8Array = new Uint8Array(),  // The hash of the blanked out listing template contract
         public tags: TagToken[]         = [],  // Subject specific tags
         public state_fields: string[]   = [],  // List of fields that are stored in app config
         public loaded: boolean          = false // local tracker for if we need to load the config
@@ -42,7 +44,7 @@ export class ApplicationConfiguration  {
 
         new_ac['tags'] = await getTags(new_ac['owner_addr'], new_ac['unit'])
 
-        sessionStorage.setItem("config", JSON.stringify(new_ac))
+        sessionStorage.setItem(conf_session_key, JSON.stringify(new_ac))
 
         return new_ac 
     }
@@ -50,7 +52,7 @@ export class ApplicationConfiguration  {
     static async fromLocalStorage(ac: ApplicationConfiguration): Promise<ApplicationConfiguration> {
         if(ac.id==0){ return {...ac, loaded: true} }
 
-        const conf = sessionStorage.getItem("config")
+        const conf = sessionStorage.getItem(conf_session_key)
         if(conf) return JSON.parse(conf)
 
         return undefined;
@@ -78,9 +80,9 @@ export function makeArgs(ac: ApplicationConfiguration): string[] {
         const val = ac[field]
         if(typeof val === 'number'){
             args.push(uintToB64(val))
-        }else if(typeof val === 'string') {
+        } else if(typeof val === 'string' || field === 'listing_hash') {
             args.push(Buffer.from(val).toString('base64'))
-        }else{
+        } else {
             console.log("No conf entry for: ", field, typeof val)
         }
     }

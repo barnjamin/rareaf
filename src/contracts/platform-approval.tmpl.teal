@@ -169,6 +169,7 @@ intc_0 // 1
 load 2
 bytec_3 // "max_price"
 app_global_get
+btoi
 <=
 &&
 return
@@ -347,6 +348,7 @@ btoi
 gtxn 1 XferAsset
 bytec_1 // "price_id"
 app_global_get
+btoi
 ==
 &&
 &&
@@ -393,6 +395,7 @@ btoi
 gtxn 1 XferAsset
 bytec_1 // "price_id"
 app_global_get
+btoi
 ==
 &&
 &&
@@ -680,6 +683,7 @@ intc_0 // 1
 intc_3 // 2
 bytec_1 // "price_id"
 app_global_get
+btoi
 asset_holding_get AssetBalance
 store 10
 store 11

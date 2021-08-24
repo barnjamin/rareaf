@@ -41,7 +41,13 @@ function ListingViewer(props: ListingViewerProps) {
     const [price, setPrice]     = React.useState(0);
     const [updateable, setUpdateable] = React.useState(false)
 
-    React.useEffect(()=>{ getListing(props.ac, addr).then((listing)=>{ setListing(listing) }) }, [])
+    React.useEffect(()=>{ 
+        let subscribed = true
+        getListing(props.ac, addr).then((listing)=>{ 
+            if(subscribed) setListing(listing) 
+        }) 
+        return ()=>{ subscribed = false}
+    }, [props.ac])
 
     async function handleCancelListing(){
         setLoading(true)

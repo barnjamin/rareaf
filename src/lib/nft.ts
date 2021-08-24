@@ -66,17 +66,16 @@ export class NFT {
                 return ps.ipfs.display + uri
             case "algorand":
                 //TODO: create url to request note field?
-                showErrorToaster("No url resolver for algorand protocol string yet")
-                return 
+                //showErrorToaster("No url resolver for algorand protocol string yet")
+                console.error("No url resolver for algorand protocol yet")
+                return  ""
             case "http":
                 return url
             case "https":
                 return url
         }
-
-        showErrorToaster("Unknown protocol: " + protocol)
-
-        return  ""
+        
+        return ""
     }
 
     static async fromToken(token: any): Promise<NFT> {

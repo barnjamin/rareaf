@@ -1,4 +1,4 @@
-from pyteal import Bytes, Tmpl, Int, App, Seq, If
+from pyteal import Bytes, Tmpl, Int, App, Seq, If, Btoi
 import json
 import os
 
@@ -25,12 +25,13 @@ tag_key       = Bytes("tag:")
 def get_var(name):
     return App.globalGet(Bytes(name))
 
-platform_fee  = get_var("fee")
 platform_addr = get_var("owner_addr")
-seed_amt      = get_var("seed_amt")
-max_price     = get_var("max_price")
-price_token   = get_var("price_id")
 listing_hash  = get_var("listing_hash")
+
+price_token   = Btoi(get_var("price_id"))
+platform_fee  = Btoi(get_var("fee"))
+seed_amt      = Btoi(get_var("seed_amt"))
+max_price     = Btoi(get_var("max_price"))
 
 
 tmpl_seed_amt      = Tmpl.Int("TMPL_SEED_AMT")
