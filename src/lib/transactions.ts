@@ -139,11 +139,11 @@ export function get_app_destroy_txn(suggestedParams, addr, id) {
    } 
 }
 
-export function get_app_call_txn(suggestedParams, addr, args) {
+export function get_app_call_txn(suggestedParams, id, addr, args) {
     return {
         from: addr,
         appArgs:args.map((a)=>{ return new Uint8Array(Buffer.from(a, 'base64'))}),
-        appIndex:ps.application.id,
+        appIndex:id,
         appOnComplete: algosdk.OnApplicationComplete.NoOpOC,
         type:"appl",
         ...suggestedParams

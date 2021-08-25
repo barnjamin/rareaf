@@ -36,34 +36,35 @@ export default function NFTViewer(props: NFTViewerProps) {
     
     React.useEffect(()=>{
         let subscribed = true
+
         tryGetNFT(parseInt(id))
-            .then((nft)=>{  
-                if(subscribed) setNFT(nft) 
-            })
-            .catch((err)=>{ showErrorToaster("Couldn't find that asset") })
+            .then((nft)=>{  if(subscribed) setNFT(nft) })
+            .catch((err)=>{ showErrorToaster("Couldn't find this asset: "+err) })
+
         return ()=>{subscribed=false}
     }, []);
 
     React.useEffect(()=>{
         let subscribed = true
+
         getListingAddr(props.ac, parseInt(id))
-            .then((addr)=>{  
-                if(subscribed) setListingAddr(addr) 
-            })
-            .catch((err)=>{ console.error("Couldn't check to see if this NFT is listed") })
+            .then((addr)=>{  if(subscribed) setListingAddr(addr) })
+            .catch((err)=>{ console.error("Couldn't check to see if this NFT is listed: ", err) })
+
         return ()=>{subscribed=false}
-    }, []);
+    }, [props.ac]);
 
     React.useEffect(()=>{
         if(props.wallet === undefined) return
 
         let subscribed = true
-        isOptedIntoApp(props.acct)
-            .then((oi)=>{ 
-                if(subscribed) setOptedIn(oi) 
-            }).catch((err)=>{ console.error(err) })
+
+        isOptedIntoApp(props.ac, props.acct)
+            .then((oi)=>{ if(subscribed) setOptedIn(oi) })
+            .catch((err)=>{ console.error("Couldnt check to see if acct is opted in: ", err) })
+
         return ()=>{subscribed=false}
-    }, [props.acct])
+    }, [props.ac, props.acct])
 
 
     function handleCreateListing(){ setListingVisible(true) }
@@ -88,7 +89,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
         showInfo("Creating Transaction to Opt-In to application")
 
-        const app = new Application(ps.application)
+        const app = new Application(props.ac)
         try {
             await app.optIn(props.wallet) 
             return true

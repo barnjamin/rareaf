@@ -42,9 +42,10 @@ export class ApplicationConfiguration  {
             }
         }
 
-        new_ac['tags'] = await getTags(new_ac['owner_addr'], new_ac['unit'])
+        new_ac.tags = await getTags(new_ac.owner_addr, new_ac.unit)
+        console.log(new_ac.tags)
 
-        sessionStorage.setItem(conf_session_key, JSON.stringify(new_ac))
+        this.updateLocalStorage(new_ac)
 
         return new_ac 
     }
@@ -56,6 +57,11 @@ export class ApplicationConfiguration  {
         if(conf) return JSON.parse(conf)
 
         return undefined;
+    }
+
+    static async updateLocalStorage(ac: ApplicationConfiguration): Promise<Boolean> {
+        sessionStorage.setItem(conf_session_key, JSON.stringify(ac))
+        return true
     }
 }
 

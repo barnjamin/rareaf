@@ -7,6 +7,7 @@ import { TagToken} from './tags'
 import { dummy_addr } from './contracts'
 import { ApplicationConfiguration } from './application-configuration';
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
+import { ProofResponse } from 'algosdk/dist/types/src/client/v2/algod/models/types';
 
 
 type Holdings= {
@@ -72,10 +73,12 @@ export async function getGlobalState(app_id: number): Promise<any> {
     return result['params']['global-state']
 }
 
-export async function isOptedIntoApp(address: string): Promise<boolean> {
+export async function isOptedIntoApp(ac: ApplicationConfiguration, address: string): Promise<boolean> {
+    if(address === "" || address === undefined) return false;
+
     const client = getAlgodClient()
     const result = await client.accountInformation(address).do()
-    const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ps.application.id })
+    const optedIn = result['apps-local-state'].find((r)=>{ return r.id == ac.id })
     return optedIn !== undefined 
 }
 
@@ -101,7 +104,7 @@ export async function getListings(ac: ApplicationConfiguration, tagName: string,
     if(token_id === undefined) return []
 
     if(tagName !== undefined){
-        const tag = new TagToken(tagName)
+        const tag = new TagToken(ac, tagName)
         const tt = await getTagToken(ac, tag.getTokenName(ac.unit))
         if (tt.id == 0) return []
         token_id = tt.id
@@ -140,10 +143,10 @@ export async function getTagToken(ac: ApplicationConfiguration, name: string): P
 
     for(let aidx in assets.assets){
         if(assets.assets[aidx].params.creator == ac.owner_addr)
-            return new TagToken(name, assets.assets[aidx].index)
+            return new TagToken(ac, name, assets.assets[aidx].index)
     }
 
-    return new TagToken(name)
+    return new TagToken(ac, name)
 }
 
 

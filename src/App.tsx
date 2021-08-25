@@ -85,7 +85,7 @@ export default function App(props: AppProps) {
   const acct = sessionWallet.getDefaultAccount()
 
   let adminNav = <div/>
-  if(connected  && (ps.application.admin_addr == "" || acct == ps.application.admin_addr)) {
+  if(connected  && (ac.admin_addr == "" || acct == ac.admin_addr)) {
     adminNav = <AnchorButton className='bp3-minimal' icon='key' text='Admin' href="/admin" />
   }
 

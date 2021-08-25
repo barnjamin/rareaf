@@ -156,7 +156,7 @@ function ListingViewer(props: ListingViewerProps) {
         if (props.wallet !== undefined && listing.creator_addr == props.wallet.getDefaultAccount()){
             tagsComponent = (
                 <Tagger 
-                    tagOpts={ps.application.tags} 
+                    tagOpts={props.ac.tags} 
                     tags={listing.tags} 
                     handleAddTag={handleAddTag}
                     handleRemoveTag={handleRemoveTag}

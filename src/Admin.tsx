@@ -30,7 +30,7 @@ export default function Admin(props: AdminProps) {
     const [indexer, setIndexer] = React.useState(ps.indexer)
     const [ipfs, setIPFS] = React.useState(ps.ipfs)
     const [loading, setLoading] = React.useState(false)
-    const [tags, setTags] = React.useState(ps.application.tags)
+    const [tags, setTags] = React.useState(props.ac.tags)
 
     function setAlgodValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
@@ -52,7 +52,7 @@ export default function Admin(props: AdminProps) {
     }
 
     function handleTagAdd(e){
-        const tag = new TagToken(e[0])
+        const tag = new TagToken(props.ac, e[0])
 
         //Make sure tag isnt already in array
         if(tags.some((t)=>{return t.name == tag.name})) 
@@ -62,8 +62,11 @@ export default function Admin(props: AdminProps) {
         setLoading(true)
 
         try{
-            tag.create(props.ac, props.wallet)
-            .then((id)=>{ setTags(old=>[...old, tag]) })
+            tag.create(props.wallet)
+            .then((id)=>{ 
+                setTags(old=>[...old, tag]) 
+                ApplicationConfiguration.updateLocalStorage({...props.ac, tags:[...tags, tag]})
+            })
             .finally(()=>{ setLoading(false) })
         }catch(error){
             console.error("Fail: ", error)
@@ -82,7 +85,13 @@ export default function Admin(props: AdminProps) {
 
         try {
             tag.destroy(props.wallet)
-            .then(success=>{ if(success) return setTags(tags.filter(t=>{return t.id!==tid})) })
+            .then(success=>{ 
+                if(success){
+                    const filtered = tags.filter(t=>{return t.id!==tid})
+                    setTags(filtered)    
+                    ApplicationConfiguration.updateLocalStorage({...props.ac, tags:filtered})
+                }
+            })
             .finally(()=>{ setLoading(false) })
 
         }catch(error){

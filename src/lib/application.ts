@@ -204,7 +204,7 @@ export class Application {
         const destroys = []
         for(let tidx in this.conf.tags){
             const t = this.conf.tags[tidx]
-            const tag = new TagToken(t.name, t.id)
+            const tag = new TagToken(this.conf, t.name, t.id)
             await tag.destroy(wallet)
         }
         this.conf.tags = []
