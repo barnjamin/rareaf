@@ -32,6 +32,8 @@ export default function Admin(props: AdminProps) {
     const [loading, setLoading] = React.useState(false)
     const [tags, setTags] = React.useState(props.ac.tags)
 
+    React.useEffect(()=>{ setTags(props.ac.tags) }, [props.ac])
+
     function setAlgodValue (k: string, v: string){
         const val = k=="port"? parseInt(v) :v
         setAlgod(algod =>({ ...algod, [k]: val }))
@@ -146,7 +148,7 @@ export default function Admin(props: AdminProps) {
     function searchForTags(){
         setLoading(true)
 
-        getTags(props.ac.owner_addr, props.ac.unit).then((foundTags)=>{ setTags([...foundTags]) })
+        getTags(props.ac, props.ac.owner_addr, props.ac.unit).then((foundTags)=>{ setTags([...foundTags]) })
         .finally(()=>{setLoading(false)})
     }
 

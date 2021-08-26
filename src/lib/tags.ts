@@ -12,12 +12,11 @@ import {
     get_asa_destroy_txn, 
 } from './transactions'
 import { platform_settings as ps } from './platform-conf';
-import { ApplicationConfiguration, get_template_vars } from './application-configuration';
+import { ApplicationConfiguration, get_template_vars, LoadApplicationConfiguration } from './application-configuration';
 import { get_platform_owner } from './contracts';
 
 export class TagToken {
 
-    ac: ApplicationConfiguration
     id: number;
     name: string;
     constructor(ac: ApplicationConfiguration, name: string, id?: number) {
@@ -25,27 +24,28 @@ export class TagToken {
         //Check if its prefixed unit and remove it
         if(name.substr(0,3) == ac.unit)  name = name.substr(4)
 
-        this.ac = ac
         this.name = name
         this.id = id ||= 0
     }
 
     static fromAsset(asset: any): TagToken {
-        return  new TagToken(asset.params.name, asset.index)  
+        return new TagToken(asset.params.name, asset.index)  
     }
 
     async destroy(wallet: Wallet): Promise<boolean> {
         const suggestedParams = await getSuggested(10)
 
-        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.ac.admin_addr))
-        const destroy_txn = new Transaction(get_asa_destroy_txn(suggestedParams, this.ac.owner_addr, this.id))
+        const ac = await LoadApplicationConfiguration()
+
+        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, ac))
+        const destroy_txn = new Transaction(get_asa_destroy_txn(suggestedParams, ac, this.id))
 
         const grouped = [cosign_txn, destroy_txn]
         algosdk.assignGroupID(grouped)
 
         const [s_cosigned_txn, /* s_destroy_txn */] = await wallet.signTxn(grouped)
 
-        const lsig = await getLogicFromTransaction(this.ac.owner_addr) 
+        const lsig = await getLogicFromTransaction(ac.owner_addr) 
         const s_destroy_txn = algosdk.signLogicSigTransaction(destroy_txn, lsig)
 
         const result = await sendWait([s_cosigned_txn, s_destroy_txn])
@@ -56,11 +56,13 @@ export class TagToken {
     async create(wallet: Wallet): Promise<number> {
         const suggestedParams = await getSuggested(10)
 
-        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.ac.admin_addr))
+        const ac = await LoadApplicationConfiguration()
 
-        const create_txn = new Transaction(get_asa_create_txn(suggestedParams, this.ac.owner_addr, this.getUrl()))
-        create_txn.assetName = this.getTokenName(this.ac.unit) 
-        create_txn.assetUnitName = TagToken.getUnitName(this.ac.unit)
+        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, ac.admin_addr))
+
+        const create_txn = new Transaction(get_asa_create_txn(suggestedParams, ac.owner_addr, this.getUrl()))
+        create_txn.assetName = this.getTokenName(ac.unit) 
+        create_txn.assetUnitName = TagToken.getUnitName(ac.unit)
         create_txn.assetTotal = 1e6
         create_txn.assetDecimals = 0
 
@@ -70,7 +72,7 @@ export class TagToken {
 
         const [s_cosign_txn, /* create_txn */] = await wallet.signTxn(grouped)
 
-        const lsig = await get_platform_owner(get_template_vars(this.ac, {}))
+        const lsig = await get_platform_owner(get_template_vars(ac, {}))
 
         const s_create_txn = algosdk.signLogicSigTransaction(create_txn, lsig)
 

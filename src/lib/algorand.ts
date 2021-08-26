@@ -54,16 +54,18 @@ export async function getLogicFromTransaction(addr: string): Promise<LogicSigAcc
     return undefined
 }
 
-export async function getTags(owner: string, unit: string): Promise<TagToken[]> {
-    const indexer = getIndexer()
-    const tags = await indexer
-        .searchForAssets()
-        .creator(owner)
-        .unit(TagToken.getUnitName(unit))
+export async function getTags(ac: ApplicationConfiguration, owner: string, unit: string): Promise<TagToken[]> {
+    const client = getAlgodClient()
+    const results =  await client 
+        .accountInformation(owner)
         .do()
 
-    return tags.assets.map((t)=>{
-        return new TagToken(t.params.name, t.index)
+    const name = TagToken.getUnitName(unit)
+
+    return results['created-assets'].filter((a)=>{
+        return a.params['unit-name'] == name 
+    }).map((t)=>{
+        return new TagToken(ac, t.params.name, t.index)
     })
 }
 

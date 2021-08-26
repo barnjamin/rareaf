@@ -1,5 +1,6 @@
 import { addrToB64, getGlobalState, getTags, uintToB64 } from './algorand'
 import {TagToken} from './tags'
+import { platform_settings as ps } from './platform-conf'
 import algosdk from 'algosdk'
 
 const conf_session_key = "config"
@@ -42,10 +43,9 @@ export class ApplicationConfiguration  {
             }
         }
 
-        new_ac.tags = await getTags(new_ac.owner_addr, new_ac.unit)
-        console.log(new_ac.tags)
+        new_ac.tags = await getTags(new_ac, new_ac.owner_addr, new_ac.unit)
 
-        this.updateLocalStorage(new_ac)
+        ApplicationConfiguration.updateLocalStorage(new_ac)
 
         return new_ac 
     }
@@ -60,11 +60,22 @@ export class ApplicationConfiguration  {
     }
 
     static async updateLocalStorage(ac: ApplicationConfiguration): Promise<Boolean> {
+        console.log(ac)
         sessionStorage.setItem(conf_session_key, JSON.stringify(ac))
         return true
     }
+
 }
 
+
+export async function LoadApplicationConfiguration(): Promise<ApplicationConfiguration> {
+    const ac = await ApplicationConfiguration.fromLocalStorage(ps.application)
+    if(ac!==undefined){
+        return ac
+    }
+
+    return await ApplicationConfiguration.fromNetwork(ps.application)
+}
 
 export function get_template_vars(ac: ApplicationConfiguration, override: any): any {
     return {
