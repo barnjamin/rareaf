@@ -1,5 +1,5 @@
 #pragma version 4
-intcblock 1 0 4 2 5 8 6 7 9 10 11 45
+intcblock 1 0 4 2 5 8 6 7 9 10 11 45 32
 bytecblock 0x6f776e65725f61646472 0x70726963655f6964 0x6c697374696e675f68617368 0x6d61785f7072696365 TMPL_OWNER_ADDR
 txn ApplicationID
 intc_1 // 0
@@ -72,7 +72,7 @@ substring3
 concat
 store 4
 load 5
-pushint 32 // 32
+intc 12 // 32
 +
 intc 11 // 45
 +
@@ -133,6 +133,21 @@ concat
 store 4
 load 5
 intc_0 // 1
++
+intc 4 // 5
++
+store 5
+load 4
+txna ApplicationArgs 2
+load 5
+load 5
+intc 4 // 5
++
+substring3
+concat
+store 4
+load 5
+intc 12 // 32
 +
 intc 4 // 5
 +
@@ -1239,6 +1254,9 @@ txna ApplicationArgs 6
 app_global_put
 bytec_1 // "price_id"
 txna ApplicationArgs 7
+app_global_put
+pushbytes 0x736565645f616d74 // "seed_amt"
+txna ApplicationArgs 8
 app_global_put
 intc_0 // 1
 &&

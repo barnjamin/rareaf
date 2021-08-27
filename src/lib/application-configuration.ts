@@ -37,6 +37,7 @@ export class ApplicationConfiguration  {
             let value_bytes = Buffer.from(state[idx].value.bytes, 'base64')
 
             if(typeof new_ac[key] ==='number') {
+                console.log(key, value_bytes)
                 new_ac[key] = algosdk.decodeUint64(new Uint8Array(value_bytes), 'safe')
             }else {
                 new_ac[key] = value_bytes.toString()
@@ -67,6 +68,11 @@ export class ApplicationConfiguration  {
 
 }
 
+
+export async function ReloadApplicationConfiguration(): Promise<ApplicationConfiguration> {
+    sessionStorage.removeItem(conf_session_key)
+    return await LoadApplicationConfiguration()
+}
 
 export async function LoadApplicationConfiguration(): Promise<ApplicationConfiguration> {
     const ac = await ApplicationConfiguration.fromLocalStorage(ps.application)
