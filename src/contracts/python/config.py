@@ -25,7 +25,7 @@ tag_key       = Bytes("tag:")
 def get_var(name):
     return App.globalGet(Bytes(name))
 
-platform_addr = get_var("owner_addr")
+owner_addr    = get_var("owner_addr")
 listing_hash  = get_var("listing_hash")
 
 price_token   = Btoi(get_var("price_id"))
@@ -35,10 +35,10 @@ max_price     = Btoi(get_var("max_price"))
 
 
 tmpl_seed_amt      = Tmpl.Int("TMPL_SEED_AMT")
-tmpl_platform_fee  = Tmpl.Int("TMPL_FEE_AMT")
+tmpl_fee_amt       = Tmpl.Int("TMPL_FEE_AMT")
 tmpl_price_token   = Tmpl.Int("TMPL_PRICE_ID")
 tmpl_app_id        = Tmpl.Int("TMPL_APP_ID")
-tmpl_platform_addr = Tmpl.Bytes("TMPL_OWNER_ADDR")
+tmpl_owner_addr    = Tmpl.Bytes("TMPL_OWNER_ADDR")
 tmpl_admin_addr    = Tmpl.Bytes("TMPL_ADMIN_ADDR")
 
 action_create  = Bytes("create")

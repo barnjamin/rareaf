@@ -1,4 +1,4 @@
-from pyteal import And, TxnType, Int, AssetParam, Seq, Global, If, App, Bytes, Concat, Sha512_256,  AssetHolding, Gtxn, OnComplete
+from pyteal import And, TxnType, Int, AssetParam, Seq, Global, If, App, Bytes, Concat, Sha512_256,  AssetHolding, Gtxn, OnComplete, Assert, Substring, Len, Or
 from config import *
 
 def tealpath(name):
@@ -14,9 +14,27 @@ def valid_app_call(txn, app_id):
 def valid_admin_fee_pay(txn):
     return pay_txn_valid(txn, Int(0), tmpl_admin_addr, tmpl_admin_addr)
 
-def valid_platform_asset():
-    expr = AssetParam.manager(Int(0))
-    return Seq([ expr, expr.value() == tmpl_platform_addr ])
+def valid_tag_token(idx):
+    manager = AssetParam.manager(idx)
+    name = AssetParam.unitName(idx)
+    return Seq([ 
+        manager, 
+        Assert(manager.hasValue()),
+        Assert(manager.value() == tmpl_owner_addr),
+        Assert(name.hasValue()),
+        Assert(Substring(name.value(), Len(name.value()) - Int(2), Len(name.value())) == Bytes("tag")) #TODO find a better way
+    ])
+
+def valid_price_token(idx):
+    manager = AssetParam.manager(idx)
+    name = AssetParam.unitName(idx)
+    return Seq([ 
+        manager, 
+        Assert(manager.hasValue()),
+        Assert(manager.value() == tmpl_owner_addr),
+        Assert(name.hasValue()),
+        Assert(Substring(name.value(), Len(name.value()) - Int(2), Len(name.value())) == Bytes("px")) #TODO find a better way
+    ])
 
 def valid_contract(tc, contract_source, contract_addr):
     return And(
@@ -49,9 +67,27 @@ def set_asset_id(txn, var):
     return Seq([ var.store(txn.xfer_asset()), Int(1) ])
 
 def check_balance_match(txn, addr_idx, asset_id):
-    expr = AssetHolding.balance(addr_idx, asset_id)
-    return Seq([ expr, txn.amount() == expr.value() ])
-
+    balance = AssetHolding.balance(addr_idx, asset_id)
+    price_asset = get_price_asset(asset_id)
+    return And(
+        Seq([ 
+            balance, 
+            Assert(balance.hasValue()),
+            Or(txn.amount() == balance.value(), txn.asset_amount() == balance.value())
+        ]),
+        Or(
+            #Either paying with algos or another asset that matches what the listing wants
+            price_asset == 0, 
+            price_asset == txn.xfer_asset()
+        )
+    )
+def get_price_asset(asset_id):
+    name = AssetParam.name(asset_id)
+    return Seq([
+        name,
+        Assert(name.hasValue()),
+        Substring(name.value(),x,x)
+    ])
 
 def pay_txn_valid(txn, amt, from_addr, to_addr):
     return And(

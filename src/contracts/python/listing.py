@@ -29,7 +29,10 @@ def listing():
         asa_optin_valid(Gtxn[2], asset_id.load(), contract_addr.load()),
         asa_optin_valid(Gtxn[3], price_token.load(), contract_addr.load()),
         asa_xfer_valid( Gtxn[4], asset_id.load(), Int(1), creator_addr.load(), contract_addr.load()),
-        asa_xfer_valid( Gtxn[5], price_token.load(), Btoi(Gtxn[0].application_args[1]), tmpl_platform_addr, contract_addr.load()),
+
+        # Checking this in the app logic since we need to validate price token 
+        asa_xfer_valid( Gtxn[5], Gtxn[0].assets[0], Btoi(Gtxn[0].application_args[1]), tmpl_owner_addr, contract_addr.load()),
+
         asa_cfg_valid(  Gtxn[6], asset_id.load(), contract_addr.load()),
     )
 
@@ -39,7 +42,7 @@ def listing():
         valid_app_call(Gtxn[0], app_id.load()),
 
         set_addr_as_tx(      Gtxn[1], contract_addr),
-        asa_close_xfer_valid(Gtxn[1], price_token.load(),  contract_addr.load(), tmpl_platform_addr, tmpl_platform_addr),
+        asa_close_xfer_valid(Gtxn[1], Gtxn[0].assets[0],  contract_addr.load(), tmpl_owner_addr, tmpl_owner_addr),
 
         asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), creator_addr.load(), creator_addr.load()),
         asa_cfg_valid(       Gtxn[3], asset_id.load(), creator_addr.load()),
@@ -58,12 +61,12 @@ def listing():
 
         pay_txn_valid(       Gtxn[1], Gtxn[1].amount(), buyer_addr.load(), creator_addr.load()),
         asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), buyer_addr.load(), buyer_addr.load()),
-        asa_close_xfer_valid(Gtxn[3], price_token.load(), contract_addr.load(), tmpl_platform_addr, tmpl_platform_addr),
+        asa_close_xfer_valid(Gtxn[3], price_token.load(), contract_addr.load(), tmpl_owner_addr, tmpl_owner_addr),
         asa_cfg_valid(       Gtxn[4], asset_id.load(), buyer_addr.load()),
 
         # Possible Tag closes
 
-        pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), tmpl_platform_addr, creator_addr.load(), tmpl_platform_fee),
+        pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), tmpl_owner_addr, creator_addr.load(), tmpl_fee_amt),
     )
 
     app_offload = Or(
