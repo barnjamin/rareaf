@@ -222,3 +222,9 @@ button {
 	left:50%;
 	transform:translate(-50%,-50%);
 }
+
+.tooltip-container {
+	background: #FFF;
+	padding: 5px;
+	box-shadow: $pt-elevation-shadow-2;
+}

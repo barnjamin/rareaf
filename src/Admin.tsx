@@ -54,7 +54,6 @@ export default function Admin(props: AdminProps) {
 
     function setAppConf(k: string, v: string) {
         const val = ["fee_amt", "max_price", "seed_amt"].includes(k) ? parseInt(v) : v
-        console.log(k,typeof val)
         setApplicationConfiguration({ ...ac, [k]: val })
     }
 
@@ -379,7 +378,7 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
 
     return (
         <div className='content application-conf' >
-            <Tooltip2 content='Name of the application'>
+            <Tooltip2 content={<div className='tooltip-container' >Name of the application</div>}  >
                 <InputGroup fill={true}
                     onChange={e => { props.set('name', e.target.value) }}
                     placeholder="Application Name"
@@ -388,7 +387,7 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
                 />
             </Tooltip2>
 
-            <Tooltip2 content='Unit name of tokens to create (3 characters)'>
+            <Tooltip2 content={<div className='tooltip-container' >Unit name of tokens to create (3 characters)</div>}>
                 <InputGroup fill={true}
                     onChange={e => { props.set('unit', e.target.value) }}
                     placeholder="Unit Name"
@@ -397,7 +396,7 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
                 />
             </Tooltip2>
 
-            <Tooltip2 content='Fee to apply to successful sales'>
+            <Tooltip2 content={<div className='tooltip-container' >Fee to apply to successful sales</div>}>
                 <InputGroup fill={true}
                     onChange={e => { props.set('fee_amt', e.target.value) }}
                     placeholder="Fee"
@@ -406,7 +405,7 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
                 />
             </Tooltip2>
 
-            <Tooltip2 content='Number of microalgos to seed escrow accounts with, should not be set too low or transactions may fail' >
+            <Tooltip2 content={<div className='tooltip-container' >Number of microalgos to seed escrow accounts with, should not be set too low or transactions may fail</div>} >
                 <InputGroup fill={true}
                     onChange={e => { props.set('seed_amt', e.target.value) }}
                     placeholder="Seed Amt"
@@ -415,7 +414,7 @@ function ApplicationUpdater(props: ApplicationUpdaterProps) {
                 />
             </Tooltip2>
 
-            <Tooltip2 content='Maximum price to allow on listings in microalgos' usePortal={false}>
+            <Tooltip2 content={<div className='tooltip-container'> Maximum price to allow on listings in microalgos</div>} >
                 <InputGroup fill={true}
                     onChange={e => { props.set('max_price', e.target.value) }}
                     placeholder="Maximum Price"
