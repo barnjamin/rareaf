@@ -40,7 +40,7 @@ export default function Browser(props: BrowserProps) {
     React.useEffect(()=>{
         let subscribed = true
         if(!loaded && filtersChanged)
-            getListings(props.ac, tag, minPrice, maxPrice).then((l)=>{ 
+            getListings(props.ac, props.ac.price_ids, [tag], minPrice, maxPrice).then((l)=>{ 
                 if(!subscribed) return
 
                 setLoaded(true)

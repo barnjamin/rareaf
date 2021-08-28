@@ -12,7 +12,7 @@ export class ApplicationConfiguration  {
         public admin_addr: string       = "",  // Creator of the application
         public name: string             = "",  // Full name of App 
         public unit: string             = "",  // Unit name for price/tag tokens
-        public price_id: number         = 0,   // ID of price token
+        public price_ids: number[]      = [],   // ID of price token
         public owner_addr: string       = "",  // Address of price/tag token owner
         public fee_amt: number          = 0,   // Amount to be sent to app onwer on sales
         public seed_amt: number         = 0,   // Amount sent to each listing to cover costs
@@ -89,7 +89,7 @@ export function get_template_vars(ac: ApplicationConfiguration, override: any): 
         "TMPL_ADMIN_ADDR": addrToB64(ac.admin_addr),
         "TMPL_OWNER_ADDR": addrToB64(ac.owner_addr),
         "TMPL_FEE_AMT": ac.fee_amt,
-        "TMPL_PRICE_ID": ac.price_id?ac.price_id:0,
+        "TMPL_PRICE_ID": ac.price_ids.length>0?ac.price_ids[0]:0,
         "TMPL_BLANK_HASH": ac.listing_hash,
         "TMPL_SEED_AMT": ac.seed_amt,
         ...override

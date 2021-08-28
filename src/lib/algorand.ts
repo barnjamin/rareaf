@@ -8,10 +8,13 @@ import { dummy_addr } from './contracts'
 import { ApplicationConfiguration } from './application-configuration';
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
 import { ProofResponse } from 'algosdk/dist/types/src/client/v2/algod/models/types';
+import { match } from 'ts-mockito';
+import { PriceToken } from './price';
 
 
 type Holdings= {
     price: number
+    price_id: number
     tags: TagToken[]
     nft: NFT
 };
@@ -61,7 +64,6 @@ export async function getTags(ac: ApplicationConfiguration, owner: string, unit:
         .do()
 
     const name = TagToken.getUnitName(unit)
-
     return results['created-assets'].filter((a)=>{
         return a.params['unit-name'] == name 
     }).map((t)=>{
@@ -94,49 +96,52 @@ export async function isOptedIntoAsset(address: string, idx: number): Promise<bo
 export async function isListing(ac: ApplicationConfiguration, address: string): Promise<boolean> {
     const client = getAlgodClient()
     const result = await client.accountInformation(address).do()
-    const hasPriceToken = result['assets'].find((r)=>{ return r['asset-id'] == ac.price_id })
+    const hasPriceToken = result['assets'].find((r)=>{ return ac.price_ids.includes(r['asset-id'])  })
     return hasPriceToken !== undefined
 }
 
-export async function getListings(ac: ApplicationConfiguration, tagName: string, minPrice=0, maxPrice=0): Promise<Listing[]> {
+export async function getListings(ac: ApplicationConfiguration, price_tokens: number[], tagNames: string[], minPrice=0, maxPrice=0): Promise<Listing[]> {
     const indexer  = getIndexer()
 
-    let token_id = ac.price_id
+    // App conf not initialized
+    if(ac.price_ids.length === 0) return []
 
-    if(token_id === undefined) return []
+    // Use tag names first
+    if(tagNames.length>0) {
+        const matching = ac.tags.filter((t)=>{ return tagNames.includes(t.name) }).map((t)=>{ return t.id })
+        if(matching.length === 0) return []
 
-    if(tagName !== undefined){
-        const tag = new TagToken(ac, tagName)
-        const tt = await getTagToken(ac, tag.getTokenName(ac.unit))
-        if (tt.id == 0) return []
-        token_id = tt.id
-    }
+        const allBalances = await Promise.all(matching.map((id)=>{
+             return indexer.lookupAssetBalances(id).currencyGreaterThan(0).do()
+        }))
 
-    let lookup = indexer.lookupAssetBalances(token_id)
-    if(tagName !== undefined){
-        lookup = lookup.currencyGreaterThan(0)
-    }else{
-        if(maxPrice>0) lookup = lookup.currencyLessThan(maxPrice) 
-        lookup = lookup.currencyGreaterThan(minPrice)
-    }
-
-    const balances =  await lookup.do()
-
-    const lp = []
-    const listings = []
-    for (let bidx in balances.balances) {
-        const b = balances.balances[bidx]
-
-        if (b.address == ac.owner_addr || b.amount == 0) continue;
-
-        lp.push(getListing(ac, b.address).then((listing)=>{
-             listings.push(listing)
+        const balances = [].concat(...allBalances.map((b)=>{ return b.balances }))
+        
+        return await Promise.all(balances.filter((b)=>{
+            return b.address !== ac.owner_addr && b.amount > 0
+        }).map((b)=>{
+            return getListing(ac, b.address)
         }))
     }
 
-    await Promise.all(lp)
+    //Set to the default if none are set
+    if(price_tokens.length==0){
+        price_tokens.push(ac.price_ids[0])
+    }
 
-    return listings
+    const allBalances = await Promise.all(price_tokens.map((id)=>{
+        let lookup =  indexer.lookupAssetBalances(id).currencyGreaterThan(minPrice)
+        if(maxPrice>0) lookup = lookup.currencyLessThan(maxPrice) 
+        return lookup.do()
+    }))
+
+    const price_balances = [].concat(...allBalances.map((b)=>{ return b.balances }))
+    
+    return await Promise.all(price_balances.filter((b)=>{
+        return b.address !== ac.owner_addr && b.amount > 0
+    }).map((b)=>{
+        return getListing(ac, b.address)
+    }))
 }
 
 export async function getTagToken(ac: ApplicationConfiguration, name: string): Promise<TagToken> {
@@ -150,6 +155,24 @@ export async function getTagToken(ac: ApplicationConfiguration, name: string): P
 
     return new TagToken(ac, name)
 }
+
+export async function getPriceTokens(ac: ApplicationConfiguration): Promise<PriceToken[]> {
+    const client = getAlgodClient()
+    const results =  await client 
+        .accountInformation(ac.owner_addr)
+        .do()
+
+    const name = PriceToken.getUnitName(ac.unit)
+
+    return Promise.all(results['created-assets'].filter((a)=>{
+        return a.params['unit-name'] == name 
+    }).map((t)=>{
+        return new PriceToken(ac, t.params.name, t.index)
+    }).map((pt)=>{
+        return pt.populateDetails()
+    }))
+}
+
 
 
 export async function getPortfolio(ac: ApplicationConfiguration, addr: string): Promise<Portfolio> {
@@ -202,7 +225,7 @@ export async function getListing(ac: ApplicationConfiguration, addr: string): Pr
 
     const creator  = await getCreator(addr, holdings.nft.asset_id)
 
-    let l = new Listing(holdings.price, holdings.nft.asset_id, creator, ac, addr)
+    let l = new Listing(holdings.price, holdings.price_id, holdings.nft.asset_id, creator, ac, addr)
     l.tags = holdings.tags
     l.nft = holdings.nft
 
@@ -212,14 +235,15 @@ export async function getListing(ac: ApplicationConfiguration, addr: string): Pr
 export async function getHoldingsFromListingAddress(ac: ApplicationConfiguration, address: string): Promise<Holdings> {
     const client   = getAlgodClient()
     const account = await client.accountInformation(address).do()
-    const holdings  = { 'price':0, 'tags':[], 'nft':undefined, }
+    const holdings  = { 'price':0, 'tags':[], 'nft':undefined, 'price_id':0}
 
     const gets = []
     for (let aid in account.assets) {
         const asa = account.assets[aid]
 
-        if(asa['asset-id'] == ac.price_id){
+        if(ac.price_ids.includes(asa['asset-id'])){
             holdings.price = asa['amount']
+            holdings.price_id = asa['asset-id']
             continue
         }
 

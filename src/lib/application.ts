@@ -19,6 +19,7 @@ import {
 import {makeArgs, get_template_vars, ApplicationConfiguration} from './application-configuration'
 import { showErrorToaster, showInfo } from "../Toaster";
 import {TagToken} from './tags'
+import { PriceToken } from "./price";
 
 declare const AlgoSigner: any;
 
@@ -69,7 +70,7 @@ export class Application {
 
         // Create price token with app name 
         showInfo("Creating price token")
-        await this.createPriceToken(wallet) 
+        await this.createPriceToken(wallet, 0) 
 
         // Create listing and compute hash for app update
         await this.setListingHash()
@@ -146,13 +147,13 @@ export class Application {
         }
     }
 
-    async createPriceToken(wallet: Wallet): Promise<boolean>  { 
+    async createPriceToken(wallet: Wallet, asa_id: number): Promise<boolean>  { 
         const suggestedParams = await getSuggested(10)
         const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
 
         const create_px = new Transaction(get_asa_create_txn(suggestedParams, this.conf.owner_addr, ps.domain))
-        create_px.assetName     = this.conf.name
-        create_px.assetUnitName = this.conf.unit + "-px"
+        create_px.assetName     = PriceToken.getAssetName(this.conf.name, asa_id)
+        create_px.assetUnitName = PriceToken.getUnitName(this.conf.unit)
         create_px.assetTotal    = 1e10
         create_px.assetDecimals = 0 
         
@@ -172,18 +173,18 @@ export class Application {
 
         if(result === undefined) return false
 
-        this.conf.price_id = result['asset-index']
+        this.conf.price_ids.push(result['asset-index'])
         return true
     } 
 
-    async destroyPriceToken(wallet: Wallet) : Promise<boolean> { 
-        if(this.conf.price_id == 0) return true
+    async destroyPriceToken(wallet: Wallet, price_id: number) : Promise<boolean> { 
+        if(price_id == 0) return true
 
         const suggestedParams = await getSuggested(10)
 
         const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
 
-        const destroy_px = new Transaction(get_asa_destroy_txn(suggestedParams, this.conf.owner_addr, this.conf.price_id))
+        const destroy_px = new Transaction(get_asa_destroy_txn(suggestedParams, this.conf.owner_addr, price_id))
         
         const grouped = [cosign_txn, destroy_px]
 
@@ -212,12 +213,12 @@ export class Application {
 
         // Destroy price token
         showInfo("Destroying price token")
-        if(this.conf.price_id !== 0) {
-            if(!await this.destroyPriceToken(wallet)){
+        for(const pidx in this.conf.price_ids){
+            if(!await this.destroyPriceToken(wallet, this.conf.price_ids[pidx])){
                 showErrorToaster("Couldn't delete price token")
                 return this.conf
             }
-            this.conf.price_id = 0
+
         }
 
         // Return algos to admin

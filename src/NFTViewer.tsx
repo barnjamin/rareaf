@@ -4,7 +4,7 @@
 import * as React from 'react'
 import {useParams, useHistory} from 'react-router-dom'
 import { tryGetNFT, isOptedIntoApp, getListingAddr } from './lib/algorand'
-import {Tag, Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation} from '@blueprintjs/core'
+import {Tag, Card, FormGroup, Label, Button, MultistepDialog, DialogStep, Classes, NumericInput, Elevation, HTMLSelect} from '@blueprintjs/core'
 import Listing from './lib/listing'
 import {Wallet} from 'algorand-session-wallet'
 import {NFT} from './lib/nft'
@@ -13,6 +13,7 @@ import {Application} from './lib/application'
 import {platform_settings as ps} from './lib/platform-conf'
 import { showErrorToaster, showInfo } from './Toaster'
 import { ApplicationConfiguration } from './lib/application-configuration'
+import { PriceToken } from './lib/price'
 
 type NFTViewerProps = {
     history: any
@@ -29,6 +30,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     const [waiting_for_tx, setWaiting]        = React.useState(false)
     const [price, setPrice]                   = React.useState(0)
+    const [price_id, setPriceId]              = React.useState(0)
     const [listingVisible, setListingVisible] = React.useState(false)
     const [tags, setTags]                     = React.useState([])
     const [optedIn, setOptedIn]               = React.useState(false)
@@ -82,6 +84,7 @@ export default function NFTViewer(props: NFTViewerProps) {
     }
 
     async function handlePriceChange(price){ setPrice(price) }
+    async function handlePriceIdChange(price_id){ setPriceId(price_id) }
 
 
     async function handleOptIn(): Promise<boolean> {
@@ -107,7 +110,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
 
             showInfo("Creating listing transaction")
-            const lst = new Listing(price, parseInt(id), props.acct, props.ac)
+            const lst = new Listing(price, price_id, parseInt(id), props.acct, props.ac)
 
             console.log(lst)
                // Trigger popup to get event for signing 
@@ -203,6 +206,15 @@ export default function NFTViewer(props: NFTViewerProps) {
     )
 }
 
+type ListingDetailProps= {
+    tokenId: number
+    priceId:  number
+    price: number
+    priceIdOptions: PriceToken[]
+    onPriceIdChange(number)
+    onPriceChange(number)
+}
+
 
 function ListingDetails(props){
     function handlePriceChange(vnum) {
@@ -212,6 +224,8 @@ function ListingDetails(props){
     return (
         <div className={Classes.DIALOG_BODY}>
             <FormGroup>
+                <HTMLSelect options={props.price_ids}>
+                </HTMLSelect> 
                 <Label htmlFor="input-price">Price in μAlgos</Label>
                 <NumericInput buttonPosition="none" 
                     min={0} large={true} 
