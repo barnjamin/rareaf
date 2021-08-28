@@ -14,6 +14,8 @@
 ## Developers
 Please visit  [Setup](https://github.com/barnjamin/rareaf/wiki/Setup) page to create your own marketplace
 
+Also see https://github.com/barnjamin/rareaf/issues and https://github.com/barnjamin/rareaf/pulls for the work that still needs to be done.
+
 #### WARNING #####
 the contracts have _not_ been audited. you are responsible for reading and validating that there is nothing dangerous.
 
@@ -44,29 +46,3 @@ Fork it for free, configure it for free, publish it for free on a static hosting
 *donate to this address (charity? Dao?)*
 
 
-
-```
-#TODO:
-
-   Testing: 
-	https://github.com/barnjamin/rareaf/pull/8
-
-   Initialization:
-      - Config write to github? IPFS with link in global var on app? Set app params in app global state?
-	https://github.com/barnjamin/rareaf/pull/11
-
-   IPFS:
-      - Pin files?
-
-   General:
-      - Convert numbers to bignum
-      - Add more currencies for price tokens
-      - Add other contract type hashes
-
-   Minting:
-      - Add more fields for metadata
-
-   Browse:
-      - Check filetype/dimensions for display
-
-```
