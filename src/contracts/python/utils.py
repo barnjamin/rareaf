@@ -1,4 +1,7 @@
-from pyteal import And, TxnType, Int, AssetParam, Seq, Global, If, App, Bytes, Concat, Sha512_256,  AssetHolding, Gtxn, OnComplete, Assert, Substring, Len, Or
+from pyteal import ScratchVar, And, TxnType, Int, AssetParam, Seq, TealType
+from pyteal import Global, If, App, Bytes, Concat, Sha512_256, For, GetByte, Exp
+from pyteal import AssetHolding, Gtxn, OnComplete, Assert, Substring, Len, Or, Subroutine
+
 from config import *
 
 def tealpath(name):
@@ -22,8 +25,9 @@ def valid_tag_token(idx):
         Assert(manager.hasValue()),
         Assert(manager.value() == tmpl_owner_addr),
         Assert(name.hasValue()),
-        Assert(Substring(name.value(), Len(name.value()) - Int(2), Len(name.value())) == Bytes("tag")) #TODO find a better way
+        Assert(Substring(name.value(), Len(name.value()) - Int(3), Len(name.value())) == Bytes("tag")) #TODO find a better way
     ])
+
 
 def valid_price_token(idx):
     manager = AssetParam.manager(idx)
@@ -35,6 +39,33 @@ def valid_price_token(idx):
         Assert(name.hasValue()),
         Assert(Substring(name.value(), Len(name.value()) - Int(2), Len(name.value())) == Bytes("px")) #TODO find a better way
     ])
+
+
+@Subroutine(TealType.uint64)
+def atoi(a):
+    idx = ScratchVar()
+    i = ScratchVar()
+
+    init = idx.store(Int(0))
+    cond = idx.load()<Len(a)
+    step = idx.store(idx.load() + Int(1))
+
+    return Seq([
+        i.store(Int(0)),
+        For(init, cond, step).Do(
+                i.store(
+                    i.load() +
+                    (
+                        (GetByte(a, idx.load()) - Int(48)) *
+                        Exp(Int(10), (Len(a)-idx.load())-Int(1))
+                    )
+                ),
+        ),
+        i.load()
+    ])
+
+
+
 
 def valid_contract(tc, contract_source, contract_addr):
     return And(
@@ -81,12 +112,14 @@ def check_balance_match(txn, addr_idx, asset_id):
             price_asset == txn.xfer_asset()
         )
     )
+
+
 def get_price_asset(asset_id):
     name = AssetParam.name(asset_id)
     return Seq([
         name,
         Assert(name.hasValue()),
-        Substring(name.value(),x,x)
+        atoi(Substring(name.value(),Len(platform_name),Len(name.value())))
     ])
 
 def pay_txn_valid(txn, amt, from_addr, to_addr):

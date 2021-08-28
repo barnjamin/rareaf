@@ -27,6 +27,7 @@ def get_var(name):
 
 owner_addr    = get_var("owner_addr")
 listing_hash  = get_var("listing_hash")
+platform_name = get_var("name")
 
 price_token   = Btoi(get_var("price_id"))
 platform_fee  = Btoi(get_var("fee"))
