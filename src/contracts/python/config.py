@@ -14,8 +14,6 @@ def get_config():
     return config
 
 
-
-
 configuration = get_config()
 
 listing_key   = Bytes("listing")

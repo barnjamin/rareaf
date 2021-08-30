@@ -24,8 +24,9 @@ def valid_tag_token(idx):
         manager, 
         Assert(manager.hasValue()),
         Assert(manager.value() == tmpl_owner_addr),
+        name,
         Assert(name.hasValue()),
-        Assert(Substring(name.value(), Len(name.value()) - Int(3), Len(name.value())) == Bytes("tag")) #TODO find a better way
+        suffix(name.value(), Int(3)) == Bytes("tag") 
     ])
 
 
@@ -36,35 +37,10 @@ def valid_price_token(idx):
         manager, 
         Assert(manager.hasValue()),
         Assert(manager.value() == tmpl_owner_addr),
+        name,
         Assert(name.hasValue()),
-        Assert(Substring(name.value(), Len(name.value()) - Int(2), Len(name.value())) == Bytes("px")) #TODO find a better way
+        suffix(name.value(), Int(2)) ==  Bytes("px")
     ])
-
-
-@Subroutine(TealType.uint64)
-def atoi(a):
-    idx = ScratchVar()
-    i = ScratchVar()
-
-    init = idx.store(Int(0))
-    cond = idx.load()<Len(a)
-    step = idx.store(idx.load() + Int(1))
-
-    return Seq([
-        i.store(Int(0)),
-        For(init, cond, step).Do(
-                i.store(
-                    i.load() +
-                    (
-                        (GetByte(a, idx.load()) - Int(48)) *
-                        Exp(Int(10), (Len(a)-idx.load())-Int(1))
-                    )
-                ),
-        ),
-        i.load()
-    ])
-
-
 
 
 def valid_contract(tc, contract_source, contract_addr):
@@ -99,28 +75,24 @@ def set_asset_id(txn, var):
 
 def check_balance_match(txn, addr_idx, asset_id):
     balance = AssetHolding.balance(addr_idx, asset_id)
-    price_asset = get_price_asset(asset_id)
-    return And(
-        Seq([ 
+    price_asset_id = price_asset(asset_id)
+    return Seq([ 
             balance, 
             Assert(balance.hasValue()),
-            Or(txn.amount() == balance.value(), txn.asset_amount() == balance.value())
-        ]),
-        Or(
-            #Either paying with algos or another asset that matches what the listing wants
-            price_asset == 0, 
-            price_asset == txn.xfer_asset()
-        )
-    )
+            Or(
+                And(
+                    price_asset_id == Int(0),
+                    txn.type_enum() == TxnType.Payment,
+                    txn.amount() == balance.value(), 
+                ),
+                And(
+                    price_asset_id == txn.xfer_asset(),
+                    txn.type_enum() == TxnType.AssetTransfer,
+                    txn.asset_amount() == balance.value()
+                ),
+            )
+        ])
 
-
-def get_price_asset(asset_id):
-    name = AssetParam.name(asset_id)
-    return Seq([
-        name,
-        Assert(name.hasValue()),
-        atoi(Substring(name.value(),Len(platform_name),Len(name.value())))
-    ])
 
 def pay_txn_valid(txn, amt, from_addr, to_addr):
     return And(
@@ -222,6 +194,47 @@ def valid_tag_closes(start_idx, max_tags, platform_addr, contract_addr):
 
     return And(*valid_ops)
 
-
 def asa_delete_txn_valid(txn, platform_token_id):
     return Int(1)
+
+
+@Subroutine(TealType.uint64)
+def price_asset(asset_id):
+    name = AssetParam.name(asset_id)
+    return Seq([
+        name,
+        Assert(name.hasValue()),
+        atoi(Substring(name.value(),Len(platform_name),Len(name.value())))
+    ])
+
+@Subroutine(TealType.uint64)
+def strpos(str, char):
+    pass
+
+
+@Subroutine(TealType.bytes)
+def suffix(a, len):
+    return Substring(a, Len(a) - len, Len(a))
+
+@Subroutine(TealType.uint64)
+def atoi(a):
+    idx = ScratchVar()
+    i = ScratchVar()
+
+    init = idx.store(Int(0))
+    cond = idx.load()<Len(a)
+    step = idx.store(idx.load() + Int(1))
+
+    return Seq([
+        i.store(Int(0)),
+        For(init, cond, step).Do(
+                i.store(
+                    i.load() +
+                    (
+                        (GetByte(a, idx.load()) - Int(48)) *
+                        Exp(Int(10), (Len(a)-idx.load())-Int(1))
+                    )
+                ),
+        ),
+        i.load()
+    ])
