@@ -128,6 +128,7 @@ export class Application {
 
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.admin_addr, app, clear))
 
+
             const [signed]   = await wallet.signTxn([create_txn])
 
             const result     = await sendWait([signed])
@@ -135,7 +136,11 @@ export class Application {
             this.conf.id = result['application-index']
         }else{
             const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.id))
+
+            console.log(AlgoSigner.encoding.msgpackToBase64(update_txn.toByte()))
+
             const [s_update_txn]   = await wallet.signTxn([update_txn])
+
             await sendWait([s_update_txn])
             
             const params = [Method.Config, ...makeArgs(this.conf)]
@@ -172,6 +177,8 @@ export class Application {
         const result = await getTransaction(s_create_px.txID)
 
         if(result === undefined) return false
+
+        if(!this.conf.price_ids) this.conf.price_ids = []
 
         this.conf.price_ids.push(result['asset-index'])
         return true

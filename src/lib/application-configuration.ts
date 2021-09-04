@@ -89,7 +89,7 @@ export function get_template_vars(ac: ApplicationConfiguration, override: any): 
         "TMPL_ADMIN_ADDR": addrToB64(ac.admin_addr),
         "TMPL_OWNER_ADDR": addrToB64(ac.owner_addr),
         "TMPL_FEE_AMT": ac.fee_amt,
-        "TMPL_PRICE_ID": ac.price_ids.length>0?ac.price_ids[0]:0,
+        "TMPL_PRICE_ID": ac.price_ids && ac.price_ids.length>0?ac.price_ids[0]:0,
         "TMPL_BLANK_HASH": ac.listing_hash,
         "TMPL_SEED_AMT": ac.seed_amt,
         ...override

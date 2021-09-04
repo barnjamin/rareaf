@@ -103,8 +103,9 @@ export async function isListing(ac: ApplicationConfiguration, address: string): 
 export async function getListings(ac: ApplicationConfiguration, price_tokens: number[], tagNames: string[], minPrice=0, maxPrice=0): Promise<Listing[]> {
     const indexer  = getIndexer()
 
+    console.log(ac)
     // App conf not initialized
-    if(ac.price_ids.length === 0) return []
+    if(!ac.price_ids || ac.price_ids.length === 0) return []
 
     // Use tag names first
     if(tagNames.length>0) {
