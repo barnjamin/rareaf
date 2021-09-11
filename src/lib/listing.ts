@@ -69,6 +69,8 @@ export class Listing {
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
+        app_call_txn.appForeignAssets = [this.price_id]        
+
         const seed_txn = new Transaction(get_pay_txn(suggestedParams, this.creator_addr, this.contract_addr, this.ac.seed_amt))
         const asa_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.asset_id))
         const price_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.price_id))
