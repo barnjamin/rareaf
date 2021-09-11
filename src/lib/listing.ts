@@ -55,7 +55,8 @@ export class Listing {
     getVars() {
         return get_template_vars(this.ac, {
             "TMPL_ASSET_ID":"b64("+uintToB64(this.asset_id)+")",
-            "TMPL_CREATOR_ADDR": addrToB64(this.creator_addr)
+            "TMPL_CREATOR_ADDR": addrToB64(this.creator_addr),
+            "TMPL_PRICE_ID": this.price_id,
         })
     }
 

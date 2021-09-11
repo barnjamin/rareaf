@@ -37,7 +37,7 @@ export class PriceToken {
             //Algos
             this.asa.units = 1e17 
             this.asa.decimals = 6 
-            this.asa.unitName = "μA" 
+            this.asa.unitName = "A" 
             this.asa.url = "algorand.com" 
             this.asa.name = "Algos" 
 
@@ -107,6 +107,11 @@ export class PriceToken {
         const s_destroy_px = algosdk.signLogicSigTransaction(destroy_px, ls)
 
         return (await sendWait([s_cosign_txn, s_destroy_px])) !== undefined
+    }
+
+
+    static toUnits(pt: PriceToken, val: number): number {
+        return val * Math.pow(10, pt.asa.decimals)
     }
 
     static getAssetId(name: string): number {

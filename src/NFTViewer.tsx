@@ -14,7 +14,7 @@ import {platform_settings as ps} from './lib/platform-conf'
 import { showErrorToaster, showInfo } from './Toaster'
 import { ApplicationConfiguration } from './lib/application-configuration'
 import { PriceToken } from './lib/price'
-import { Pricer } from './Pricer'
+import { TagToken } from './lib/tags'
 
 type NFTViewerProps = {
     history: any
@@ -31,6 +31,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     const [waiting_for_tx, setWaiting]        = React.useState(false)
     const [price, setPrice]                   = React.useState(0)
+    const [displayPrice, setDisplayPrice]     = React.useState("")
     const [priceToken, setPriceToken]         = React.useState(undefined)
     const [listingVisible, setListingVisible] = React.useState(false)
     const [tags, setTags]                     = React.useState([])
@@ -38,11 +39,8 @@ export default function NFTViewer(props: NFTViewerProps) {
     const [listingAddr, setListingAddr]       = React.useState("")
     
     React.useEffect(()=>{
-        let subscribed = true
         if(priceToken == undefined && props.ac.price_ids && props.ac.price_ids.length>0) 
             setPriceToken(props.ac.price_ids[0])
-
-        return ()=>{subscribed=false}
     }, [props.ac])
 
     React.useEffect(()=>{
@@ -92,11 +90,19 @@ export default function NFTViewer(props: NFTViewerProps) {
         setWaiting(false)
     }
 
-    async function handlePriceChange(price: number){ setPrice(price) }
-    async function handlePriceTokenChange(pt: PriceToken){ 
-        console.log(pt)
-        setPriceToken(pt) 
+    async function handlePriceChange(price: string){ 
+        setPrice(PriceToken.toUnits(priceToken, parseFloat(price)))
+
+        if(price.includes(".")){
+            const chunks = price.split(".")
+            if(chunks.length>1 && chunks[1].length>priceToken.asa.decimals){
+                price = chunks[0] + "." + chunks[1].slice(0, priceToken.asa.decimals)
+            }
+        }
+
+        setDisplayPrice(price) 
     }
+    async function handlePriceTokenChange(pt: PriceToken){ setPriceToken(pt) }
 
     async function handleOptIn(): Promise<boolean> {
         if(props.wallet === undefined || optedIn) return false
@@ -123,7 +129,6 @@ export default function NFTViewer(props: NFTViewerProps) {
             showInfo("Creating listing transaction")
             const lst = new Listing(price, priceToken.id, parseInt(id), props.acct, props.ac)
 
-            console.log(lst)
                // Trigger popup to get event for signing 
             await lst.doCreate(props.wallet)
 
@@ -192,7 +197,7 @@ export default function NFTViewer(props: NFTViewerProps) {
                     id="price" 
                     title="price" 
                     panel={<PricingDetails 
-                        price={price} 
+                        price={displayPrice} 
                         priceToken={priceToken} 
                         priceTokenOptions={props.ac.price_ids}
                         onPriceChange={handlePriceChange} 
@@ -216,7 +221,12 @@ export default function NFTViewer(props: NFTViewerProps) {
                 <DialogStep 
                     id="confirm" 
                     title="confirm" 
-                    panel={<ConfirmListingDetails tokenId={nft.asset_id} price={price} tags={tags} />} 
+                    panel={<ConfirmListingDetails 
+                        tokenId={nft.asset_id} 
+                        price={displayPrice} 
+                        priceToken={priceToken}
+                        tags={tags} 
+                        />} 
                     >
                 </DialogStep>
             </MultistepDialog>
@@ -225,11 +235,11 @@ export default function NFTViewer(props: NFTViewerProps) {
 }
 
 type PricingDetailsProps= {
-    price: number
+    price: string 
     priceToken:  PriceToken 
     priceTokenOptions: PriceToken[]
     onPriceTokenChange(PriceToken)
-    onPriceChange(number)
+    onPriceChange(string)
 }
 
 function PricingDetails(props: PricingDetailsProps){
@@ -239,37 +249,47 @@ function PricingDetails(props: PricingDetailsProps){
         const pt = props.priceTokenOptions.find((pt)=>{ return pt.id == id})
         props.onPriceTokenChange(pt)
     }
-    function handlePriceChange(vnum) {
-        props.onPriceChange(vnum)
+
+    function handlePriceChange(vnum: number, vstring: string) {
+        props.onPriceChange(vstring)
     }
     
     const opts = props.priceTokenOptions.map((pt)=>{
         return {label:pt.asa.name, value:pt.id}
     })
 
-    const price_units = props.priceToken?props.priceToken.asa.unitName:""
-
     return (
         <div className={Classes.DIALOG_BODY}>
             <FormGroup>
-                <HTMLSelect options={opts} onChange={handlePriceTokenSelect} />
-                <Label htmlFor="input-price">Price  in {price_units}</Label>
-                <NumericInput buttonPosition="none" 
-                    min={0} large={true} 
+                <Label >Price in: 
+                    <HTMLSelect id="price-token" options={opts} onChange={handlePriceTokenSelect} />
+                </Label>
+                <NumericInput 
+                    buttonPosition="none" 
+                    min={0} 
+                    fill={true}
                     id="input-price" value={props.price} 
-                    onValueChange={handlePriceChange} ></NumericInput>
+                    allowNumericCharactersOnly={false}
+                    onValueChange={handlePriceChange} />
             </FormGroup>
         </div>
     )
 }
 
-function ConfirmListingDetails(props){
+type ListingDetailsProps = {
+    tokenId: number
+    price: string 
+    priceToken: PriceToken
+    tags: TagToken[]
+}
+
+function ConfirmListingDetails(props: ListingDetailsProps){
     return (
         <div className={Classes.DIALOG_BODY}>
             <h3>Listing:</h3>
 
             <p><b>Token:</b> {props.tokenId} </p>
-            <p><b>Price:</b> {props.price} μAlgos</p> 
+            <p><b>Price:</b> {props.price} {props.priceToken.asa.unitName}</p> 
             <p><b>Tags:</b> {props.tags.map(t=>{return <Tag key={t.id} round={true} intent='primary'>{t.name}</Tag>})}</p>
         </div>
     )
