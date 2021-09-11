@@ -14,6 +14,7 @@ import {platform_settings as ps} from './lib/platform-conf'
 import { showErrorToaster, showInfo } from './Toaster'
 import { ApplicationConfiguration } from './lib/application-configuration'
 import { PriceToken } from './lib/price'
+import { Pricer } from './Pricer'
 
 type NFTViewerProps = {
     history: any
@@ -30,12 +31,20 @@ export default function NFTViewer(props: NFTViewerProps) {
 
     const [waiting_for_tx, setWaiting]        = React.useState(false)
     const [price, setPrice]                   = React.useState(0)
-    const [price_id, setPriceId]              = React.useState(0)
+    const [priceToken, setPriceToken]         = React.useState(undefined)
     const [listingVisible, setListingVisible] = React.useState(false)
     const [tags, setTags]                     = React.useState([])
     const [optedIn, setOptedIn]               = React.useState(false)
     const [listingAddr, setListingAddr]       = React.useState("")
     
+    React.useEffect(()=>{
+        let subscribed = true
+        if(priceToken == undefined && props.ac.price_ids && props.ac.price_ids.length>0) 
+            setPriceToken(props.ac.price_ids[0])
+
+        return ()=>{subscribed=false}
+    }, [props.ac])
+
     React.useEffect(()=>{
         let subscribed = true
 
@@ -83,9 +92,11 @@ export default function NFTViewer(props: NFTViewerProps) {
         setWaiting(false)
     }
 
-    async function handlePriceChange(price){ setPrice(price) }
-    async function handlePriceIdChange(price_id){ setPriceId(price_id) }
-
+    async function handlePriceChange(price: number){ setPrice(price) }
+    async function handlePriceTokenChange(pt: PriceToken){ 
+        console.log(pt)
+        setPriceToken(pt) 
+    }
 
     async function handleOptIn(): Promise<boolean> {
         if(props.wallet === undefined || optedIn) return false
@@ -110,7 +121,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
 
             showInfo("Creating listing transaction")
-            const lst = new Listing(price, price_id, parseInt(id), props.acct, props.ac)
+            const lst = new Listing(price, priceToken.id, parseInt(id), props.acct, props.ac)
 
             console.log(lst)
                // Trigger popup to get event for signing 
@@ -129,6 +140,7 @@ export default function NFTViewer(props: NFTViewerProps) {
 
         setWaiting(false);
     }
+
 
     let editButtons = <div />
 
@@ -179,7 +191,13 @@ export default function NFTViewer(props: NFTViewerProps) {
                 <DialogStep 
                     id="price" 
                     title="price" 
-                    panel={<ListingDetails tokenId={nft.asset_id} price={price} onPriceChange={handlePriceChange} />}>
+                    panel={<PricingDetails 
+                        price={price} 
+                        priceToken={priceToken} 
+                        priceTokenOptions={props.ac.price_ids}
+                        onPriceChange={handlePriceChange} 
+                        onPriceTokenChange={handlePriceTokenChange} 
+                    />}>
                 </DialogStep>
                 <DialogStep 
                     id="tags" 
@@ -206,27 +224,36 @@ export default function NFTViewer(props: NFTViewerProps) {
     )
 }
 
-type ListingDetailProps= {
-    tokenId: number
-    priceId:  number
+type PricingDetailsProps= {
     price: number
-    priceIdOptions: PriceToken[]
-    onPriceIdChange(number)
+    priceToken:  PriceToken 
+    priceTokenOptions: PriceToken[]
+    onPriceTokenChange(PriceToken)
     onPriceChange(number)
 }
 
+function PricingDetails(props: PricingDetailsProps){
 
-function ListingDetails(props){
+    function handlePriceTokenSelect(e){
+        const id = parseInt(e.currentTarget.value)
+        const pt = props.priceTokenOptions.find((pt)=>{ return pt.id == id})
+        props.onPriceTokenChange(pt)
+    }
     function handlePriceChange(vnum) {
         props.onPriceChange(vnum)
     }
+    
+    const opts = props.priceTokenOptions.map((pt)=>{
+        return {label:pt.asa.name, value:pt.id}
+    })
+
+    const price_units = props.priceToken?props.priceToken.asa.unitName:""
 
     return (
         <div className={Classes.DIALOG_BODY}>
             <FormGroup>
-                <HTMLSelect options={props.price_ids}>
-                </HTMLSelect> 
-                <Label htmlFor="input-price">Price in μAlgos</Label>
+                <HTMLSelect options={opts} onChange={handlePriceTokenSelect} />
+                <Label htmlFor="input-price">Price  in {price_units}</Label>
                 <NumericInput buttonPosition="none" 
                     min={0} large={true} 
                     id="input-price" value={props.price} 
