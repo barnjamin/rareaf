@@ -1,5 +1,6 @@
-import { addrToB64, getGlobalState, getTags, uintToB64 } from './algorand'
+import { addrToB64, getGlobalState, getPriceTokens, getTags, uintToB64 } from './algorand'
 import {TagToken} from './tags'
+import {PriceToken} from './price'
 import { platform_settings as ps } from './platform-conf'
 import algosdk from 'algosdk'
 
@@ -12,7 +13,7 @@ export class ApplicationConfiguration  {
         public admin_addr: string       = "",  // Creator of the application
         public name: string             = "",  // Full name of App 
         public unit: string             = "",  // Unit name for price/tag tokens
-        public price_ids: number[]      = [],   // ID of price token
+        public price_ids: PriceToken[]  = [],   // ID of price token
         public owner_addr: string       = "",  // Address of price/tag token owner
         public fee_amt: number          = 0,   // Amount to be sent to app onwer on sales
         public seed_amt: number         = 0,   // Amount sent to each listing to cover costs
@@ -45,6 +46,7 @@ export class ApplicationConfiguration  {
         }
 
         new_ac.tags = await getTags(new_ac, new_ac.owner_addr, new_ac.unit)
+        new_ac.price_ids = await getPriceTokens(new_ac)
 
         ApplicationConfiguration.updateLocalStorage(new_ac)
 

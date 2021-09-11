@@ -153,56 +153,12 @@ export class Application {
     }
 
     async createPriceToken(wallet: Wallet, asa_id: number): Promise<boolean>  { 
-        const suggestedParams = await getSuggested(10)
-        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
-
-        const create_px = new Transaction(get_asa_create_txn(suggestedParams, this.conf.owner_addr, ps.domain))
-        create_px.assetName     = PriceToken.getAssetName(this.conf.name, asa_id)
-        create_px.assetUnitName = PriceToken.getUnitName(this.conf.unit)
-        create_px.assetTotal    = 1e10
-        create_px.assetDecimals = 0 
-        
-        const grouped = [cosign_txn, create_px]
-        algosdk.assignGroupID(grouped)
-        const [s_cosign_txn, /* create_px */] = await wallet.signTxn(grouped)
-
-        const ls = await get_platform_owner(this.getVars({
-            "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr),
-        }))
-
-        const s_create_px = algosdk.signLogicSigTransaction(create_px, ls)
-
-        await sendWait([s_cosign_txn, s_create_px])
-
-        const result = await getTransaction(s_create_px.txID)
-
-        if(result === undefined) return false
-
-        if(!this.conf.price_ids) this.conf.price_ids = []
-
-        this.conf.price_ids.push(result['asset-index'])
-        return true
+        const pt = new PriceToken(this.conf, PriceToken.getAssetName(this.conf.name, asa_id))
+        return await pt.create(this.conf, wallet)
     } 
 
-    async destroyPriceToken(wallet: Wallet, price_id: number) : Promise<boolean> { 
-        if(price_id == 0) return true
-
-        const suggestedParams = await getSuggested(10)
-
-        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
-
-        const destroy_px = new Transaction(get_asa_destroy_txn(suggestedParams, this.conf.owner_addr, price_id))
-        
-        const grouped = [cosign_txn, destroy_px]
-
-        algosdk.assignGroupID(grouped)
-        const [s_cosign_txn, /* s_destroy_px */] = await wallet.signTxn(grouped)
-
-        const ls = await getLogicFromTransaction(this.conf.owner_addr)
-
-        const s_destroy_px = algosdk.signLogicSigTransaction(destroy_px, ls)
-
-        return (await sendWait([s_cosign_txn, s_destroy_px])) !== undefined
+    async destroyPriceToken(wallet: Wallet, price: PriceToken) : Promise<boolean> { 
+        return await price.destroy(this.conf, wallet)
     } 
 
     async destroyApplication(wallet: Wallet): Promise<ApplicationConfiguration> {
@@ -225,7 +181,6 @@ export class Application {
                 showErrorToaster("Couldn't delete price token")
                 return this.conf
             }
-
         }
 
         // Return algos to admin

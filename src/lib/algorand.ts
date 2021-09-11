@@ -5,7 +5,7 @@ import Listing from "./listing";
 import { NFT } from "./nft";
 import { TagToken} from './tags'
 import { dummy_addr } from './contracts'
-import { ApplicationConfiguration } from './application-configuration';
+import { ApplicationConfiguration, LoadApplicationConfiguration } from './application-configuration';
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
 import { ProofResponse } from 'algosdk/dist/types/src/client/v2/algod/models/types';
 import { match } from 'ts-mockito';
@@ -100,7 +100,7 @@ export async function isListing(ac: ApplicationConfiguration, address: string): 
     return hasPriceToken !== undefined
 }
 
-export async function getListings(ac: ApplicationConfiguration, price_tokens: number[], tagNames: string[], minPrice=0, maxPrice=0): Promise<Listing[]> {
+export async function getListings(ac: ApplicationConfiguration, price_tokens: PriceToken[], tagNames: string[], minPrice=0, maxPrice=0): Promise<Listing[]> {
     const indexer  = getIndexer()
 
     console.log(ac)
@@ -165,11 +165,16 @@ export async function getPriceTokens(ac: ApplicationConfiguration): Promise<Pric
 
     const name = PriceToken.getUnitName(ac.unit)
 
+    console.log(name)
+    console.log(results)
+
     return Promise.all(results['created-assets'].filter((a)=>{
         return a.params['unit-name'] == name 
     }).map((t)=>{
+        console.log(t)
         return new PriceToken(ac, t.params.name, t.index)
     }).map((pt)=>{
+        console.log(pt)
         return pt.populateDetails()
     }))
 }
@@ -320,6 +325,21 @@ export async function getCreator(addr: string, asset_id: number): Promise<string
             return txn.sender
         }
     }
+}
+
+export async function searchForAssetsByName(name: string): Promise<PriceToken[]> {
+
+    const ac = await  LoadApplicationConfiguration()
+    const indexer = getIndexer()
+    const assets = await indexer.searchForAssets().unit(name).do()
+
+    const pts = []
+    for(let idx in assets.assets){
+        const a = assets.assets[idx]
+        pts.push(PriceToken.fromAsset(ac, a))
+    }
+
+    return pts
 }
 
 export async function getSuggested(rounds){

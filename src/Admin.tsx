@@ -14,6 +14,8 @@ import { platform_settings as ps } from './lib/platform-conf'
 import { ApplicationConfiguration, ReloadApplicationConfiguration } from './lib/application-configuration'
 import { showErrorToaster, showInfo } from './Toaster'
 import { Tooltip2 } from '@blueprintjs/popover2'
+import { PriceToken } from './lib/price'
+import { Pricer } from './Pricer'
 
 type AdminProps = {
     history: any
@@ -31,12 +33,17 @@ export default function Admin(props: AdminProps) {
     const [ipfs, setIPFS] = React.useState(ps.ipfs)
     const [loading, setLoading] = React.useState(false)
     const [tags, setTags] = React.useState(props.ac.tags)
+    const [prices, setPrices] = React.useState(props.ac.price_ids)
     const [ac, setApplicationConfiguration] = React.useState(props.ac)
+
+    const [priceOptions, setPriceOptions] = React.useState([])
 
     React.useEffect(() => { 
         setTags(props.ac.tags) 
         setApplicationConfiguration(props.ac) 
+        setPrices(props.ac.price_ids)
     }, [props.ac])
+
 
     function setAlgodValue(k: string, v: string) {
         const val = k == "port" ? parseInt(v) : v
@@ -55,6 +62,32 @@ export default function Admin(props: AdminProps) {
     function setAppConf(k: string, v: string) {
         const val = ["fee_amt", "max_price", "seed_amt"].includes(k) ? parseInt(v) : v
         setApplicationConfiguration({ ...ac, [k]: val })
+    }
+
+    function handlePriceAdd(price){
+        //Make sure tag isnt already in array
+        if (prices.some((t) => { return t.id == price.id }))
+            return showErrorToaster("This price type already exists")
+
+        showInfo("Creating price token")
+        setLoading(true)
+
+        try {
+            price.create(ac, props.wallet)
+                .then((success) => {
+                    if(success){
+                        setPrices(old => [...old, price])
+                        ApplicationConfiguration.updateLocalStorage({ ...ac, price_ids: [...prices, price] })
+                    }else{
+                        throw new Error("Failed to create price token")
+                    }
+                })
+                .finally(() => { setLoading(false) })
+        } catch (error) {
+            console.error("Fail: ", error)
+            showErrorToaster("Error:" + error)
+            setLoading(false)
+        }
     }
 
     function handleTagAdd(e) {
@@ -78,9 +111,33 @@ export default function Admin(props: AdminProps) {
             console.error("Fail: ", error)
             setLoading(false)
         }
-
     }
 
+    function handlePriceRemove(e) {
+        // Create Txn to remove  
+        setLoading(true)
+        showInfo("Destroying Price Token")
+
+        const tid = parseInt(e.key)
+        const price = prices.find(t => { return t.id == tid })
+
+        try {
+            price.destroy(ac, props.wallet)
+                .then(success => {
+                    if (success) {
+                        const filtered = tags.filter(t => { return t.id !== tid })
+                        setTags(filtered)
+                        ApplicationConfiguration.updateLocalStorage({ ...ac, tags: filtered })
+                    }
+                })
+                .finally(() => { setLoading(false) })
+
+        } catch (error) {
+            showErrorToaster("Error: "+error)
+            console.error("error: ", error)
+            setLoading(false)
+        }
+    }
     function handleTagRemove(e) {
         // Create Txn to remove  
         setLoading(true)
@@ -192,6 +249,7 @@ export default function Admin(props: AdminProps) {
                         <Tab title='Indexer' id='index' panel={<Indexer setProp={setIndexerValue} {...indexer} />} />
                         <Tab title='Ipfs' id='ipfs' panel={<IPFSConfig setProp={setIpfsValue} {...ipfs} />} />
                         <Tab title='Tags' id='tags' panel={<TagCreator loading={loading} handleAdd={handleTagAdd} handleRemove={handleTagRemove} tags={tags} />} />
+                        <Tab title='Pricing' id='prices' panel={<PriceCreator loading={loading} handleAdd={handlePriceAdd} handleRemove={handlePriceRemove} prices={prices} />} />
                     </Tabs>
                     <div className='container config-text-container'>
                         <SyntaxHighlighter language='json' style={docco} wrapLongLines={true}>
@@ -454,6 +512,29 @@ function TagCreator(props: TagCreatorProps) {
                     onRemove={props.handleRemove}
                     placeholder='Add listing tags...'
                     values={tags.map(t => { return <Tag key={t.id}>{t.name}</Tag> })}
+                />
+            </Tooltip2>
+        </div>
+    )
+}
+
+type PriceCreatorProps = {
+    loading: boolean
+    prices: PriceToken[]
+    handleAdd(e)
+    handleRemove(e)
+}
+function PriceCreator(props: PriceCreatorProps) {
+    const prices = props.prices !== undefined ? props.prices: []
+
+    return (
+        <div>
+            <Tooltip2 content="Create new pricing options">
+                <Pricer 
+                renderProps={{}}
+                prices={prices} 
+                handleAddPrice={props.handleAdd} 
+                handleRemovePrice={props.handleRemove} 
                 />
             </Tooltip2>
         </div>
