@@ -6,6 +6,31 @@ import sys
 #python tcv.py ../listing.tmpl.teal
 #goal clerk compile -D listing.tmpl.teal.populated
 
+def blank_contract(tc):
+    contract = list(get_contract(tc+".populated"))
+    details = get_details(tc+".tok.deets.json")
+
+    # Make sure they're sorted into the order they appear in 
+    # the contract or the `shift` will be wrong
+    labels = dict(sorted(details['template_labels'].items(), key=lambda item: item[1]['position']))
+
+    for k,v in labels.items():
+        pos = v['position']
+        if v['bytes']:
+            val, l = uvarint.decode(contract[pos:])
+            total = l + val
+            print("{} set to {}".format(k,  contract[pos:pos+total]))
+            contract[pos:pos+total] = [0]
+        else:
+            val, l = uvarint.decode(contract[pos:])
+            total = l  
+            print("{} set to {}".format(k,  val))
+            contract[pos:pos+total] = [0]
+
+    with open(tc+".blanked", "wb") as blanked_contract:
+        blanked_contract.write(bytearray(contract))
+        print("Wrote blanked contract to {}".format(tc+".blanked"))
+
 def populate_contract(tc, tvars):
     contract = list(get_contract(tc+".tok"))
     details = get_details(tc+".tok.deets.json")
@@ -55,7 +80,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) != 2:
         print("Please supply the path to the template contract")
-
+        sys.exit() 
 
     print("populating {}".format(sys.argv[1]))
 
@@ -68,3 +93,7 @@ if __name__ == "__main__":
         "TMPL_PRICE_ID": 5,
         "TMPL_SEED_AMT": 10000 
     })
+
+    blank_contract(sys.argv[1])
+
+    # check to make sure the argv[1].tok == argv[1].blanked
