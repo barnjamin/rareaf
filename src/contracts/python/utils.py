@@ -17,28 +17,22 @@ def valid_app_call(txn, app_id):
 def valid_admin_fee_pay(txn):
     return pay_txn_valid(txn, Int(0), tmpl_admin_addr, tmpl_admin_addr)
 
-def valid_tag_token(idx):
-    manager = AssetParam.manager(idx)
-    name = AssetParam.unitName(idx)
+def valid_tag_token(asset_id):
+    manager = AssetParam.manager(asset_id)
+    name = AssetParam.unitName(asset_id)
     return Seq([ 
-        manager, 
-        Assert(manager.hasValue()),
+        manager, name,
         Assert(manager.value() == tmpl_owner_addr),
-        name,
-        Assert(name.hasValue()),
         suffix(name.value(), Int(3)) == Bytes("tag") 
     ])
 
 
-def valid_price_token(idx):
-    manager = AssetParam.manager(idx)
-    name = AssetParam.unitName(idx)
+def valid_price_token(asset_id):
+    manager = AssetParam.manager(asset_id)
+    name = AssetParam.unitName(asset_id)
     return Seq([ 
-        manager, 
-        Assert(manager.hasValue()),
+        manager, name,
         Assert(manager.value() == tmpl_owner_addr),
-        name,
-        Assert(name.hasValue()),
         suffix(name.value(), Int(2)) ==  Bytes("px")
     ])
 

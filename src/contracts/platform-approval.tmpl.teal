@@ -370,17 +370,13 @@ intc_1 // 0
 asset_params_get AssetManager
 store 21
 store 22
-load 21
-assert
-load 22
-bytec_1 // TMPL_OWNER_ADDR
-==
-assert
 intc_1 // 0
 asset_params_get AssetUnitName
 store 23
 store 24
-load 23
+load 22
+bytec_1 // TMPL_OWNER_ADDR
+==
 assert
 load 24
 intc_3 // 2
@@ -967,17 +963,13 @@ intc_1 // 0
 asset_params_get AssetManager
 store 17
 store 18
-load 17
-assert
-load 18
-bytec_1 // TMPL_OWNER_ADDR
-==
-assert
 intc_1 // 0
 asset_params_get AssetUnitName
 store 19
 store 20
-load 19
+load 18
+bytec_1 // TMPL_OWNER_ADDR
+==
 assert
 load 20
 intc_3 // 2
@@ -1075,17 +1067,13 @@ intc_1 // 0
 asset_params_get AssetManager
 store 13
 store 14
-load 13
-assert
-load 14
-bytec_1 // TMPL_OWNER_ADDR
-==
-assert
 intc_1 // 0
 asset_params_get AssetUnitName
 store 15
 store 16
-load 15
+load 14
+bytec_1 // TMPL_OWNER_ADDR
+==
 assert
 load 16
 intc 11 // 3
@@ -1134,17 +1122,13 @@ intc_1 // 0
 asset_params_get AssetManager
 store 9
 store 10
-load 9
-assert
-load 10
-bytec_1 // TMPL_OWNER_ADDR
-==
-assert
 intc_1 // 0
 asset_params_get AssetUnitName
 store 11
 store 12
-load 11
+load 10
+bytec_1 // TMPL_OWNER_ADDR
+==
 assert
 load 12
 intc 11 // 3
@@ -1341,21 +1325,17 @@ load 1
 ==
 &&
 &&
-intc_1 // 0
+txna Assets 0
 asset_params_get AssetManager
 store 5
 store 6
-load 5
-assert
-load 6
-bytec_1 // TMPL_OWNER_ADDR
-==
-assert
-intc_1 // 0
+txna Assets 0
 asset_params_get AssetUnitName
 store 7
 store 8
-load 7
+load 6
+bytec_1 // TMPL_OWNER_ADDR
+==
 assert
 load 8
 intc_3 // 2

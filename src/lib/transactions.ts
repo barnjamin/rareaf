@@ -117,7 +117,7 @@ export function get_app_update_txn(suggestedParams, addr, approval, clear, id) {
         appOnComplete: algosdk.OnApplicationComplete.UpdateApplicationOC,
         appApprovalProgram: approval,
         appClearProgram: clear,
-        extraPages: getExtraPages(approval.length+clear.length),
+        //extraPages: getExtraPages(approval.length+clear.length),
         ...suggestedParams
    } 
 }

@@ -34,7 +34,6 @@ export function Pricer(props: PricerProps) {
     }
 
     function handlePrice(p: PriceToken) { 
-        console.log(p)
         if(props.handleAddPrice !== undefined) 
            props.handleAddPrice(p)
 

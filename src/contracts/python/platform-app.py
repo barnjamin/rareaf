@@ -34,7 +34,7 @@ def approval():
         valid_contract(tc, Txn.application_args[2], contract_addr.load()),
 
         # Make sure the price token is valid
-        valid_price_token(Int(0)),
+        valid_price_token(Txn.assets[0]),
 
         # Save it in creators local state
         caller_add_listing_addr(contract_addr.load()),
