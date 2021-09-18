@@ -2,6 +2,8 @@ from pyteal import Bytes, Tmpl, Int, App, Seq, If, Btoi
 import json
 import os
 
+
+
 def get_config():
     config = None
     with open('../../../config.json', 'r') as f:
@@ -31,7 +33,6 @@ price_token   = Btoi(get_var("price_id"))
 platform_fee  = Btoi(get_var("fee"))
 seed_amt      = Btoi(get_var("seed_amt"))
 max_price     = Btoi(get_var("max_price"))
-
 
 tmpl_seed_amt      = Tmpl.Int("TMPL_SEED_AMT")
 tmpl_fee_amt       = Tmpl.Int("TMPL_FEE_AMT")
