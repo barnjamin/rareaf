@@ -45,7 +45,7 @@ function ListingViewer(props: ListingViewerProps) {
 
     React.useEffect(()=>{ 
         let subscribed = true
-        getListing(props.ac, addr).then((listing)=>{ 
+        getListing(addr).then((listing)=>{ 
             if(subscribed) {
                 setListing(listing) 
                 setPrice(listing.price)

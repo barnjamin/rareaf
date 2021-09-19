@@ -100,10 +100,11 @@ export async function isListing(ac: ApplicationConfiguration, address: string): 
     return hasPriceToken !== undefined
 }
 
-export async function getListings(ac: ApplicationConfiguration, price_tokens: PriceToken[], tagNames: string[], minPrice=0, maxPrice=0): Promise<Listing[]> {
+export async function getListings(tagNames: string[], minPrice=0, maxPrice=0): Promise<Listing[]> {
+    const ac = await LoadApplicationConfiguration()
+    
     const indexer  = getIndexer()
 
-    console.log(ac)
     // App conf not initialized
     if(!ac.price_ids || ac.price_ids.length === 0) return []
 
@@ -121,17 +122,18 @@ export async function getListings(ac: ApplicationConfiguration, price_tokens: Pr
         return await Promise.all(balances.filter((b)=>{
             return b.address !== ac.owner_addr && b.amount > 0
         }).map((b)=>{
-            return getListing(ac, b.address)
+            return getListing(b.address)
         }))
     }
 
     //Set to the default if none are set
+    const price_tokens = ac.price_ids
     if(price_tokens.length==0){
         price_tokens.push(ac.price_ids[0])
     }
 
-    const allBalances = await Promise.all(price_tokens.map((id)=>{
-        let lookup =  indexer.lookupAssetBalances(id).currencyGreaterThan(minPrice)
+    const allBalances = await Promise.all(price_tokens.map((pt)=>{
+        let lookup =  indexer.lookupAssetBalances(pt.id).currencyGreaterThan(minPrice)
         if(maxPrice>0) lookup = lookup.currencyLessThan(maxPrice) 
         return lookup.do()
     }))
@@ -141,7 +143,7 @@ export async function getListings(ac: ApplicationConfiguration, price_tokens: Pr
     return await Promise.all(price_balances.filter((b)=>{
         return b.address !== ac.owner_addr && b.amount > 0
     }).map((b)=>{
-        return getListing(ac, b.address)
+        return getListing(b.address)
     }))
 }
 
@@ -165,16 +167,11 @@ export async function getPriceTokens(ac: ApplicationConfiguration): Promise<Pric
 
     const name = PriceToken.getUnitName(ac.unit)
 
-    console.log(name)
-    console.log(results)
-
     return Promise.all(results['created-assets'].filter((a)=>{
         return a.params['unit-name'] == name 
     }).map((t)=>{
-        console.log(t)
         return new PriceToken(ac, t.params.name, t.index)
     }).map((pt)=>{
-        console.log(pt)
         return pt.populateDetails()
     }))
 }
@@ -183,7 +180,7 @@ export async function getPriceTokens(ac: ApplicationConfiguration): Promise<Pric
 
 export async function getPortfolio(ac: ApplicationConfiguration, addr: string): Promise<Portfolio> {
     const client = getAlgodClient()
-    const portfolio: Portfolio = {listings:[], nfts:[]}
+    const portfolio = {listings:[], nfts:[]} as Portfolio
     let acct = undefined
 
     try{
@@ -195,11 +192,12 @@ export async function getPortfolio(ac: ApplicationConfiguration, addr: string): 
     const lp = []
     for(let aidx in acct['apps-local-state']){
         const als = acct['apps-local-state'][aidx]
+
         if(als.id !== ac.id) continue
 
         for(let kidx in als['key-value']) {
             const kv = als['key-value'][kidx]
-            lp.push(getListing(ac, b64ToAddr(kv.key)).then((listing)=>{
+            lp.push(getListing(b64ToAddr(kv.key)).then((listing)=>{
                 if(listing!==undefined) portfolio.listings.push(listing)
             }))
         }
@@ -224,7 +222,9 @@ export async function getPortfolio(ac: ApplicationConfiguration, addr: string): 
     return portfolio
 }
 
-export async function getListing(ac: ApplicationConfiguration, addr: string): Promise<Listing> {
+export async function getListing(addr: string): Promise<Listing> {
+    const ac        = await LoadApplicationConfiguration()
+
     const holdings  = await getHoldingsFromListingAddress(ac, addr)
 
     if(holdings.nft === undefined) return undefined;
@@ -323,7 +323,6 @@ export async function getCreator(addr: string, asset_id: number): Promise<string
         .assetID(asset_id)
         .do()
 
-    console.log(asset_id, addr)
     for(let idx in txns.transactions){
         const txn = txns.transactions[idx]
         if(txn.sender != addr){
