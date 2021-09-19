@@ -40,6 +40,8 @@ export class ApplicationConfiguration  {
             if(typeof new_ac[key] ==='number') {
                 console.log(key, value_bytes)
                 new_ac[key] = algosdk.decodeUint64(new Uint8Array(value_bytes), 'safe')
+            } else if(typeof new_ac[key]  === 'string' && key.endsWith("addr")) {
+                new_ac[key] = algosdk.encodeAddress(value_bytes)
             }else {
                 new_ac[key] = value_bytes.toString()
             }
@@ -105,6 +107,8 @@ export function makeArgs(ac: ApplicationConfiguration): string[] {
         const val = ac[field]
         if(typeof val === 'number'){
             args.push(uintToB64(val))
+        } else if(typeof val === 'string' && field.endsWith("addr")) {
+            args.push(Buffer.from(algosdk.decodeAddress(val).publicKey).toString('base64'))
         } else if(typeof val === 'string' || field === 'listing_hash') {
             args.push(Buffer.from(val).toString('base64'))
         } else {

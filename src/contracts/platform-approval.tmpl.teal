@@ -1,6 +1,6 @@
 #pragma version 4
 intcblock 1 0 4 2 5 8 10 6 7 9 11 3 45
-bytecblock 0x6f776e65725f61646472 TMPL_OWNER_ADDR 0x746167 0x7078 0x6e616d65 0x6d61785f7072696365 0x6c697374696e675f68617368 0x70726963655f6964
+bytecblock 0x6f776e65725f61646472 TMPL_OWNER_ADDR 0x746167 0x7078 0x6e616d65 0x6d61785f7072696365 0x6c697374696e675f68617368
 txn ApplicationID
 intc_1 // 0
 ==
@@ -1005,9 +1005,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-bytec 7 // "price_id"
-app_global_get
-btoi
+txna Assets 0
 ==
 &&
 &&
@@ -1048,9 +1046,7 @@ btoi
 ==
 &&
 gtxn 1 XferAsset
-bytec 7 // "price_id"
-app_global_get
-btoi
+txna Assets 0
 ==
 &&
 &&

@@ -14,7 +14,7 @@ import { PriceToken } from './price';
 
 type Holdings= {
     price: number
-    price_id: number
+    price_token: PriceToken
     tags: TagToken[]
     nft: NFT
 };
@@ -231,7 +231,7 @@ export async function getListing(ac: ApplicationConfiguration, addr: string): Pr
 
     const creator  = await getCreator(addr, holdings.nft.asset_id)
 
-    let l = new Listing(holdings.price, holdings.price_id, holdings.nft.asset_id, creator, ac, addr)
+    let l = new Listing(holdings.price, holdings.price_token, holdings.nft.asset_id, creator, ac, addr)
     l.tags = holdings.tags
     l.nft = holdings.nft
 
@@ -239,17 +239,22 @@ export async function getListing(ac: ApplicationConfiguration, addr: string): Pr
 }
 
 export async function getHoldingsFromListingAddress(ac: ApplicationConfiguration, address: string): Promise<Holdings> {
+
+
     const client   = getAlgodClient()
     const account = await client.accountInformation(address).do()
-    const holdings  = { 'price':0, 'tags':[], 'nft':undefined, 'price_id':0}
+    const holdings  = { 'price':0, 'tags':[], 'nft':undefined, 'price_token':undefined} as Holdings
+
+    if(!ac.price_ids) return holdings;
 
     const gets = []
     for (let aid in account.assets) {
         const asa = account.assets[aid]
 
-        if(ac.price_ids.includes(asa['asset-id'])){
-            holdings.price = asa['amount']
-            holdings.price_id = asa['asset-id']
+        const price_token = ac.price_ids.find(pi=> asa['asset-id'] === pi.id)
+        if(price_token){
+            holdings.price = asa['amount'] 
+            holdings.price_token = price_token
             continue
         }
 

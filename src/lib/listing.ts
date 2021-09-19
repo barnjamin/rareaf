@@ -21,13 +21,14 @@ import { TagToken } from './tags'
 import { Method } from './application'
 import {LogicSig} from 'algosdk/dist/types/src/logicsig';
 import { showErrorToaster } from '../Toaster';
+import { PriceToken } from './price';
 
 
 export class Listing {
     asset_id: number
 
     price: number
-    price_id: number
+    price_token: PriceToken
 
     creator_addr: string
     contract_addr: string
@@ -42,9 +43,9 @@ export class Listing {
 
     ac: ApplicationConfiguration
 
-    constructor(price: number, price_id: number, asset_id: number, creator_addr: string, ac: ApplicationConfiguration, contract_addr?: string) {
+    constructor(price: number, price_token: PriceToken, asset_id: number, creator_addr: string, ac: ApplicationConfiguration, contract_addr?: string) {
         this.price = price
-        this.price_id = price_id
+        this.price_token = price_token 
         this.asset_id = asset_id
         this.creator_addr = creator_addr
         this.contract_addr = contract_addr
@@ -56,7 +57,7 @@ export class Listing {
         return get_template_vars(this.ac, {
             "TMPL_ASSET_ID":"b64("+uintToB64(this.asset_id)+")",
             "TMPL_CREATOR_ADDR": addrToB64(this.creator_addr),
-            "TMPL_PRICE_ID": this.price_id,
+            "TMPL_PRICE_ID": this.price_token.id,
         })
     }
 
@@ -69,12 +70,13 @@ export class Listing {
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
-        app_call_txn.appForeignAssets = [this.price_id]        
+        app_call_txn.appForeignAssets = [this.price_token.id]        
+        app_call_txn.appAccounts = [algosdk.decodeAddress(this.ac.owner_addr)]
 
         const seed_txn = new Transaction(get_pay_txn(suggestedParams, this.creator_addr, this.contract_addr, this.ac.seed_amt))
         const asa_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.asset_id))
-        const price_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.price_id))
-        const price_send = new Transaction(get_asa_xfer_txn(suggestedParams, this.ac.owner_addr, this.contract_addr, this.price_id, this.price))
+        const price_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.price_token.id))
+        const price_send = new Transaction(get_asa_xfer_txn(suggestedParams, this.ac.owner_addr, this.contract_addr, this.price_token.id, this.price))
         const asa_send = new Transaction(get_asa_xfer_txn(suggestedParams, this.creator_addr, this.contract_addr, this.asset_id, 1))
         const asa_cfg = new Transaction(get_asa_cfg_txn(suggestedParams, this.creator_addr, this.asset_id, {
             assetManager:  this.contract_addr,
@@ -200,13 +202,14 @@ export class Listing {
     async doPriceIncrease(wallet: Wallet, amt: number) {
 
         const args = [Method.PriceIncrease, uintToB64(amt)]
-        const fasset = [this.price_id]
+        const fasset = [this.price_token.id]
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
         app_call_txn.appForeignAssets = fasset
+        //app_call_txn.appAccounts = [algosdk.decodeAddress(this.ac.owner_addr)]
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.ac.owner_addr, this.contract_addr, this.price_id, amt))
+        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.ac.owner_addr, this.contract_addr, this.price_token.id, amt))
 
         const grouped = [app_call_txn, price_xfer_txn]
         algosdk.assignGroupID(grouped)
@@ -221,13 +224,13 @@ export class Listing {
 
     async doPriceDecrease(wallet: Wallet, amt: number) {
         const args = [Method.PriceDecrease, uintToB64(amt)]
-        const fasset = [this.price_id]
+        const fasset = [this.price_token.id]
         const suggestedParams = await getSuggested(10)
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
         app_call_txn.appForeignAssets = fasset
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_id, amt))
+        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_token.id, amt))
         const grouped = [app_call_txn, price_xfer_txn]
         algosdk.assignGroupID(grouped)
 
@@ -245,7 +248,7 @@ export class Listing {
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_id, 0))
+        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_token.id, 0))
         price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
 
         const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.contract_addr, this.asset_id, {
@@ -298,11 +301,11 @@ export class Listing {
 
         const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, buyer, args))
         app_call_txn.appAccounts = [algosdk.decodeAddress(this.creator_addr), algosdk.decodeAddress(this.contract_addr)]
-        app_call_txn.appForeignAssets = [this.price_id]
+        app_call_txn.appForeignAssets = [this.price_token.id]
 
         const purchase_amt_txn = new Transaction(get_pay_txn(suggestedParams, buyer, this.creator_addr, this.price))
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_id, 0))
+        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_token.id, 0))
         price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
 
         const asa_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, buyer, this.asset_id, 0))

@@ -22,6 +22,7 @@ import {TagToken} from './lib/tags'
 import { MAX_LISTING_TAGS, Tagger} from './Tagger'
 import { showErrorToaster } from './Toaster'
 import { ApplicationConfiguration } from './lib/application-configuration'
+import { PriceToken } from './lib/price'
 
 type ListingViewerProps = {
     history: any
@@ -36,15 +37,20 @@ function ListingViewer(props: ListingViewerProps) {
     const history = useHistory();
 
     const {addr} = useParams();
-    const [listing, setListing] = React.useState(undefined);
-    const [loading, setLoading] = React.useState(false);
-    const [price, setPrice]     = React.useState(0);
-    const [updateable, setUpdateable] = React.useState(false)
+    const [listing, setListing]             = React.useState(undefined);
+    const [loading, setLoading]             = React.useState(false);
+    const [price, setPrice]                 = React.useState(0);
+    const [displayPrice, setDisplayPrice]   = React.useState("");
+    const [updateable, setUpdateable]       = React.useState(false)
 
     React.useEffect(()=>{ 
         let subscribed = true
         getListing(props.ac, addr).then((listing)=>{ 
-            if(subscribed) setListing(listing) 
+            if(subscribed) {
+                setListing(listing) 
+                setPrice(listing.price)
+                setDisplayPrice(PriceToken.format(listing.price_token,listing.price))
+            }
         }) 
         return ()=>{ subscribed = false}
     }, [props.ac])
@@ -107,8 +113,11 @@ function ListingViewer(props: ListingViewerProps) {
         setLoading(false)
     }
 
-    async function checkSetPrice(price: number){
+    async function checkSetPrice(newP: number, newPrice: string){
+        const price = PriceToken.toUnits(listing.price_token, parseFloat(newPrice))
+
         setPrice(price)
+        setDisplayPrice(PriceToken.toDisplay(listing.price_token, newPrice))
 
         if(price==listing.price) setUpdateable(false)
         else setUpdateable(true)
@@ -149,7 +158,7 @@ function ListingViewer(props: ListingViewerProps) {
 
         let priceComponent = (
             <div className='container listing-price' >
-                <p>{listing.price} μAlgos</p>
+                <p>{displayPrice} {listing.price_token.asa.unitName}</p>
             </div>
         )
 
@@ -167,10 +176,11 @@ function ListingViewer(props: ListingViewerProps) {
             priceComponent = (
                 <div className='container listing-price-edit'>
                     <NumericInput 
+                        allowNumericCharactersOnly={false}
                         onValueChange={checkSetPrice}
-                        defaultValue={listing.price} 
                         min={1} 
-                        max={10000} 
+                        max={10000000} 
+                        value={displayPrice} 
                         buttonPosition={"none"} 
                     />
                     <Button 

@@ -110,9 +110,25 @@ export class PriceToken {
     }
 
 
+    static format(pt: PriceToken, val: number): string {
+        console.log(val, pt.asa.decimals)
+        return (val / Math.pow(10, pt.asa.decimals)).toString()
+    }
+
+    static toDisplay(pt: PriceToken, val: string): string {
+        if(val.includes(".")){
+            const chunks = val.split(".")
+            if(chunks.length>1 && chunks[1].length>pt.asa.decimals){
+                val = chunks[0] + "." + chunks[1].slice(0, pt.asa.decimals)
+            }
+        }
+        return val
+    }
+
     static toUnits(pt: PriceToken, val: number): number {
         return val * Math.pow(10, pt.asa.decimals)
     }
+
 
     static getAssetId(name: string): number {
         console.log(name)

@@ -67,7 +67,7 @@ def approval():
         set_addr_as_asset_rx(Gtxn[1], contract_addr),
         valid_price_token(Int(0)),
         caller_is_listing_creator(contract_addr.load()),
-        asa_xfer_valid(Gtxn[1], price_token, Btoi(Txn.application_args[1]), owner_addr, contract_addr.load()), 
+        asa_xfer_valid(Gtxn[1], Txn.assets[0], Btoi(Txn.application_args[1]), owner_addr, contract_addr.load()), 
         # TODO: check that new price <= max price, need too get current holdings for contract addr 
         #current_holdings + Btoi(Txn.application_args[1]) <= max_price
     )
@@ -76,7 +76,7 @@ def approval():
         Global.group_size() == Int(2),
         set_addr_as_tx(Gtxn[1], contract_addr),
         caller_is_listing_creator(contract_addr.load()),
-        asa_xfer_valid(Gtxn[1], price_token, Btoi(Txn.application_args[1]), contract_addr.load(), owner_addr), 
+        asa_xfer_valid(Gtxn[1], Txn.assets[0], Btoi(Txn.application_args[1]), contract_addr.load(), owner_addr), 
         # TODO: check that new price > 0, need too get current holdings for contract addr 
         #current_holdings + Btoi(Txn.application_args[1]) <= max_price
     )
