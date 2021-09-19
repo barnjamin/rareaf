@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { AnchorButton, Card, Elevation } from '@blueprintjs/core'
 import { Listing} from './lib/listing'
+import { PriceToken } from './lib/price';
 
 
 type ListingCardProps = { key: string, listing: Listing; };
@@ -22,7 +23,7 @@ export function ListingCard(props: ListingCardProps) {
             <div className='container'>
                 <p>
                     <a href={'/listing/'+l.contract_addr}> 
-                        <b>{md.name}</b> - <i>{md.properties.artist}</i> ({l.price} μAlgos)
+                        <b>{md.name}</b> - <i>{PriceToken.format(l.price_token, l.price)} {l.price_token.asa.unitName}</i>
                     </a>
 
                 </p>
