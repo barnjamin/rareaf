@@ -19,6 +19,8 @@ Also see https://github.com/barnjamin/rareaf/issues and https://github.com/barnj
 #### WARNING #####
 the contracts have _not_ been audited. you are responsible for reading and validating that there is nothing dangerous.
 
+Demo site at https://rare.af
+
 
 Rare AF is _your_ NFT Marketplace
 ----------------------------------
