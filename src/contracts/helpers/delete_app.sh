@@ -9,5 +9,5 @@ $GCMD app delete --app-id 9 \
 	-o app-delete.txn \
 	-s 
 
-$GCMD clerk rawsend -f app-delete.txn
+#$GCMD clerk rawsend -f app-delete.txn
 

@@ -2,7 +2,7 @@
 
 TXN_FILE=grouped.txns
 
-mv /mnt/c/Users/Ben/Downloads/$TXN_FILE .
+#mv /mnt/c/Users/Ben/Downloads/$TXN_FILE .
 
 ../sandbox copyTo $TXN_FILE
 
@@ -20,4 +20,6 @@ mv /mnt/c/Users/Ben/Downloads/$TXN_FILE .
 
 #Remote
 #../sandbox enter algod
-#tealdbg debug -a 4 -d grouped.txns.json -v --remote-debugging-port 9392 --listen ""
+echo "tealdbg debug -a 4 -d $TXN_FILE.json -v --remote-debugging-port 9392 --listen ''"
+
+#../sandbox enter algod

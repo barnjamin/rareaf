@@ -1,23 +1,22 @@
 #!/bin/bash
 
-funder="HGB4HTDSRYDUWUVUPR553NWZ3TDHUX72QNU4SIAI3WWIZ64DNPHFG2J6PY"
-
+funder="ONEVQYMRSUSTTSELN3LMDEDQA3QK7ZDEHL4L6KO7AV2BIRVZGDGZHRQX7I"
 
 
 addr="7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM"
+MNEMONIC="genuine burger urge heart spot science vague guess timber rich olympic cheese found please then snack nice arrest coin seminar pyramid adult flip absorb apology"
 echo $addr
-echo "genuine burger urge heart spot science vague guess timber rich olympic cheese found please then snack nice arrest coin seminar pyramid adult flip absorb apology"
-../sandbox goal account import
+../sandbox goal account import -m "$MNEMONIC"
 
 addr="6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI"
+MNEMONIC="loan journey alarm garage bulk olympic detail pig edit other brisk sense below when false ripple cute buffalo tissue again boring manual excuse absent injury"
 echo $addr
-echo "loan journey alarm garage bulk olympic detail pig edit other brisk sense below when false ripple cute buffalo tissue again boring manual excuse absent injury"
-../sandbox goal account import
+../sandbox goal account import -m "$MNEMONIC"
 
 addr="DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4"
+MNEMONIC="train rather absorb mouse tone scorpion group vacuum depth nothing assault silent fox relax depart lady hurdle million jaguar ensure define mule silk able order"
 echo $addr
-echo "train rather absorb mouse tone scorpion group vacuum depth nothing assault silent fox relax depart lady hurdle million jaguar ensure define mule silk able order"
-../sandbox goal account import
+../sandbox goal account import -m "$MNEMONIC"
 
 
 addr="7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM"
