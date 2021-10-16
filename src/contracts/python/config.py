@@ -6,6 +6,11 @@ import os
 tag_unit_name   = Bytes("raf:tag")
 price_unit_name = Bytes("raf:px")
 
+owner_key = Bytes("owner")
+asset_key = Bytes("asset")
+tags_key  = Bytes("tags")
+prices_key= Bytes("prices")
+
 
 def get_config():
     config = None

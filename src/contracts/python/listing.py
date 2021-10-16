@@ -16,12 +16,12 @@ def listing():
     # used to set template variables, returns 0 so the 
     # condition is not executed 
     setup = Seq([
-        app_id.store(Tmpl.Int("TMPL_APP_ID")),
-        app_addr.store(Tmpl.Bytes("TMPL_APP_ADDR")),
-        creator_addr.store(Tmpl.Bytes("TMPL_CREATOR_ADDR")),
-        asset_id.store(Tmpl.Int("TMPL_ASSET_ID")),
-        seed_amt.store(Tmpl.Int("TMPL_SEED_AMT")),
-        nonce.store(Tmpl.Bytes("TMPL_NONCE")),
+        app_id.store(       Tmpl.Int("TMPL_APP_ID")),
+        asset_id.store(     Tmpl.Int("TMPL_ASSET_ID")),
+        seed_amt.store(     Tmpl.Int("TMPL_SEED_AMT")),
+        app_addr.store(     Tmpl.Bytes("TMPL_APP_ADDR")),
+        creator_addr.store( Tmpl.Bytes("TMPL_CREATOR_ADDR")),
+        nonce.store(        Tmpl.Bytes("TMPL_NONCE")),
         Int(0) 
     ])
 

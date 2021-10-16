@@ -1,6 +1,6 @@
 from pyteal import ScratchVar, TealType, Return, Btoi, Txn, OnComplete, Mode, Cond, compileTeal, GeneratedID
 from pyteal.ast.itxn import InnerTxnBuilder
-from pyteal.ast.txn import TxnField
+from pyteal.ast.txn import TxnExprBuilder, TxnField
 
 from utils import *
 from config import *
@@ -48,76 +48,148 @@ def approval():
         Gtxn[4].amount() > Int(0),
         Gtxn[4].sender() == Gtxn[0].sender(),
         Gtxn[4].receiver() == Gtxn[0].receiver(),
+
+        #Set the local storage creator to the funding sender 
+        Seq(
+            App.localPut(Gtxn[0].receiver(), owner_key, Gtxn[0].sender()),
+            App.localPut(Gtxn[0].receiver(), asset_key, Gtxn[4].xfer_asset()),
+            Int(1)
+        )
     )
 
     tag_listing = And( 
         Global.group_size() == Int(1),
-        valid_app_call(Txn, Global.current_application_id()),
+        valid_owner_app_call(),
         valid_tag_token(Txn.assets[0]),
         valid_listing_addr(Txn.accounts[0]),
         ensure_opted_in(Txn.accounts[0], Txn.assets[0]),
-        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Int(1))
+        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Int(1)),
+        add_to_localstate(Txn.accounts[0], tags_key, Txn.assets[0])
     )
 
     untag_listing = And(
         Global.group_size() == Int(1),
-        valid_app_call(Txn, Global.current_application_id()),
+        valid_owner_app_call(),
         valid_tag_token(Txn.assets[0]),
         valid_listing_addr(Txn.accounts[0]),
-        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Int(0))
+        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Int(0)),
+        remove_from_localstate(Txn.accounts[0], tags_key, Txn.assets[0])
     )
 
     reprice_listing = And(
         Global.group_size() == Int(1),
-        valid_app_call(Txn, Global.current_application_id()),
+        valid_owner_app_call(),
         valid_price_token(Txn.assets[0]),
         valid_listing_addr(Txn.accounts[0]),
         ensure_opted_in(Txn.accounts[0], Txn.assets[0]),
-        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Txn.application_args[1])
+        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Btoi(Txn.application_args[1])),
+        If(Btoi(Txn.application_args[1])>Int(0))
+        .Then(add_to_localstate(Txn.accounts[0], prices_key, Txn.assets[0]))
+        .Else(remove_from_localstate(Txn.accounts[0], prices_key, Txn.assets[0]))
     )
 
     delete_listing = And( 
         Global.group_size() == Int(1),
-        valid_app_call(Gtxn[0], Global.current_application_id())
+        Or(
+            valid_owner_app_call(),
+            valid_admin_app_call()
+        ),
+
+        # TODO:
         # Create inner transactions to xfer assets out
+        # What if they have more than 16?
     )
 
+    owner = ScratchVar()
+    asset = ScratchVar()
+    price = ScratchVar()
+
     purchase_listing = And(  
-        Global.group_size() == Int(1),
-        valid_app_call(Gtxn[0], Global.current_application_id())
-        # Create inner transactions to xfer assets
+        Global.group_size() == Int(2),
+
+        Txn.type_enum() == TxnType.ApplicationCall,
+        Txn.application_id() == Global.current_application_id(),
+
+        Seq(
+            owner.store(App.localGet(Txn.accounts[0], owner_key)),
+            asset.store(App.localGet(Txn.accounts[0], asset_key)),
+            Int(1)
+        ),
+
+        Gtxn[1].sender() == Gtxn[0].sender(),
+        Gtxn[1].receiver() == owner.load(),
+        check_balance_match(Gtxn[1], Txn.accounts[0], Btoi(Gtxn[0].application_args[1])), #Need to pass the id of the app asset to pay with
+
+        # Xfer tags/prices back to app
+        empty_app_tokens(Txn.accounts[0]),
+
+
+        # Xfer nft to buyer  
+        Seq(
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.asset_amount: Int(0),
+                TxnField.asset_close_to: Txn.sender()
+            }),
+            InnerTxnBuilder.Submit(),
+            Int(1)
+        ),
+
+        # Close out of app
+        Seq(
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.ApplicationCall,
+                TxnField.on_completion: OnComplete.CloseOut,
+            }),
+            InnerTxnBuilder.Submit(),
+            Int(1)
+        ),
+
+        # Xfer seed back to owner 
+        Seq(
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.Payment,
+                TxnField.amount: Int(0),
+                TxnField.close_remainder_to: owner.load(),
+            }),
+            InnerTxnBuilder.Submit(),
+            Int(1)
+        )
     )
 
     # Admin stuff
     create_price_token = And(
         Global.group_size() == Int(1),
-        valid_admin_app_call(Txn, Global.current_application_id()),
+        valid_admin_app_call(),
         price_token_create(price_unit_name, Txn.assets[0])
     )
 
     destroy_price_token = And(
         Global.group_size() == Int(1),
-        valid_admin_app_call(Txn, Global.current_application_id()),
+        valid_admin_app_call(),
         valid_price_token(Txn.assets[0]),
         destroy_token(Txn.assets[0]),
     )
 
     create_tag_token = And(
         Global.group_size() == Int(1),
-        valid_admin_app_call(Txn, Global.current_application_id()),
+        valid_admin_app_call(),
         tag_token_create(tag_unit_name, Txn.application_args[1])
     )
 
     destroy_tag_token = And(
         Global.group_size() == Int(1),
-        valid_admin_app_call(Txn, Global.current_application_id()),
+        valid_admin_app_call(),
         valid_tag_token(Txn.assets[0]),
         destroy_token(Txn.assets[0]),
     )
 
     application_config = And(
         Global.group_size() == Int(1),
-        valid_admin_app_call(Txn, Global.current_application_id()),
+        valid_admin_app_call(),
         #TODO
         Int(1)
     )
@@ -136,8 +208,8 @@ def approval():
         [Txn.application_args[0] == action_tag,        Return(tag_listing)],            # Add a tag to the listing
         [Txn.application_args[0] == action_untag,      Return(untag_listing)],          # Remove a tag from the listing
         [Txn.application_args[0] == action_reprice,    Return(reprice_listing)],        # Change one price amount
-        [Txn.application_args[0] == action_delete,     Return(delete_listing)],         # Delete the listing
-        [Txn.application_args[0] == action_purchase,   Return(purchase_listing)],       # Purchase the listing and close out
+        #[Txn.application_args[0] == action_delete,     Return(delete_listing)],         # Delete the listing
+        #[Txn.application_args[0] == action_purchase,   Return(purchase_listing)],       # Purchase the listing and close out
 
         ## App admin
         [Txn.application_args[0] == action_config,          Return(application_config)],     # App sets config vars 

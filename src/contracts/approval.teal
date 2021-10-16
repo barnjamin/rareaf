@@ -1,86 +1,64 @@
 #pragma version 5
-intcblock 1 0 6 4
-bytecblock 0x746167 0x7078
+intcblock 1 0 8 4
+bytecblock 0x746167 0x7078 0x707269636573 0x74616773 0x6f776e6572
 txn ApplicationID
 intc_1 // 0
 ==
-bnz main_l30
+bnz main_l29
 txn OnCompletion
 pushint 5 // DeleteApplication
 ==
-bnz main_l29
+bnz main_l28
 txn OnCompletion
 intc_3 // UpdateApplication
 ==
-bnz main_l28
+bnz main_l27
 txn OnCompletion
 pushint 2 // CloseOut
 ==
-bnz main_l27
+bnz main_l26
 txn OnCompletion
 intc_0 // OptIn
 ==
-bnz main_l26
+bnz main_l25
 txna ApplicationArgs 0
 bytec_0 // "tag"
 ==
-bnz main_l25
+bnz main_l24
 txna ApplicationArgs 0
 pushbytes 0x756e746167 // "untag"
 ==
-bnz main_l24
+bnz main_l23
 txna ApplicationArgs 0
 pushbytes 0x72657072696365 // "reprice"
 ==
-bnz main_l23
-txna ApplicationArgs 0
-pushbytes 0x64656c657465 // "delete"
-==
-bnz main_l22
-txna ApplicationArgs 0
-pushbytes 0x7075726368617365 // "purchase"
-==
-bnz main_l21
+bnz main_l19
 txna ApplicationArgs 0
 pushbytes 0x636f6e666967 // "config"
 ==
-bnz main_l20
+bnz main_l18
 txna ApplicationArgs 0
 pushbytes 0x6372656174655f7072696365 // "create_price"
 ==
-bnz main_l19
+bnz main_l17
 txna ApplicationArgs 0
 pushbytes 0x64657374726f795f7072696365 // "destroy_price"
 ==
-bnz main_l18
+bnz main_l16
 txna ApplicationArgs 0
 pushbytes 0x6372656174655f746167 // "create_tag"
 ==
-bnz main_l17
+bnz main_l15
 txna ApplicationArgs 0
 pushbytes 0x64657374726f795f746167 // "destroy_tag"
 ==
-bnz main_l16
+bnz main_l14
 err
-main_l16:
+main_l14:
 global GroupSize
 intc_0 // 1
 ==
-txn TypeEnum
-intc_2 // appl
-==
-txn OnCompletion
-intc_1 // NoOp
-==
-&&
-txn ApplicationID
-global CurrentApplicationID
-==
-&&
-txn Sender
-global CreatorAddress
-==
-&&
+callsub sub0
 &&
 txna Assets 0
 asset_params_get AssetManager
@@ -96,58 +74,30 @@ global CurrentApplicationAddress
 assert
 load 21
 pushint 3 // 3
-callsub sub5
+callsub sub9
 bytec_0 // "tag"
 ==
 &&
 txna Assets 0
-callsub sub3
+callsub sub5
 &&
 return
-main_l17:
+main_l15:
 global GroupSize
 intc_0 // 1
 ==
-txn TypeEnum
-intc_2 // appl
-==
-txn OnCompletion
-intc_1 // NoOp
-==
-&&
-txn ApplicationID
-global CurrentApplicationID
-==
-&&
-txn Sender
-global CreatorAddress
-==
-&&
+callsub sub0
 &&
 pushbytes 0x7261663a746167 // "raf:tag"
 txna ApplicationArgs 1
-callsub sub2
+callsub sub4
 &&
 return
-main_l18:
+main_l16:
 global GroupSize
 intc_0 // 1
 ==
-txn TypeEnum
-intc_2 // appl
-==
-txn OnCompletion
-intc_1 // NoOp
-==
-&&
-txn ApplicationID
-global CurrentApplicationID
-==
-&&
-txn Sender
-global CreatorAddress
-==
-&&
+callsub sub0
 &&
 txna Assets 0
 asset_params_get AssetManager
@@ -163,33 +113,19 @@ global CurrentApplicationAddress
 assert
 load 17
 pushint 2 // 2
-callsub sub5
+callsub sub9
 bytec_1 // "px"
 ==
 &&
 txna Assets 0
-callsub sub3
+callsub sub5
 &&
 return
-main_l19:
+main_l17:
 global GroupSize
 intc_0 // 1
 ==
-txn TypeEnum
-intc_2 // appl
-==
-txn OnCompletion
-intc_1 // NoOp
-==
-&&
-txn ApplicationID
-global CurrentApplicationID
-==
-&&
-txn Sender
-global CreatorAddress
-==
-&&
+callsub sub0
 &&
 txna Assets 0
 asset_params_get AssetCreator
@@ -202,83 +138,25 @@ pushbytes 0x726166 // "raf"
 pushbytes 0x3a // ":"
 concat
 txna Assets 0
-callsub sub7
+callsub sub11
 concat
-callsub sub2
+callsub sub4
 &&
 return
-main_l20:
+main_l18:
 global GroupSize
 intc_0 // 1
 ==
-txn TypeEnum
-intc_2 // appl
-==
-txn OnCompletion
-intc_1 // NoOp
-==
-&&
-txn ApplicationID
-global CurrentApplicationID
-==
-&&
-txn Sender
-global CreatorAddress
-==
-&&
+callsub sub0
 &&
 intc_0 // 1
 &&
 return
-main_l21:
+main_l19:
 global GroupSize
 intc_0 // 1
 ==
-gtxn 0 TypeEnum
-intc_2 // appl
-==
-gtxn 0 OnCompletion
-intc_1 // NoOp
-==
-&&
-gtxn 0 ApplicationID
-global CurrentApplicationID
-==
-&&
-&&
-return
-main_l22:
-global GroupSize
-intc_0 // 1
-==
-gtxn 0 TypeEnum
-intc_2 // appl
-==
-gtxn 0 OnCompletion
-intc_1 // NoOp
-==
-&&
-gtxn 0 ApplicationID
-global CurrentApplicationID
-==
-&&
-&&
-return
-main_l23:
-global GroupSize
-intc_0 // 1
-==
-txn TypeEnum
-intc_2 // appl
-==
-txn OnCompletion
-intc_1 // NoOp
-==
-&&
-txn ApplicationID
-global CurrentApplicationID
-==
-&&
+callsub sub1
 &&
 txna Assets 0
 asset_params_get AssetManager
@@ -294,7 +172,7 @@ global CurrentApplicationAddress
 assert
 load 11
 pushint 2 // 2
-callsub sub5
+callsub sub9
 bytec_1 // "px"
 ==
 &&
@@ -304,29 +182,37 @@ app_opted_in
 &&
 txna Accounts 0
 txna Assets 0
-callsub sub0
+callsub sub2
 &&
 txna Accounts 0
 txna Assets 0
 txna ApplicationArgs 1
-callsub sub1
+btoi
+callsub sub3
+&&
+txna ApplicationArgs 1
+btoi
+intc_1 // 0
+>
+bnz main_l22
+txna Accounts 0
+bytec_2 // "prices"
+txna Assets 0
+callsub sub8
+main_l21:
 &&
 return
-main_l24:
+main_l22:
+txna Accounts 0
+bytec_2 // "prices"
+txna Assets 0
+callsub sub7
+b main_l21
+main_l23:
 global GroupSize
 intc_0 // 1
 ==
-txn TypeEnum
-intc_2 // appl
-==
-txn OnCompletion
-intc_1 // NoOp
-==
-&&
-txn ApplicationID
-global CurrentApplicationID
-==
-&&
+callsub sub1
 &&
 txna Assets 0
 asset_params_get AssetManager
@@ -342,7 +228,7 @@ global CurrentApplicationAddress
 assert
 load 7
 pushint 3 // 3
-callsub sub5
+callsub sub9
 bytec_0 // "tag"
 ==
 &&
@@ -353,24 +239,19 @@ app_opted_in
 txna Accounts 0
 txna Assets 0
 intc_1 // 0
-callsub sub1
+callsub sub3
+&&
+txna Accounts 0
+bytec_3 // "tags"
+txna Assets 0
+callsub sub8
 &&
 return
-main_l25:
+main_l24:
 global GroupSize
 intc_0 // 1
 ==
-txn TypeEnum
-intc_2 // appl
-==
-txn OnCompletion
-intc_1 // NoOp
-==
-&&
-txn ApplicationID
-global CurrentApplicationID
-==
-&&
+callsub sub1
 &&
 txna Assets 0
 asset_params_get AssetManager
@@ -386,7 +267,7 @@ global CurrentApplicationAddress
 assert
 load 3
 pushint 3 // 3
-callsub sub5
+callsub sub9
 bytec_0 // "tag"
 ==
 &&
@@ -396,15 +277,20 @@ app_opted_in
 &&
 txna Accounts 0
 txna Assets 0
-callsub sub0
+callsub sub2
 &&
 txna Accounts 0
 txna Assets 0
 intc_0 // 1
-callsub sub1
+callsub sub3
+&&
+txna Accounts 0
+bytec_3 // "tags"
+txna Assets 0
+callsub sub7
 &&
 return
-main_l26:
+main_l25:
 global GroupSize
 pushint 5 // 5
 ==
@@ -429,7 +315,7 @@ gtxn 0 Receiver
 ==
 &&
 gtxn 2 TypeEnum
-intc_2 // appl
+pushint 6 // appl
 ==
 &&
 gtxn 2 OnCompletion
@@ -468,6 +354,21 @@ gtxn 4 Receiver
 gtxn 0 Receiver
 ==
 &&
+gtxn 0 Receiver
+bytec 4 // "owner"
+gtxn 0 Sender
+app_local_put
+gtxn 0 Receiver
+pushbytes 0x6173736574 // "asset"
+gtxn 4 XferAsset
+app_local_put
+intc_0 // 1
+&&
+return
+main_l26:
+global CreatorAddress
+txn Sender
+==
 return
 main_l27:
 global CreatorAddress
@@ -480,16 +381,11 @@ txn Sender
 ==
 return
 main_l29:
-global CreatorAddress
-txn Sender
-==
-return
-main_l30:
 global GroupSize
 pushint 2 // 2
 ==
 gtxn 0 TypeEnum
-intc_2 // appl
+pushint 6 // appl
 ==
 &&
 gtxn 1 TypeEnum
@@ -506,11 +402,47 @@ pushint 1000000000 // 1000000000
 &&
 gtxn 1 Receiver
 gaid 0
-callsub sub4
+callsub sub6
 ==
 &&
 return
-sub0: // ensure_opted_in
+sub0: // valid_admin_app_call
+txn TypeEnum
+pushint 6 // appl
+==
+txn OnCompletion
+intc_1 // NoOp
+==
+&&
+txn ApplicationID
+global CurrentApplicationID
+==
+&&
+txn Sender
+global CreatorAddress
+==
+&&
+retsub
+sub1: // valid_owner_app_call
+txn TypeEnum
+pushint 6 // appl
+==
+txn OnCompletion
+intc_1 // NoOp
+==
+&&
+txn ApplicationID
+global CurrentApplicationID
+==
+&&
+txn Sender
+txna Accounts 0
+bytec 4 // "owner"
+app_local_get
+==
+&&
+retsub
+sub2: // ensure_opted_in
 store 23
 store 22
 load 22
@@ -520,7 +452,7 @@ store 24
 store 25
 load 24
 !
-bz sub0_l2
+bz sub2_l2
 itxn_begin
 intc_3 // axfer
 itxn_field TypeEnum
@@ -532,9 +464,9 @@ txna Accounts 0
 itxn_field Sender
 itxn_submit
 intc_0 // 1
-sub0_l2:
+sub2_l2:
 retsub
-sub1: // ensure_token_balance
+sub3: // ensure_token_balance
 store 28
 store 27
 store 26
@@ -548,18 +480,18 @@ assert
 load 28
 intc_1 // 0
 ==
-bnz sub1_l6
+bnz sub3_l6
 load 28
 load 30
 >
-bnz sub1_l5
+bnz sub3_l5
 load 28
 load 30
 <
-bnz sub1_l4
+bnz sub3_l4
 intc_0 // 1
-b sub1_l7
-sub1_l4:
+b sub3_l7
+sub3_l4:
 itxn_begin
 intc_3 // axfer
 itxn_field TypeEnum
@@ -571,8 +503,8 @@ load 26
 itxn_field Receiver
 itxn_submit
 intc_0 // 1
-b sub1_l7
-sub1_l5:
+b sub3_l7
+sub3_l5:
 itxn_begin
 intc_3 // axfer
 itxn_field TypeEnum
@@ -584,8 +516,8 @@ global CurrentApplicationAddress
 itxn_field Receiver
 itxn_submit
 intc_0 // 1
-b sub1_l7
-sub1_l6:
+b sub3_l7
+sub3_l6:
 itxn_begin
 intc_3 // axfer
 itxn_field TypeEnum
@@ -599,9 +531,9 @@ load 26
 itxn_field Sender
 itxn_submit
 intc_0 // 1
-sub1_l7:
+sub3_l7:
 retsub
-sub2: // create_token
+sub4: // create_token
 store 32
 store 31
 itxn_begin
@@ -632,7 +564,7 @@ itxn_field ConfigAssetURL
 itxn_submit
 intc_0 // 1
 retsub
-sub3: // destroy_token
+sub5: // destroy_token
 store 33
 itxn_begin
 pushint 3 // acfg
@@ -642,7 +574,7 @@ itxn_field ConfigAsset
 itxn_submit
 intc_0 // 1
 retsub
-sub4: // generated_addr
+sub6: // generated_addr
 store 34
 pushbytes 0x6170704944 // "appID"
 load 34
@@ -650,58 +582,205 @@ itob
 concat
 sha512_256
 retsub
-sub5: // suffix
+sub7: // add_to_localstate
+store 37
 store 36
 store 35
+intc_1 // 0
+store 40
 load 35
-load 35
-len
 load 36
--
+app_local_get
+store 38
+intc_1 // 0
+store 39
+sub7_l1:
+load 39
+load 38
+len
+intc_2 // 8
+/
+<
+bz sub7_l7
+load 38
+load 39
+intc_2 // 8
+*
+extract_uint64
+store 40
+load 40
+load 37
+>
+bnz sub7_l6
+load 40
+load 37
+==
+bnz sub7_l5
+sub7_l4:
+load 39
+intc_0 // 1
++
+store 39
+b sub7_l1
+sub7_l5:
+intc_0 // 1
+b sub7_l4
+sub7_l6:
+load 38
+intc_1 // 0
+load 39
+intc_2 // 8
+*
+substring3
+load 37
+itob
+concat
+load 38
+load 39
+intc_2 // 8
+*
+load 38
+len
+substring3
+concat
+store 38
+load 38
+len
+store 39
+b sub7_l4
+sub7_l7:
 load 35
+load 36
+load 38
+app_local_put
+intc_0 // 1
+retsub
+sub8: // remove_from_localstate
+store 43
+store 42
+store 41
+intc_1 // 0
+store 46
+load 41
+load 42
+app_local_get
+store 44
+intc_1 // 0
+store 45
+sub8_l1:
+load 45
+load 44
+len
+intc_2 // 8
+/
+<
+bz sub8_l7
+load 44
+load 45
+intc_2 // 8
+*
+extract_uint64
+store 46
+load 46
+load 43
+==
+bnz sub8_l6
+load 46
+load 43
+>
+bnz sub8_l5
+sub8_l4:
+load 45
+intc_0 // 1
++
+store 45
+b sub8_l1
+sub8_l5:
+intc_0 // 1
+b sub8_l4
+sub8_l6:
+load 44
+intc_1 // 0
+load 45
+intc_2 // 8
+*
+substring3
+load 44
+load 45
+intc_2 // 8
+*
+intc_2 // 8
++
+load 44
+len
+intc_2 // 8
+-
+substring3
+concat
+store 44
+load 44
+len
+store 45
+b sub8_l4
+sub8_l7:
+load 41
+load 42
+load 44
+app_local_put
+intc_0 // 1
+retsub
+sub9: // suffix
+store 48
+store 47
+load 47
+load 47
+len
+load 48
+-
+load 47
 len
 substring3
 retsub
-sub6: // int_to_ascii
-store 38
+sub10: // int_to_ascii
+store 50
 pushbytes 0x30313233343536373839 // "0123456789"
-load 38
-load 38
+load 50
+load 50
 intc_0 // 1
 +
 substring3
 retsub
-sub7: // itoa
-store 37
-load 37
+sub11: // itoa
+store 49
+load 49
 intc_1 // 0
 ==
-bnz sub7_l5
-load 37
+bnz sub11_l5
+load 49
 pushint 10 // 10
 /
 intc_1 // 0
 >
-bnz sub7_l4
+bnz sub11_l4
 pushbytes 0x // ""
-sub7_l3:
-load 37
+sub11_l3:
+load 49
 pushint 10 // 10
 %
-callsub sub6
+callsub sub10
 concat
-b sub7_l6
-sub7_l4:
-load 37
+b sub11_l6
+sub11_l4:
+load 49
 pushint 10 // 10
 /
-load 37
+load 49
 swap
-callsub sub7
+callsub sub11
 swap
-store 37
-b sub7_l3
-sub7_l5:
+store 49
+b sub11_l3
+sub11_l5:
 pushbytes 0x30 // "0"
-sub7_l6:
+sub11_l6:
 retsub

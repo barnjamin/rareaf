@@ -1,5 +1,5 @@
 from pyteal import ScratchVar, And, TxnType, Int, AssetParam, Seq, TealType, InnerTxnBuilder, TxnField, Txn, Not, Itob
-from pyteal import Global, If, App, Bytes, Concat, Sha512_256, For, GetByte, Exp
+from pyteal import Global, If, App, Bytes, Concat, Sha512_256, For, GetByte, Exp, ExtractUint64
 from pyteal import AssetHolding, Gtxn, OnComplete, Assert, Substring, Len, Or, Subroutine
 
 from config import *
@@ -9,19 +9,22 @@ def tmplpath(name):
 def tealpath(name):
     return "../" + name
 
-def valid_admin_app_call(txn, app_id):
+@Subroutine(TealType.uint64)
+def valid_admin_app_call():
     return And(
-        txn.type_enum() == TxnType.ApplicationCall,
-        txn.on_completion() ==  OnComplete.NoOp,
-        txn.application_id() == app_id,
-        txn.sender() == Global.creator_address(),
+       Txn.type_enum() == TxnType.ApplicationCall,
+       Txn.on_completion() ==  OnComplete.NoOp,
+       Txn.application_id() == Global.current_application_id(),
+       Txn.sender() == Global.creator_address(),
     )
 
-def valid_app_call(txn, app_id):
+@Subroutine(TealType.uint64)
+def valid_owner_app_call():
     return And(
-        txn.type_enum() == TxnType.ApplicationCall,
-        txn.on_completion() ==  OnComplete.NoOp,
-        txn.application_id() == app_id,
+        Txn.type_enum() == TxnType.ApplicationCall,
+        Txn.on_completion() ==  OnComplete.NoOp,
+        Txn.application_id() == Global.current_application_id(),
+        Txn.sender() == App.localGet(Txn.accounts[0], owner_key)
     )
 
 def valid_tag_token(asset_id):
@@ -164,9 +167,91 @@ def generated_addr(id):
         Concat(Bytes("appID"), Itob(id))
     ) 
 
-def check_balance_match(txn, addr_idx, asset_id):
-    balance = AssetHolding.balance(addr_idx, asset_id)
-    price_asset_id = price_asset(asset_id)
+@Subroutine(TealType.uint64)
+def empty_app_tokens(addr):
+    # TODO: for each tag in tags_key and prices_key, submit ensure token 0
+    pass
+
+@Subroutine(TealType.uint64)
+def add_to_localstate(addr, key, asset_id):
+
+    idlist = ScratchVar()
+    i      = ScratchVar()
+
+    init = i.store(Int(0))
+    iter = i.load()<Len(idlist.load())/Int(8)
+    incr = i.store(i.load() + Int(1)) 
+
+    curr = ScratchVar()
+
+    return Seq(
+        curr.store(Int(0)),
+        idlist.store(App.localGet(addr, key)),
+        For(init, iter, incr).Do(Seq(
+            curr.store(ExtractUint64(idlist.load(), i.load()*Int(8))),
+
+            If(curr.load()>asset_id)
+            .Then(Seq(
+                splice_in(asset_id, idlist, i.load()*Int(8)),
+                i.store(Len(idlist.load()))
+            ))
+            .ElseIf(curr.load()==asset_id)
+            .Then(Int(1)),
+        )),
+        App.localPut(addr, key, idlist.load()),
+        Int(1)
+    )
+
+@Subroutine(TealType.uint64)
+def remove_from_localstate(addr, key, asset_id):
+    idlist = ScratchVar()
+    i      = ScratchVar()
+
+    init = i.store(Int(0))
+    iter = i.load()<Len(idlist.load())/Int(8)
+    incr = i.store(i.load() + Int(1)) 
+
+    curr = ScratchVar()
+
+    return Seq(
+        curr.store(Int(0)),
+        idlist.store(App.localGet(addr, key)),
+        For(init, iter, incr).Do(Seq(
+            curr.store(ExtractUint64(idlist.load(), i.load()*Int(8))),
+
+            If(curr.load()==asset_id)
+            .Then(Seq(
+                splice_out(idlist, i.load()*Int(8)),
+                i.store(Len(idlist.load()))
+            ))
+            .ElseIf(curr.load()>asset_id)
+            .Then(Int(1)),
+        )),
+        App.localPut(addr, key, idlist.load()),
+        Int(1)
+    )
+
+
+def splice_out(idlist, pos):
+    return idlist.store(
+        Concat(
+            Substring(idlist.load(), Int(0), pos),
+            Substring(idlist.load(), pos+Int(8), Len(idlist.load())-Int(8))
+        )
+    )
+
+def splice_in(asset_id, idlist, pos):
+    return idlist.store(
+        Concat(
+            Substring(idlist.load(), Int(0), pos),
+            Itob(asset_id),
+            Substring(idlist.load(), pos, Len(idlist.load()))
+        )
+    )
+
+def check_balance_match(txn, addr, asset_id):
+    balance = AssetHolding.balance(addr, asset_id)
+    price_asset_id = price_id(asset_id)
     return Seq(
             balance, 
             Assert(balance.hasValue()),
@@ -177,7 +262,7 @@ def check_balance_match(txn, addr_idx, asset_id):
                     txn.amount() == balance.value(), 
                 ),
                 And(
-                    price_asset_id == txn.xfer_asset(),
+                    txn.xfer_asset() == price_asset_id,
                     txn.type_enum() == TxnType.AssetTransfer,
                     txn.asset_amount() == balance.value()
                 ),
@@ -188,7 +273,7 @@ def check_balance_match(txn, addr_idx, asset_id):
 ascii_offset = Int(48)  # Magic number to convert between ascii chars and integers 
 
 @Subroutine(TealType.uint64)
-def price_asset(asset_id):
+def price_id(asset_id):
     name = AssetParam.name(asset_id)
     return Seq([
         name,
