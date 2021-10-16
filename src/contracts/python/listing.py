@@ -1,90 +1,70 @@
-from pyteal import ScratchVar, TealType, Tmpl, Or, Btoi, Cond, Mode, compileTeal
+from pyteal import ScratchVar, TealType, Tmpl, Cond, Mode, compileTeal
+from pyteal.ast.txn import Txn
 
 from config import *
 from utils  import *
 
 def listing():
-    creator_addr  = ScratchVar(TealType.bytes)
-    contract_addr = ScratchVar(TealType.bytes)
-    buyer_addr    = ScratchVar(TealType.bytes)
-    asset_id      = ScratchVar(TealType.uint64)
-
     app_id        = ScratchVar(TealType.uint64)
-    price_token   = ScratchVar(TealType.uint64)
+    app_addr      = ScratchVar(TealType.bytes)
+    creator_addr  = ScratchVar(TealType.bytes)
+    asset_id      = ScratchVar(TealType.uint64)
+    seed_amt      = ScratchVar(TealType.uint64)
+    nonce         = ScratchVar(TealType.bytes)
 
+    # setup is evaluated at the beginning of the cond
+    # used to set template variables, returns 0 so the 
+    # condition is not executed 
     setup = Seq([
+        app_id.store(Tmpl.Int("TMPL_APP_ID")),
+        app_addr.store(Tmpl.Bytes("TMPL_APP_ADDR")),
         creator_addr.store(Tmpl.Bytes("TMPL_CREATOR_ADDR")),
-        asset_id.store(Btoi(Tmpl.Bytes("TMPL_ASSET_ID"))),
-
-        app_id.store(tmpl_app_id),
-        price_token.store(tmpl_price_token),
-        Int(0) # return 0 so this cond case doesnt get executed
+        asset_id.store(Tmpl.Int("TMPL_ASSET_ID")),
+        seed_amt.store(Tmpl.Int("TMPL_SEED_AMT")),
+        nonce.store(Tmpl.Bytes("TMPL_NONCE")),
+        Int(0) 
     ])
 
+    # The only logic is to check that the initial transaction group
+    # matches what we expect. This group includes a transaction to
+    # rekey the listing to the application address so all logic
+    # from here forward is done in the application code 
     create = And(
-        Global.group_size() == Int(7),
-        valid_app_call( Gtxn[0], app_id.load()),
-        set_addr_as_rx( Gtxn[1], contract_addr),
-        pay_txn_valid(  Gtxn[1], tmpl_seed_amt, creator_addr.load(), contract_addr.load()),
-        asa_optin_valid(Gtxn[2], asset_id.load(), contract_addr.load()),
-        asa_optin_valid(Gtxn[3], price_token.load(), contract_addr.load()),
-        asa_xfer_valid( Gtxn[4], asset_id.load(), Int(1), creator_addr.load(), contract_addr.load()),
+        Global.group_size() == Int(5),
 
-        # Checking this in the app logic since we need to validate price token 
-        asa_xfer_valid( Gtxn[5], Gtxn[0].assets[0], Btoi(Gtxn[0].application_args[1]), tmpl_owner_addr, contract_addr.load()),
+        # Seed 
+        Gtxn[0].type_enum() == TxnType.Payment,
+        Gtxn[0].amount() >= seed_amt.load(),
+        Gtxn[0].sender() == creator_addr.load(),
 
-        asa_cfg_valid(  Gtxn[6], asset_id.load(), contract_addr.load()),
+        # Rekey to App Addr
+        Gtxn[1].type_enum() == TxnType.Payment,
+        Gtxn[1].amount() == Int(0),
+        Gtxn[1].rekey_to() == app_addr.load(),
+        Gtxn[1].sender() == Gtxn[0].receiver(),
+
+        # Opt into App 
+        Gtxn[2].type_enum() == TxnType.ApplicationCall,
+        Gtxn[2].on_completion() == OnComplete.OptIn,
+        Gtxn[2].application_id() == app_id.load(),
+
+        # Opt into NFT
+        Gtxn[3].type_enum() == TxnType.AssetTransfer,
+        Gtxn[3].amount() == Int(0),
+        Gtxn[3].sender() == Gtxn[3].receiver(),
+        Gtxn[3].xfer_asset() == asset_id.load(),
+
+        # Receive NFT 
+        Gtxn[4].type_enum() == TxnType.AssetTransfer,
+        Gtxn[4].xfer_asset() == asset_id.load(),
+        Gtxn[4].amount() > Int(0),
+        Gtxn[4].sender() == Gtxn[0].sender(),
+        Gtxn[4].receiver() == Gtxn[0].receiver(),
     )
 
-
-    delete = And(
-        Global.group_size() >= Int(5),
-        valid_app_call(Gtxn[0], app_id.load()),
-
-        set_addr_as_tx(      Gtxn[1], contract_addr),
-        asa_close_xfer_valid(Gtxn[1], Gtxn[0].assets[0],  contract_addr.load(), tmpl_owner_addr, tmpl_owner_addr),
-
-        asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), creator_addr.load(), creator_addr.load()),
-        asa_cfg_valid(       Gtxn[3], asset_id.load(), creator_addr.load()),
-        
-        # Possible Tag closes
-
-        pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), creator_addr.load(), creator_addr.load(), Int(0)),
-    )
-
-    purchase = And(
-        Global.group_size() >= Int(6),
-        valid_app_call(Gtxn[0], app_id.load()),
-
-        set_addr_as_tx(      Gtxn[1], buyer_addr),
-        set_addr_as_tx(      Gtxn[2], contract_addr),
-
-        pay_txn_valid(       Gtxn[1], Gtxn[1].amount(), buyer_addr.load(), creator_addr.load()),
-        asa_close_xfer_valid(Gtxn[2], asset_id.load(), contract_addr.load(), buyer_addr.load(), buyer_addr.load()),
-        asa_close_xfer_valid(Gtxn[3], price_token.load(), contract_addr.load(), tmpl_owner_addr, tmpl_owner_addr),
-        asa_cfg_valid(       Gtxn[4], asset_id.load(), buyer_addr.load()),
-
-        # Possible Tag closes
-
-        pay_close_txn_valid( Gtxn[Global.group_size() - Int(1)], contract_addr.load(), tmpl_owner_addr, creator_addr.load(), tmpl_fee_amt),
-    )
-
-    app_offload = Or(
-        Gtxn[0].application_args[0] == action_tag, 
-        Gtxn[0].application_args[0] == action_untag, 
-        Gtxn[0].application_args[0] == action_dprice,
-        Gtxn[0].application_args[0] == action_safety
-    )
-    app_validate = valid_app_call(Gtxn[0], app_id.load())
-
-    return Cond([setup, Int(0)], #NoOp
-                [Gtxn[0].application_args[0] == action_create,   create], 
-                [Gtxn[0].application_args[0] == action_delete,   delete], 
-                [Gtxn[0].application_args[0] == action_purchase, purchase],
-                [app_offload,   app_validate])
-
-
+    return Cond([setup,     Int(0)], # NoOp, just sets up tmpl vars
+                [Int(1),    create]) # The only thing we do is check the initial create txn group
 
 if __name__ == "__main__":
-     with open(tealpath(configuration['contracts']['listing']), 'w') as f:
-        f.write(compileTeal(listing(), Mode.Signature, version=4, assembleConstants=True))
+     with open(tmplpath(configuration['contracts']['listing']), 'w') as f:
+        f.write(compileTeal(listing(), Mode.Signature, version=5, assembleConstants=True))

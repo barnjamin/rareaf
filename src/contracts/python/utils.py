@@ -1,11 +1,21 @@
-from pyteal import ScratchVar, And, TxnType, Int, AssetParam, Seq, TealType
+from pyteal import ScratchVar, And, TxnType, Int, AssetParam, Seq, TealType, InnerTxnBuilder, TxnField, Txn, Not, Itob
 from pyteal import Global, If, App, Bytes, Concat, Sha512_256, For, GetByte, Exp
 from pyteal import AssetHolding, Gtxn, OnComplete, Assert, Substring, Len, Or, Subroutine
 
 from config import *
 
-def tealpath(name):
+def tmplpath(name):
     return "../" + name.replace("teal", "tmpl.teal")
+def tealpath(name):
+    return "../" + name
+
+def valid_admin_app_call(txn, app_id):
+    return And(
+        txn.type_enum() == TxnType.ApplicationCall,
+        txn.on_completion() ==  OnComplete.NoOp,
+        txn.application_id() == app_id,
+        txn.sender() == Global.creator_address(),
+    )
 
 def valid_app_call(txn, app_id):
     return And(
@@ -14,63 +24,150 @@ def valid_app_call(txn, app_id):
         txn.application_id() == app_id,
     )
 
-def valid_admin_fee_pay(txn):
-    return pay_txn_valid(txn, Int(0), tmpl_admin_addr, tmpl_admin_addr)
-
 def valid_tag_token(asset_id):
     manager = AssetParam.manager(asset_id)
     name = AssetParam.unitName(asset_id)
-    return Seq([ 
+    return Seq(
         manager, name,
-        Assert(manager.value() == tmpl_owner_addr),
+        Assert(manager.value() == Global.current_application_address()),
         suffix(name.value(), Int(3)) == Bytes("tag") 
-    ])
-
+    )
 
 def valid_price_token(asset_id):
     manager = AssetParam.manager(asset_id)
     name = AssetParam.unitName(asset_id)
-    return Seq([ 
+    return Seq( 
         manager, name,
-        Assert(manager.value() == tmpl_owner_addr),
+        Assert(manager.value() == Global.current_application_address()),
         suffix(name.value(), Int(2)) ==  Bytes("px")
-    ])
-
-
-def valid_contract(tc, contract_source, contract_addr):
-    return And(
-        tc.get_validate_ops(contract_source),
-        Sha512_256(Concat(Bytes("Program"), contract_source)) ==  contract_addr,
     )
 
-def caller_is_listing_creator(contract_addr):
-    return Seq([ App.localGet(Int(0), contract_addr) == contract_addr])
+def valid_listing_addr(addr):
+    return App.optedIn(addr, Global.current_application_id())
 
-def caller_add_listing_addr(contract_addr):
-    return Seq([ App.localPut(Int(0), contract_addr, contract_addr), Int(1) ])
+@Subroutine(TealType.uint64)
+def ensure_opted_in(addr, asset_id):
+    ah = AssetHolding.balance(addr, asset_id)
+    return Seq(
+        ah,
+        If(Not(ah.hasValue()))
+        .Then( # Need to opt in 
+            Seq(
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields({
+                    TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.asset_amount: Int(0),
+                    TxnField.receiver: Txn.accounts[0],
+                    TxnField.sender: Txn.accounts[0],
+                }),
+                InnerTxnBuilder.Submit(),
+                Int(1)
+            )
+        ),
+    )
 
-def remove_listing_addr(idx, contract_addr):
-    return Seq([ App.localDel(idx, contract_addr), Int(1) ])
+@Subroutine(TealType.uint64)
+def ensure_token_balance(addr, asset_id, amt):
+    ah = AssetHolding.balance(addr, asset_id)
+    return Seq(
+        ah,
+        Assert(ah.hasValue()), # Should already be opted in
+        If(amt == Int(0)).Then( # Close to app
+            Seq(
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields({
+                    TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.asset_amount: Int(0),
+                    TxnField.xfer_asset: asset_id,
+                    TxnField.asset_close_to: Global.current_application_address(),
+                    TxnField.sender: addr,
+                }),
+                InnerTxnBuilder.Submit(),
+                Int(1)
+            )
+        ).ElseIf(amt>ah.value()).Then( # Xfer asset to app addr
+            Seq(
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields({
+                    TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.asset_amount: ah.value()-amt,
+                    TxnField.receiver: Global.current_application_address(),
+                }),
+                InnerTxnBuilder.Submit(),
+                Int(1)
+            )
+        ).ElseIf(amt<ah.value()).Then( # Xfer asset to addr
+            Seq(
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields({
+                    TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.asset_amount: amt-ah.value(),
+                    TxnField.receiver: addr,
+                }),
+                InnerTxnBuilder.Submit(),
+                Int(1)
+            )
+        ).Else(Int(1)), # already has the right amount
+    )
 
-def set_foreign_asset(txn, idx, var):
-    return Seq([ var.store(txn.assets[idx]), Int(1) ])
 
-def set_addr_as_rx(txn, var):
-    return Seq([ var.store(txn.receiver()), Int(1) ])
+def price_token_create(tag, asset_id):
+    ac = AssetParam.creator(asset_id)
+    return Seq(
+        ac,
+        Assert(ac.hasValue()),
+        create_token(tag, Concat(
+            Bytes(configuration['application']['unit']), 
+            Bytes(":"), 
+            itoa(asset_id)
+        ))
+    )
 
-def set_addr_as_asset_rx(txn, var):
-    return Seq([ var.store(txn.asset_receiver()), Int(1) ])
+def tag_token_create(tag, name):
+    return create_token(tag, name)
 
-def set_addr_as_tx(txn, var):
-    return Seq([ var.store(txn.sender()), Int(1) ])
+@Subroutine(TealType.uint64)
+def create_token(tag, name):
+    return Seq(
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.AssetConfig,
+                TxnField.config_asset_unit_name: tag,
+                TxnField.config_asset_name: name,
+                TxnField.config_asset_manager: Global.current_application_address(),
+                TxnField.config_asset_clawback: Global.current_application_address(),
+                TxnField.config_asset_reserve: Global.current_application_address(),
+                TxnField.config_asset_freeze: Global.current_application_address(),
+                TxnField.config_asset_total: Int(10^9),
+                TxnField.config_asset_decimals: Int(0),
+                TxnField.config_asset_url: Concat(Bytes(configuration['domain']), Bytes("/"), tag)
+            }),
+            InnerTxnBuilder.Submit(),
+            Int(1)
+        )
 
-def set_asset_id(txn, var):
-    return Seq([ var.store(txn.xfer_asset()), Int(1) ])
+@Subroutine(TealType.uint64)
+def destroy_token(asset_id):
+    return Seq(
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields({
+            TxnField.type_enum: TxnType.AssetConfig,
+            TxnField.config_asset: asset_id,
+        }),
+        InnerTxnBuilder.Submit(),
+        Int(1)
+    )
+
+@Subroutine(TealType.bytes)
+def generated_addr(id):
+    return Sha512_256(
+        Concat(Bytes("appID"), Itob(id))
+    ) 
 
 def check_balance_match(txn, addr_idx, asset_id):
     balance = AssetHolding.balance(addr_idx, asset_id)
     price_asset_id = price_asset(asset_id)
-    return Seq([ 
+    return Seq(
             balance, 
             Assert(balance.hasValue()),
             Or(
@@ -85,112 +182,10 @@ def check_balance_match(txn, addr_idx, asset_id):
                     txn.asset_amount() == balance.value()
                 ),
             )
-        ])
-
-
-def pay_txn_valid(txn, amt, from_addr, to_addr):
-    return And(
-        txn.type_enum()         == TxnType.Payment,
-        txn.rekey_to()          == Global.zero_address(),
-        txn.close_remainder_to()== Global.zero_address(),
-
-        txn.sender()            == from_addr,
-        txn.receiver()          == to_addr,
-        txn.amount()            == amt 
-    )
-
-def pay_close_txn_valid(txn, from_addr, to_addr, close_addr, amt):
-    return And(
-        txn.type_enum()         == TxnType.Payment,
-        txn.rekey_to()          == Global.zero_address(),
-        txn.close_remainder_to()== close_addr,
-
-        txn.sender()            == from_addr,
-        txn.receiver()          == to_addr,
-        txn.amount()            == amt 
-    )
-
-def asa_optout_valid(txn, token_id, from_addr, to_addr):
-    return And(
-        txn.type_enum()         == TxnType.AssetTransfer,
-        txn.asset_close_to()    == to_addr,
-
-        txn.xfer_asset()        == token_id,
-        txn.sender()            == from_addr,
-        txn.asset_receiver()    == to_addr, 
-        txn.asset_amount()      == Int(0)
-    )
-
-def asa_optin_valid(txn, token_id, addr):
-    return And(
-        txn.type_enum()         == TxnType.AssetTransfer,
-        txn.asset_close_to()    == Global.zero_address(),
-
-        txn.xfer_asset()        == token_id,
-        txn.sender()            == addr,
-        txn.asset_receiver()    == addr, 
-        txn.asset_amount()      == Int(0),
-    )
-
-def asa_close_xfer_valid(txn, token_id, from_addr, to_addr, close_addr):
-    return And(
-        txn.type_enum()         == TxnType.AssetTransfer,
-        txn.asset_close_to()    == close_addr,
-
-        txn.sender()            == from_addr,
-        txn.asset_receiver()    == to_addr,
-        txn.xfer_asset()        == token_id
-    )
-
-def asa_xfer_valid(txn, token_id, amt, from_addr, to_addr):
-    return And(
-        txn.type_enum()         == TxnType.AssetTransfer,
-        txn.asset_close_to()    == Global.zero_address(),
-
-        txn.sender()            == from_addr,
-        txn.asset_receiver()    == to_addr,
-        txn.asset_amount()      == amt,
-        txn.xfer_asset()        == token_id
-    )
-
-def asa_cfg_valid(txn, token_id, new_addr):
-    return And(
-        txn.type_enum()             == TxnType.AssetConfig,
-        txn.rekey_to()              == Global.zero_address(),
-
-        txn.config_asset()          == token_id,
-        txn.config_asset_manager()  == new_addr,
-        txn.config_asset_reserve()  == new_addr,
-        txn.config_asset_freeze()   == new_addr,
-        txn.config_asset_clawback() == new_addr,
-    )
-
-def tag_close_valid(txn, from_addr, to_addr):
-    return And(
-        txn.type_enum()         == TxnType.AssetTransfer,
-        txn.asset_close_to()    == to_addr,
-
-        #TODO: check the asset creator?
-
-        txn.sender()            == from_addr,
-        txn.asset_receiver()    == to_addr,
-        txn.asset_amount()      == Int(0) 
-    )
-
-def valid_tag_closes(start_idx, max_tags, platform_addr, contract_addr):
-    valid_ops = []
-    for x in range(max_tags):
-        idx = x + start_idx
-        valid_ops.append(
-            # +2 to account for 0 indexed && for last transaction which should not be a tag close
-            If(Int(idx) + Int(2) < Global.group_size(),  tag_close_valid(Gtxn[idx], contract_addr, platform_addr), Int(1))
         )
 
-    return And(*valid_ops)
 
-def asa_delete_txn_valid(txn, platform_token_id):
-    return Int(1)
-
+ascii_offset = Int(48)  # Magic number to convert between ascii chars and integers 
 
 @Subroutine(TealType.uint64)
 def price_asset(asset_id):
@@ -201,34 +196,47 @@ def price_asset(asset_id):
         atoi(Substring(name.value(),Len(platform_name),Len(name.value())))
     ])
 
-@Subroutine(TealType.uint64)
-def strpos(str, char):
-    pass
-
-
 @Subroutine(TealType.bytes)
 def suffix(a, len):
     return Substring(a, Len(a) - len, Len(a))
 
 @Subroutine(TealType.uint64)
-def atoi(a):
-    idx = ScratchVar()
-    i = ScratchVar()
+def ascii_to_int(arg: TealType.uint64):
+    return arg - ascii_offset
 
-    init = idx.store(Int(0))
-    cond = idx.load()<Len(a)
-    step = idx.store(idx.load() + Int(1))
+@Subroutine(TealType.bytes)
+def int_to_ascii(arg: TealType.uint64):
+    #return arg + ascii_offset Just returns a uint64, cant convert to bytes type
+    return Substring(Bytes("0123456789"), arg, arg+Int(1))
+ 
+@Subroutine(TealType.uint64)
+def atoi(a: TealType.bytes):
+    return If(
+            Len(a) > Int(0),
+            ( ascii_to_int(head(a)) * ilog10(Len(a)-Int(1)) ) + atoi( Substring(a,Int(1),Len(a)) ),
+            Int(0)
+        )
 
-    return Seq([
-        i.store(Int(0)),
-        For(init, cond, step).Do(
-                i.store(
-                    i.load() +
-                    (
-                        (GetByte(a, idx.load()) - Int(48)) *
-                        Exp(Int(10), (Len(a)-idx.load())-Int(1))
-                    )
-                ),
-        ),
-        i.load()
-    ])
+@Subroutine(TealType.bytes)
+def itoa(i: TealType.uint64):
+    return If(
+            i == Int(0),
+            Bytes("0"),
+            Concat( 
+                If(i / Int(10)>Int(0), itoa(i/Int(10)), Bytes("")), 
+                int_to_ascii(i % Int(10)) 
+            )
+        )
+
+
+@Subroutine(TealType.uint64)
+def head(s: TealType.bytes):
+    return GetByte(s, Int(0))
+
+@Subroutine(TealType.bytes)
+def tail(s: TealType.bytes):
+    return Substring(s, Int(1), Len(s))
+
+@Subroutine(TealType.uint64)
+def ilog10(x: TealType.uint64):
+    return Exp(Int(10), x)

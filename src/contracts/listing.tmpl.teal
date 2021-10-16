@@ -1,520 +1,104 @@
-#pragma version 4
-intcblock 1 0 4 6 3
-bytecblock TMPL_OWNER_ADDR
-pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
-store 0
-pushbytes TMPL_ASSET_ID // TMPL_ASSET_ID
-btoi
-store 3
+#pragma version 5
+intcblock 0 1 4
 pushint TMPL_APP_ID // TMPL_APP_ID
-store 4
-pushint TMPL_PRICE_ID // TMPL_PRICE_ID
-store 5
-intc_1 // 0
-bnz main_l10
-gtxna 0 ApplicationArgs 0
-pushbytes 0x637265617465 // "create"
-==
-bnz main_l9
-gtxna 0 ApplicationArgs 0
-pushbytes 0x64656c657465 // "delete"
-==
-bnz main_l8
-gtxna 0 ApplicationArgs 0
-pushbytes 0x7075726368617365 // "purchase"
-==
-bnz main_l7
-gtxna 0 ApplicationArgs 0
-pushbytes 0x746167 // "tag"
-==
-gtxna 0 ApplicationArgs 0
-pushbytes 0x756e746167 // "untag"
-==
-||
-gtxna 0 ApplicationArgs 0
-pushbytes 0x70726963655f6465637265617365 // "price_decrease"
-==
-||
-gtxna 0 ApplicationArgs 0
-pushbytes 0x736166657479 // "safety"
-==
-||
-bnz main_l6
-err
-main_l6:
-gtxn 0 TypeEnum
-intc_3 // appl
-==
-gtxn 0 OnCompletion
-intc_1 // NoOp
-==
-&&
-gtxn 0 ApplicationID
-load 4
-==
-&&
-b main_l11
-main_l7:
-global GroupSize
-intc_3 // 6
->=
-gtxn 0 TypeEnum
-intc_3 // appl
-==
-gtxn 0 OnCompletion
-intc_1 // NoOp
-==
-&&
-gtxn 0 ApplicationID
-load 4
-==
-&&
-&&
-gtxn 1 Sender
-store 2
-intc_0 // 1
-&&
-gtxn 2 Sender
+store 0
+pushbytes TMPL_APP_ADDR // TMPL_APP_ADDR
 store 1
-intc_0 // 1
-&&
-gtxn 1 TypeEnum
-intc_0 // pay
-==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 1 CloseRemainderTo
-global ZeroAddress
-==
-&&
-gtxn 1 Sender
-load 2
-==
-&&
-gtxn 1 Receiver
-load 0
-==
-&&
-gtxn 1 Amount
-gtxn 1 Amount
-==
-&&
-&&
-gtxn 2 TypeEnum
-intc_2 // axfer
-==
-gtxn 2 AssetCloseTo
-load 2
-==
-&&
-gtxn 2 Sender
-load 1
-==
-&&
-gtxn 2 AssetReceiver
-load 2
-==
-&&
-gtxn 2 XferAsset
-load 3
-==
-&&
-&&
-gtxn 3 TypeEnum
-intc_2 // axfer
-==
-gtxn 3 AssetCloseTo
-bytec_0 // TMPL_OWNER_ADDR
-==
-&&
-gtxn 3 Sender
-load 1
-==
-&&
-gtxn 3 AssetReceiver
-bytec_0 // TMPL_OWNER_ADDR
-==
-&&
-gtxn 3 XferAsset
-load 5
-==
-&&
-&&
-gtxn 4 TypeEnum
-intc 4 // acfg
-==
-gtxn 4 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 4 ConfigAsset
-load 3
-==
-&&
-gtxn 4 ConfigAssetManager
-load 2
-==
-&&
-gtxn 4 ConfigAssetReserve
-load 2
-==
-&&
-gtxn 4 ConfigAssetFreeze
-load 2
-==
-&&
-gtxn 4 ConfigAssetClawback
-load 2
-==
-&&
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns TypeEnum
-intc_0 // pay
-==
-global GroupSize
-intc_0 // 1
--
-gtxns RekeyTo
-global ZeroAddress
-==
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns CloseRemainderTo
-load 0
-==
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns Sender
-load 1
-==
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns Receiver
-bytec_0 // TMPL_OWNER_ADDR
-==
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns Amount
-pushint TMPL_FEE_AMT // TMPL_FEE_AMT
-==
-&&
-&&
-b main_l11
-main_l8:
+pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
+store 2
+pushint TMPL_ASSET_ID // TMPL_ASSET_ID
+store 3
+pushint TMPL_SEED_AMT // TMPL_SEED_AMT
+store 4
+pushbytes TMPL_NONCE // TMPL_NONCE
+store 5
+intc_0 // 0
+bnz main_l4
+intc_1 // 1
+bnz main_l3
+err
+main_l3:
 global GroupSize
 pushint 5 // 5
+==
+gtxn 0 TypeEnum
+intc_1 // pay
+==
+&&
+gtxn 0 Amount
+load 4
 >=
-gtxn 0 TypeEnum
-intc_3 // appl
-==
-gtxn 0 OnCompletion
-intc_1 // NoOp
-==
 &&
-gtxn 0 ApplicationID
-load 4
+gtxn 0 Sender
+load 2
 ==
-&&
-&&
-gtxn 1 Sender
-store 1
-intc_0 // 1
 &&
 gtxn 1 TypeEnum
-intc_2 // axfer
-==
-gtxn 1 AssetCloseTo
-bytec_0 // TMPL_OWNER_ADDR
-==
-&&
-gtxn 1 Sender
-load 1
-==
-&&
-gtxn 1 AssetReceiver
-bytec_0 // TMPL_OWNER_ADDR
-==
-&&
-gtxn 1 XferAsset
-gtxna 0 Assets 0
-==
-&&
-&&
-gtxn 2 TypeEnum
-intc_2 // axfer
-==
-gtxn 2 AssetCloseTo
-load 0
-==
-&&
-gtxn 2 Sender
-load 1
-==
-&&
-gtxn 2 AssetReceiver
-load 0
-==
-&&
-gtxn 2 XferAsset
-load 3
-==
-&&
-&&
-gtxn 3 TypeEnum
-intc 4 // acfg
-==
-gtxn 3 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 3 ConfigAsset
-load 3
-==
-&&
-gtxn 3 ConfigAssetManager
-load 0
-==
-&&
-gtxn 3 ConfigAssetReserve
-load 0
-==
-&&
-gtxn 3 ConfigAssetFreeze
-load 0
-==
-&&
-gtxn 3 ConfigAssetClawback
-load 0
-==
-&&
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns TypeEnum
-intc_0 // pay
-==
-global GroupSize
-intc_0 // 1
--
-gtxns RekeyTo
-global ZeroAddress
-==
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns CloseRemainderTo
-load 0
-==
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns Sender
-load 1
-==
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns Receiver
-load 0
-==
-&&
-global GroupSize
-intc_0 // 1
--
-gtxns Amount
-intc_1 // 0
-==
-&&
-&&
-b main_l11
-main_l9:
-global GroupSize
-pushint 7 // 7
-==
-gtxn 0 TypeEnum
-intc_3 // appl
-==
-gtxn 0 OnCompletion
-intc_1 // NoOp
-==
-&&
-gtxn 0 ApplicationID
-load 4
-==
-&&
-&&
-gtxn 1 Receiver
-store 1
-intc_0 // 1
-&&
-gtxn 1 TypeEnum
-intc_0 // pay
-==
-gtxn 1 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 1 CloseRemainderTo
-global ZeroAddress
-==
-&&
-gtxn 1 Sender
-load 0
-==
-&&
-gtxn 1 Receiver
-load 1
+intc_1 // pay
 ==
 &&
 gtxn 1 Amount
-pushint TMPL_SEED_AMT // TMPL_SEED_AMT
+intc_0 // 0
 ==
 &&
+gtxn 1 RekeyTo
+load 1
+==
+&&
+gtxn 1 Sender
+gtxn 0 Receiver
+==
 &&
 gtxn 2 TypeEnum
-intc_2 // axfer
-==
-gtxn 2 AssetCloseTo
-global ZeroAddress
+pushint 6 // appl
 ==
 &&
-gtxn 2 XferAsset
-load 3
+gtxn 2 OnCompletion
+intc_1 // OptIn
 ==
 &&
-gtxn 2 Sender
-load 1
+gtxn 2 ApplicationID
+load 0
 ==
-&&
-gtxn 2 AssetReceiver
-load 1
-==
-&&
-gtxn 2 AssetAmount
-intc_1 // 0
-==
-&&
 &&
 gtxn 3 TypeEnum
 intc_2 // axfer
 ==
-gtxn 3 AssetCloseTo
-global ZeroAddress
-==
 &&
-gtxn 3 XferAsset
-load 5
+gtxn 3 Amount
+intc_0 // 0
 ==
 &&
 gtxn 3 Sender
-load 1
+gtxn 3 Receiver
 ==
 &&
-gtxn 3 AssetReceiver
-load 1
+gtxn 3 XferAsset
+load 3
 ==
-&&
-gtxn 3 AssetAmount
-intc_1 // 0
-==
-&&
 &&
 gtxn 4 TypeEnum
 intc_2 // axfer
-==
-gtxn 4 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 4 Sender
-load 0
-==
-&&
-gtxn 4 AssetReceiver
-load 1
-==
-&&
-gtxn 4 AssetAmount
-intc_0 // 1
 ==
 &&
 gtxn 4 XferAsset
 load 3
 ==
 &&
+gtxn 4 Amount
+intc_0 // 0
+>
 &&
-gtxn 5 TypeEnum
-intc_2 // axfer
-==
-gtxn 5 AssetCloseTo
-global ZeroAddress
-==
-&&
-gtxn 5 Sender
-bytec_0 // TMPL_OWNER_ADDR
+gtxn 4 Sender
+gtxn 0 Sender
 ==
 &&
-gtxn 5 AssetReceiver
-load 1
+gtxn 4 Receiver
+gtxn 0 Receiver
 ==
 &&
-gtxn 5 AssetAmount
-gtxna 0 ApplicationArgs 1
-btoi
-==
-&&
-gtxn 5 XferAsset
-gtxna 0 Assets 0
-==
-&&
-&&
-gtxn 6 TypeEnum
-intc 4 // acfg
-==
-gtxn 6 RekeyTo
-global ZeroAddress
-==
-&&
-gtxn 6 ConfigAsset
-load 3
-==
-&&
-gtxn 6 ConfigAssetManager
-load 1
-==
-&&
-gtxn 6 ConfigAssetReserve
-load 1
-==
-&&
-gtxn 6 ConfigAssetFreeze
-load 1
-==
-&&
-gtxn 6 ConfigAssetClawback
-load 1
-==
-&&
-&&
-b main_l11
-main_l10:
-intc_1 // 0
-main_l11:
+b main_l5
+main_l4:
+intc_0 // 0
+main_l5:
 return

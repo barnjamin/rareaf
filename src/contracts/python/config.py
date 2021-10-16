@@ -3,6 +3,9 @@ import json
 import os
 
 
+tag_unit_name   = Bytes("raf:tag")
+price_unit_name = Bytes("raf:px")
+
 
 def get_config():
     config = None
@@ -44,9 +47,13 @@ tmpl_admin_addr    = Tmpl.Bytes("TMPL_ADMIN_ADDR")
 action_create  = Bytes("create")
 action_tag     = Bytes("tag")  
 action_untag   = Bytes("untag")  
-action_iprice  = Bytes("price_increase")
-action_dprice  = Bytes("price_decrease")
+action_reprice = Bytes("reprice")
 action_delete  = Bytes("delete")
 action_purchase= Bytes("purchase")
 action_safety  = Bytes("safety")
 action_config  = Bytes("config")
+
+action_create_price     = Bytes("create_price")
+action_destroy_price    = Bytes("destroy_price")
+action_create_tag       = Bytes("create_tag")
+action_destroy_tag      = Bytes("destroy_tag")
