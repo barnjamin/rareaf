@@ -1,4 +1,4 @@
-from pyteal import ScratchVar, And, TxnType, Int, AssetParam, Seq, TealType, InnerTxnBuilder, TxnField, Txn, Not, Itob
+from pyteal import ScratchVar, And, TxnType, Int, AssetParam, Seq, TealType, InnerTxnBuilder, TxnField, Txn, Not, Itob, Pop
 from pyteal import Global, If, App, Bytes, Concat, Sha512_256, For, GetByte, Exp, ExtractUint64
 from pyteal import AssetHolding, Gtxn, OnComplete, Assert, Substring, Len, Or, Subroutine
 
@@ -167,86 +167,16 @@ def generated_addr(id):
         Concat(Bytes("appID"), Itob(id))
     ) 
 
-@Subroutine(TealType.uint64)
-def empty_app_tokens(addr):
-    # TODO: for each tag in tags_key and prices_key, submit ensure token 0
-    pass
-
-@Subroutine(TealType.uint64)
-def add_to_localstate(addr, key, asset_id):
-
-    idlist = ScratchVar()
-    i      = ScratchVar()
-
-    init = i.store(Int(0))
-    iter = i.load()<Len(idlist.load())/Int(8)
-    incr = i.store(i.load() + Int(1)) 
-
-    curr = ScratchVar()
-
+def empty_app_tokens(addr, args, idx):
+    i = ScratchVar() 
+    init = i.store(idx)
+    cond = i.load()<args.length()
+    iter = i.store(i.load() + Int(1))
     return Seq(
-        curr.store(Int(0)),
-        idlist.store(App.localGet(addr, key)),
-        For(init, iter, incr).Do(Seq(
-            curr.store(ExtractUint64(idlist.load(), i.load()*Int(8))),
-
-            If(curr.load()>asset_id)
-            .Then(Seq(
-                splice_in(asset_id, idlist, i.load()*Int(8)),
-                i.store(Len(idlist.load()))
-            ))
-            .ElseIf(curr.load()==asset_id)
-            .Then(Int(1)),
-        )),
-        App.localPut(addr, key, idlist.load()),
+        For(init, cond, iter).Do(
+            Pop(ensure_token_balance(addr, Btoi(args[i.load()]), Int(0)))
+        ),
         Int(1)
-    )
-
-@Subroutine(TealType.uint64)
-def remove_from_localstate(addr, key, asset_id):
-    idlist = ScratchVar()
-    i      = ScratchVar()
-
-    init = i.store(Int(0))
-    iter = i.load()<Len(idlist.load())/Int(8)
-    incr = i.store(i.load() + Int(1)) 
-
-    curr = ScratchVar()
-
-    return Seq(
-        curr.store(Int(0)),
-        idlist.store(App.localGet(addr, key)),
-        For(init, iter, incr).Do(Seq(
-            curr.store(ExtractUint64(idlist.load(), i.load()*Int(8))),
-
-            If(curr.load()==asset_id)
-            .Then(Seq(
-                splice_out(idlist, i.load()*Int(8)),
-                i.store(Len(idlist.load()))
-            ))
-            .ElseIf(curr.load()>asset_id)
-            .Then(Int(1)),
-        )),
-        App.localPut(addr, key, idlist.load()),
-        Int(1)
-    )
-
-
-def splice_out(idlist, pos):
-    return idlist.store(
-        Concat(
-            Substring(idlist.load(), Int(0), pos),
-            Substring(idlist.load(), pos+Int(8), Len(idlist.load())-Int(8))
-        )
-    )
-
-def splice_in(asset_id, idlist, pos):
-    return idlist.store(
-        Concat(
-            Substring(idlist.load(), Int(0), pos),
-            Itob(asset_id),
-            Substring(idlist.load(), pos, Len(idlist.load()))
-        )
     )
 
 def check_balance_match(txn, addr, asset_id):
@@ -325,3 +255,80 @@ def tail(s: TealType.bytes):
 @Subroutine(TealType.uint64)
 def ilog10(x: TealType.uint64):
     return Exp(Int(10), x)
+
+@Subroutine(TealType.uint64)
+def add_to_localstate(addr, key, asset_id):
+
+    idlist = ScratchVar()
+    i      = ScratchVar()
+
+    init = i.store(Int(0))
+    iter = i.load()<Len(idlist.load())/Int(8)
+    incr = i.store(i.load() + Int(1)) 
+
+    curr = ScratchVar()
+
+    return Seq(
+        curr.store(Int(0)),
+        idlist.store(App.localGet(addr, key)),
+        For(init, iter, incr).Do(Seq(
+            curr.store(ExtractUint64(idlist.load(), i.load()*Int(8))),
+
+            If(curr.load()>asset_id)
+            .Then(Seq(
+                splice_in(asset_id, idlist, i.load()*Int(8)),
+                i.store(Len(idlist.load()))
+            ))
+            .ElseIf(curr.load()==asset_id)
+            .Then(Int(1)),
+        )),
+        App.localPut(addr, key, idlist.load()),
+        Int(1)
+    )
+
+@Subroutine(TealType.uint64)
+def remove_from_localstate(addr, key, asset_id):
+    idlist = ScratchVar()
+    i      = ScratchVar()
+
+    init = i.store(Int(0))
+    iter = i.load()<Len(idlist.load())/Int(8)
+    incr = i.store(i.load() + Int(1)) 
+
+    curr = ScratchVar()
+
+    return Seq(
+        curr.store(Int(0)),
+        idlist.store(App.localGet(addr, key)),
+        For(init, iter, incr).Do(Seq(
+            curr.store(ExtractUint64(idlist.load(), i.load()*Int(8))),
+
+            If(curr.load()==asset_id)
+            .Then(Seq(
+                splice_out(idlist, i.load()*Int(8)),
+                i.store(Len(idlist.load()))
+            ))
+            .ElseIf(curr.load()>asset_id)
+            .Then(Int(1)),
+        )),
+        App.localPut(addr, key, idlist.load()),
+        Int(1)
+    )
+
+
+def splice_out(idlist, pos):
+    return idlist.store(
+        Concat(
+            Substring(idlist.load(), Int(0), pos),
+            Substring(idlist.load(), pos+Int(8), Len(idlist.load())-Int(8))
+        )
+    )
+
+def splice_in(asset_id, idlist, pos):
+    return idlist.store(
+        Concat(
+            Substring(idlist.load(), Int(0), pos),
+            Itob(asset_id),
+            Substring(idlist.load(), pos, Len(idlist.load()))
+        )
+    )
