@@ -8,18 +8,18 @@ from config import *
 def approval():
     is_app_creator = Global.creator_address() == Txn.sender()
 
-    create_app = And(
-        Global.group_size() == Int(2),
-        
-        # Create app call
-        Gtxn[0].type_enum() == TxnType.ApplicationCall,
+    #create_app = And(
+    #    Global.group_size() == Int(1),
+    #    
+    #    # Create app call
+    #    Gtxn[0].type_enum() == TxnType.ApplicationCall,
 
-        # Seed app address
-        Gtxn[1].type_enum() == TxnType.Payment,
-        Gtxn[1].sender() == Gtxn[0].sender(),
-        Gtxn[1].amount() >= Int(1_000_000_000),
-        Gtxn[1].receiver() == generated_addr(GeneratedID(0)),
-    )
+    #    ## Seed app address
+    #    #Gtxn[1].type_enum() == TxnType.Payment,
+    #    #Gtxn[1].sender() == Gtxn[0].sender(),
+    #    #Gtxn[1].amount() >= Int(1_000_000_000),
+    #    #Gtxn[1].receiver() == generated_addr(GeneratedID(0)),
+    #)
 
     create_listing = And(
         Global.group_size() == Int(5),
@@ -232,7 +232,7 @@ def approval():
 
     return Cond(
         # App lifecycle
-        [Txn.application_id() == Int(0),                        Return(create_app)],
+        [Txn.application_id() == Int(0),                        Return(Int(1))],
         [Txn.on_completion()  == OnComplete.DeleteApplication,  Return(is_app_creator)],
         [Txn.on_completion()  == OnComplete.UpdateApplication,  Return(is_app_creator)],
         [Txn.on_completion()  == OnComplete.CloseOut,           Return(is_app_creator)],

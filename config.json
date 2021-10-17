@@ -20,7 +20,7 @@
         "id":4,
         "unit":"raf",
         "admin_addr":"7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM",
-        "state_fields":["name", "fee", "max_price", "max_tags", "seed_amt"]
+        "state_fields":["fee", "max_price", "max_prices", "max_tags", "app_seed", "listing_seed"]
     },
     "explorer":"algoscan.app",
     "contracts":{

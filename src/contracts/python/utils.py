@@ -141,9 +141,9 @@ def create_token(tag, name):
                 TxnField.config_asset_clawback: Global.current_application_address(),
                 TxnField.config_asset_reserve: Global.current_application_address(),
                 TxnField.config_asset_freeze: Global.current_application_address(),
-                TxnField.config_asset_total: Int(10^9),
+                TxnField.config_asset_total: Int(10000000000),
                 TxnField.config_asset_decimals: Int(0),
-                TxnField.config_asset_url: Concat(Bytes(configuration['domain']), Bytes("/"), tag)
+                TxnField.config_asset_url: Concat(Bytes(configuration['domain']), Bytes("/tag/"), name)
             }),
             InnerTxnBuilder.Submit(),
             Int(1)

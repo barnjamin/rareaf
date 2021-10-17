@@ -2,14 +2,14 @@
 intcblock 0 1 4
 pushint TMPL_APP_ID // TMPL_APP_ID
 store 0
-pushbytes TMPL_APP_ADDR // TMPL_APP_ADDR
-store 1
-pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
-store 2
 pushint TMPL_ASSET_ID // TMPL_ASSET_ID
 store 3
 pushint TMPL_SEED_AMT // TMPL_SEED_AMT
 store 4
+pushbytes TMPL_APP_ADDR // TMPL_APP_ADDR
+store 1
+pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
+store 2
 pushbytes TMPL_NONCE // TMPL_NONCE
 store 5
 intc_0 // 0

@@ -82,7 +82,7 @@ global CurrentApplicationAddress
 assert
 load 27
 pushint 3 // 3
-callsub sub8
+callsub sub7
 bytec_0 // "tag"
 ==
 &&
@@ -121,7 +121,7 @@ global CurrentApplicationAddress
 assert
 load 23
 intc_3 // 2
-callsub sub8
+callsub sub7
 bytec_3 // "px"
 ==
 &&
@@ -146,7 +146,7 @@ pushbytes 0x726166 // "raf"
 pushbytes 0x3a // ":"
 concat
 txna Assets 0
-callsub sub12
+callsub sub11
 concat
 callsub sub4
 &&
@@ -200,7 +200,7 @@ load 15
 assert
 gtxna 0 ApplicationArgs 1
 btoi
-callsub sub7
+callsub sub6
 intc_1 // 0
 ==
 gtxn 1 TypeEnum
@@ -214,7 +214,7 @@ load 16
 gtxn 1 XferAsset
 gtxna 0 ApplicationArgs 1
 btoi
-callsub sub7
+callsub sub6
 ==
 gtxn 1 TypeEnum
 intc_2 // axfer
@@ -366,7 +366,7 @@ global CurrentApplicationAddress
 assert
 load 11
 intc_3 // 2
-callsub sub8
+callsub sub7
 bytec_3 // "px"
 ==
 &&
@@ -405,7 +405,7 @@ global CurrentApplicationAddress
 assert
 load 7
 pushint 3 // 3
-callsub sub8
+callsub sub7
 bytec_0 // "tag"
 ==
 &&
@@ -439,7 +439,7 @@ global CurrentApplicationAddress
 assert
 load 3
 pushint 3 // 3
-callsub sub8
+callsub sub7
 bytec_0 // "tag"
 ==
 &&
@@ -548,30 +548,7 @@ txn Sender
 ==
 return
 main_l36:
-global GroupSize
-intc_3 // 2
-==
-gtxn 0 TypeEnum
-pushint 6 // appl
-==
-&&
-gtxn 1 TypeEnum
-intc_0 // pay
-==
-&&
-gtxn 1 Sender
-gtxn 0 Sender
-==
-&&
-gtxn 1 Amount
-pushint 1000000000 // 1000000000
->=
-&&
-gtxn 1 Receiver
-gaid 0
-callsub sub6
-==
-&&
+intc_0 // 1
 return
 sub0: // valid_admin_app_call
 txn TypeEnum
@@ -718,14 +695,14 @@ global CurrentApplicationAddress
 itxn_field ConfigAssetReserve
 global CurrentApplicationAddress
 itxn_field ConfigAssetFreeze
-pushint 3 // 3
+pushint 10000000000 // 10000000000
 itxn_field ConfigAssetTotal
 intc_1 // 0
 itxn_field ConfigAssetDecimals
 pushbytes 0x726172652e6166 // "rare.af"
-pushbytes 0x2f // "/"
+pushbytes 0x2f7461672f // "/tag/"
 concat
-load 37
+load 38
 concat
 itxn_field ConfigAssetURL
 itxn_submit
@@ -741,133 +718,125 @@ itxn_field ConfigAsset
 itxn_submit
 intc_0 // 1
 retsub
-sub6: // generated_addr
+sub6: // price_id
 store 40
-pushbytes 0x6170704944 // "appID"
 load 40
-itob
-concat
-sha512_256
-retsub
-sub7: // price_id
-store 41
-load 41
 asset_params_get AssetName
+store 41
 store 42
-store 43
-load 42
+load 41
 assert
-load 43
+load 42
 pushbytes 0x6e616d65 // "name"
 app_global_get
 len
-load 43
+load 42
 len
 substring3
-callsub sub11
+callsub sub10
 retsub
-sub8: // suffix
-store 49
+sub7: // suffix
 store 48
-load 48
-load 48
+store 47
+load 47
+load 47
 len
-load 49
--
 load 48
+-
+load 47
 len
 substring3
 retsub
-sub9: // ascii_to_int
-store 45
-load 45
+sub8: // ascii_to_int
+store 44
+load 44
 pushint 48 // 48
 -
 retsub
-sub10: // int_to_ascii
-store 51
+sub9: // int_to_ascii
+store 50
 pushbytes 0x30313233343536373839 // "0123456789"
-load 51
-load 51
+load 50
+load 50
 intc_0 // 1
 +
 substring3
 retsub
-sub11: // atoi
-store 44
-load 44
+sub10: // atoi
+store 43
+load 43
 len
 intc_1 // 0
 >
-bnz sub11_l2
+bnz sub10_l2
 intc_1 // 0
-b sub11_l3
-sub11_l2:
-load 44
-callsub sub13
-callsub sub9
-load 44
+b sub10_l3
+sub10_l2:
+load 43
+callsub sub12
+callsub sub8
+load 43
 len
 intc_0 // 1
 -
-callsub sub14
+callsub sub13
 *
-load 44
+load 43
 intc_0 // 1
-load 44
+load 43
 len
 substring3
-load 44
+load 43
 swap
-callsub sub11
+callsub sub10
 swap
-store 44
+store 43
 +
-sub11_l3:
+sub10_l3:
 retsub
-sub12: // itoa
-store 50
-load 50
+sub11: // itoa
+store 49
+load 49
 intc_1 // 0
 ==
-bnz sub12_l5
-load 50
+bnz sub11_l5
+load 49
 pushint 10 // 10
 /
 intc_1 // 0
 >
-bnz sub12_l4
+bnz sub11_l4
 pushbytes 0x // ""
-sub12_l3:
-load 50
+sub11_l3:
+load 49
 pushint 10 // 10
 %
-callsub sub10
+callsub sub9
 concat
-b sub12_l6
-sub12_l4:
-load 50
+b sub11_l6
+sub11_l4:
+load 49
 pushint 10 // 10
 /
-load 50
+load 49
 swap
-callsub sub12
+callsub sub11
 swap
-store 50
-b sub12_l3
-sub12_l5:
+store 49
+b sub11_l3
+sub11_l5:
 pushbytes 0x30 // "0"
-sub12_l6:
+sub11_l6:
 retsub
-sub13: // head
-store 46
-load 46
+sub12: // head
+store 45
+load 45
 intc_1 // 0
 getbyte
 retsub
-sub14: // ilog10
-store 47
+sub13: // ilog10
+store 46
 pushint 10 // 10
-load 47
+load 46
 exp
 retsub
