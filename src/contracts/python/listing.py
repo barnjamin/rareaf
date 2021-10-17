@@ -35,15 +35,15 @@ def listing():
 
         # Opt into NFT
         Gtxn[2].type_enum() == TxnType.AssetTransfer,
-        Gtxn[2].amount() == Int(0),
-        Gtxn[2].sender() == Gtxn[3].receiver(),
+        Gtxn[2].asset_amount() == Int(0),
+        Gtxn[2].sender() == Gtxn[3].asset_receiver(),
         Gtxn[2].xfer_asset() == Gtxn[3].xfer_asset(),
 
         # Receive NFT 
         Gtxn[3].type_enum() == TxnType.AssetTransfer,
-        Gtxn[3].amount() > Int(0),
+        Gtxn[3].asset_amount() > Int(0),
         Gtxn[3].sender() == Gtxn[0].sender(),
-        Gtxn[3].receiver() == Gtxn[0].receiver(),
+        Gtxn[3].asset_receiver() == Gtxn[0].receiver(),
 
         # Rekey to App Addr
         Gtxn[4].type_enum() == TxnType.Payment,

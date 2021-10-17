@@ -20,8 +20,8 @@ if $create_app; then
         --clear-prog $CLEAR_NAME\
         --global-byteslices 16 \
         --global-ints 16 \
-        --local-ints 0 \
-        --local-byteslices 16  | grep 'Created app' |awk '{print $6}'`
+        --local-ints 1 \
+        --local-byteslices 1  | grep 'Created app' |awk '{print $6}'`
 fi
 
 echo "App ID: $app_id"

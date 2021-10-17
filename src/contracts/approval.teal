@@ -465,6 +465,10 @@ gtxn 0 TypeEnum
 intc_0 // pay
 ==
 &&
+gtxn 0 Amount
+intc_1 // 0
+>=
+&&
 gtxn 1 TypeEnum
 pushint 6 // appl
 ==
@@ -481,19 +485,23 @@ gtxn 2 TypeEnum
 intc_2 // axfer
 ==
 &&
-gtxn 2 Amount
+gtxn 2 AssetAmount
 intc_1 // 0
 ==
 &&
 gtxn 2 Sender
-gtxn 2 Receiver
+gtxn 3 AssetReceiver
+==
+&&
+gtxn 2 XferAsset
+gtxn 3 XferAsset
 ==
 &&
 gtxn 3 TypeEnum
 intc_2 // axfer
 ==
 &&
-gtxn 3 Amount
+gtxn 3 AssetAmount
 intc_1 // 0
 >
 &&
@@ -501,7 +509,23 @@ gtxn 3 Sender
 gtxn 0 Sender
 ==
 &&
-gtxn 3 Receiver
+gtxn 3 AssetReceiver
+gtxn 0 Receiver
+==
+&&
+gtxn 4 TypeEnum
+intc_0 // pay
+==
+&&
+gtxn 4 Amount
+intc_1 // 0
+==
+&&
+gtxn 4 RekeyTo
+global CurrentApplicationAddress
+==
+&&
+gtxn 4 Sender
 gtxn 0 Receiver
 ==
 &&

@@ -9,8 +9,9 @@ reprice_listing=false
 delete_listing=false
 purchase_listing=false
 
-app_id=4
-app_addr="2B3I4PZIAH7N6PEQANWHZRALX35SRWNHULIVYEB335VW7X3PKW4CTBYFPY"
+app_id=54
+app_addr=3Z2RSO2F5NJ3GWC4TN6ZQVMJ6EGH6ZZCHLF4PAEK2FNE4ZXKO4TTLEY3UQ
+
 nft_id=28
 
 listing_name=listing.teal
