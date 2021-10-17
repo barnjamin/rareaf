@@ -161,8 +161,7 @@ def destroy_token(asset_id):
         Int(1)
     )
 
-@Subroutine(TealType.bytes)
-def generated_addr(id):
+def app_addr_from_id(id):
     return Sha512_256(
         Concat(Bytes("appID"), Itob(id))
     ) 

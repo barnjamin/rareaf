@@ -1,21 +1,7 @@
 #!/bin/bash
 source ./vars.sh
 
-app_id=10
-app_addr=""
-
-#cp $SRCDIR/$LISTING_TEMPLATE $LISTING_NAME
-#sed -i "s/TMPL_APP_ID/$TMPL_APP_ID/" $LISTING_NAME
-#sed -i "s/TMPL_PRICE_ID/$TMPL_PRICE_ID/" $LISTING_NAME
-#sed -i "s/TMPL_CREATOR_ADDR/$CREATOR_BYTES/" $LISTING_NAME
-#sed -i "s/TMPL_ASSET_ID/b64($b64_asa_id)/" $LISTING_NAME
-#sed -i "s/TMPL_FEE_AMT/$FEE_AMT/" $LISTING_NAME
-#sed -i "s/TMPL_OWNER_ADDR/$OWNER_BYTES/" $LISTING_NAME
-#../sandbox copyTo $LISTING_NAME
-
-#export LISTING=`$GOAL clerk compile $LISTING_NAME|awk '{print $2}'|tr '\r' ' ' | xargs`
-
-
+make_nft=false
 create_listing=true
 tag_listing=false
 untag_listing=false
@@ -23,8 +9,49 @@ reprice_listing=false
 delete_listing=false
 purchase_listing=false
 
-if $create_listing; then
+app_id=4
+app_addr="2B3I4PZIAH7N6PEQANWHZRALX35SRWNHULIVYEB335VW7X3PKW4CTBYFPY"
+nft_id=28
 
+listing_name=listing.teal
+
+listing_tmpl=$SRCDIR/listing.tmpl.teal
+listing_src=$SRCDIR/$listing_name
+
+
+echo "Recompile teal"
+cd $PYSRCDIR
+python3 listing.py
+
+cd $SRCDIR
+cp $listing_tmpl $listing_src
+nonce=`openssl rand -hex 32`
+
+sed -i "s/TMPL_APP_ID/$app_id/" $listing_src
+sed -i "s/TMPL_NONCE/0x$nonce/" $listing_src
+
+$SB copyTo $listing_src 
+
+LISTING=`$GOAL clerk compile $listing_name |awk '{print $2}'|tr '\r' ' '`
+
+echo $LISTING
+
+
+if $make_nft; then
+    echo "Making nft"
+    nft_id=`$GOAL asset create --creator $CREATOR \
+                --asseturl="ipfs://deadbeef" \
+                --decimals=0 \
+                --name="NFT" \
+                --unitname="nft" \
+                --total=1 | grep 'Created asset' | awk '{print $6}'`
+    echo "Created NFT: $nft_id"
+fi
+
+if $create_listing; then
+    echo "Creating listing"
+
+    echo "Making transactions"
     # Seed
     $GOAL clerk send -f $CREATOR -t $LISTING -a 1000000 -o seed.txn
 
@@ -40,32 +67,46 @@ if $create_listing; then
     # Rekey
     $GOAL clerk send -f $LISTING -t $LISTING -a 0 --rekey-to $app_addr -o rekey.txn
 
-    $SB exec "cat seed.txn app-optin.txn nft-optin.txn nft-seed.txn rekey.txn > create.txn"
+    # Group/Split
+    echo "Grouping/Splitting"
+    $SB exec "cat seed.txn app-optin.txn nft-optin.txn nft-send.txn rekey.txn > create.txn"
     $GOAL clerk group -i create.txn -o create.txn
     $GOAL clerk split -i create.txn -o create
 
-    $GOAL clerk sign -i create-1 -o seed.txn
-    $GOAL clerk sign -i create-2 -o app-optin.txn -p listing.teal
-    $GOAL clerk sign -i create-3 -o nft-optin.txn -p listing.teal
-    $GOAL clerk sign -i create-4 -o nft-send.txn 
-    $GOAL clerk sign -i create-5 -o rekey.txn -p listing.teal
+    echo "Signing"
+    # Sign
+    echo "seed"
+    $GOAL clerk sign -i create-0 -o seed.txn
+    echo "appoptin"
+    $GOAL clerk sign -i create-1 -o app-optin.txn -p listing.teal
+    echo "nftoptin"
+    $GOAL clerk sign -i create-2 -o nft-optin.txn -p listing.teal
+    echo "nftsend"
+    $GOAL clerk sign -i create-3 -o nft-send.txn 
+    echo "rekey"
+    $GOAL clerk sign -i create-4 -o rekey.txn -p listing.teal
 
-    $SB exec "cat seed.txn app-optin.txn nft-optin.txn nft-seed.txn rekey.txn > create.txn"
+    $SB exec "cat seed.txn app-optin.txn nft-optin.txn nft-send.txn rekey.txn > create.txn"
 
-    #$GOAL clerk rawsend -f create.txn
+    $GOAL clerk rawsend -f create.txn
 fi
 
 if $tag_listing; then
+    echo "Tagging listing"
 fi
 
 if $untag_listing; then
+    echo "Untagging listing"
 fi
 
 if $reprice_listing; then
+    echo "Repricing listing"
 fi
 
 if $delete_listing; then
+    echo "Deleting listing"
 fi
 
 if $purchase_listing; then
+    echo "Purchasing listing"
 fi

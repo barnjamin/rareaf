@@ -6,17 +6,13 @@ from utils  import *
 
 def listing():
     app_id        = ScratchVar(TealType.uint64)
-    app_addr      = ScratchVar(TealType.bytes)
-    creator_addr  = ScratchVar(TealType.bytes)
     nonce         = ScratchVar(TealType.bytes)
 
     # setup is evaluated at the beginning of the cond
     # used to set template variables, returns 0 so the 
     # condition is not executed 
     setup = Seq([
-        app_id.store(       Tmpl.Int("TMPL_APP_ID")),
-        app_addr.store(     Tmpl.Bytes("TMPL_APP_ADDR")),
-        creator_addr.store( Tmpl.Bytes("TMPL_CREATOR_ADDR")),
+        app_id.store(       Tmpl.Int(  "TMPL_APP_ID")),
         nonce.store(        Tmpl.Bytes("TMPL_NONCE")),
         Int(0) 
     ])
@@ -31,7 +27,6 @@ def listing():
         # Seed 
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[0].amount() >= Int(0),
-        Gtxn[0].sender() == creator_addr.load(),
 
         # Opt into App 
         Gtxn[1].type_enum() == TxnType.ApplicationCall,
@@ -53,7 +48,7 @@ def listing():
         # Rekey to App Addr
         Gtxn[4].type_enum() == TxnType.Payment,
         Gtxn[4].amount() == Int(0),
-        Gtxn[4].rekey_to() == app_addr.load(),
+        Gtxn[4].rekey_to() == app_addr_from_id(app_id.load()),
         Gtxn[4].sender() == Gtxn[0].receiver(),
     )
 

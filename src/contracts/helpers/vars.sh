@@ -16,12 +16,12 @@ export LISTING_TEMPLATE=listing.tmpl.teal
 export ADMIN=7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM
 export CREATOR=6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI
 
-if $GOAL account list |grep -q $ADMIN; then
-    echo "Already have accounts"
-else
-    echo "Populating accounts"
-    ./import_accts.sh
-fi
+#if `$GOAL account list |grep -q $ADMIN`; then
+#    echo "Already have accounts"
+#else
+#    echo "Populating accounts"
+#    ./import_accts.sh
+#fi
 
 
 export b64_create_func=`echo -n "create"|base64 -w0`
@@ -48,20 +48,6 @@ $SB copyTo $CLEAR_NAME
 $GOAL clerk compile $APP_NAME
 $GOAL clerk compile $CLEAR_NAME
 
-
-#export CREATOR_BYTES=`python3 -c "from algosdk import encoding;print('0x'+bytearray(encoding.decode_address('$CREATOR_ACCT')).hex())"`
-#export ADMIN_BYTES=`python3 -c "from algosdk import encoding;print('0x'+bytearray(encoding.decode_address('$PLATFORM_ADMIN')).hex())"`
-
-#cp $SRCDIR/$LISTING_TEMPLATE $LISTING_NAME
-#sed -i "s/TMPL_APP_ID/$TMPL_APP_ID/" $LISTING_NAME
-#sed -i "s/TMPL_PRICE_ID/$TMPL_PRICE_ID/" $LISTING_NAME
-#sed -i "s/TMPL_CREATOR_ADDR/$CREATOR_BYTES/" $LISTING_NAME
-#sed -i "s/TMPL_ASSET_ID/b64($b64_asa_id)/" $LISTING_NAME
-#sed -i "s/TMPL_FEE_AMT/$FEE_AMT/" $LISTING_NAME
-#sed -i "s/TMPL_OWNER_ADDR/$OWNER_BYTES/" $LISTING_NAME
-#../sandbox copyTo $LISTING_NAME
-
-#export LISTING_ACCT=`$GCMD clerk compile $LISTING_NAME|awk '{print $2}'|tr '\r' ' ' | xargs`
 
 #echo $LISTING_ACCT
 

@@ -2,16 +2,8 @@
 intcblock 0 1 4
 pushint TMPL_APP_ID // TMPL_APP_ID
 store 0
-pushint TMPL_ASSET_ID // TMPL_ASSET_ID
-store 3
-pushint TMPL_SEED_AMT // TMPL_SEED_AMT
-store 4
-pushbytes TMPL_APP_ADDR // TMPL_APP_ADDR
-store 1
-pushbytes TMPL_CREATOR_ADDR // TMPL_CREATOR_ADDR
-store 2
 pushbytes TMPL_NONCE // TMPL_NONCE
-store 5
+store 1
 intc_0 // 0
 bnz main_l4
 intc_1 // 1
@@ -26,12 +18,8 @@ intc_1 // pay
 ==
 &&
 gtxn 0 Amount
-load 4
+intc_0 // 0
 >=
-&&
-gtxn 0 Sender
-load 2
-==
 &&
 gtxn 1 TypeEnum
 pushint 6 // appl
@@ -58,15 +46,11 @@ gtxn 3 Receiver
 ==
 &&
 gtxn 2 XferAsset
-load 3
+gtxn 3 XferAsset
 ==
 &&
 gtxn 3 TypeEnum
 intc_2 // axfer
-==
-&&
-gtxn 3 XferAsset
-load 3
 ==
 &&
 gtxn 3 Amount
@@ -90,7 +74,11 @@ intc_0 // 0
 ==
 &&
 gtxn 4 RekeyTo
-load 1
+pushbytes 0x6170704944 // "appID"
+load 0
+itob
+concat
+sha512_256
 ==
 &&
 gtxn 4 Sender
