@@ -34,66 +34,66 @@ load 2
 ==
 &&
 gtxn 1 TypeEnum
-intc_1 // pay
-==
-&&
-gtxn 1 Amount
-intc_0 // 0
-==
-&&
-gtxn 1 RekeyTo
-load 1
-==
-&&
-gtxn 1 Sender
-gtxn 0 Receiver
-==
-&&
-gtxn 2 TypeEnum
 pushint 6 // appl
 ==
 &&
-gtxn 2 OnCompletion
+gtxn 1 OnCompletion
 intc_1 // OptIn
 ==
 &&
-gtxn 2 ApplicationID
+gtxn 1 ApplicationID
 load 0
+==
+&&
+gtxn 2 TypeEnum
+intc_2 // axfer
+==
+&&
+gtxn 2 Amount
+intc_0 // 0
+==
+&&
+gtxn 2 Sender
+gtxn 3 Receiver
+==
+&&
+gtxn 2 XferAsset
+load 3
 ==
 &&
 gtxn 3 TypeEnum
 intc_2 // axfer
 ==
 &&
-gtxn 3 Amount
-intc_0 // 0
-==
-&&
-gtxn 3 Sender
-gtxn 3 Receiver
-==
-&&
 gtxn 3 XferAsset
 load 3
 ==
 &&
-gtxn 4 TypeEnum
-intc_2 // axfer
+gtxn 3 Amount
+intc_0 // 0
+>
+&&
+gtxn 3 Sender
+gtxn 0 Sender
 ==
 &&
-gtxn 4 XferAsset
-load 3
+gtxn 3 Receiver
+gtxn 0 Receiver
+==
+&&
+gtxn 4 TypeEnum
+intc_1 // pay
 ==
 &&
 gtxn 4 Amount
 intc_0 // 0
->
-&&
-gtxn 4 Sender
-gtxn 0 Sender
 ==
 &&
-gtxn 4 Receiver
+gtxn 4 RekeyTo
+load 1
+==
+&&
+gtxn 4 Sender
 gtxn 0 Receiver
 ==
 &&

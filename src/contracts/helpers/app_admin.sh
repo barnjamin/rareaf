@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 source ./vars.sh
 
 create_app=true
@@ -11,6 +9,7 @@ create_tag_tokens=true
 
 destroy_price_tokens=false
 destroy_tag_tokens=false
+delete_app=false
 
 app_id=14
 
@@ -100,4 +99,9 @@ if $create_tag_tokens; then
             --app-arg "str:create_tag" \
             --app-arg "str:$i"
     done
+fi
+
+if $delete_app; then
+    echo "Deleting app"
+    $GOAL app delete --app-id $app_id -f $ADMIN
 fi

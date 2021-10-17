@@ -466,31 +466,27 @@ intc_0 // pay
 ==
 &&
 gtxn 1 TypeEnum
-intc_0 // pay
-==
-&&
-gtxn 1 Amount
-intc_1 // 0
-==
-&&
-gtxn 1 RekeyTo
-global CurrentApplicationAddress
-==
-&&
-gtxn 1 Sender
-gtxn 0 Receiver
-==
-&&
-gtxn 2 TypeEnum
 pushint 6 // appl
 ==
 &&
-gtxn 2 OnCompletion
+gtxn 1 OnCompletion
 intc_0 // OptIn
 ==
 &&
-gtxn 2 ApplicationID
+gtxn 1 ApplicationID
 global CurrentApplicationID
+==
+&&
+gtxn 2 TypeEnum
+intc_2 // axfer
+==
+&&
+gtxn 2 Amount
+intc_1 // 0
+==
+&&
+gtxn 2 Sender
+gtxn 2 Receiver
 ==
 &&
 gtxn 3 TypeEnum
@@ -499,25 +495,29 @@ intc_2 // axfer
 &&
 gtxn 3 Amount
 intc_1 // 0
-==
+>
 &&
 gtxn 3 Sender
+gtxn 0 Sender
+==
+&&
 gtxn 3 Receiver
+gtxn 0 Receiver
 ==
 &&
 gtxn 4 TypeEnum
-intc_2 // axfer
+intc_0 // pay
 ==
 &&
 gtxn 4 Amount
 intc_1 // 0
->
-&&
-gtxn 4 Sender
-gtxn 0 Sender
 ==
 &&
-gtxn 4 Receiver
+gtxn 4 RekeyTo
+global CurrentApplicationAddress
+==
+&&
+gtxn 4 Sender
 gtxn 0 Receiver
 ==
 &&
@@ -639,8 +639,8 @@ sub3_l4:
 itxn_begin
 intc_2 // axfer
 itxn_field TypeEnum
-load 34
 load 36
+load 34
 -
 itxn_field AssetAmount
 load 32
@@ -652,8 +652,8 @@ sub3_l5:
 itxn_begin
 intc_2 // axfer
 itxn_field TypeEnum
-load 36
 load 34
+load 36
 -
 itxn_field AssetAmount
 global CurrentApplicationAddress

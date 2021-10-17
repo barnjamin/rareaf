@@ -48,6 +48,7 @@ $SB copyTo $CLEAR_NAME
 $GOAL clerk compile $APP_NAME
 $GOAL clerk compile $CLEAR_NAME
 
+
 #export CREATOR_BYTES=`python3 -c "from algosdk import encoding;print('0x'+bytearray(encoding.decode_address('$CREATOR_ACCT')).hex())"`
 #export ADMIN_BYTES=`python3 -c "from algosdk import encoding;print('0x'+bytearray(encoding.decode_address('$PLATFORM_ADMIN')).hex())"`
 
@@ -61,6 +62,7 @@ $GOAL clerk compile $CLEAR_NAME
 #../sandbox copyTo $LISTING_NAME
 
 #export LISTING_ACCT=`$GCMD clerk compile $LISTING_NAME|awk '{print $2}'|tr '\r' ' ' | xargs`
+
 #echo $LISTING_ACCT
 
 #export b64_price=`python3 -c "import base64;print(base64.b64encode(($LISTING_PRICE).to_bytes(8,'big')).decode('ascii'))"`

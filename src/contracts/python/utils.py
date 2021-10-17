@@ -93,7 +93,7 @@ def ensure_token_balance(addr, asset_id, amt):
                 InnerTxnBuilder.Begin(),
                 InnerTxnBuilder.SetFields({
                     TxnField.type_enum: TxnType.AssetTransfer,
-                    TxnField.asset_amount: ah.value()-amt,
+                    TxnField.asset_amount: amt - ah.value(),
                     TxnField.receiver: Global.current_application_address(),
                 }),
                 InnerTxnBuilder.Submit(),
@@ -104,7 +104,7 @@ def ensure_token_balance(addr, asset_id, amt):
                 InnerTxnBuilder.Begin(),
                 InnerTxnBuilder.SetFields({
                     TxnField.type_enum: TxnType.AssetTransfer,
-                    TxnField.asset_amount: amt-ah.value(),
+                    TxnField.asset_amount: ah.value() - amt,
                     TxnField.receiver: addr,
                 }),
                 InnerTxnBuilder.Submit(),

@@ -27,27 +27,27 @@ def approval():
         # Seed 
         Gtxn[0].type_enum() == TxnType.Payment,
 
-        # Rekey to App Addr
-        Gtxn[1].type_enum() == TxnType.Payment,
-        Gtxn[1].amount()    == Int(0),
-        Gtxn[1].rekey_to()  == Global.current_application_address(),
-        Gtxn[1].sender()    == Gtxn[0].receiver(),
-
         # Opt into App 
-        Gtxn[2].type_enum() == TxnType.ApplicationCall,
-        Gtxn[2].on_completion() == OnComplete.OptIn,
-        Gtxn[2].application_id() == Global.current_application_id(),
+        Gtxn[1].type_enum() == TxnType.ApplicationCall,
+        Gtxn[1].on_completion() == OnComplete.OptIn,
+        Gtxn[1].application_id() == Global.current_application_id(),
 
         # Opt into NFT
-        Gtxn[3].type_enum() == TxnType.AssetTransfer,
-        Gtxn[3].amount() == Int(0),
-        Gtxn[3].sender() == Gtxn[3].receiver(),
+        Gtxn[2].type_enum() == TxnType.AssetTransfer,
+        Gtxn[2].amount() == Int(0),
+        Gtxn[2].sender() == Gtxn[2].receiver(),
 
         # Xfer NFT 
-        Gtxn[4].type_enum() == TxnType.AssetTransfer,
-        Gtxn[4].amount() > Int(0),
-        Gtxn[4].sender() == Gtxn[0].sender(),
-        Gtxn[4].receiver() == Gtxn[0].receiver(),
+        Gtxn[3].type_enum() == TxnType.AssetTransfer,
+        Gtxn[3].amount() > Int(0),
+        Gtxn[3].sender() == Gtxn[0].sender(),
+        Gtxn[3].receiver() == Gtxn[0].receiver(),
+
+        # Rekey to App Addr
+        Gtxn[4].type_enum() == TxnType.Payment,
+        Gtxn[4].amount()    == Int(0),
+        Gtxn[4].rekey_to()  == Global.current_application_address(),
+        Gtxn[4].sender()    == Gtxn[0].receiver(),
 
         #Set the local storage creator to the funding sender 
         Seq(
