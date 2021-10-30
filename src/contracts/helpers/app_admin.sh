@@ -11,8 +11,6 @@ destroy_price_tokens=false
 destroy_tag_tokens=false
 delete_app=false
 
-app_id=14
-
 if $create_app; then
     echo "Creating application"
     app_id=`$GOAL app create --creator $ADMIN \

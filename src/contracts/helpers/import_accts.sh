@@ -2,25 +2,26 @@
 
 sb=~/sandbox/sandbox
 
-funder="MRFAZACE2PCLQTHID324UNKYSRKA6FNWLTL7M7LS3O25OMHQJFA7ZHX52I"
+#500A
+seed_amt=500000000
 
-addr="7LQ7U4SEYEVQ7P4KJVCHPJA5NSIFJTGIEXJ4V6MFS4SL5FMDW6MYHL2JXM"
-echo $addr
-MNEMONIC="genuine burger urge heart spot science vague guess timber rich olympic cheese found please then snack nice arrest coin seminar pyramid adult flip absorb apology"
-$sb goal account import -m "$MNEMONIC"
-$sb goal clerk send -f$funder -t$addr -a50000000 -s -o send1.txn
+mnemonics=(
+    "genuine burger urge heart spot science vague guess timber rich olympic cheese found please then snack nice arrest coin seminar pyramid adult flip absorb apology"
+    "train rather absorb mouse tone scorpion group vacuum depth nothing assault silent fox relax depart lady hurdle million jaguar ensure define mule silk able order"
+    "loan journey alarm garage bulk olympic detail pig edit other brisk sense below when false ripple cute buffalo tissue again boring manual excuse absent injury"
+)
 
-addr="6EVZZTWUMODIXE7KX5UQ5WGQDQXLN6AQ5ELUUQHWBPDSRTD477ECUF5ABI"
-echo $addr
-MNEMONIC="loan journey alarm garage bulk olympic detail pig edit other brisk sense below when false ripple cute buffalo tissue again boring manual excuse absent injury"
-$sb goal account import -m "$MNEMONIC"
-$sb goal clerk send -f$funder -t$addr -a50000000 -s -o send2.txn
+# Needs to be run against a clean sb or it may pick up unfunded accts
+accts=(`$sb goal account list | awk '{print $3}'`)
+funder=${accts[0]}
 
-addr="DOG2QFGWQSFRJOQYW7I7YL7X7DEDIOPPBDV3XE34NMMXYYG32CCXXNFAV4"
-echo $addr
-MNEMONIC="train rather absorb mouse tone scorpion group vacuum depth nothing assault silent fox relax depart lady hurdle million jaguar ensure define mule silk able order"
-$sb goal account import -m "$MNEMONIC"
-$sb goal clerk send -f$funder -t$addr -a50000000 -s -o send3.txn
+echo "Funding from: $funder"
 
-$sb exec "cat send1.txn send2.txn send3.txn > fund-accts.txn"
-$sb goal clerk rawsend -f fund-accts.txn
+for m in "${mnemonics[@]}"
+do
+    acct=`$sb goal account import -m "$m" |grep 'Imported' | awk '{print $2}'`
+    echo "Imported $acct"
+
+    #TODO write to file and cat them all together to send grouped txn?
+    $sb goal clerk send -f$funder -t$acct -a$seed_amt
+done
