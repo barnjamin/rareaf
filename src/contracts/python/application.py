@@ -67,7 +67,7 @@ def approval():
 
     tag_listing = And( 
         Global.group_size() == Int(1),
-        valid_owner_app_call(),
+        valid_owner_app_call(Txn.accounts[1]),
         valid_tag_token(Txn.assets[0]),
         valid_listing_addr(Txn.accounts[1]),
         ensure_opted_in(Txn.accounts[1], Txn.assets[0]),
@@ -76,7 +76,7 @@ def approval():
 
     untag_listing = And(
         Global.group_size() == Int(1),
-        valid_owner_app_call(),
+        valid_owner_app_call(Txn.accounts[1]),
         valid_tag_token(Txn.assets[0]),
         valid_listing_addr(Txn.accounts[1]),
         ensure_token_balance(Txn.accounts[1], Txn.assets[0], Int(0))
@@ -84,7 +84,7 @@ def approval():
 
     reprice_listing = And(
         Global.group_size() == Int(1),
-        valid_owner_app_call(),
+        valid_owner_app_call(Txn.accounts[1]),
         valid_price_token(Txn.assets[0]),
         valid_listing_addr(Txn.accounts[1]),
         ensure_opted_in(Txn.accounts[1], Txn.assets[0]),
@@ -97,7 +97,7 @@ def approval():
     delete_listing = And( 
         Global.group_size() == Int(1),
         Or(
-            valid_owner_app_call(),
+            valid_owner_app_call(Txn.accounts[1]),
             valid_admin_app_call()
         ),
 
@@ -108,36 +108,41 @@ def approval():
         ),
 
         # Xfer tags/prices back to app
-        empty_app_tokens(Txn.accounts[1], Gtxn[0].application_args, Int(2)),
+        empty_app_tokens(Txn.accounts[1], Txn.assets, Int(1)),
 
-        # Xfer nft to buyer  
+        # Xfer nft back to owner
         Seq(
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
                 TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.xfer_asset: Txn.assets[0], 
                 TxnField.asset_amount: Int(0),
+                TxnField.sender: Txn.accounts[1],
                 TxnField.asset_close_to: owner.load() 
             }),
             InnerTxnBuilder.Submit(),
             Int(1)
         ),
 
-        # Close out of app
+        # Close Listing out of app
         Seq(
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
                 TxnField.type_enum: TxnType.ApplicationCall,
+                TxnField.application_id: Global.current_application_id(),
                 TxnField.on_completion: OnComplete.CloseOut,
+                TxnField.sender: Txn.accounts[1]
             }),
             InnerTxnBuilder.Submit(),
             Int(1)
         ),
 
-        # Xfer seed back to owner 
+        # Xfer seed back to owner to complete listing deletion 
         Seq(
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
                 TxnField.type_enum: TxnType.Payment,
+                TxnField.sender: Txn.accounts[1],
                 TxnField.amount: Int(0),
                 TxnField.close_remainder_to: owner.load(),
             }),

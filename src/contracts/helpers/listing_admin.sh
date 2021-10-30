@@ -3,10 +3,10 @@ source ./vars.sh
 
 make_nft=false
 create_listing=false
-tag_listing=true
+tag_listing=false
 untag_listing=false
 reprice_listing=false
-delete_listing=false
+delete_listing=true
 purchase_listing=false
 
 echo "Using AppId: $app_id ($app_addr)"
@@ -106,14 +106,41 @@ fi
 
 if $untag_listing; then
     echo "Untagging listing"
+    tag_id=27
+    $GOAL app call --app-id $app_id -f $CREATOR \
+        --app-arg "str:untag" \
+        --foreign-asset $tag_id \
+        --app-account $listing_addr  
 fi
 
 if $reprice_listing; then
-    echo "Repricing listing"
+    price_id=9
+
+    echo "Setting price"
+    $GOAL app call --app-id $app_id -f $CREATOR \
+        --app-arg "str:reprice" \
+        --app-arg "int:1000" \
+        --foreign-asset $price_id \
+        --app-account $listing_addr 
+
+    echo "Lowering price"
+    $GOAL app call --app-id $app_id -f $CREATOR \
+        --app-arg "str:reprice" \
+        --app-arg "int:100" \
+        --foreign-asset $price_id \
+        --app-account $listing_addr 
 fi
 
 if $delete_listing; then
     echo "Deleting listing"
+
+    price_id=9
+    $GOAL app call --app-id $app_id -f $CREATOR \
+        --app-arg "str:delete" \
+        --foreign-asset $nft_id \
+        --foreign-asset $price_id \
+        --app-account $listing_addr 
+
 fi
 
 if $purchase_listing; then

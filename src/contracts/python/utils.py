@@ -20,12 +20,12 @@ def valid_admin_app_call():
     )
 
 @Subroutine(TealType.uint64)
-def valid_owner_app_call():
+def valid_owner_app_call(addr: TealType.bytes):
     return And(
         Txn.type_enum() == TxnType.ApplicationCall,
         Txn.on_completion() ==  OnComplete.NoOp,
         Txn.application_id() == Global.current_application_id(),
-        Txn.sender() == App.localGet(Txn.accounts[1], owner_key)
+        Txn.sender() == App.localGet(addr, owner_key)
     )
 
 def valid_tag_token(asset_id):
@@ -62,17 +62,17 @@ def ensure_opted_in(addr: TealType.bytes, asset_id: TealType.uint64):
                     TxnField.type_enum: TxnType.AssetTransfer,
                     TxnField.xfer_asset: asset_id,
                     TxnField.asset_amount: Int(0),
-                    TxnField.asset_receiver: Txn.accounts[1],
-                    TxnField.sender: Txn.accounts[1],
+                    TxnField.asset_receiver: addr,
+                    TxnField.sender: addr,
                 }),
                 InnerTxnBuilder.Submit(),
                 Int(1)
             )
-        ),
+        ).Else(Int(1)),
     )
 
 @Subroutine(TealType.uint64)
-def ensure_token_balance(addr, asset_id, amt):
+def ensure_token_balance(addr: TealType.bytes, asset_id: TealType.uint64, amt: TealType.uint64):
     ah = AssetHolding.balance(addr, asset_id)
     return Seq(
         ah,
@@ -98,6 +98,7 @@ def ensure_token_balance(addr, asset_id, amt):
                     TxnField.xfer_asset: asset_id,
                     TxnField.asset_amount: amt - ah.value(),
                     TxnField.asset_receiver: addr,
+                    TxnField.sender: Global.current_application_address(),
                 }),
                 InnerTxnBuilder.Submit(),
                 Int(1)
@@ -110,6 +111,7 @@ def ensure_token_balance(addr, asset_id, amt):
                     TxnField.xfer_asset: asset_id,
                     TxnField.asset_amount: ah.value() - amt,
                     TxnField.asset_receiver: Global.current_application_address(),
+                    TxnField.sender: addr,
                 }),
                 InnerTxnBuilder.Submit(),
                 Int(1)
@@ -170,14 +172,14 @@ def app_addr_from_id(id):
         Concat(Bytes("appID"), Itob(id))
     ) 
 
-def empty_app_tokens(addr, args, idx):
+def empty_app_tokens(addr, assets, idx):
     i = ScratchVar() 
     init = i.store(idx)
-    cond = i.load()<args.length()
+    cond = i.load()<assets.length()
     iter = i.store(i.load() + Int(1))
     return Seq(
         For(init, cond, iter).Do(
-            Pop(ensure_token_balance(addr, Btoi(args[i.load()]), Int(0)))
+            Pop(ensure_token_balance(addr, assets[i.load()], Int(0)))
         ),
         Int(1)
     )
