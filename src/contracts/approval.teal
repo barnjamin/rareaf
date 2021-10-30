@@ -246,22 +246,46 @@ itxn_submit
 intc_0 // 1
 &&
 itxn_begin
-pushint 6 // appl
-itxn_field TypeEnum
-intc_3 // CloseOut
-itxn_field OnCompletion
-itxn_submit
-intc_0 // 1
-&&
-itxn_begin
 intc_0 // pay
 itxn_field TypeEnum
 intc_1 // 0
 itxn_field Amount
-load 12
-itxn_field CloseRemainderTo
+txna Accounts 1
+itxn_field RekeyTo
 itxn_submit
 intc_0 // 1
+&&
+gtxn 1 TypeEnum
+pushint 6 // appl
+==
+&&
+gtxn 1 OnCompletion
+intc_3 // CloseOut
+==
+&&
+gtxn 1 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 Sender
+txna Accounts 1
+==
+&&
+gtxn 2 TypeEnum
+intc_0 // pay
+==
+&&
+gtxn 2 Sender
+txna Accounts 1
+==
+&&
+gtxn 2 Amount
+intc_1 // 0
+==
+&&
+gtxn 2 CloseRemainderTo
+load 12
+==
 &&
 return
 main_l24:
@@ -278,18 +302,18 @@ store 17
 b main_l22
 main_l25:
 global GroupSize
-intc_0 // 1
+pushint 3 // 3
 ==
-txna Accounts 1
+gtxna 0 Accounts 1
 callsub sub1
 callsub sub0
 ||
 &&
-txna Accounts 1
+gtxna 0 Accounts 1
 bytec_1 // "owner"
 app_local_get
 store 12
-txna Accounts 1
+gtxna 0 Accounts 1
 bytec_2 // "asset"
 app_local_get
 store 13
@@ -307,11 +331,11 @@ intc_0 // 1
 itxn_begin
 intc_2 // axfer
 itxn_field TypeEnum
-txna Assets 0
+gtxna 0 Assets 0
 itxn_field XferAsset
 intc_1 // 0
 itxn_field AssetAmount
-txna Accounts 1
+gtxna 0 Accounts 1
 itxn_field Sender
 load 12
 itxn_field AssetCloseTo
@@ -319,28 +343,48 @@ itxn_submit
 intc_0 // 1
 &&
 itxn_begin
-pushint 6 // appl
+intc_0 // pay
 itxn_field TypeEnum
-global CurrentApplicationID
-itxn_field ApplicationID
-intc_3 // CloseOut
-itxn_field OnCompletion
-txna Accounts 1
+intc_1 // 0
+itxn_field Amount
+gtxna 0 Accounts 1
 itxn_field Sender
+gtxna 0 Accounts 1
+itxn_field RekeyTo
 itxn_submit
 intc_0 // 1
 &&
-itxn_begin
-intc_0 // pay
-itxn_field TypeEnum
+gtxn 1 TypeEnum
+pushint 6 // appl
+==
+&&
+gtxn 1 OnCompletion
+intc_3 // CloseOut
+==
+&&
+gtxn 1 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 Sender
 txna Accounts 1
-itxn_field Sender
+==
+&&
+gtxn 2 TypeEnum
+intc_0 // pay
+==
+&&
+gtxn 2 Sender
+txna Accounts 1
+==
+&&
+gtxn 2 Amount
 intc_1 // 0
-itxn_field Amount
+==
+&&
+gtxn 2 CloseRemainderTo
 load 12
-itxn_field CloseRemainderTo
-itxn_submit
-intc_0 // 1
+==
 &&
 return
 main_l28:
@@ -569,9 +613,7 @@ intc_0 // 1
 &&
 return
 main_l33:
-global CreatorAddress
-txn Sender
-==
+intc_0 // 1
 return
 main_l34:
 global CreatorAddress

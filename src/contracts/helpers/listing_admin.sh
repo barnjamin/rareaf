@@ -1,11 +1,11 @@
 #!/bin/bash
 source ./vars.sh
 
-make_nft=false
-create_listing=false
+make_nft=true
+create_listing=true
 tag_listing=false
 untag_listing=false
-reprice_listing=false
+reprice_listing=true
 delete_listing=true
 purchase_listing=false
 
@@ -139,7 +139,25 @@ if $delete_listing; then
         --app-arg "str:delete" \
         --foreign-asset $nft_id \
         --foreign-asset $price_id \
-        --app-account $listing_addr 
+        --app-account $listing_addr  -o app_call.txn
+
+    $GOAL app closeout --app-id $app_id -f $listing_addr -o app_close.txn
+    $GOAL clerk send -f $listing_addr -t $CREATOR -a 0 -c $CREATOR -o algo_close.txn
+
+    $SB exec "rm close.txn"
+
+    $SB exec "cat app_call.txn app_close.txn algo_close.txn > close.txn"
+    $GOAL clerk group -i close.txn -o close.txn
+
+    $GOAL clerk split -i close.txn -o close
+
+    $GOAL clerk sign -i close-0 -o app_call.txn
+    $GOAL clerk sign -i close-1 -o app_close.txn -p $listing_name
+    $GOAL clerk sign -i close-2 -o algo_close.txn -p $listing_name
+
+    $SB exec "cat app_call.txn app_close.txn algo_close.txn > close.txn"
+
+    $GOAL clerk rawsend -f close.txn
 
 fi
 

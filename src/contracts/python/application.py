@@ -1,4 +1,5 @@
-from pyteal import ScratchVar, TealType, Return, Btoi, Txn, OnComplete, Mode, Cond, compileTeal, GeneratedID
+from os import access
+from pyteal import ScratchVar, TealType, Return, Btoi, Txn, OnComplete, Mode, Cond, compileTeal, GeneratedID, Approve
 from pyteal.ast.itxn import InnerTxnBuilder
 from pyteal.ast.txn import TxnExprBuilder, TxnField
 
@@ -95,15 +96,15 @@ def approval():
     asset = ScratchVar()
 
     delete_listing = And( 
-        Global.group_size() == Int(1),
+        Global.group_size() == Int(3),
         Or(
-            valid_owner_app_call(Txn.accounts[1]),
+            valid_owner_app_call(Gtxn[0].accounts[1]),
             valid_admin_app_call()
         ),
 
         Seq(
-            owner.store(App.localGet(Txn.accounts[1], owner_key)),
-            asset.store(App.localGet(Txn.accounts[1], asset_key)),
+            owner.store(App.localGet(Gtxn[0].accounts[1], owner_key)),
+            asset.store(App.localGet(Gtxn[0].accounts[1], asset_key)),
             Int(1)
         ),
 
@@ -115,40 +116,41 @@ def approval():
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
                 TxnField.type_enum: TxnType.AssetTransfer,
-                TxnField.xfer_asset: Txn.assets[0], 
+                TxnField.xfer_asset: Gtxn[0].assets[0], 
                 TxnField.asset_amount: Int(0),
-                TxnField.sender: Txn.accounts[1],
+                TxnField.sender: Gtxn[0].accounts[1],
                 TxnField.asset_close_to: owner.load() 
             }),
             InnerTxnBuilder.Submit(),
             Int(1)
         ),
 
-        # Close Listing out of app
+        # Rekey back to listing auth
         Seq(
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
-                TxnField.type_enum: TxnType.ApplicationCall,
-                TxnField.application_id: Global.current_application_id(),
-                TxnField.on_completion: OnComplete.CloseOut,
-                TxnField.sender: Txn.accounts[1]
+                TxnField.type_enum: TxnType.Payment,
+                TxnField.amount: Int(0),
+                TxnField.sender: Gtxn[0].accounts[1],
+                TxnField.rekey_to: Gtxn[0].accounts[1],
             }),
             InnerTxnBuilder.Submit(),
             Int(1)
         ),
 
-        # Xfer seed back to owner to complete listing deletion 
-        Seq(
-            InnerTxnBuilder.Begin(),
-            InnerTxnBuilder.SetFields({
-                TxnField.type_enum: TxnType.Payment,
-                TxnField.sender: Txn.accounts[1],
-                TxnField.amount: Int(0),
-                TxnField.close_remainder_to: owner.load(),
-            }),
-            InnerTxnBuilder.Submit(),
-            Int(1)
-        )
+
+
+        # opt out of app
+        Gtxn[1].type_enum() == TxnType.ApplicationCall,
+        Gtxn[1].on_completion() == OnComplete.CloseOut,
+        Gtxn[1].application_id() == Global.current_application_id(),
+        Gtxn[1].sender() == Txn.accounts[1],
+
+        # send funds back to creator
+        Gtxn[2].type_enum() == TxnType.Payment,
+        Gtxn[2].sender() == Txn.accounts[1],
+        Gtxn[2].amount() == Int(0),
+        Gtxn[2].close_remainder_to() == owner.load()
     )
 
 
@@ -183,28 +185,30 @@ def approval():
             Int(1)
         ),
 
-        # Close out of app
-        Seq(
-            InnerTxnBuilder.Begin(),
-            InnerTxnBuilder.SetFields({
-                TxnField.type_enum: TxnType.ApplicationCall,
-                TxnField.on_completion: OnComplete.CloseOut,
-            }),
-            InnerTxnBuilder.Submit(),
-            Int(1)
-        ),
-
-        # Xfer seed back to owner 
+        # Rekey back to listing auth
         Seq(
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
                 TxnField.type_enum: TxnType.Payment,
                 TxnField.amount: Int(0),
-                TxnField.close_remainder_to: owner.load(),
+                TxnField.rekey_to: Txn.accounts[1]
             }),
             InnerTxnBuilder.Submit(),
             Int(1)
-        )
+        ),
+
+
+        # opt out of app
+        Gtxn[1].type_enum() == TxnType.ApplicationCall,
+        Gtxn[1].on_completion() == OnComplete.CloseOut,
+        Gtxn[1].application_id() == Global.current_application_id(),
+        Gtxn[1].sender() == Txn.accounts[1],
+
+        # send funds back to creator
+        Gtxn[2].type_enum() == TxnType.Payment,
+        Gtxn[2].sender() == Txn.accounts[1],
+        Gtxn[2].amount() == Int(0),
+        Gtxn[2].close_remainder_to() == owner.load()
     )
 
     # Admin stuff
@@ -248,7 +252,7 @@ def approval():
         [Txn.application_id() == Int(0),                        Return(Int(1))],
         [Txn.on_completion()  == OnComplete.DeleteApplication,  Return(is_app_creator)],
         [Txn.on_completion()  == OnComplete.UpdateApplication,  Return(is_app_creator)],
-        [Txn.on_completion()  == OnComplete.CloseOut,           Return(is_app_creator)],
+        [Txn.on_completion()  == OnComplete.CloseOut,           Approve()],
 
         # Listing actions
         [Txn.on_completion()  == OnComplete.OptIn,     Return(create_listing)],         # Initial create, rekeys to app addr

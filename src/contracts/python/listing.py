@@ -52,8 +52,29 @@ def listing():
         Gtxn[4].sender() == Gtxn[0].receiver(),
     )
 
+    destroy = And(
+        Global.group_size() == Int(3),
+
+        #App call to destroy
+        Gtxn[0].type_enum() == TxnType.ApplicationCall,
+        Gtxn[0].on_completion() == OnComplete.NoOp,
+        Gtxn[0].application_id() == app_id.load(),
+        Gtxn[0].application_args[0] == action_delete,
+
+        # opt out of app
+        Gtxn[1].type_enum() == TxnType.ApplicationCall,
+        Gtxn[1].on_completion() == OnComplete.CloseOut,
+        Gtxn[1].application_id() == app_id.load(),
+
+        # send funds back to creator
+        Gtxn[2].type_enum() == TxnType.Payment,
+        Gtxn[2].amount() == Int(0),
+        Gtxn[2].close_remainder_to() != Global.zero_address()
+    )
+
     return Cond([setup,     Int(0)], # NoOp, just sets up tmpl vars
-                [Int(1),    create]) # The only thing we do is check the initial create txn group
+                [Global.group_size()==Int(5),    create], # The only thing we do is check the initial create txn group
+                [Global.group_size()==Int(3),    destroy]) # The only thing we do is check the initial create txn group
 
 if __name__ == "__main__":
      with open(tmplpath(configuration['contracts']['listing']), 'w') as f:
