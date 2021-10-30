@@ -1,0 +1,92 @@
+#pragma version 5
+intcblock 0 1 4
+pushint 4 // TMPL_APP_ID
+store 0
+pushbytes 0x0fb8efb86e9a7e48475eff740fe804a8caed6d57d0ade4235b72d210363cfa56 // TMPL_NONCE
+store 1
+intc_0 // 0
+bnz main_l4
+intc_1 // 1
+bnz main_l3
+err
+main_l3:
+global GroupSize
+pushint 5 // 5
+==
+gtxn 0 TypeEnum
+intc_1 // pay
+==
+&&
+gtxn 0 Amount
+intc_0 // 0
+>=
+&&
+gtxn 1 TypeEnum
+pushint 6 // appl
+==
+&&
+gtxn 1 OnCompletion
+intc_1 // OptIn
+==
+&&
+gtxn 1 ApplicationID
+load 0
+==
+&&
+gtxn 2 TypeEnum
+intc_2 // axfer
+==
+&&
+gtxn 2 AssetAmount
+intc_0 // 0
+==
+&&
+gtxn 2 Sender
+gtxn 3 AssetReceiver
+==
+&&
+gtxn 2 XferAsset
+gtxn 3 XferAsset
+==
+&&
+gtxn 3 TypeEnum
+intc_2 // axfer
+==
+&&
+gtxn 3 AssetAmount
+intc_0 // 0
+>
+&&
+gtxn 3 Sender
+gtxn 0 Sender
+==
+&&
+gtxn 3 AssetReceiver
+gtxn 0 Receiver
+==
+&&
+gtxn 4 TypeEnum
+intc_1 // pay
+==
+&&
+gtxn 4 Amount
+intc_0 // 0
+==
+&&
+gtxn 4 RekeyTo
+pushbytes 0x6170704944 // "appID"
+load 0
+itob
+concat
+sha512_256
+==
+&&
+gtxn 4 Sender
+gtxn 0 Receiver
+==
+&&
+b main_l5
+main_l4:
+intc_0 // 0
+main_l5:
+return

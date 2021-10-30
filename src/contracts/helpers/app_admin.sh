@@ -11,6 +11,18 @@ destroy_price_tokens=false
 destroy_tag_tokens=false
 delete_app=false
 
+cd $PYSRCDIR
+python3 application.py
+
+cd $SRCDIR
+$SB copyTo $APP_NAME
+$SB copyTo $CLEAR_NAME
+
+$GOAL clerk compile $APP_NAME
+$GOAL clerk compile $CLEAR_NAME
+
+cd $HELPDIR
+
 if $create_app; then
     echo "Creating application"
     app_id=`$GOAL app create --creator $ADMIN \
@@ -24,8 +36,14 @@ fi
 
 echo "App ID: $app_id"
 
+
 app_addr=`$GOAL app info --app-id $app_id | grep 'Application account' | awk '{print $3}'`
 echo "App Address: $app_addr"
+
+# Write app id and address to files so we can re-use them in other scripts
+echo "$app_id" > ./app.id
+echo "$app_addr" > ./app.addr
+
 
 if $seed_app; then
     echo "Seeding application addresss"

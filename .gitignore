@@ -4,3 +4,6 @@ node_modules
 __pycache__
 .vscode
 .parcel-cache
+
+*.addr
+*.id

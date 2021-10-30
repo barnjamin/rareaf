@@ -69,26 +69,26 @@ def approval():
         Global.group_size() == Int(1),
         valid_owner_app_call(),
         valid_tag_token(Txn.assets[0]),
-        valid_listing_addr(Txn.accounts[0]),
-        ensure_opted_in(Txn.accounts[0], Txn.assets[0]),
-        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Int(1))
+        valid_listing_addr(Txn.accounts[1]),
+        ensure_opted_in(Txn.accounts[1], Txn.assets[0]),
+        ensure_token_balance(Txn.accounts[1], Txn.assets[0], Int(1))
     )
 
     untag_listing = And(
         Global.group_size() == Int(1),
         valid_owner_app_call(),
         valid_tag_token(Txn.assets[0]),
-        valid_listing_addr(Txn.accounts[0]),
-        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Int(0))
+        valid_listing_addr(Txn.accounts[1]),
+        ensure_token_balance(Txn.accounts[1], Txn.assets[0], Int(0))
     )
 
     reprice_listing = And(
         Global.group_size() == Int(1),
         valid_owner_app_call(),
         valid_price_token(Txn.assets[0]),
-        valid_listing_addr(Txn.accounts[0]),
-        ensure_opted_in(Txn.accounts[0], Txn.assets[0]),
-        ensure_token_balance(Txn.accounts[0], Txn.assets[0], Btoi(Txn.application_args[1]))
+        valid_listing_addr(Txn.accounts[1]),
+        ensure_opted_in(Txn.accounts[1], Txn.assets[0]),
+        ensure_token_balance(Txn.accounts[1], Txn.assets[0], Btoi(Txn.application_args[1]))
     )
 
     owner = ScratchVar()
@@ -102,13 +102,13 @@ def approval():
         ),
 
         Seq(
-            owner.store(App.localGet(Txn.accounts[0], owner_key)),
-            asset.store(App.localGet(Txn.accounts[0], asset_key)),
+            owner.store(App.localGet(Txn.accounts[1], owner_key)),
+            asset.store(App.localGet(Txn.accounts[1], asset_key)),
             Int(1)
         ),
 
         # Xfer tags/prices back to app
-        empty_app_tokens(Txn.accounts[0], Gtxn[0].application_args, Int(2)),
+        empty_app_tokens(Txn.accounts[1], Gtxn[0].application_args, Int(2)),
 
         # Xfer nft to buyer  
         Seq(
@@ -154,8 +154,8 @@ def approval():
         Txn.application_id() == Global.current_application_id(),
 
         Seq(
-            owner.store(App.localGet(Txn.accounts[0], owner_key)),
-            asset.store(App.localGet(Txn.accounts[0], asset_key)),
+            owner.store(App.localGet(Txn.accounts[1], owner_key)),
+            asset.store(App.localGet(Txn.accounts[1], asset_key)),
             Int(1)
         ),
 
@@ -164,7 +164,7 @@ def approval():
         check_balance_match(Gtxn[1], Txn.accounts[0], Btoi(Gtxn[0].application_args[1])), #Need to pass the id of the app asset to pay with
 
         # Xfer tags/prices back to app
-        empty_app_tokens(Txn.accounts[0], Gtxn[0].application_args, Int(2)),
+        empty_app_tokens(Txn.accounts[1], Gtxn[0].application_args, Int(2)),
 
         # Xfer nft to buyer  
         Seq(

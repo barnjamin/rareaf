@@ -1,3 +1,4 @@
+from os import curdir
 from pyteal import ScratchVar, And, TxnType, Int, AssetParam, Seq, TealType, InnerTxnBuilder, TxnField, Txn, Not, Itob, Pop
 from pyteal import Global, If, App, Bytes, Concat, Sha512_256, For, GetByte, Exp, ExtractUint64
 from pyteal import AssetHolding, Gtxn, OnComplete, Assert, Substring, Len, Or, Subroutine
@@ -24,7 +25,7 @@ def valid_owner_app_call():
         Txn.type_enum() == TxnType.ApplicationCall,
         Txn.on_completion() ==  OnComplete.NoOp,
         Txn.application_id() == Global.current_application_id(),
-        Txn.sender() == App.localGet(Txn.accounts[0], owner_key)
+        Txn.sender() == App.localGet(Txn.accounts[1], owner_key)
     )
 
 def valid_tag_token(asset_id):
@@ -49,7 +50,7 @@ def valid_listing_addr(addr):
     return App.optedIn(addr, Global.current_application_id())
 
 @Subroutine(TealType.uint64)
-def ensure_opted_in(addr, asset_id):
+def ensure_opted_in(addr: TealType.bytes, asset_id: TealType.uint64):
     ah = AssetHolding.balance(addr, asset_id)
     return Seq(
         ah,
@@ -59,9 +60,10 @@ def ensure_opted_in(addr, asset_id):
                 InnerTxnBuilder.Begin(),
                 InnerTxnBuilder.SetFields({
                     TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.xfer_asset: asset_id,
                     TxnField.asset_amount: Int(0),
-                    TxnField.receiver: Txn.accounts[0],
-                    TxnField.sender: Txn.accounts[0],
+                    TxnField.asset_receiver: Txn.accounts[1],
+                    TxnField.sender: Txn.accounts[1],
                 }),
                 InnerTxnBuilder.Submit(),
                 Int(1)
@@ -88,13 +90,14 @@ def ensure_token_balance(addr, asset_id, amt):
                 InnerTxnBuilder.Submit(),
                 Int(1)
             )
-        ).ElseIf(amt>ah.value()).Then( # Xfer asset to app addr
+        ).ElseIf(amt>ah.value()).Then( # Xfer asset to addr
             Seq(
                 InnerTxnBuilder.Begin(),
                 InnerTxnBuilder.SetFields({
                     TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.xfer_asset: asset_id,
                     TxnField.asset_amount: amt - ah.value(),
-                    TxnField.receiver: Global.current_application_address(),
+                    TxnField.asset_receiver: addr,
                 }),
                 InnerTxnBuilder.Submit(),
                 Int(1)
@@ -104,8 +107,9 @@ def ensure_token_balance(addr, asset_id, amt):
                 InnerTxnBuilder.Begin(),
                 InnerTxnBuilder.SetFields({
                     TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.xfer_asset: asset_id,
                     TxnField.asset_amount: ah.value() - amt,
-                    TxnField.receiver: addr,
+                    TxnField.asset_receiver: Global.current_application_address(),
                 }),
                 InnerTxnBuilder.Submit(),
                 Int(1)

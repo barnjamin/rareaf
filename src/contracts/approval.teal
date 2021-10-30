@@ -172,11 +172,11 @@ txn ApplicationID
 global CurrentApplicationID
 ==
 &&
-txna Accounts 0
+txna Accounts 1
 bytec_1 // "owner"
 app_local_get
 store 12
-txna Accounts 0
+txna Accounts 1
 bytec_2 // "asset"
 app_local_get
 store 13
@@ -265,7 +265,7 @@ intc_0 // 1
 &&
 return
 main_l24:
-txna Accounts 0
+txna Accounts 1
 load 17
 gtxnas 0 ApplicationArgs
 btoi
@@ -285,11 +285,11 @@ callsub sub1
 callsub sub0
 ||
 &&
-txna Accounts 0
+txna Accounts 1
 bytec_1 // "owner"
 app_local_get
 store 12
-txna Accounts 0
+txna Accounts 1
 bytec_2 // "asset"
 app_local_get
 store 13
@@ -334,7 +334,7 @@ intc_0 // 1
 &&
 return
 main_l28:
-txna Accounts 0
+txna Accounts 1
 load 14
 gtxnas 0 ApplicationArgs
 btoi
@@ -370,15 +370,15 @@ callsub sub7
 bytec_3 // "px"
 ==
 &&
-txna Accounts 0
+txna Accounts 1
 global CurrentApplicationID
 app_opted_in
 &&
-txna Accounts 0
+txna Accounts 1
 txna Assets 0
 callsub sub2
 &&
-txna Accounts 0
+txna Accounts 1
 txna Assets 0
 txna ApplicationArgs 1
 btoi
@@ -409,11 +409,11 @@ callsub sub7
 bytec_0 // "tag"
 ==
 &&
-txna Accounts 0
+txna Accounts 1
 global CurrentApplicationID
 app_opted_in
 &&
-txna Accounts 0
+txna Accounts 1
 txna Assets 0
 intc_1 // 0
 callsub sub3
@@ -443,15 +443,15 @@ callsub sub7
 bytec_0 // "tag"
 ==
 &&
-txna Accounts 0
+txna Accounts 1
 global CurrentApplicationID
 app_opted_in
 &&
-txna Accounts 0
+txna Accounts 1
 txna Assets 0
 callsub sub2
 &&
-txna Accounts 0
+txna Accounts 1
 txna Assets 0
 intc_0 // 1
 callsub sub3
@@ -604,7 +604,7 @@ global CurrentApplicationID
 ==
 &&
 txn Sender
-txna Accounts 0
+txna Accounts 1
 bytec_1 // "owner"
 app_local_get
 ==
@@ -624,11 +624,13 @@ bz sub2_l2
 itxn_begin
 intc_2 // axfer
 itxn_field TypeEnum
+load 29
+itxn_field XferAsset
 intc_1 // 0
 itxn_field AssetAmount
-txna Accounts 0
-itxn_field Receiver
-txna Accounts 0
+txna Accounts 1
+itxn_field AssetReceiver
+txna Accounts 1
 itxn_field Sender
 itxn_submit
 intc_0 // 1
@@ -663,12 +665,14 @@ sub3_l4:
 itxn_begin
 intc_2 // axfer
 itxn_field TypeEnum
+load 33
+itxn_field XferAsset
 load 36
 load 34
 -
 itxn_field AssetAmount
-load 32
-itxn_field Receiver
+global CurrentApplicationAddress
+itxn_field AssetReceiver
 itxn_submit
 intc_0 // 1
 b sub3_l7
@@ -676,12 +680,14 @@ sub3_l5:
 itxn_begin
 intc_2 // axfer
 itxn_field TypeEnum
+load 33
+itxn_field XferAsset
 load 34
 load 36
 -
 itxn_field AssetAmount
-global CurrentApplicationAddress
-itxn_field Receiver
+load 32
+itxn_field AssetReceiver
 itxn_submit
 intc_0 // 1
 b sub3_l7
