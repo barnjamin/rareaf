@@ -19,7 +19,7 @@ echo "Funding from: $funder"
 
 for m in "${mnemonics[@]}"
 do
-    acct=`$sb goal account import -m "$m" |grep 'Imported' | awk '{print $2}'`
+    acct=`$sb goal account import -m "$m" |grep 'Imported' | awk '{print $2}' | tr -d '\r'`
     echo "Imported $acct"
 
     #TODO write to file and cat them all together to send grouped txn?

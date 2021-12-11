@@ -1,11 +1,11 @@
 #!/bin/bash
 source ./vars.sh
 
-make_nft=true
-create_listing=true
+make_nft=false
+create_listing=false
 tag_listing=false
 untag_listing=false
-reprice_listing=true
+reprice_listing=false
 delete_listing=true
 purchase_listing=false
 
@@ -15,6 +15,9 @@ listing_name=listing.teal
 listing_tmpl=$SRCDIR/listing.tmpl.teal
 listing_src=$SRCDIR/$listing_name
 
+price_id=11
+tag_id=27
+
 if $make_nft; then
     echo "Making nft"
     nft_id=`$GOAL asset create --creator $CREATOR \
@@ -22,7 +25,7 @@ if $make_nft; then
                 --decimals=0 \
                 --name="NFT" \
                 --unitname="nft" \
-                --total=1 | grep 'Created asset' | awk '{print $6}'`
+                --total=1 | grep 'Created asset' | awk '{print $6}' |tr -d '\r'`
     echo "Created NFT: $nft_id"
 
     echo "$nft_id" > nft.id
@@ -33,7 +36,7 @@ if $create_listing; then
 
     echo "Create new teal contract"
     cd $PYSRCDIR
-    python3 listing.py
+    #python3 listing.py
 
     cd $SRCDIR
     cp $listing_tmpl $listing_src
@@ -43,7 +46,7 @@ if $create_listing; then
     $SB copyTo $listing_src 
 
     cd $HELPDIR
-    listing_addr=`$GOAL clerk compile $listing_name |awk '{print $2}'|tr '\r' ' '`
+    listing_addr=`$GOAL clerk compile $listing_name |awk '{print $2}'|tr -d '\r'`
     echo "$listing_addr" > listing.addr
 
 
@@ -106,7 +109,6 @@ fi
 
 if $untag_listing; then
     echo "Untagging listing"
-    tag_id=27
     $GOAL app call --app-id $app_id -f $CREATOR \
         --app-arg "str:untag" \
         --foreign-asset $tag_id \
@@ -114,8 +116,6 @@ if $untag_listing; then
 fi
 
 if $reprice_listing; then
-    price_id=9
-
     echo "Setting price"
     $GOAL app call --app-id $app_id -f $CREATOR \
         --app-arg "str:reprice" \
@@ -134,7 +134,6 @@ fi
 if $delete_listing; then
     echo "Deleting listing"
 
-    price_id=9
     $GOAL app call --app-id $app_id -f $CREATOR \
         --app-arg "str:delete" \
         --foreign-asset $nft_id \

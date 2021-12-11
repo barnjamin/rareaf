@@ -1,8 +1,8 @@
-#pragma version 5
-intcblock 0 1 6 5
-pushint 4 // TMPL_APP_ID
+#pragma version 6
+intcblock 0 1 6 5 3 4
+pushint 6 // TMPL_APP_ID
 store 0
-pushbytes 0xfb6980f6a7cfa95ffc24984412d6744aaa8c0a0c949c54e9d71a1a3589c04516 // TMPL_NONCE
+pushbytes 0xb4c318cb4ecb29d072de9182590a4c62eb8f0d9fec030014884be45bb300f1f2 // TMPL_NONCE
 store 1
 intc_0 // 0
 bnz main_l6
@@ -11,13 +11,13 @@ intc_3 // 5
 ==
 bnz main_l5
 global GroupSize
-pushint 3 // 3
+intc 4 // 3
 ==
 bnz main_l4
 err
 main_l4:
 global GroupSize
-pushint 3 // 3
+intc 4 // 3
 ==
 gtxn 0 TypeEnum
 intc_2 // appl
@@ -85,7 +85,7 @@ load 0
 ==
 &&
 gtxn 2 TypeEnum
-pushint 4 // axfer
+intc 5 // axfer
 ==
 &&
 gtxn 2 AssetAmount
@@ -101,7 +101,7 @@ gtxn 3 XferAsset
 ==
 &&
 gtxn 3 TypeEnum
-pushint 4 // axfer
+intc 5 // axfer
 ==
 &&
 gtxn 3 AssetAmount

@@ -1,12 +1,12 @@
-#pragma version 5
-intcblock 1 0 4 2
+#pragma version 6
+intcblock 1 0 4 2 3 6 10 5
 bytecblock 0x746167 0x6f776e6572 0x6173736574 0x7078
 txn ApplicationID
 intc_1 // 0
 ==
 bnz main_l36
 txn OnCompletion
-pushint 5 // DeleteApplication
+intc 7 // DeleteApplication
 ==
 bnz main_l35
 txn OnCompletion
@@ -81,7 +81,7 @@ global CurrentApplicationAddress
 ==
 assert
 load 27
-pushint 3 // 3
+intc 4 // 3
 callsub sub7
 bytec_0 // "tag"
 ==
@@ -165,7 +165,7 @@ global GroupSize
 intc_3 // 2
 ==
 txn TypeEnum
-pushint 6 // appl
+intc 5 // appl
 ==
 &&
 txn ApplicationID
@@ -256,7 +256,7 @@ itxn_submit
 intc_0 // 1
 &&
 gtxn 1 TypeEnum
-pushint 6 // appl
+intc 5 // appl
 ==
 &&
 gtxn 1 OnCompletion
@@ -302,7 +302,7 @@ store 17
 b main_l22
 main_l25:
 global GroupSize
-pushint 3 // 3
+intc 4 // 3
 ==
 gtxna 0 Accounts 1
 callsub sub1
@@ -355,7 +355,7 @@ itxn_submit
 intc_0 // 1
 &&
 gtxn 1 TypeEnum
-pushint 6 // appl
+intc 5 // appl
 ==
 &&
 gtxn 1 OnCompletion
@@ -459,7 +459,7 @@ global CurrentApplicationAddress
 ==
 assert
 load 7
-pushint 3 // 3
+intc 4 // 3
 callsub sub7
 bytec_0 // "tag"
 ==
@@ -494,7 +494,7 @@ global CurrentApplicationAddress
 ==
 assert
 load 3
-pushint 3 // 3
+intc 4 // 3
 callsub sub7
 bytec_0 // "tag"
 ==
@@ -515,7 +515,7 @@ callsub sub3
 return
 main_l32:
 global GroupSize
-pushint 5 // 5
+intc 7 // 5
 ==
 gtxn 0 TypeEnum
 intc_0 // pay
@@ -526,7 +526,7 @@ intc_1 // 0
 >=
 &&
 gtxn 1 TypeEnum
-pushint 6 // appl
+intc 5 // appl
 ==
 &&
 gtxn 1 OnCompletion
@@ -630,7 +630,7 @@ intc_0 // 1
 return
 sub0: // valid_admin_app_call
 txn TypeEnum
-pushint 6 // appl
+intc 5 // appl
 ==
 txn OnCompletion
 intc_1 // NoOp
@@ -648,7 +648,7 @@ retsub
 sub1: // valid_owner_app_call
 store 28
 txn TypeEnum
-pushint 6 // appl
+intc 5 // appl
 ==
 txn OnCompletion
 intc_1 // NoOp
@@ -773,7 +773,7 @@ sub4: // create_token
 store 39
 store 38
 itxn_begin
-pushint 3 // acfg
+intc 4 // acfg
 itxn_field TypeEnum
 load 38
 itxn_field ConfigAssetUnitName
@@ -803,7 +803,7 @@ retsub
 sub5: // destroy_token
 store 40
 itxn_begin
-pushint 3 // acfg
+intc 4 // acfg
 itxn_field TypeEnum
 load 40
 itxn_field ConfigAsset
@@ -893,7 +893,7 @@ intc_1 // 0
 ==
 bnz sub11_l5
 load 50
-pushint 10 // 10
+intc 6 // 10
 /
 intc_1 // 0
 >
@@ -901,14 +901,14 @@ bnz sub11_l4
 pushbytes 0x // ""
 sub11_l3:
 load 50
-pushint 10 // 10
+intc 6 // 10
 %
 callsub sub9
 concat
 b sub11_l6
 sub11_l4:
 load 50
-pushint 10 // 10
+intc 6 // 10
 /
 load 50
 swap
@@ -928,7 +928,7 @@ getbyte
 retsub
 sub13: // ilog10
 store 47
-pushint 10 // 10
+intc 6 // 10
 load 47
 exp
 retsub
