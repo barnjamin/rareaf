@@ -120,7 +120,7 @@ def get_int_from_list(arr, idx):
 # it also assumes the .map.json will be there with the template variable details
 def blank_contract(tc):
     contract = list(get_contract(tc+".populated"))
-    details = get_details(tc+"map.json")
+    details = get_details(tc+".map.json")
 
     found = {}
     for k,v in details.items():
@@ -218,7 +218,9 @@ if __name__ == "__main__":
         "TMPL_FEE_AMT": 1000000,
         "TMPL_OWNER_ADDR": "deadbeef",
         "TMPL_PRICE_ID": 5,
-        "TMPL_SEED_AMT": 10000 
+        "TMPL_SEED_AMT": 10000,
+        "TMPL_OTHER_OWNER_ADDR": "deadbeef",
+
     }
 
     populate_contract(sys.argv[1], vars)
