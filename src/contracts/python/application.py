@@ -277,7 +277,7 @@ def clear():
 
 if __name__ == "__main__":
     with open(tealpath(configuration['contracts']['approval']), "w") as pa_file:
-        pa_file.write(compileTeal(approval(), Mode.Application, version=5, assembleConstants=True))
+        pa_file.write(compileTeal(approval(), Mode.Application, version=6, assembleConstants=True))
 
     with open(tealpath(configuration['contracts']['clear']), "w") as pc_file:
-        pc_file.write(compileTeal(clear(), Mode.Application, version=5, assembleConstants=True))
+        pc_file.write(compileTeal(clear(), Mode.Application, version=6, assembleConstants=True))

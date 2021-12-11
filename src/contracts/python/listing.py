@@ -78,4 +78,4 @@ def listing():
 
 if __name__ == "__main__":
      with open(tmplpath(configuration['contracts']['listing']), 'w') as f:
-        f.write(compileTeal(listing(), Mode.Signature, version=5, assembleConstants=True))
+        f.write(compileTeal(listing(), Mode.Signature, version=6, assembleConstants=True))
