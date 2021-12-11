@@ -1,11 +1,11 @@
 #!/bin/bash
 source ./vars.sh
 
-make_nft=false
-create_listing=false
-tag_listing=false
-untag_listing=false
-reprice_listing=false
+make_nft=true
+create_listing=true
+tag_listing=true
+untag_listing=true
+reprice_listing=true
 delete_listing=true
 purchase_listing=false
 
@@ -22,7 +22,7 @@ if $make_nft; then
                 --decimals=0 \
                 --name="NFT" \
                 --unitname="nft" \
-                --total=1 | grep 'Created asset' | awk '{print $6}'`
+                --total=1 | grep 'Created asset' | awk '{print $6}' |tr -d '\r'`
     echo "Created NFT: $nft_id"
 
     echo "$nft_id" > nft.id
@@ -43,7 +43,7 @@ if $create_listing; then
     $SB copyTo $listing_src 
 
     cd $HELPDIR
-    listing_addr=`$GOAL clerk compile $listing_name |awk '{print $2}'|tr '\r' ' '`
+    listing_addr=`$GOAL clerk compile $listing_name |awk '{print $2}'|tr -d '\r'`
     echo "$listing_addr" > listing.addr
 
 

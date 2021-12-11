@@ -31,13 +31,13 @@ if $create_app; then
         --global-byteslices 16 \
         --global-ints 16 \
         --local-ints 1 \
-        --local-byteslices 1  | grep 'Created app' |awk '{print $6}'`
+        --local-byteslices 1  | grep 'Created app' |awk '{print $6}' | tr -d '\r'`
 fi
 
 echo "App ID: $app_id"
 
 
-app_addr=`$GOAL app info --app-id $app_id | grep 'Application account' | awk '{print $3}'`
+app_addr=`$GOAL app info --app-id $app_id | grep 'Application account' | awk '{print $3}' | tr -d '\r'`
 echo "App Address: $app_addr"
 
 # Write app id and address to files so we can re-use them in other scripts
@@ -58,14 +58,14 @@ if $create_price_tokens; then
                 --decimals=6 \
                 --name="USDC" \
                 --unitname="USDC" \
-                --total=100000000000 | grep 'Created asset' | awk '{print $6}'`
+                --total=100000000000 | grep 'Created asset' | awk '{print $6}' | tr -d '\r'`
 
     created_2=`$GOAL asset create --creator $ADMIN \
                 --asseturl="https://tether.com" \
                 --decimals=6 \
                 --name="Tether USDt" \
                 --unitname="USDt" \
-                --total=100000000000 | grep 'Created asset' | awk '{print $6}'`
+                --total=100000000000 | grep 'Created asset' | awk '{print $6}'| tr -d '\r'`
 
 
     # Now create App specific tokens

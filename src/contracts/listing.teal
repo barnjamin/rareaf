@@ -2,7 +2,7 @@
 intcblock 0 1 4
 pushint 4 // TMPL_APP_ID
 store 0
-pushbytes 0x0fb8efb86e9a7e48475eff740fe804a8caed6d57d0ade4235b72d210363cfa56 // TMPL_NONCE
+pushbytes 0x0bcc09a4a8a0a02a0089e8f17eee545fae2689f7ed68d554b7ffcba60eaf9ccb // TMPL_NONCE
 store 1
 intc_0 // 0
 bnz main_l4
