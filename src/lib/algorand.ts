@@ -108,19 +108,15 @@ export async function getListings(tagName: string, minPrice=0, maxPrice=0): Prom
 
     const balances =  await lookup.do()
 
-    const lp = []
     const listings = []
     for (let bidx in balances.balances) {
         const b = balances.balances[bidx]
 
         if (b.address == ps.application.owner_addr || b.amount == 0) continue;
 
-        lp.push(getListing(b.address).then((listing)=>{
-             listings.push(listing)
-        }))
+        const listing = await getListing(b.address);
+        listings.push(listing);
     }
-
-    await Promise.all(lp)
 
     return listings
 }
