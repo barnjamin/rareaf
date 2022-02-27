@@ -1,5 +1,5 @@
 import { ApplicationConfiguration, get_template_vars } from './application-configuration'
-import { get_listing_sig, get_platform_owner } from './contracts'
+import { get_listing_sig } from './contracts'
 import {
     uintToB64, 
     addrToB64, 
@@ -12,9 +12,10 @@ import {
     get_asa_xfer_txn, 
     get_asa_optin_txn, 
     get_pay_txn, 
-    get_app_call_txn
+    get_app_call_txn,
+    get_app_optin_txn
 } from './transactions'
-import algosdk, { Transaction } from 'algosdk';
+import algosdk, { OnApplicationComplete, Transaction } from 'algosdk';
 import { Wallet } from 'algorand-session-wallet';
 import { NFT } from './nft'
 import { TagToken } from './tags'
@@ -55,9 +56,7 @@ export class Listing {
 
     getVars() {
         return get_template_vars(this.ac, {
-            "TMPL_ASSET_ID":"b64("+uintToB64(this.asset_id)+")",
-            "TMPL_CREATOR_ADDR": addrToB64(this.creator_addr),
-            "TMPL_PRICE_ID": this.price_token.id,
+            "TMPL_NONCE": "0x"+Buffer.from((Math.random() + 1).toString(36).substring(7)).toString("hex"),
         })
     }
 
@@ -65,42 +64,34 @@ export class Listing {
         const lsig = await get_listing_sig(this.getVars())
         this.contract_addr = lsig.address();
 
-        const args = [Method.Create, uintToB64(this.price), Buffer.from(lsig.lsig.logic).toString('base64')]
+        /*
+            Seed creator => listing addr 
+            listing opt into app
+            listing opt into nft
+            xfer nft creator=>listing
+            rekey listing to app addr 
+        */
 
         const suggestedParams = await getSuggested(10)
 
-        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
-        app_call_txn.appForeignAssets = [this.price_token.id]        
-        app_call_txn.appAccounts = [algosdk.decodeAddress(this.ac.owner_addr)]
+        const seed_txn = new Transaction(get_pay_txn(suggestedParams, this.creator_addr, this.contract_addr, 1e8))
+        const listing_app_optin = new Transaction(get_app_optin_txn(suggestedParams, this.contract_addr, this.ac.id))
+        const listing_nft_optin = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.asset_id)) 
+        const nft_xfer = new Transaction(get_asa_xfer_txn(suggestedParams, this.creator_addr, this.contract_addr, this.asset_id, 1))
+        const listing_rekey = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, this.contract_addr, 0))
+        listing_rekey.reKeyTo = algosdk.decodeAddress(this.ac.app_addr)
 
-        const seed_txn = new Transaction(get_pay_txn(suggestedParams, this.creator_addr, this.contract_addr, this.ac.seed_amt))
-        const asa_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.asset_id))
-        const price_opt_in = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, this.price_token.id))
-        const price_send = new Transaction(get_asa_xfer_txn(suggestedParams, this.ac.owner_addr, this.contract_addr, this.price_token.id, this.price))
-        const asa_send = new Transaction(get_asa_xfer_txn(suggestedParams, this.creator_addr, this.contract_addr, this.asset_id, 1))
-        const asa_cfg = new Transaction(get_asa_cfg_txn(suggestedParams, this.creator_addr, this.asset_id, {
-            assetManager:  this.contract_addr,
-            assetReserve:  this.contract_addr,
-            assetFreeze:   this.contract_addr,
-            assetClawback: this.contract_addr
-        }))
-
-        const grouped = [app_call_txn, seed_txn, asa_opt_in, price_opt_in, asa_send, price_send, asa_cfg]
+        const grouped = [seed_txn, listing_app_optin, listing_nft_optin, nft_xfer, listing_rekey]
 
         algosdk.assignGroupID(grouped)
 
-        const [s_app_call_txn, s_seed_txn, /*asa_optin*/, /*price_optin*/,s_asa_send, /*price_send*/, s_asa_cfg] = await wallet.signTxn(grouped)
+        const [s_seed_txn, /*listing_app_optin*/, /*listing_nft_optin*/, s_nft_xfer, /*listing_rekey*/] = await wallet.signTxn(grouped)
 
-        const s_asa_opt_in = algosdk.signLogicSigTransactionObject(asa_opt_in, lsig);
-        const s_price_opt_in = algosdk.signLogicSigTransactionObject(price_opt_in, lsig);
+        const s_app_opt_in = algosdk.signLogicSigTransactionObject(listing_app_optin, lsig);
+        const s_nft_opt_in = algosdk.signLogicSigTransactionObject(listing_nft_optin, lsig);
+        const s_rekey = algosdk.signLogicSigTransactionObject(listing_rekey, lsig);
 
-        const platform_lsig = await get_platform_owner(get_template_vars(this.ac, {}))
-        const s_price_send = algosdk.signLogicSigTransactionObject(price_send, platform_lsig)
-
-        const combined = [
-            s_app_call_txn, s_seed_txn, s_asa_opt_in,
-            s_price_opt_in, s_asa_send, s_price_send, s_asa_cfg
-        ]
+        const combined = [ s_seed_txn, s_app_opt_in, s_nft_opt_in, s_nft_xfer, s_rekey ]
 
         return await sendWait(combined)
     }
@@ -122,243 +113,148 @@ export class Listing {
     }
 
     async doTag(wallet: Wallet, tag: TagToken, execute: boolean=true) {
-        const args = [Method.Tag]
-        const fasset = [tag.id]
+        const suggestedParams = await getSuggested(100)
+        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, [Method.Tag]))
+        app_call_txn.appForeignAssets =  [tag.id]
+        app_call_txn.appAccounts = [algosdk.decodeAddress(this.contract_addr)]
 
-        const suggestedParams = await getSuggested(10)
-
-        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
-        app_call_txn.appForeignAssets = fasset
-
-        const tag_optin_txn = new Transaction(get_asa_optin_txn(suggestedParams, this.contract_addr, tag.id))
-        const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.ac.owner_addr, this.contract_addr, tag.id, 1))
-
-        const grouped = [app_call_txn, tag_optin_txn, tag_xfer_txn]
-        algosdk.assignGroupID(grouped)
-
-        const [s_app_call_txn, /*tag_optin*/ , /*tag_xfer*/ ] = await wallet.signTxn(grouped)
-
-
-        const listing_lsig = await getLogicFromTransaction(this.contract_addr)
-
-        const s_tag_optin_txn = algosdk.signLogicSigTransactionObject(tag_optin_txn, listing_lsig)
-
-        const platform_lsig = await get_platform_owner(get_template_vars(this.ac, {}))
-        const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, platform_lsig)
-
-        const txngroup =  [s_app_call_txn, s_tag_optin_txn, s_tag_xfer_txn]
+        const [s_app_call_txn] = await wallet.signTxn([app_call_txn])
 
         this.tags.push(tag)
 
-        if(!execute) return sendWait(txngroup)
-
-        return await sendWait(txngroup)
+        if(!execute) return sendWait([s_app_call_txn])
+        return await sendWait([s_app_call_txn])
     }
 
     async doUntag(wallet: Wallet, tag: TagToken, execute: boolean=true) {
-        const args = [Method.Untag]
-        const fasset = [tag.id]
-
         const suggestedParams = await getSuggested(10)
+        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, [Method.Untag]))
+        app_call_txn.appForeignAssets =  [tag.id]
+        app_call_txn.appAccounts = [algosdk.decodeAddress(this.contract_addr)]
 
-        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
-        app_call_txn.appForeignAssets = fasset
-
-        const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, tag.id, 1))
-        tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
-
-        const grouped = [app_call_txn, tag_xfer_txn]
-        algosdk.assignGroupID(grouped)
-
-        const [s_app_call_txn, /*tag_xfer*/] = await wallet.signTxn(grouped)
-
-        const listing_lsig = await getLogicFromTransaction(this.contract_addr)
-        const s_tag_xfer_txn = algosdk.signLogicSigTransactionObject(tag_xfer_txn, listing_lsig)
-
-        const txngroup = [s_app_call_txn, s_tag_xfer_txn]
+        const [s_app_call_txn] = await wallet.signTxn([app_call_txn])
 
         this.tags = this.tags.filter((t)=>{ return t.id!=tag.id })
 
-        if(!execute) return sendWait(txngroup)
-
-        await sendWait(txngroup)
+        if(!execute) return sendWait([s_app_call_txn])
+        await sendWait([s_app_call_txn])
     }
 
-    async doPriceChange(wallet: Wallet, new_price:number ) {
-        const diff = this.price - new_price 
+    async doPriceChange(wallet: Wallet, new_price:number) {
+        const suggestedParams = await getSuggested(100)
 
-        try {
-            if (diff<0) return await this.doPriceIncrease(wallet, Math.abs(diff))
-            else await this.doPriceDecrease(wallet, diff)
-        }catch(error){
-            showErrorToaster("Couldn't update price: " + error)
-            return
-        }
+        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, [Method.Reprice, uintToB64(new_price)]))
+        app_call_txn.appForeignAssets = [this.price_token.id]
+        app_call_txn.appAccounts = [algosdk.decodeAddress(this.contract_addr)]
 
-        this.price = new_price
-    }
+        const [s_app_call_txn] = await wallet.signTxn([app_call_txn])
 
-
-    async doPriceIncrease(wallet: Wallet, amt: number) {
-
-        const args = [Method.PriceIncrease, uintToB64(amt)]
-        const fasset = [this.price_token.id]
-        const suggestedParams = await getSuggested(10)
-
-        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
-        app_call_txn.appForeignAssets = fasset
-        //app_call_txn.appAccounts = [algosdk.decodeAddress(this.ac.owner_addr)]
-
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.ac.owner_addr, this.contract_addr, this.price_token.id, amt))
-
-        const grouped = [app_call_txn, price_xfer_txn]
-        algosdk.assignGroupID(grouped)
-
-        const [s_app_call_txn, /* price_xfer */] = await wallet.signTxn(grouped)
-
-        const platform_lsig = await get_platform_owner(get_template_vars(this.ac, {}))
-        const s_price_xfer_txn = algosdk.signLogicSigTransactionObject(price_xfer_txn, platform_lsig)
-
-        return await sendWait([s_app_call_txn, s_price_xfer_txn])
-    }
-
-    async doPriceDecrease(wallet: Wallet, amt: number) {
-        const args = [Method.PriceDecrease, uintToB64(amt)]
-        const fasset = [this.price_token.id]
-        const suggestedParams = await getSuggested(10)
-
-        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
-        app_call_txn.appForeignAssets = fasset
-
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_token.id, amt))
-        const grouped = [app_call_txn, price_xfer_txn]
-        algosdk.assignGroupID(grouped)
-
-        const [s_app_call_txn, /*price_xfer*/] = await wallet.signTxn(grouped)
-
-        const listing_lsig = await getLogicFromTransaction(this.contract_addr)
-        const s_price_xfer_txn = algosdk.signLogicSigTransactionObject(price_xfer_txn, listing_lsig)
-
-        return await sendWait([s_app_call_txn, s_price_xfer_txn])
+        return await sendWait([s_app_call_txn])
     }
 
     async doDelete(wallet: Wallet): Promise<boolean> {
-        const args = [Method.Delete]
-        const suggestedParams = await getSuggested(10)
 
-        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, args))
+        /*
+            app call to delete from creator
+            app call to close out from lsig
+            close algos to creator
+        */
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_token.id, 0))
-        price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
 
-        const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.contract_addr, this.asset_id, {
-            assetManager: this.creator_addr,
-            assetReserve: this.creator_addr,
-            assetFreeze: this.creator_addr,
-            assetClawback: this.creator_addr
-        }))
+        const suggestedParams = await getSuggested(100)
 
-        const asa_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.creator_addr, this.asset_id, 0))
-        asa_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
+        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.creator_addr, [Method.Delete]))
+        app_call_txn.appForeignAssets = [this.asset_id, this.price_token.id]
+        app_call_txn.appAccounts = [algosdk.decodeAddress(this.contract_addr)]
+
+        const app_close_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, this.contract_addr, []))
+        app_close_txn.appOnComplete = OnApplicationComplete.CloseOutOC
 
         const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, this.creator_addr, 0))
         algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
-        const tagTxns = []
-        for(let t in this.tags){
-            const tag = this.tags[t]
-            const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, tag.id, 0))
-            tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
-            tagTxns.push(tag_xfer_txn)
-        }
-
-        const grouped = [app_call_txn, price_xfer_txn,  asa_xfer_txn,  asa_cfg_txn, ...tagTxns, algo_close_txn]
+        const grouped = [app_call_txn, app_close_txn, algo_close_txn]
         algosdk.assignGroupID(grouped)
 
-        const [s_app_call_txn, /*price_xfer */, /*asa_xfer*/, /*asa_cfg */, /*tag_txns*/, /*algo_close */]  = await wallet.signTxn(grouped)
+        const [s_app_call_txn, /*app_close*/, /*algo_close */]  = await wallet.signTxn(grouped)
 
         const listing_lsig = await getLogicFromTransaction(this.contract_addr)
-        const s_price_xfer_txn  = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)
-        const s_asa_cfg_txn     = algosdk.signLogicSigTransaction(asa_cfg_txn, listing_lsig)
-        const s_asa_xfer_txn    = algosdk.signLogicSigTransaction(asa_xfer_txn, listing_lsig)
+
+        const s_app_close_txn   = algosdk.signLogicSigTransaction(app_close_txn, listing_lsig)
         const s_algo_close_txn  = algosdk.signLogicSigTransaction(algo_close_txn, listing_lsig)
 
-        const s_tagTxns = []
-        for(let t in tagTxns){
-            s_tagTxns.push(algosdk.signLogicSigTransactionObject(tagTxns[t], listing_lsig))
-        }
-
-        const combined = [s_app_call_txn, s_price_xfer_txn,  s_asa_xfer_txn,  s_asa_cfg_txn, ...s_tagTxns, s_algo_close_txn]
+        const combined = [s_app_call_txn, s_app_close_txn, s_algo_close_txn]
 
         return await sendWait(combined) !== undefined
     }
 
     async doPurchase(wallet: Wallet): Promise<boolean> {
-        const args = [Method.Purchase]
-        const suggestedParams = await getSuggested(10)
+        return false
+        //const args = [Method.Purchase]
+        //const suggestedParams = await getSuggested(10)
 
-        const buyer = wallet.getDefaultAccount()
+        //const buyer = wallet.getDefaultAccount()
 
-        const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, buyer, args))
-        app_call_txn.appAccounts = [algosdk.decodeAddress(this.creator_addr), algosdk.decodeAddress(this.contract_addr)]
-        app_call_txn.appForeignAssets = [this.price_token.id]
+        //const app_call_txn = new Transaction(get_app_call_txn(suggestedParams, this.ac.id, buyer, args))
+        //app_call_txn.appAccounts = [algosdk.decodeAddress(this.creator_addr), algosdk.decodeAddress(this.contract_addr)]
+        //app_call_txn.appForeignAssets = [this.price_token.id]
 
-        const purchase_amt_txn = new Transaction(get_pay_txn(suggestedParams, buyer, this.creator_addr, this.price))
+        //const purchase_amt_txn = new Transaction(get_pay_txn(suggestedParams, buyer, this.creator_addr, this.price))
 
-        const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_token.id, 0))
-        price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
+        //const price_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.price_token.id, 0))
+        //price_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
 
-        const asa_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, buyer, this.asset_id, 0))
-        asa_xfer_txn.closeRemainderTo = algosdk.decodeAddress(buyer)
+        //const asa_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, buyer, this.asset_id, 0))
+        //asa_xfer_txn.closeRemainderTo = algosdk.decodeAddress(buyer)
 
-        const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.contract_addr, this.asset_id, {
-            assetManager: buyer,
-            assetReserve: buyer,
-            assetFreeze: buyer,
-            assetClawback: buyer,
-        }))
+        //const asa_cfg_txn = new Transaction(get_asa_cfg_txn(suggestedParams, this.contract_addr, this.asset_id, {
+        //    assetManager: buyer,
+        //    assetReserve: buyer,
+        //    assetFreeze: buyer,
+        //    assetClawback: buyer,
+        //}))
 
-        const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.ac.fee_amt))
-        algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
-
-
-        const tagTxns = []
-        for(let t in this.tags){
-            const tag = this.tags[t]
-            const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, tag.id, 0))
-            tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
-            tagTxns.push(tag_xfer_txn)
-        }
-
-        const grouped = [
-            app_call_txn, purchase_amt_txn, 
-            asa_xfer_txn, price_xfer_txn, 
-            asa_cfg_txn, ...tagTxns, algo_close_txn
-        ]
-
-        algosdk.assignGroupID(grouped)
+        //const algo_close_txn = new Transaction(get_pay_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, this.ac.fee_amt))
+        //algo_close_txn.closeRemainderTo = algosdk.decodeAddress(this.creator_addr)
 
 
-        const [s_app_call_txn, s_purchase_amt_txn, /*asa_xfer*/, /*price_xfer*/, /*asa_cfg*/ , /* tag_txns */, /*algo_close*/] = await wallet.signTxn(grouped)
+        //const tagTxns = []
+        //for(let t in this.tags){
+        //    const tag = this.tags[t]
+        //    const tag_xfer_txn = new Transaction(get_asa_xfer_txn(suggestedParams, this.contract_addr, this.ac.owner_addr, tag.id, 0))
+        //    tag_xfer_txn.closeRemainderTo = algosdk.decodeAddress(this.ac.owner_addr)
+        //    tagTxns.push(tag_xfer_txn)
+        //}
 
-        const listing_lsig     = await getLogicFromTransaction(this.contract_addr)
-        const s_price_xfer_txn = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)
-        const s_asa_cfg_txn    = algosdk.signLogicSigTransaction(asa_cfg_txn, listing_lsig)
-        const s_asa_xfer_txn   = algosdk.signLogicSigTransaction(asa_xfer_txn, listing_lsig)
-        const s_algo_close_txn = algosdk.signLogicSigTransaction(algo_close_txn, listing_lsig)
+        //const grouped = [
+        //    app_call_txn, purchase_amt_txn, 
+        //    asa_xfer_txn, price_xfer_txn, 
+        //    asa_cfg_txn, ...tagTxns, algo_close_txn
+        //]
 
-        const s_tagTxns = []
-        for(let t in tagTxns){
-            s_tagTxns.push(algosdk.signLogicSigTransactionObject(tagTxns[t], listing_lsig))
-        }
+        //algosdk.assignGroupID(grouped)
 
-        const combined = [
-            s_app_call_txn, s_purchase_amt_txn, 
-            s_asa_xfer_txn, s_price_xfer_txn, 
-            s_asa_cfg_txn, ...s_tagTxns, s_algo_close_txn
-        ]
 
-        return await sendWait(combined) !== undefined
+        //const [s_app_call_txn, s_purchase_amt_txn, /*asa_xfer*/, /*price_xfer*/, /*asa_cfg*/ , /* tag_txns */, /*algo_close*/] = await wallet.signTxn(grouped)
+
+        //const listing_lsig     = await getLogicFromTransaction(this.contract_addr)
+        //const s_price_xfer_txn = algosdk.signLogicSigTransaction(price_xfer_txn, listing_lsig)
+        //const s_asa_cfg_txn    = algosdk.signLogicSigTransaction(asa_cfg_txn, listing_lsig)
+        //const s_asa_xfer_txn   = algosdk.signLogicSigTransaction(asa_xfer_txn, listing_lsig)
+        //const s_algo_close_txn = algosdk.signLogicSigTransaction(algo_close_txn, listing_lsig)
+
+        //const s_tagTxns = []
+        //for(let t in tagTxns){
+        //    s_tagTxns.push(algosdk.signLogicSigTransactionObject(tagTxns[t], listing_lsig))
+        //}
+
+        //const combined = [
+        //    s_app_call_txn, s_purchase_amt_txn, 
+        //    s_asa_xfer_txn, s_price_xfer_txn, 
+        //    s_asa_cfg_txn, ...s_tagTxns, s_algo_close_txn
+        //]
+
+        //return await sendWait(combined) !== undefined
     }
 }
 

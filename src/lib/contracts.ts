@@ -5,18 +5,15 @@ import { platform_settings as ps } from './platform-conf'
 import {sha256} from 'js-sha256'
 
 //@ts-ignore
-import listing_var_positions from '../contracts/listing.tmpl.teal.json'
+import listing_var_positions from '../contracts/listing.json'
 //@ts-ignore
 import listing_template from '../contracts/listing.tmpl.teal'
 
 
 //@ts-ignore
-import platform_approval_template from '../contracts/platform-approval.tmpl.teal'
+import platform_approval_template from '../contracts/approval.teal'
 //@ts-ignore
-import platform_clear_template from '../contracts/platform-clear.tmpl.teal'
-
-//@ts-ignore
-import platform_owner_template from '../contracts/platform-owner.tmpl.teal'
+import platform_clear_template from '../contracts/clear.teal'
 
 
 export const dummy_addr = "b64(YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=)"
@@ -28,11 +25,6 @@ export async function get_listing_sig(vars: any): Promise<LogicSigAccount> {
     return new LogicSigAccount(program_bytes);
 }
 
-export async function get_platform_owner(vars: any): Promise<LogicSigAccount> {
-    const program       = await get_contract_compiled(platform_owner_template, vars)
-    const program_bytes = new Uint8Array(Buffer.from(program.result, "base64"));
-    return new LogicSigAccount(program_bytes);
-}
 
 export async function get_listing_hash(vars: any): Promise<Buffer> {
     const compiled = await get_listing_compiled(vars)

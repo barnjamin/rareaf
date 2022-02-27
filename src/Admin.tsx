@@ -32,16 +32,16 @@ export default function Admin(props: AdminProps) {
     const [indexer, setIndexer] = React.useState(ps.indexer)
     const [ipfs, setIPFS] = React.useState(ps.ipfs)
     const [loading, setLoading] = React.useState(false)
-    const [tags, setTags] = React.useState(props.ac.tags)
+    const [tags, setTags] = React.useState<TagToken[]>(props.ac.tags)
     const [prices, setPrices] = React.useState(props.ac.price_ids)
     const [ac, setApplicationConfiguration] = React.useState(props.ac)
 
     const [priceOptions, setPriceOptions] = React.useState([])
 
     React.useEffect(() => { 
-        setTags(props.ac.tags) 
+        setTags(props.ac.tags?props.ac.tags:[]) 
         setApplicationConfiguration(props.ac) 
-        setPrices(props.ac.price_ids)
+        setPrices(props.ac.price_ids?props.ac.price_ids:[])
     }, [props.ac])
 
 
@@ -138,16 +138,18 @@ export default function Admin(props: AdminProps) {
             setLoading(false)
         }
     }
+
     function handleTagRemove(e) {
         // Create Txn to remove  
         setLoading(true)
         showInfo("Removing tag")
 
-        const tid = parseInt(e.key)
-        const tag = tags.find(t => { return t.id == tid })
+        const tid = parseInt(e.key);
+        const tag = tags.find(t => { return t.id == tid });
 
+        const t = new TagToken(ac, tag.name, tag.id)
         try {
-            tag.destroy(props.wallet)
+            t.destroy(props.wallet)
                 .then(success => {
                     if (success) {
                         const filtered = tags.filter(t => { return t.id !== tid })

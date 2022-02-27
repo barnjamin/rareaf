@@ -1,12 +1,12 @@
 #!/bin/bash
 source ./vars.sh
 
-make_nft=false
-create_listing=false
-tag_listing=false
+make_nft=true
+create_listing=true
+tag_listing=true
 untag_listing=false
 reprice_listing=false
-delete_listing=true
+delete_listing=false
 purchase_listing=false
 
 echo "Using AppId: $app_id ($app_addr)"

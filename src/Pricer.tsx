@@ -56,13 +56,13 @@ export function Pricer(props: PricerProps) {
     return (
         <PriceMultiSelect 
             {...props.renderProps}
-            placeholder="Tag your listing..."
+            placeholder="Add Price tokens"
             itemRenderer={renderPriceItem}
             tagRenderer={renderPriceTag}
             onItemSelect={handlePrice}
             onQueryChange={searchForAssets}
             selectedItems={props.prices}
-            tagInputProps={{ onRemove:handleUnprice}}
+            tagInputProps={{onRemove:handleUnprice}}
             itemsEqual="id"
             items={priceOpts} 
         />

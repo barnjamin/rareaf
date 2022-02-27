@@ -1,11 +1,11 @@
 #!/bin/bash
 source ./vars.sh
 
-create_app=true
-seed_app=true
+create_app=false
+seed_app=false
 
 create_price_tokens=true
-create_tag_tokens=true
+create_tag_tokens=false
 
 destroy_price_tokens=false
 destroy_tag_tokens=false
@@ -68,15 +68,15 @@ if $create_price_tokens; then
                 --total=100000000000 | grep 'Created asset' | awk '{print $6}'| tr -d '\r'`
 
 
-    # Now create App specific tokens
-    echo "Creating price tokens"
-    $GOAL app call --app-id $app_id -f $ADMIN \
-                --app-arg "str:create_price" \
-                --foreign-asset $created_1
+    ## Now create App specific tokens
+    #echo "Creating price tokens"
+    #$GOAL app call --app-id $app_id -f $ADMIN \
+    #            --app-arg "str:create_price" \
+    #            --foreign-asset $created_1
 
-    $GOAL app call --app-id $app_id -f $ADMIN \
-                --app-arg "str:create_price" \
-                --foreign-asset $created_2
+    #$GOAL app call --app-id $app_id -f $ADMIN \
+    #            --app-arg "str:create_price" \
+    #            --foreign-asset $created_2
 fi
 
 if $destroy_price_tokens; then 

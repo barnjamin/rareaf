@@ -104,38 +104,21 @@ export default function NFTViewer(props: NFTViewerProps) {
     }
     async function handlePriceTokenChange(pt: PriceToken){ setPriceToken(pt) }
 
-    async function handleOptIn(): Promise<boolean> {
-        if(props.wallet === undefined || optedIn) return false
-
-        showInfo("Creating Transaction to Opt-In to application")
-
-        const app = new Application(props.ac)
-        try {
-            await app.optIn(props.wallet) 
-            return true
-        }catch(error){
-            showErrorToaster("Failed to opt into Application: "+error.toString())
-        }
-        return false 
-    }
-
     async function handleSubmitListing(){
         setWaiting(true); 
 
         try{
-            await handleOptIn()
-
-
             showInfo("Creating listing transaction")
             const lst = new Listing(price, priceToken.id, parseInt(id), props.acct, props.ac)
 
-               // Trigger popup to get event for signing 
             await lst.doCreate(props.wallet)
 
             if(tags.length > 0 ){
                 showInfo("Adding tags")
                 await lst.doTags(props.wallet, tags)
             }
+
+            await lst.doPriceChange(props.wallet, price)
 
             history.push("/listing/"+lst.contract_addr)
 

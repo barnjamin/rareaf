@@ -1,5 +1,3 @@
-import { TagToken } from './tags'
-import { addrToB64 } from './algorand'
 import {ApplicationConfiguration} from './application-configuration'
 
 type AlgodConf = {

@@ -1,4 +1,4 @@
-import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash, get_platform_owner } from "./contracts"
+import { dummy_addr, dummy_id, get_approval_program, get_clear_program, get_listing_hash } from "./contracts"
 import { addrToB64, sendWait, getSuggested, getTransaction, getLogicFromTransaction, download_txns } from "./algorand"
 import {
     get_app_update_txn, 
@@ -12,7 +12,7 @@ import {
     get_app_config_txn,
 } from "./transactions"
 import {Wallet} from 'algorand-session-wallet'
-import algosdk, { Transaction } from 'algosdk';
+import algosdk, { getApplicationAddress, Transaction } from 'algosdk';
 import { 
     platform_settings as ps ,
 } from "./platform-conf";
@@ -24,18 +24,22 @@ import { PriceToken } from "./price";
 declare const AlgoSigner: any;
 
 
-
+export enum AdminMethod {
+    CreatePrice = "Y3JlYXRlX3ByaWNlCg==",   // Create ASA to represent specific pricing token
+    DestroyPrice = "ZGVzdHJveV9wcmljZQo=",  // Destroy price token
+    CreateTag = "Y3JlYXRlX3RhZwo=",         // Create tag token
+    DestroyTag = "ZGVzdHJveV90YWcK",        // Destroy tag token
+    Safety = "c2FmZXR5",                    // Destroy listing, in case it violates TOS
+    Config = "Y29uZmln",                    // Change the config of the application
+}
 
 export enum Method {
-    Create = "Y3JlYXRl",
-    Delete = "ZGVsZXRl",
-    Tag = "dGFn",
-    Untag = "dW50YWc=",
-    PriceIncrease = "cHJpY2VfaW5jcmVhc2U=",
-    PriceDecrease = "cHJpY2VfZGVjcmVhc2U=",
-    Purchase = "cHVyY2hhc2U=",
-    Safety = "c2FmZXR5",
-    Config = "Y29uZmln",
+    Create = "Y3JlYXRl",        // Create listing
+    Delete = "ZGVsZXRl",        // Delete listing
+    Tag = "dGFn",               // Add tag to listing
+    Untag = "dW50YWc=",         // Remove tag from listing
+    Reprice = "cmVwcmljZQo=",   // Change price of listing
+    Purchase = "cHVyY2hhc2U=",  // Buy listing
 }
 
 
@@ -64,21 +68,6 @@ export class Application {
         showInfo("Creating application to reserve ID")
         await this.updateApplication(wallet)
 
-        // Create Owner contract account for token creation/sending 
-        showInfo("Creating owner contract account")
-        await this.createOwnerAcct(wallet)
-
-        // Create price token with app name 
-        showInfo("Creating price token")
-        await this.createPriceToken(wallet, 0) 
-
-        // Create listing and compute hash for app update
-        await this.setListingHash()
-
-        // Update Application with hash of contract && price token id
-        showInfo("Updating listing hash")
-        await this.updateApplication(wallet)
-
         return this.conf 
     }
 
@@ -93,63 +82,38 @@ export class Application {
         this.conf.listing_hash = new Uint8Array(lc)
     }
 
-    async createOwnerAcct(wallet: Wallet): Promise<string> {
-        // Read in platform-owner.tmpl.teal
-        // Set App id && admin addr
-        const ls = await get_platform_owner(this.getVars({
-            "TMPL_ADMIN_ADDR":addrToB64(this.conf.admin_addr),
-        }))
-        
-        // Save it
-        this.conf.owner_addr = ls.address()
-
-        // Seed it
-        const suggestedParams = await getSuggested(10)
-        const seed_txn        = new Transaction(get_pay_txn(suggestedParams, this.conf.admin_addr, this.conf.owner_addr, this.conf.seed_amt))
-        const [signed_seed]   = await wallet.signTxn([seed_txn])
-        const result          = await sendWait([signed_seed])
-
-        if(result['pool-error'] != "") console.error("Failed to seed the owner")
-
-        return this.conf.owner_addr 
-    }
-
     async updateApplication(wallet: Wallet) {
-        const suggestedParams = await getSuggested(10)
+        const suggestedParams = await getSuggested(100)
 
-        await this.setListingHash()
-
-        //Set this in create or its already set
-
-        const app = await get_approval_program(this.getVars({})) 
+        const app = await get_approval_program({}) 
         const clear = await get_clear_program({})
 
         if (!this.conf.id){
-
             const create_txn = new Transaction(get_app_create_txn(suggestedParams, this.conf.admin_addr, app, clear))
 
-
             const [signed]   = await wallet.signTxn([create_txn])
-
             const result     = await sendWait([signed])
 
             this.conf.id = result['application-index']
+            this.conf.app_addr = getApplicationAddress(this.conf.id) 
+
+            const fund_txn = new Transaction(get_pay_txn(suggestedParams, this.conf.admin_addr, this.conf.app_addr, 1e8))
+            const [s_fund_txn] = await wallet.signTxn([fund_txn])
+            await sendWait([s_fund_txn])
+
         }else{
             const update_txn = new Transaction(get_app_update_txn(suggestedParams, this.conf.admin_addr, app, clear, this.conf.id))
-
-            console.log(AlgoSigner.encoding.msgpackToBase64(update_txn.toByte()))
-
             const [s_update_txn]   = await wallet.signTxn([update_txn])
-
             await sendWait([s_update_txn])
-            
-            const params = [Method.Config, ...makeArgs(this.conf)]
-            const config_txn = new Transaction(get_app_config_txn(suggestedParams, this.conf.admin_addr, this.conf.id, params))
-
-            const [s_config_txn]   = await wallet.signTxn([config_txn])
-
-            await sendWait([s_config_txn])
         }
+    }
+
+    async updateConfiguration(wallet: Wallet) {
+        const suggestedParams = await getSuggested(100)
+        const params = [AdminMethod.Config, ...makeArgs(this.conf)]
+        const config_txn = new Transaction(get_app_config_txn(suggestedParams, this.conf.admin_addr, this.conf.id, params))
+        const [s_config_txn]   = await wallet.signTxn([config_txn])
+        await sendWait([s_config_txn])
     }
 
     async createPriceToken(wallet: Wallet, asa_id: number): Promise<boolean>  { 
@@ -184,12 +148,12 @@ export class Application {
         }
 
         // Return algos to admin
-        if(this.conf.owner_addr !== ""){
+        if(this.conf.app_addr !== ""){
             showInfo("Returning algos to admin")
             const suggestedParams = await getSuggested(10)
 
             const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, this.conf.admin_addr))
-            const pay_txn = new Transaction(get_pay_txn(suggestedParams, this.conf.owner_addr, this.conf.admin_addr, 0))
+            const pay_txn = new Transaction(get_pay_txn(suggestedParams, this.conf.app_addr, this.conf.admin_addr, 0))
             pay_txn.closeRemainderTo = algosdk.decodeAddress(this.conf.admin_addr)
 
             const grouped = [cosign_txn, pay_txn]
@@ -197,7 +161,7 @@ export class Application {
 
             const [s_cosign_txn, /* s_pay_txn */] = await wallet.signTxn(grouped)
 
-            const ls = await getLogicFromTransaction(this.conf.owner_addr)
+            const ls = await getLogicFromTransaction(this.conf.app_addr)
             const s_pay_txn = algosdk.signLogicSigTransaction(pay_txn, ls)
 
             if((await sendWait([s_cosign_txn, s_pay_txn])) === undefined){

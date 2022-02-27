@@ -1,8 +1,7 @@
 Contract Overview
 -----------------
 
-`approval.teal`
 
-`clear.teal`
+`application.py` - The primary on-chain logic used by this application
 
-`listing.teal`
+`listing.py` - The smart sig logic to use as an escrow account, acts as the listing 

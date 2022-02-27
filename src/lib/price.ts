@@ -1,10 +1,10 @@
 import { Wallet } from "algorand-session-wallet";
 import algosdk, { Transaction } from "algosdk";
 import { platform_settings as ps } from "./platform-conf";
-import { addrToB64, getLogicFromTransaction, getSuggested, getToken, getTransaction, sendWait } from "./algorand";
-import { ApplicationConfiguration, get_template_vars, ReloadApplicationConfiguration } from "./application-configuration";
-import { get_platform_owner } from "./contracts";
-import { get_cosign_txn, get_asa_create_txn, get_asa_destroy_txn } from "./transactions";
+import { getSuggested, getToken, sendWait } from "./algorand";
+import { ApplicationConfiguration } from "./application-configuration";
+import { get_app_call_txn } from "./transactions";
+import { AdminMethod } from "./application";
 
 
 export type ASADetails = {
@@ -56,30 +56,14 @@ export class PriceToken {
     }
 
     async create(conf: ApplicationConfiguration, wallet: Wallet): Promise<boolean> {
+        const suggestedParams = await getSuggested(100)
 
-        const suggestedParams = await getSuggested(10)
-
-        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, conf.admin_addr))
-
-        const create_px = new Transaction(get_asa_create_txn(suggestedParams, conf.owner_addr, ps.domain))
-        create_px.assetName     = PriceToken.getAssetName(conf.name, this.asa.id)
-        create_px.assetUnitName = PriceToken.getUnitName(conf.unit)
-        create_px.assetTotal    = 1e10
-        create_px.assetDecimals = 0 
+        const create_px = new Transaction(get_app_call_txn(suggestedParams, conf.id, conf.admin_addr, [AdminMethod.CreatePrice]))
+        create_px.appForeignAssets = [this.asa.id]
         
-        const grouped = [cosign_txn, create_px]
-        algosdk.assignGroupID(grouped)
-        const [s_cosign_txn, /* create_px */] = await wallet.signTxn(grouped)
+        const [s_create_px, /* create_px */] = await wallet.signTxn([create_px])
 
-        const ls = await get_platform_owner(get_template_vars(conf, {
-            "TMPL_ADMIN_ADDR":addrToB64(conf.admin_addr),
-        }))
-
-        const s_create_px = algosdk.signLogicSigTransaction(create_px, ls)
-
-        await sendWait([s_cosign_txn, s_create_px])
-
-        const result = await getTransaction(s_create_px.txID)
+        const result = await sendWait([s_create_px])
 
         if(result === undefined) return  false 
 
@@ -91,22 +75,14 @@ export class PriceToken {
     async destroy(conf: ApplicationConfiguration, wallet: Wallet): Promise<boolean>{
         if(this.id == 0) return true
 
-        const suggestedParams = await getSuggested(10)
+        const suggestedParams = await getSuggested(100)
 
-        const cosign_txn = new Transaction(get_cosign_txn(suggestedParams, conf.admin_addr))
-
-        const destroy_px = new Transaction(get_asa_destroy_txn(suggestedParams, conf.owner_addr, this.id))
+        const destroy_px = new Transaction(get_app_call_txn(suggestedParams, conf.id, conf.admin_addr, [AdminMethod.DestroyPrice]))
+        destroy_px.appForeignAssets = [this.id]
         
-        const grouped = [cosign_txn, destroy_px]
+        const [s_destroy_px, /* s_destroy_px */] = await wallet.signTxn([destroy_px])
 
-        algosdk.assignGroupID(grouped)
-        const [s_cosign_txn, /* s_destroy_px */] = await wallet.signTxn(grouped)
-
-        const ls = await getLogicFromTransaction(conf.owner_addr)
-
-        const s_destroy_px = algosdk.signLogicSigTransaction(destroy_px, ls)
-
-        return (await sendWait([s_cosign_txn, s_destroy_px])) !== undefined
+        return (await sendWait([s_destroy_px])) !== undefined
     }
 
 

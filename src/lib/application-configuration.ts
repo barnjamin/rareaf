@@ -3,6 +3,7 @@ import {TagToken} from './tags'
 import {PriceToken} from './price'
 import { platform_settings as ps } from './platform-conf'
 import algosdk from 'algosdk'
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
 
 const conf_session_key = "config"
 
@@ -10,11 +11,11 @@ export class ApplicationConfiguration  {
 
     constructor(
         public id: number               = 0,
+        public app_addr: string         = "",  // Address of application 
         public admin_addr: string       = "",  // Creator of the application
         public name: string             = "",  // Full name of App 
         public unit: string             = "",  // Unit name for price/tag tokens
         public price_ids: PriceToken[]  = [],   // ID of price token
-        public owner_addr: string       = "",  // Address of price/tag token owner
         public fee_amt: number          = 0,   // Amount to be sent to app onwer on sales
         public seed_amt: number         = 0,   // Amount sent to each listing to cover costs
         public max_price: number        = 0,   // The max number of price tokens that can be distributed to a listing
@@ -29,6 +30,8 @@ export class ApplicationConfiguration  {
 
         // get global state of application
         const state = await getGlobalState(ac.id)
+
+        console.log(state)
 
         //Set fields
         const new_ac = {...new ApplicationConfiguration(), ...ac, loaded: true}
@@ -47,7 +50,7 @@ export class ApplicationConfiguration  {
             }
         }
 
-        new_ac.tags = await getTags(new_ac, new_ac.owner_addr, new_ac.unit)
+        new_ac.tags = await getTags(new_ac, new_ac.app_addr, new_ac.unit)
         new_ac.price_ids = await getPriceTokens(new_ac)
 
         ApplicationConfiguration.updateLocalStorage(new_ac)
@@ -90,8 +93,8 @@ export async function LoadApplicationConfiguration(): Promise<ApplicationConfigu
 export function get_template_vars(ac: ApplicationConfiguration, override: any): any {
     return {
         "TMPL_APP_ID": ac.id,
+        "TMPL_APP_ADDR": addrToB64(ac.app_addr),
         "TMPL_ADMIN_ADDR": addrToB64(ac.admin_addr),
-        "TMPL_OWNER_ADDR": addrToB64(ac.owner_addr),
         "TMPL_FEE_AMT": ac.fee_amt,
         "TMPL_PRICE_ID": ac.price_ids && ac.price_ids.length>0?ac.price_ids[0].id:0,
         "TMPL_BLANK_HASH": ac.listing_hash,

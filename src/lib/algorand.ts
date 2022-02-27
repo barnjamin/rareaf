@@ -7,8 +7,6 @@ import { TagToken} from './tags'
 import { dummy_addr } from './contracts'
 import { ApplicationConfiguration, LoadApplicationConfiguration } from './application-configuration';
 import { showErrorToaster, showNetworkError, showNetworkSuccess, showNetworkWaiting } from "../Toaster";
-import { ProofResponse } from 'algosdk/dist/types/src/client/v2/algod/models/types';
-import { match } from 'ts-mockito';
 import { PriceToken } from './price';
 
 
@@ -74,7 +72,8 @@ export async function getTags(ac: ApplicationConfiguration, owner: string, unit:
 export async function getGlobalState(app_id: number): Promise<any> {
     const client = getAlgodClient()
     const result = await client.getApplicationByID(app_id).do()
-    return result['params']['global-state']
+    if('global-state' in result['params']) return result['params']['global-state']
+    return []
 }
 
 export async function isOptedIntoApp(ac: ApplicationConfiguration, address: string): Promise<boolean> {
@@ -120,7 +119,7 @@ export async function getListings(tagNames: string[], minPrice=0, maxPrice=0): P
         const balances = [].concat(...allBalances.map((b)=>{ return b.balances }))
         
         return await Promise.all(balances.filter((b)=>{
-            return b.address !== ac.owner_addr && b.amount > 0
+            return b.address !== ac.app_addr && b.amount > 0
         }).map((b)=>{
             return getListing(b.address)
         }))
@@ -141,7 +140,7 @@ export async function getListings(tagNames: string[], minPrice=0, maxPrice=0): P
     const price_balances = [].concat(...allBalances.map((b)=>{ return b.balances }))
     
     return await Promise.all(price_balances.filter((b)=>{
-        return b.address !== ac.owner_addr && b.amount > 0
+        return b.address !== ac.app_addr && b.amount > 0
     }).map((b)=>{
         return getListing(b.address)
     }))
@@ -152,7 +151,7 @@ export async function getTagToken(ac: ApplicationConfiguration, name: string): P
     const assets = await indexer.searchForAssets().name(name).do()
 
     for(let aidx in assets.assets){
-        if(assets.assets[aidx].params.creator == ac.owner_addr)
+        if(assets.assets[aidx].params.creator == ac.app_addr)
             return new TagToken(ac, name, assets.assets[aidx].index)
     }
 
@@ -162,7 +161,7 @@ export async function getTagToken(ac: ApplicationConfiguration, name: string): P
 export async function getPriceTokens(ac: ApplicationConfiguration): Promise<PriceToken[]> {
     const client = getAlgodClient()
     const results =  await client 
-        .accountInformation(ac.owner_addr)
+        .accountInformation(ac.app_addr)
         .do()
 
     const name = PriceToken.getUnitName(ac.unit)
@@ -259,7 +258,7 @@ export async function getHoldingsFromListingAddress(ac: ApplicationConfiguration
         }
 
         gets.push(getToken(asa['asset-id']).then(async (token)=>{
-            if(token.params.creator == ac.owner_addr) holdings.tags.push(TagToken.fromAsset(token))
+            if(token.params.creator == ac.app_addr) holdings.tags.push(TagToken.fromAsset(ac, token))
             else holdings.nft = await NFT.fromToken(token)
         }))
     }
@@ -383,7 +382,7 @@ export async function sendWait(signed: any[]): Promise<any> {
         const {txId}  = await client.sendRawTransaction(signed.map((t)=>{return t.blob})).do()
         showNetworkWaiting(txId)
 
-        const result = await waitForConfirmation(client, txId, 3)
+        const result = await algosdk.waitForConfirmation(client, txId, 3)
         showNetworkSuccess(txId)
 
         return result 
@@ -396,41 +395,7 @@ export async function sendWait(signed: any[]): Promise<any> {
 
 
 export async function getTransaction(txid: string) {
-    return await waitForConfirmation(getAlgodClient(), txid, 3)
-}
-
-export async function waitForConfirmation(algodclient, txId, timeout) {
-    if (algodclient == null || txId == null || timeout < 0) {
-      throw new Error('Bad arguments.');
-    }
-
-    const status = await algodclient.status().do();
-    if (typeof status === 'undefined')
-      throw new Error('Unable to get node status');
-
-    const startround = status['last-round'] + 1;
-    let currentround = startround;
-  
-    /* eslint-disable no-await-in-loop */
-    while (currentround < startround + timeout) {
-      const pending = await algodclient
-        .pendingTransactionInformation(txId)
-        .do();
-
-      if (pending !== undefined) {
-        if ( pending['confirmed-round'] !== null && pending['confirmed-round'] > 0) 
-          return pending;
-  
-        if ( pending['pool-error'] != null && pending['pool-error'].length > 0) 
-          throw new Error( `Transaction Rejected pool error${pending['pool-error']}`);
-      }
-
-      await algodclient.statusAfterBlock(currentround).do();
-      currentround += 1;
-    }
-
-    /* eslint-enable no-await-in-loop */
-    throw new Error(`Transaction not confirmed after ${timeout} rounds!`);
+    return await algosdk.waitForConfirmation(getAlgodClient(), txid, 3)
 }
 
 export function download_txns(name, txns) {
